@@ -13,31 +13,13 @@ from Postgresql import save_player
 
 techs = [bloodmanip.Blood_Manipulation(), boogiewoogie.Boogie_Woogie(), cursedspiritmanip.Cursed_Spirit_Manip(), idletranfig.Idle_Transfiguration(), limitless.Limitless(), heavenlyrestriction.HeavenlyRestriction(), mythicbeastamber.Mythic_Beast_Amber(), projectionsorcery.Projection_Sorcery(), shrine.Shrine(), strawdoll.Straw_Doll(), tenshadows.Ten_Shadows(), birdmanip.Bird_Manipulation(), comedian.Comedian(), construction.Construction(), copy.Copy(), cursed_speech.Cursed_Speech()]
 
-
-owner_id = int(os.environ['OWNER'])
-loud_id = 677718946270543882
-codes_id = 562051691978162186 
-elo = 386482884745101316 #shrine
-nate = 529741118116593664 #limitless
-punjokes = 807415496042741822 #csm
-cats = 608036935541325875 #comedian
-gam =484519065004670988 #shrine
-dxrr = 743029626523090945 #limitless
-legend = 472454463886721028 #limitless 
-#projection sorcery
-myers = 1111180692970295326 #idle transfig
-chris = 279729964717309962 #10s
-greg = 770300915642007572 #shrine
-tiberius = 256232932681842698 #10s
-snot = 451630767177465857 #csm
-mikael = 912104751133507604 #blood manipulation
 token = os.environ['TOKEN']
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 bot = commands.Bot(command_prefix=',', intents=intents)
 bot.remove_command('help')
-chyna = 1164740316738355313 
+
 #the status embed background
 status_bg = {'gray' : 'images/graystats.png', 'blue' : 'images/bluestats.png', 'green' : 'images/greenstats.png', 'black' : 'images/blackstats.png', 'pink' : 'images/pinkstats.png'}
 #the bots banner
