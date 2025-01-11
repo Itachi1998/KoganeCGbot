@@ -5,3 +5,8 @@ psycopg2==2.9.10
 replit==4.1.0
 Requests==2.32.3
 typing_extensions==4.12.2
+boto3==1.21.10
+
+# Install the requriements.txt file with pip:
+#   $ pip install -r requirements.txt 
+
