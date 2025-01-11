@@ -1,10 +1,15 @@
 from boto3 import resource
 from boto3.dynamodb.conditions import Attr, Key
 from datetime import datetime
+import boto3
 
+# Create a DynamoDB resource using the default session
+dynamodbb = boto3.resource('dynamodb', region_name='us-east-2')
 
-colony_table = resource('dynamodb').Table('colony')
+# Replace 'your-region' with the appropriate AWS region, e.g., 'us-west-2'
+colony_table = dynamodb.Table('colony')
 
+# Create a DynamoDB table
 def save_coloy():
     response = colony_table.put_item(
     Item={
@@ -21,7 +26,8 @@ def save_coloy():
             'colony_active_event' : [{"EVENT" : "EVENT"}]
              })
     print(f"Insert Response: {response}")
-
-
+    
 save_colony()
+
+
     # [ { "M" : { "name" : { "S" : "Sukuna" }, "respawn_timer" : { "S" : "100" }, "ce" : { "S" : "100" }, "spawndate" : { "S" : "10/10/10" } } } ]
