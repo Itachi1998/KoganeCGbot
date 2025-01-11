@@ -4,7 +4,7 @@ from datetime import datetime
 import boto3
 
 # Create a DynamoDB resource using the default session
-dynamodbb = boto3.resource('dynamodb', region_name='us-east-2')
+dynamodbb = resource('dynamodb', region_name='us-east-2')
 
 # Replace 'your-region' with the appropriate AWS region, e.g., 'us-west-2'
 colony_table = dynamodb.Table('colony')
@@ -26,7 +26,7 @@ def save_coloy():
             'colony_active_event' : [{"EVENT" : "EVENT"}]
              })
     print(f"Insert Response: {response}")
-    
+
 save_colony()
 
 
