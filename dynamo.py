@@ -1,9 +1,8 @@
-import psycopg2, os, json, traceback, game
+from boto3 import resource
+from boto3.dynamodb.conditions import Attr, Key
+from datetime import datetime
 
-from psycopg2.sql import NULL
-from cogs import colonies
-
-
+colony_table = resource('dynamodb').Table('colony')
 
 def save_player(player):
     
@@ -146,39 +145,21 @@ def read_player(user_id, guild_id):
     
     
 def save_colony(colony):
-    ai_list = json.dumps(colony.ai)
-    unique_members = list(set(colony.members))
-    values = (colony.id, colony.name, colony.owner, json.dumps(unique_members), ai_list, colony.xp, colony.colony_color)
-
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    cur.execute("""CREATE TABLE IF NOT EXISTS colony(
-        id SERIAL PRIMARY KEY,
-        colony_id BIGINT,
-        name TEXT,
-        owner BIGINT,
-        members JSONB,
-        ai JSONB,
-        xp BIGINT,
-        colony_color TEXT,
-        UNIQUE(colony_id))
-        """)
-    query = """
-           INSERT INTO colony (colony_id, name, owner, members, ai, xp, colony_color)
-           VALUES (%s, %s, %s, %s, %s, %s, %s)
-           ON CONFLICT (colony_id) DO UPDATE SET
-               name = EXCLUDED.name,
-               owner = EXCLUDED.owner,
-               members = EXCLUDED.members,
-               ai = EXCLUDED.ai,
-               xp = EXCLUDED.xp,
-               colony_color = EXCLUDED.colony_color
-        """
-    cur.execute(query, values)
-    conn.commit()
-    cur.close()
-    conn.close()
-
+	db = colony_table
+    response = db.put_item(
+        Item = {
+            'colony_id' : colony.id,
+            'colony_active_players' : colony.active_players,
+            'colony_ce' : colony.ce,
+            'colony_name' : colony.name,
+            'colony_owner' : colony.owner,
+            'colony_xp' : colony.xp
+        }
+    
+    )
+	   
+    
+   
 def read_colony(colony_id):
 
     conn = psycopg2.connect(os.environ['DATABASE_URL'])

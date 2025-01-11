@@ -6,7 +6,7 @@ from discord.ext.commands.converter import is_generic_type
 from cogs import colonies
 import traceback
 from types import new_class
-import discord, game, Postgresql, techniques, random
+import discord, game, dynamo, techniques, random
 import os
 from time import time
 from typing import List
@@ -73,7 +73,7 @@ def turn(turn, lobby_data: dict):
                 team1_queue.clear()
             print(f"Turn: {turn}")
             print(f"Targets: {targets}")
-            Postgresql.save_lobby(hostid,
+            dynamo.save_lobby(hostid,
                                   colony,
                                   name,
                                   players,
@@ -84,7 +84,7 @@ def turn(turn, lobby_data: dict):
                                   team1q=team1_queue,
                                   team2q=team2_queue,
                                   targets=targets)
-            lob =  Postgresql.read_lobby(hostid, colony)
+            lob =  dynamo.read_lobby(hostid, colony)
             return lob
 
         elif turn in team2:
@@ -105,7 +105,7 @@ def turn(turn, lobby_data: dict):
                 team2_queue.clear()
             print(f"Turn: {turn}")
             print(f"Targets: {targets}")
-            Postgresql.save_lobby(hostid,
+            dynamo.save_lobby(hostid,
                                   colony,
                                   name,
                                   players,
@@ -116,7 +116,7 @@ def turn(turn, lobby_data: dict):
                                   team1q=team1_queue,
                                   team2q=team2_queue,
                                   targets=targets)
-            lob = Postgresql.read_lobby(hostid, colony)
+            lob = dynamo.read_lobby(hostid, colony)
             return lob
             
         else:
@@ -126,18 +126,18 @@ def turn(turn, lobby_data: dict):
                     if p != turn:
                        new_turn = p
             if new_turn:
-                Postgresql.save_lobby(hostid,
+                dynamo.save_lobby(hostid,
                       colony,
                       name,
                       players,
                       t_count, turn=new_turn, targets=targets)
             else:
-                Postgresql.save_lobby(hostid,
+                dynamo.save_lobby(hostid,
                       colony,
                       name,
                       players,
                       t_count, turn=turn, targets=targets)
-            lob = Postgresql.read_lobby(lobby_data['host'], lobby_data['colony'])
+            lob = dynamo.read_lobby(lobby_data['host'], lobby_data['colony'])
             return lob
             
     except Exception as e:
@@ -292,7 +292,7 @@ async def make_lobby_embed(bot, lobdata, description):
 
 
 def invite_embed(bot, lobby):
-    colony = Postgresql.read_colony(lobby['colony'])
+    colony = dynamo.read_colony(lobby['colony'])
     member_list = []
     for m in colony['members']:
         player = bot.load_character(m, lobby['colony'])
@@ -303,7 +303,7 @@ def invite_embed(bot, lobby):
 
 
 def host_check(user, colony):
-    lobby = Postgresql.read_lobby(user, colony)
+    lobby = dynamo.read_lobby(user, colony)
     if lobby:
         return True
     else:
@@ -424,7 +424,7 @@ async def battle_info(bot,
             field2v = f"**HP:** {enemy_hp} `[{enemy.hp}/{enemy.max_hp}]` \n**CE:** {enemy_ce} `[{enemy.ce}/{enemy.max_ce}]`\n**STR:** `{enemy.attack}`\n**SPD:** `{enemy.speed}`\n**DEF:** `{enemy.defense}`\n**CT:** `{enemy.technique}` {enemy_ct.emote}"
         else:
             field2v = f"**HP:** {healthbar(enemy.hp, enemy.max_hp)}\n**Strength:** `{enemy.attack}`\n**Defense:** `{enemy.defense}`\n**Speed:** `{enemy.speed}`"
-        lob = Postgresql.read_lobby(host, player.colony)
+        lob = dynamo.read_lobby(host, player.colony)
         title = lob['name']
         embed = make_embed(title,
                            description,
@@ -469,7 +469,7 @@ async def pve_embed(bot, msg, enemy, player, host_id, avatar):
         player.hp = player.max_hp
         player.imbued = 0
         player.save_to_db()
-        lobdata = Postgresql.read_lobby(host_id, player.colony)
+        lobdata = dynamo.read_lobby(host_id, player.colony)
         description = f"### Select an Opponent!\n### `{player.name}'s turn`"
         t = techniques.get_cursed_technique(player.technique)
         ct_name = player.technique
@@ -512,7 +512,7 @@ async def pve_embed(bot, msg, enemy, player, host_id, avatar):
         grade = player.get_grade()
         field2_value = f"**Rank:** `{grade}` \n**HP:** {player_health}\n**CE Reserves:** {player_ce}\n**Strength:** `{player.attack}`\n**Speed:** `{player.speed}`\n**CT:** {t.emote} `{ct_name}`\n**Imbued:** `{player.imbued}`\n**XP:** `{player.xp}/{xp_needed}`"
         thumb = avatar
-        lobdata = Postgresql.read_lobby(host_id, player.colony)
+        lobdata = dynamo.read_lobby(host_id, player.colony)
         title = f"{lobdata['name']}"
         
         embed = make_embed(title,
@@ -540,7 +540,7 @@ async def pve_embed(bot, msg, enemy, player, host_id, avatar):
                         
                 lobdata['targets'] = enemy_list
                 print(f"saving target to lobby : {lobdata['targets']}")
-                Postgresql.save_lobby(host_id,
+                dynamo.save_lobby(host_id,
                                       player.colony,
                                       lobdata['name'],
                                       lobdata['players'],
@@ -554,7 +554,7 @@ async def pve_embed(bot, msg, enemy, player, host_id, avatar):
             else:
                 lobdata['targets'] = [enemy.to_dict()]
                 print(f"saving target to lobby : {lobdata['targets']}")
-                Postgresql.save_lobby(host_id,
+                dynamo.save_lobby(host_id,
                                       player.colony,
                                       lobdata['name'],
                                       lobdata['players'],
@@ -802,7 +802,7 @@ async def technique_embed(bot, tech_name, result, msg, player, lobdata, target,
                 player.cgp += target.cgp
                 player.save_to_db()
                 if isinstance(target, game.Character):
-                    Postgresql.delete_from_colony(player.colony, 'members', target.user_id)
+                    dynamo.delete_from_colony(player.colony, 'members', target.user_id)
   
                      
                 
@@ -982,7 +982,7 @@ async def aoe_embed(bot,
 
     target_str = "\n".join(target_names) if len(
         target_list) > 0 else "All enemies selected!"
-    Postgresql.save_lobby(lobdata['host'], lobdata['colony'], lobdata['name'], lobdata['players'], lobdata['t_count'], targets=[t for t in targets], mark = marks)
+    dynamo.save_lobby(lobdata['host'], lobdata['colony'], lobdata['name'], lobdata['players'], lobdata['t_count'], targets=[t for t in targets], mark = marks)
     description = f"### Launching AOE attack `{player.technique} : {attack}`\n`Choose a target ({len(current_targets)}/{max_length}):`\n ```{target_str}```"
     print(f"Selected targets {current_targets}")
     embed = make_embed(title=title,
@@ -1230,9 +1230,9 @@ async def ai_turn(bot, outcome, attack_name, target, ai, msg, lobdata):
             if killed:
                 description += f"\n### VICTORY! <:emoji_2:1215306371541499925>\n### `{ai.name}` exorcised `{target.name}` using {attack_name}\n### Stand proud `{target.name}` you were strong."
                 description += f"\n`{target.name} has died...`"
-                Postgresql.delete_from_lobby(lobdata['host'],
+                dynamo.delete_from_lobby(lobdata['host'],
                                              lobdata['colony'], target.user_id)
-                Postgresql.delete_from_colony(target.colony, 'members',
+                dynamo.delete_from_colony(target.colony, 'members',
                                               target.user_id)
                 embed = make_embed(lobdata['name'], description,
                                    bot.user.avatar.url)
@@ -1313,7 +1313,7 @@ class Battle(
                            field1_value=field1_value,
                            thumbnail=thumbnail)
 
-        Postgresql.save_lobby(host_id, player.colony, name, players, 0)
+        dynamo.save_lobby(host_id, player.colony, name, players, 0)
         await ctx.send(f"## Lobby created: {player.name}", ephemeral=True)
         msg = await ctx.send(
             embed=embed)  #save the message to be able to edit the embed later
@@ -1337,7 +1337,7 @@ class Battle(
 
         enemy = player.pve(ctx.guild.id)
         avatar = self.bot.user.avatar.url
-        Postgresql.save_lobby(player.user_id, ctx.guild.id, name,
+        dynamo.save_lobby(player.user_id, ctx.guild.id, name,
                               [player.user_id], 0)
         await pve_embed(self.bot, msg, enemy, player, ctx.author.id, avatar)
 
@@ -1350,8 +1350,8 @@ class Battle(
         if not name:
             name = f"{player.name}'s lobby"
         host = ctx.author.id
-        Postgresql.save_lobby(host, ctx.guild.id, name, [host], 0)
-        lob = Postgresql.read_lobby(host, ctx.guild.id)
+        dynamo.save_lobby(host, ctx.guild.id, name, [host], 0)
+        lob = dynamo.read_lobby(host, ctx.guild.id)
         choice = ctx.author.id
 
         description = f"### `PVP LOBBY`"
@@ -1401,7 +1401,7 @@ class PVPview(discord.ui.View):
             char = self.bot.load_character(interaction.user.id,
                                            interaction.guild_id)
             description = f"### `{char.name} joined team A`"
-            Postgresql.save_lobby(self.lob['host'],
+            dynamo.save_lobby(self.lob['host'],
                                   self.lob['colony'],
                                   self.lob['name'],
                                   self.lob['players'],
@@ -1432,7 +1432,7 @@ class PVPview(discord.ui.View):
                                                interaction.guild_id)
                 description = f"### `{char.name} joined team B`"
 
-                Postgresql.save_lobby(self.lob['host'],
+                dynamo.save_lobby(self.lob['host'],
                                       self.lob['colony'],
                                       self.lob['name'],
                                       self.lob['players'],
@@ -1502,7 +1502,7 @@ class Invite(discord.ui.Button):
                          row=1)
 
     async def callback(self, interaction: discord.Interaction):
-        lob = Postgresql.read_lobby(self.host, interaction.guild.id)
+        lob = dynamo.read_lobby(self.host, interaction.guild.id)
         if interaction.user.id in self.players:
             if lob['lock'] == True:
                 await invite_embed(self.bot, self.msg, self.players,
@@ -1536,7 +1536,7 @@ class Ready(discord.ui.Button):
         #await interaction.response.defer()
         #await interaction.followup.send("Ready button pressed!")
         #await interaction.response.send_message("Ready button pressed!")
-        lobby_data = Postgresql.read_lobby(self.host_id, interaction.guild.id)
+        lobby_data = dynamo.read_lobby(self.host_id, interaction.guild.id)
         await interaction.response.defer()
         player = interaction.user.id
         colony = interaction.guild.id
@@ -1544,7 +1544,7 @@ class Ready(discord.ui.Button):
         if lobby_data['ready'] is None:
             name = self.msg.embeds[0].title
             ready_list = [player]
-            Postgresql.save_lobby(player,
+            dynamo.save_lobby(player,
                                   colony,
                                   name=name,
                                   players=self.players,
@@ -1562,7 +1562,7 @@ class Ready(discord.ui.Button):
                     await interaction.followup.send("You are not ready",
                                                     ephemeral=True)
                     name = self.msg.embeds[0].title
-                    Postgresql.save_lobby(lobby_data['host'],
+                    dynamo.save_lobby(lobby_data['host'],
                                           colony,
                                           player,
                                           name,
@@ -1572,7 +1572,7 @@ class Ready(discord.ui.Button):
             else:
                 name = self.msg.embeds[0].title
                 ready_list.append(player)
-                Postgresql.save_lobby(lobby_data['host'],
+                dynamo.save_lobby(lobby_data['host'],
                                       colony,
                                       name,
                                       self.players,
@@ -1614,7 +1614,7 @@ class JoinLobby(discord.ui.Button):  #join the lobby button class
         player = self.bot.load_character(interaction.user.id,
                                          interaction.guild.id)
         self.players.append(player.user_id)
-        lob = Postgresql.read_lobby(self.host_id, player.colony)
+        lob = dynamo.read_lobby(self.host_id, player.colony)
 
         if lob['locked']:
             if interaction.user.id not in lob['invites']:
@@ -1624,7 +1624,7 @@ class JoinLobby(discord.ui.Button):  #join the lobby button class
 
         description = f"### `{player.name}` has joined the lobby"
         lob['players'] = self.players
-        Postgresql.save_lobby(self.host_id, player.colony, lob['name'],
+        dynamo.save_lobby(self.host_id, player.colony, lob['name'],
                               self.players, 0)
         embed = await make_lobby_embed(self.bot, lob, description)
         self.disabled = False
@@ -1662,7 +1662,7 @@ class StartPve(discord.ui.Button):
         enemy = player.pve(
             interaction.guild.id
         )  #here we use the game.py character classes PVE function to retrieve an Enemy for our player
-        lobby_data = Postgresql.read_lobby(self.host_id, interaction.guild.id)
+        lobby_data = dynamo.read_lobby(self.host_id, interaction.guild.id)
         target_list = []
         for e in enemy:
             target_list.append(e)
@@ -1670,7 +1670,7 @@ class StartPve(discord.ui.Button):
         lobby_data['team1'] = lobby_data['players']
         lobby_data['team2'] = lobby_data['targets']
         lobby_data['turn'] = turn
-        Postgresql.save_lobby(self.host_id,
+        dynamo.save_lobby(self.host_id,
                               lobby_data['colony'],
                               lobby_data['name'],
                               lobby_data['players'],
@@ -1697,7 +1697,7 @@ class StartPVP(discord.ui.Button):
                          row=2)
 
     async def callback(self, interaction: discord.Interaction):
-        lob = Postgresql.read_lobby(self.host, interaction.guild.id)
+        lob = dynamo.read_lobby(self.host, interaction.guild.id)
         if interaction.user.id != self.host:
             await interaction.response.send_message(
                 "You are not the host of this lobby", ephemeral=True)
@@ -1719,7 +1719,7 @@ class Lock(discord.ui.Button):
                          row=1)
 
     async def callback(self, interaction: discord.Interaction):
-        lob = Postgresql.read_lobby(self.host, interaction.guild.id)
+        lob = dynamo.read_lobby(self.host, interaction.guild.id)
         if lob['lock'] == False:
             lob['lock'] = True
             description = "You have locked the lobby"
@@ -1733,7 +1733,7 @@ class Lock(discord.ui.Button):
             if p not in invites:
                 invites.append(p)
         lob['invites'] = invites
-        Postgresql.save_lobby(self.host,
+        dynamo.save_lobby(self.host,
                               interaction.guild.id,
                               lob['name'],
                               self.players,
@@ -2052,7 +2052,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
             player = self.player
             player.mode = game.GameMode.ROAM
             escaped = player.run(enemy)
-            lobby = Postgresql.read_lobby(self.host_id, player.colony)
+            lobby = dynamo.read_lobby(self.host_id, player.colony)
             if escaped:
                 title = f"{player.name} escaped the battle"
                 if player.user_id == self.host_id:
@@ -2064,7 +2064,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                     description = f"### {player.name} ran from the battle"
 
                 new_lob = turn(player.user_id, lobby)
-                Postgresql.delete_from_lobby(self.host_id, player.colony,
+                dynamo.delete_from_lobby(self.host_id, player.colony,
                                              player.user_id)
                 embed = make_embed(title=title, description=description)
                 await self.msg.edit(embed=embed, view=None)
@@ -2109,7 +2109,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                         embed = make_embed(lobby['name'], description,
                                            self.bot.user.avatar.url)
                         await self.msg.edit(embed=embed, view=None)
-                        Postgresql.delete_from_lobby(self.host_id,
+                        dynamo.delete_from_lobby(self.host_id,
                                                      lobby['colony'],
                                                      player.user_id)
                     return
@@ -2128,7 +2128,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
             thumb):  #update the embed with new information
         try:
             description = ""
-            lobdata = Postgresql.read_lobby(self.host_id, player.colony)
+            lobdata = dynamo.read_lobby(self.host_id, player.colony)
             if tool_list:
                 if len(tool_list) > 1:
                     tool1 = techniques.get_cursed_tool(tool_list[0])
@@ -2161,7 +2161,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                 player.cgp += enemy.cgp
                 player.save_to_db()
                 if isinstance(enemy, game.Character):
-                    Postgresql.delete_from_colony(enemy.colony, 'members', enemy.user_id)
+                    dynamo.delete_from_colony(enemy.colony, 'members', enemy.user_id)
                 if len(next_targets) > 0:
                     for t in next_targets:
                         if isinstance(t, game.Enemy):
@@ -2202,7 +2202,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                     atk_name = random.choice([k for k in enemy.technique['attack'].keys()])
                     atk_dict = enemy.technique['attack'][atk_name]
                     results = def_func(enemy, player, atk_dict)
-                    Postgresql.save_lobby(
+                    dynamo.save_lobby(
                         self.host_id,
                         player.colony,
                         lobdata['name'],
@@ -2218,7 +2218,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                     embed = make_embed(lobdata['name'], description, self.bot.user.avatar.url)
                     await self.msg.edit(embed=embed, view=None)
                     await asyncio.sleep(6)
-                    lob = Postgresql.read_lobby(self.host_id, player.colony)
+                    lob = dynamo.read_lobby(self.host_id, player.colony)
                     new_lob = turn(player.user_id, lobdata)
                     await pvp_fight(self.bot, new_lob, new_lob['targets'],self.msg)
                     return
@@ -2319,7 +2319,7 @@ class AtkSelect(discord.ui.Select):
         attack = self.values[0]
         print(f"{self.player.name} using {self.player.technique} : {attack}")
         print(f"host is {self.host}")
-        lobdata = Postgresql.read_lobby(self.host, self.player.colony)
+        lobdata = dynamo.read_lobby(self.host, self.player.colony)
         print(self.enemy)
         print(self.enemy_team)
 
@@ -2408,7 +2408,7 @@ class DefSelect(discord.ui.Select):
             await interaction.followup.send("Error in your defense")
             return
         print(f"Results for {self.player.defense} defense: {results}")
-        lobby_data = Postgresql.read_lobby(host, self.player.colony)
+        lobby_data = dynamo.read_lobby(host, self.player.colony)
         await self.new_msg.delete()
         await ai_turn(self.bot, results, attack_name, self.player, self.enemy,
                       self.msg, lobby_data)
@@ -2530,7 +2530,7 @@ class AOESelect(discord.ui.Select):
                 target_dicts.append(diction)
                 
         self.lob['mark'] = marks
-        Postgresql.save_lobby(self.lob['host'], self.lob['colony'],
+        dynamo.save_lobby(self.lob['host'], self.lob['colony'],
                               self.lob['name'], self.lob['players'],
                               self.lob['t_count'], targets=[target_dicts])
         for t in self.current_targets:

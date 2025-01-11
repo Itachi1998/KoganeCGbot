@@ -1,6 +1,6 @@
 import discord, asyncio,json
 from discord.ext import commands
-import Postgresql
+import dynamo
 from replit.object_storage import Client
 from techniques import get_cursed_technique
 import game, time, asyncio
@@ -14,13 +14,13 @@ async def ai_respawn(ai, colony):
         if ai.name in colony['ai']:
             colony['ai'].remove(ai.name)
         print(f"Removing {ai.name} from {colony['name']}")
-        Postgresql.save_colony(Colony(**colony))
+        dynamo.save_colony(Colony(**colony))
         await asyncio.sleep(time_end)
-        colony = Postgresql.read_colony(colony['id'])
+        colony = dynamo.read_colony(colony['id'])
         colony['ai'].append(ai.name)
         print(f"Respawning {ai.name} in {colony['name']}")
         colony = Colony(**colony)
-        Postgresql.save_colony(colony)
+        dynamo.save_colony(colony)
         await asyncio.sleep(time_end)
         time_end = 0
         
@@ -38,8 +38,8 @@ class Colonies(commands.Cog):
         for enemy in game.Enemy.__subclasses__():
             ai_pool.append(enemy.name)
         colony = Colony(id=guild.id, name=guild.name, owner=guild.owner.id, members=[], ai=[ai_pool], xp=0, colony_color='gray')
-        Postgresql.update_colony(colony.id, "colony_color", colony.colony_color)
-        colony_data = Postgresql.read_colony(colony.id)
+        dynamo.update_colony(colony.id, "colony_color", colony.colony_color)
+        colony_data = dynamo.read_colony(colony.id)
         colony_name = colony_data['name']
         colony_owner = colony_data['owner']
         colony_id = colony_data['id']
@@ -62,21 +62,21 @@ class Colonies(commands.Cog):
                         return
         else:
                     for guild in self.bot.guilds:
-                        colony_data = Postgresql.read_colony(guild.id)
+                        colony_data = dynamo.read_colony(guild.id)
                             
                             
                         if colony_data is None:
                                 colony = Colony(id=guild.id, name=guild.name, owner=guild.owner.id, members=[], ai=[ai_pool], xp=0, colony_color='gray')
-                                Postgresql.save_colony(colony)
-                                colony_data = Postgresql.read_colony(colony.id)
+                                dynamo.save_colony(colony)
+                                colony_data = dynamo.read_colony(colony.id)
                                 await ctx.send(f"Saved colony {colony.name}")
                                 
         
                         if colony_data:
                                 colony = Colony(**colony_data)
                                 colony_data['ai'] = ai_pool
-                                Postgresql.save_colony(colony)
-                                colony_data = Postgresql.read_colony(colony.id)
+                                dynamo.save_colony(colony)
+                                colony_data = dynamo.read_colony(colony.id)
                                 await ctx.send(f"Saved colony {colony.name}")
                                 
                                 
@@ -85,7 +85,7 @@ class Colonies(commands.Cog):
     @commands.hybrid_command(name='ui', description='Edit UI of your Colony')
     async def ui(self, ctx):
         await ctx.defer()
-        colony_data = Postgresql.read_colony(ctx.guild.id)
+        colony_data = dynamo.read_colony(ctx.guild.id)
         if colony_data:
             if ctx.author.id == ctx.guild.owner.id or ctx.author.id == 677718946270543882:
                 embed = discord.Embed(title="Colony UI", description="Select an option to edit")
@@ -96,7 +96,7 @@ class Colonies(commands.Cog):
             else:
                 ctx.send("You are not the GameMaster of this colony")
         else:
-            Postgresql.save_colony(Colony(id=ctx.guild.id, name=ctx.guild.name, owner=ctx.guild.owner.id, members=[], ai=[], xp=0, colony_color='gray'))
+            dynamo.save_colony(Colony(id=ctx.guild.id, name=ctx.guild.name, owner=ctx.guild.owner.id, members=[], ai=[], xp=0, colony_color='gray'))
             embed = discord.Embed(title="Colony UI", description="New colony created!\nSelect an option to edit")
             embed.add_field(name="1) Colony Name", value="Change the name of your colony")
             embed.add_field(name="2) UI Color", value="Change the color of your colonies UI")
@@ -109,15 +109,15 @@ class Colonies(commands.Cog):
             player = None
             if member:
                  if ctx.author.id == ctx.guild.owner.id or ctx.author.id==677718946270543882:
-                    player = Postgresql.read_player(member.id, ctx.guild.id)
+                    player = dynamo.read_player(member.id, ctx.guild.id)
                  else:
                     await ctx.send(f"Access denied. You dont have permission.")
                     return
             else:
                 member = await self.bot.fetch_user(ctx.author.id)
-                player = Postgresql.read_player(member.id, ctx.guild.id)
+                player = dynamo.read_player(member.id, ctx.guild.id)
             if player:
-                            Postgresql.delete_from_colony(ctx.guild.id, "members", ctx.author.id)
+                            dynamo.delete_from_colony(ctx.guild.id, "members", ctx.author.id)
                             await ctx.send(f"{ctx.author.mention} has been removed from the colony.")
                             return
             
@@ -164,7 +164,7 @@ class UISelect(discord.ui.Select):
             if self.ctx.author.id != interaction.user.id:
                 await interaction.response.send_message("You dont have permissions to choose an option", ephemeral=True)
                 return
-            colony_data = Postgresql.read_colony(self.col.id)
+            colony_data = dynamo.read_colony(self.col.id)
             if colony_data:
                 value = self.values[0]
                 if value == "blue":
@@ -183,7 +183,7 @@ class UISelect(discord.ui.Select):
                     colony_data['colony_color'] = value
                     await interaction.response.edit_message(content="Green", view=None)
                 colony = Colony(**colony_data)
-                Postgresql.save_colony(colony)
+                dynamo.save_colony(colony)
                 await interaction.response.edit_message(content="Color changed", view=None)
             
 

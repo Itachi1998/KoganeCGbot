@@ -1,10 +1,10 @@
-import json, Postgresql, traceback
+import json, dynamo, traceback
 from typing import Union, List
 import enum, random, sys
 from copy import deepcopy
 from cogs.battle import Target
 import techniques
-from Postgresql import save_player
+from dynamo import save_player
 
 
 
@@ -205,7 +205,7 @@ class Actor:
             return results
             
         if move == "defense":
-                lobdat = Postgresql.read_lobby(host, colony_id = self.colony)
+                lobdat = dynamo.read_lobby(host, colony_id = self.colony)
                 t = techniques.get_cursed_technique(self.technique)
                 self.defense=technique
                 technique = technique.replace(" ", "_")
@@ -417,7 +417,7 @@ class Character(Actor):
                 return True
 
     def pve(self, colony_id: int) -> Union[List['Enemy'], 'Enemy']:
-        colony = Postgresql.read_colony(colony_id)
+        colony = dynamo.read_colony(colony_id)
         enemies = colony['ai'][0]
         enemy = None
         enemy_list = []

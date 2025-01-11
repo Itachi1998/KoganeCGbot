@@ -1,4 +1,4 @@
-import discord, techniques, Postgresql, game
+import discord, techniques, dynamo, game
 from cogs import colonies
 from discord.ext import commands
 from PIL import ImageDraw, Image, ImageFont
@@ -113,7 +113,7 @@ class Shop(commands.Cog):
     @commands.hybrid_command(name="shop", description="Shows the shop")
     async def shop(self, ctx):
         await ctx.defer()
-        colony_Data = Postgresql.read_colony(ctx.guild.id)
+        colony_Data = dynamo.read_colony(ctx.guild.id)
         if colony_Data is None:
             await ctx.send("You are not in a colony")
             return

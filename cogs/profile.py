@@ -1,4 +1,4 @@
-import discord, techniques, Postgresql, game, traceback
+import discord, techniques, dynamo, game, traceback
 from discord import player
 from discord.flags import MessageFlags
 from discord.enums import ButtonStyle, TextStyle
@@ -27,14 +27,14 @@ class Profile(commands.Cog):
     async def level(self, ctx, member: discord.Member=None):
         if member is None:
             member = ctx.author.id
-        player_stats = Postgresql.read_player(member, ctx.guild.id)
+        player_stats = dynamo.read_player(member, ctx.guild.id)
         if player_stats is None:
             await ctx.send("Player not found.")
         colony = player_stats['colony']
         
         if colony is None:
             await ctx.send("Error, no colony found, deleting player from colony")
-            Postgresql.delete_from_colony(ctx.guild.id, 'members', player_stats['user_id'])
+            dynamo.delete_from_colony(ctx.guild.id, 'members', player_stats['user_id'])
             await ctx.send("player deleted")
 
         if ctx.guild.id == colony:
@@ -63,7 +63,7 @@ class Profile(commands.Cog):
                 id = ctx.author.id
             else:
                 id = member.id
-            player_stats = Postgresql.read_player(id, ctx.guild.id)
+            player_stats = dynamo.read_player(id, ctx.guild.id)
             if player_stats is None:
                 await ctx.send("Player not found.")
                 return
@@ -72,7 +72,7 @@ class Profile(commands.Cog):
         
             if colony is None:
                 await ctx.send("Error player has no colony, deleting player")
-                Postgresql.delete_from_colony(ctx.guild.id, 'members', player_stats['user_id'])
+                dynamo.delete_from_colony(ctx.guild.id, 'members', player_stats['user_id'])
                 await ctx.send("player deleted")
         
             if ctx.guild.id == colony:

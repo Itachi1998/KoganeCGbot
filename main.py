@@ -1,4 +1,4 @@
-import discord, asyncio, os, traceback, game, requests, textwrap, PIL, aiohttp, io, Postgresql, time
+import discord, asyncio, os, traceback, game, requests, textwrap, PIL, aiohttp, io, dynamo, time
 import math
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont, ImageSequence
@@ -8,7 +8,7 @@ from cogs import colonies
 from techniques import enemy_techniques, BVs, cursed_tools, rules
 from technique_list import bloodmanip, boogiewoogie,cursedspiritmanip, heavenlyrestriction, idletranfig, limitless, mythicbeastamber, projectionsorcery, shrine, strawdoll, tenshadows, birdmanip, comedian, construction, copy, cursed_speech
 from io import BytesIO
-from Postgresql import save_player
+from dynamo import save_player
 
 
 techs = [bloodmanip.Blood_Manipulation(), boogiewoogie.Boogie_Woogie(), cursedspiritmanip.Cursed_Spirit_Manip(), idletranfig.Idle_Transfiguration(), limitless.Limitless(), heavenlyrestriction.HeavenlyRestriction(), mythicbeastamber.Mythic_Beast_Amber(), projectionsorcery.Projection_Sorcery(), shrine.Shrine(), strawdoll.Straw_Doll(), tenshadows.Ten_Shadows(), birdmanip.Bird_Manipulation(), comedian.Comedian(), construction.Construction(), copy.Copy(), cursed_speech.Cursed_Speech()]
@@ -28,7 +28,7 @@ cg_banner = 'images/cg_banner.png'
 # Helper functions
 def load_character(user_id, guild_id):
     print(f"user {user_id} guild {guild_id}")
-    map_dict = Postgresql.read_player(user_id, guild_id)
+    map_dict = dynamo.read_player(user_id, guild_id)
     if map_dict is None:
         return None
     return game.Character(**map_dict)
@@ -67,7 +67,7 @@ def status_embed(user, character, banner=None):
             
         ui = None
         
-        colony = Postgresql.read_colony(character.colony)
+        colony = dynamo.read_colony(character.colony)
         
         if colony:
             colony_color = colony['colony_color']
@@ -128,7 +128,7 @@ def status_embed(user, character, banner=None):
                   stroke_fill=1, stroke_width=2, fill=(255, 255, 255))
     
         technique_name = character.technique
-        colony = Postgresql.read_colony(character.colony)
+        colony = dynamo.read_colony(character.colony)
         draw.text((65, 450), f"TECHNIQUE", font=namefont,
                   stroke_fill=1, stroke_width=2, fill=(255, 255, 255))
         draw.text((65, 510), f"{technique_name}", font=font,
@@ -604,11 +604,11 @@ async def create(ctx, name: str=None):
         await ctx.send("Creating your character...")
         
         colony = ctx.guild.id
-        player_exists = Postgresql.read_player(ctx.author.id, ctx.guild.id)
+        player_exists = dynamo.read_player(ctx.author.id, ctx.guild.id)
         
         if player_exists:
             
-                colony_data = Postgresql.read_colony(ctx.guild.id)
+                colony_data = dynamo.read_colony(ctx.guild.id)
             
                 if colony_data == None:
                     colony = colonies.Colony(id = ctx.guild.id, name = ctx.guild.name, owner = ctx.author.id, members = [], ai=[game.Enemy.__subclasses__()], xp = 0, colony_color = 'gray') 
