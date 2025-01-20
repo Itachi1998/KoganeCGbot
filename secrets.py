@@ -16,6 +16,7 @@ def get_secret():
          get_secret_value_response = client.get_secret_value( 
             SecretId =secret_name )
     except ClientError as e:
+                 print(e)
                  raise e
                  
 
