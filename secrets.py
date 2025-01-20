@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 def get_secret(): 
     
     session = boto3.session.Session()
-    secret_name = "prod/KoganeSecrets" 
+    secret_name = "arn:aws:secretsmanager:us-east-2:302263061226:secret:prod/KoganeSecrets-x7LtVt" 
     region_name = "us-east-2" 
     # Create a Secrets Manager
     client = session.client(
