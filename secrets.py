@@ -20,5 +20,11 @@ def get_secret():
                  
 
     secret = get_secret_value_response['TOKEN']
-    print(secret)
+    return secret 
+
+
+sec = get_secret()
+print(sec)
+
+
             
