@@ -1,4 +1,19 @@
 import os
+import discord 
+from discord.ext import commands
+
+
+class Techniques_cog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+        @commands.Cog.listener()
+        async def on_ready(self):
+            print('Techniques cog is ready')
+
+
+async def setup(bot):
+    await bot.add_cog(Techniques_cog(bot))
 
 
 class Techniques():
@@ -11,6 +26,7 @@ class Techniques():
             self.emote = emote
             self.discription = discription
             self.rarity = rarity
+
         except Exception as e:
             print("Failed to configure technique \n")
 

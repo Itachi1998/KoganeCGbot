@@ -1,4 +1,4 @@
-import discord, old_techniques, dynamo, game, traceback
+import discord, old_techniques, game, traceback
 from discord import player
 from discord.flags import MessageFlags
 from discord.enums import ButtonStyle, TextStyle

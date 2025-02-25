@@ -1,4 +1,4 @@
-import discord, old_techniques, dynamo, game
+import discord, old_techniques, game
 from cogs import colonies
 from discord.ext import commands
 from PIL import ImageDraw, Image, ImageFont
