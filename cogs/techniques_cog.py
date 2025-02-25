@@ -9,7 +9,7 @@ class Techniques_cog(commands.Cog):
 
         @commands.Cog.listener()
         async def on_ready(self):
-            print('Techniques cog is ready')
+            print('Techniques cog is ready!')
 
 
 async def setup(bot):
