@@ -4,8 +4,6 @@ from enum import Enum
 from random import randint
 import random
 
-project_root = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(project_root, "technique_list"))
 
 
 ##New results - aoe, stun, domain, stack, charge
@@ -342,8 +340,11 @@ enemy_techniques = {
                 "def": 500,
                 "speed": 100,
                 "rct": 20
-            }
-        }, 200, 10, None),
+            },
+            }, 
+            200, 
+            10, 
+            None),
     "Uro":
     Techniques(
         "Uro", 1, {

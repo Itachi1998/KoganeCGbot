@@ -27,11 +27,6 @@ cg_banner = 'images/cg_banner.png'
 # Helper functions
 def load_character(user_id, guild_id):
     print(f"user {user_id} guild {guild_id}")
-    map_dict = dynamo.read_player(user_id, guild_id)
-    if map_dict is None:
-        return None
-    return game.Character(**map_dict)
-    
 #setting the function as an attribute of bot
 bot.load_character = load_character
     
