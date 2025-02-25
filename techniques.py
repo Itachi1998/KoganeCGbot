@@ -789,7 +789,6 @@ def get_cursed_technique(name, techniques: list):
     for t in techniques:
         if t.name == name:
             technique = t
-    
             return technique  # Instantiate the class before returning
 
 
