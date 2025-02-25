@@ -12,7 +12,9 @@ class Battle(commands.Cog):
     async def on_ready(self):
         print("Battle cog is ready!")
 
-
+    @commands.command(name="Battle", description= "Load battle cog")
+    async def battle(self, ctx):
+        await ctx.send("Battle cog ready")
 
 async def setup(bot):
     await bot.add_cog(Battle(bot))
