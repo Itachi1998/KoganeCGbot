@@ -1,4 +1,4 @@
-import discord, asyncio, os, traceback, game, requests, textwrap, PIL, aiohttp, io, dynamo, time
+import discord, asyncio, os, traceback, game, requests, textwrap, PIL, aiohttp, io, time
 import math
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont, ImageSequence
@@ -8,7 +8,6 @@ from cogs import colonies
 from techniques import enemy_techniques, BVs, cursed_tools, rules
 from technique_list import bloodmanip, boogiewoogie,cursedspiritmanip, heavenlyrestriction, idletranfig, limitless, mythicbeastamber, projectionsorcery, shrine, strawdoll, tenshadows, birdmanip, comedian, construction, copy, cursed_speech
 from io import BytesIO
-from dynamo import save_player
 
 
 techs = [bloodmanip.Blood_Manipulation(), boogiewoogie.Boogie_Woogie(), cursedspiritmanip.Cursed_Spirit_Manip(), idletranfig.Idle_Transfiguration(), limitless.Limitless(), heavenlyrestriction.HeavenlyRestriction(), mythicbeastamber.Mythic_Beast_Amber(), projectionsorcery.Projection_Sorcery(), shrine.Shrine(), strawdoll.Straw_Doll(), tenshadows.Ten_Shadows(), birdmanip.Bird_Manipulation(), comedian.Comedian(), construction.Construction(), copy.Copy(), cursed_speech.Cursed_Speech()]

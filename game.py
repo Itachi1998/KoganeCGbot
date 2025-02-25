@@ -1,10 +1,9 @@
-import json, dynamo, traceback
+import json, traceback
 from typing import Union, List
 import enum, random, sys
 from copy import deepcopy
 from cogs.battle import Target
 import techniques
-from dynamo import save_player
 
 
 
