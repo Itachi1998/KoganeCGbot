@@ -785,24 +785,7 @@ def get_enemy_cursed_technique(enemy_name):
             return enemy_techniques[t]
 
 
-def get_cursed_technique(name):
-    from technique_list import bloodmanip, boogiewoogie, cursedspiritmanip, idletranfig, limitless, mythicbeastamber, projectionsorcery, shrine, strawdoll, tenshadows, heavenlyrestriction, birdmanip, comedian, construction, copy, cursed_speech
-    techniques = [
-        bloodmanip.Blood_Manipulation(),
-        boogiewoogie.Boogie_Woogie(),
-        cursedspiritmanip.Cursed_Spirit_Manip(),
-        idletranfig.Idle_Transfiguration(),
-        limitless.Limitless(),
-        mythicbeastamber.Mythic_Beast_Amber(),
-        projectionsorcery.Projection_Sorcery(),
-        shrine.Shrine(),
-        strawdoll.Straw_Doll(),
-        tenshadows.Ten_Shadows(),
-        heavenlyrestriction.HeavenlyRestriction(),
-        birdmanip.Bird_Manipulation(),
-        comedian.Comedian(),
-        construction.Construction(), copy.Copy(), cursed_speech.Cursed_Speech()
-    ]
+def get_cursed_technique(name, techniques: list):
     for t in techniques:
         if t.name == name:
             technique = t
