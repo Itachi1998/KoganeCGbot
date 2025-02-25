@@ -1,11 +1,5 @@
-import discord, old_techniques, game, traceback
-from discord import player
-from discord.flags import MessageFlags
-from discord.enums import ButtonStyle, TextStyle
-from discord import file
+import discord
 from discord.ext import commands
-from discord import app_commands
-
 
 
 # def skills_embed(player, msg):
@@ -21,6 +15,7 @@ from discord import app_commands
 class Profile(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'{self.bot.user.name} is ready')
