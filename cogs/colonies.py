@@ -1,7 +1,7 @@
 import discord, asyncio, json
 from discord.ext import commands
-from old_techniques import get_cursed_technique
-import game, time, asyncio
+#from old_techniques import get_cursed_technique
+#import game, time, asyncio
 
 
 class Colonies(commands.Cog):
@@ -11,6 +11,10 @@ class Colonies(commands.Cog):
         @commands.Cog.listener()
         async def on_ready(self):
             print('Colonies cog is ready!')
+
+    
+async def setup(bot):
+    await bot.add_cog(Colonies(bot))
 
 
 #client = Client()
@@ -139,33 +143,33 @@ class Colonies(commands.Cog):
 
 #____________VIEWS__________
         
-class UIEdit(discord.ui.View):
-    def __init__(self, bot, ctx, col):
-        super().__init__(timeout=None)
-        self.ctx = ctx
-        self.col = col
-        self.bot = bot
-        self.add_item(UISelect(self.bot, self.ctx, self.col))
+# class UIEdit(discord.ui.View):
+#     def __init__(self, bot, ctx, col):
+#         super().__init__(timeout=None)
+#         self.ctx = ctx
+#         self.col = col
+#         self.bot = bot
+#         self.add_item(UISelect(self.bot, self.ctx, self.col))
         
         
         
     
-class UISelect(discord.ui.Select):
+# class UISelect(discord.ui.Select):
     
-    def __init__(self, bot, ctx, col):
-        super().__init__(
-            placeholder="Select a color",
-            options=[
-                discord.SelectOption(label="Pink", value="pink"),
-                discord.SelectOption(label="Blue", value="blue"),
-                discord.SelectOption(label="Gray", value="gray"),
-                discord.SelectOption(label="Black", value="black"),
-                discord.SelectOption(label="Green", value="green")
-            ]
-        )
-        self.ctx = ctx
-        self.col = col
-        self.bot = bot
+#     def __init__(self, bot, ctx, col):
+#         super().__init__(
+#             placeholder="Select a color",
+#             options=[
+#                 discord.SelectOption(label="Pink", value="pink"),
+#                 discord.SelectOption(label="Blue", value="blue"),
+#                 discord.SelectOption(label="Gray", value="gray"),
+#                 discord.SelectOption(label="Black", value="black"),
+#                 discord.SelectOption(label="Green", value="green")
+#             ]
+#         )
+#         self.ctx = ctx
+#         self.col = col
+#         self.bot = bot
       
 
     # async def callback(self, interaction: discord.Interaction):
@@ -195,15 +199,15 @@ class UISelect(discord.ui.Select):
     #             await interaction.response.edit_message(content="Color changed", view=None)
             
 
-async def setup(bot: commands.Bot):
-            await bot.add_cog(Colonies(bot))
+# async def setup(bot: commands.Bot):
+#             await bot.add_cog(Colonies(bot))
 
-class Colony:
-    def __init__(self, id, name, owner, members: list, ai: list, xp, colony_color):
-        self.id = id
-        self.name = name
-        self.owner = owner
-        self.members = members
-        self.ai = ai
-        self.xp = xp
-        self.colony_color = colony_color
+# class Colony:
+#     def __init__(self, id, name, owner, members: list, ai: list, xp, colony_color):
+#         self.id = id
+#         self.name = name
+#         self.owner = owner
+#         self.members = members
+#         self.ai = ai
+#         self.xp = xp
+#         self.colony_color = colony_color
