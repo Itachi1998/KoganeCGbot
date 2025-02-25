@@ -1,18 +1,5 @@
-from logging import exception
-from typing_extensions import TypeVarTuple
-from discord import user
-from discord.ext.commands import core
-from discord.ext.commands.converter import is_generic_type
-from cogs import colonies
-import traceback
-from types import new_class
-import discord, game, old_techniques, random
-import os
-from time import time
-from typing import List
+import discord
 from discord.ext import commands
-from discord import app_commands
-import asyncio
 
 bot = commands.Bot(command_prefix=',', intents=discord.Intents.all())
 
