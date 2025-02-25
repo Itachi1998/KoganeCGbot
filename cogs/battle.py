@@ -22,17 +22,20 @@ domains = [
     'Authentic Love', 'Garden of the Everlasting', 'Captivating Skandah', "Iron Mountain"
 ]
 
-class Battle(
-        commands.Cog
-):  #here we start the cog which is an extension of the bot, and set the bot as a class variable to be used in the class methods
+class Battle(commands.Cog): 
 
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.Cog.listener()
     async def on_ready(self):
         print("Battle cog is ready!")
+
+
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Battle(bot))
+
 
     # @commands.hybrid_command(name="lobby", description="Host a lobby")
     # async def lobby(self, ctx, name: str = None):
@@ -111,9 +114,9 @@ class Battle(
     #     await pvp_embed(self.bot, host, lob['players'], lob, description, msg)
 
 
-async def respawn_enemy(enemy, colony):
-    await colonies.ai_respawn(enemy, colony)
-    return
+# async def respawn_enemy(enemy, colony):
+#     await colonies.ai_respawn(enemy, colony)
+#     return
 
 
 # def turn(turn, lobby_data: dict):
@@ -222,150 +225,150 @@ async def respawn_enemy(enemy, colony):
     #     traceback.print_exc()
 
 
-def healthbar(health, max_health):
-    max_dashes = 4
-    dash_ratio = max_health / max_dashes
-    filled_dashes = int(health / dash_ratio)
-    dashes = "❤️" * filled_dashes
-    if filled_dashes % 1 != 0:
-        dashes += "💔"
+# def healthbar(health, max_health):
+#     max_dashes = 4
+#     dash_ratio = max_health / max_dashes
+#     filled_dashes = int(health / dash_ratio)
+#     dashes = "❤️" * filled_dashes
+#     if filled_dashes % 1 != 0:
+#         dashes += "💔"
 
-    percent = f"`{round((health / max_health) * 100)}%`"
-    if '-' in percent:
-        percent = "`0%`"
-    bar = f"{dashes}{percent}"
-    return bar
-
-
-def ce_bar(ce, max_ce):
-    max_dashes = 4
-    dash_ratio = max_ce / max_dashes
-    filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio)
-    dashes = "<a:blueflames:1279971716382326804>" * filled_dashes
-    if filled_dashes % 1 != 0:
-        dashes += "<a:blueflames:1279971716382326804>"
-    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
-    if '-' in percent:
-        percent = "`0%`"
-    bar = f"{dashes}{percent}"
-    return bar
+#     percent = f"`{round((health / max_health) * 100)}%`"
+#     if '-' in percent:
+#         percent = "`0%`"
+#     bar = f"{dashes}{percent}"
+#     return bar
 
 
-def check_id(id1, id2):
-    if id1 == id2:
-        return True
+# def ce_bar(ce, max_ce):
+#     max_dashes = 4
+#     dash_ratio = max_ce / max_dashes
+#     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio)
+#     dashes = "<a:blueflames:1279971716382326804>" * filled_dashes
+#     if filled_dashes % 1 != 0:
+#         dashes += "<a:blueflames:1279971716382326804>"
+#     percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
+#     if '-' in percent:
+#         percent = "`0%`"
+#     bar = f"{dashes}{percent}"
+#     return bar
 
 
-def make_embed(title,
-               description,
-               thumbnail=None,
-               image=None,
-               footer=None,
-               line=True,
-               field1_name=None,
-               field1_value=None,
-               field2_name=None,
-               field2_value=None,
-               field3_name=None,
-               field3_value=None,
-               field4_name=None,
-               field4_value=None,
-               field5_name=None,
-               field5_value=None,
-               field6_name=None,
-               field6_value=None,
-               author=None):
-
-    embed = discord.Embed(title=title, description=description)
-    if field1_name:
-        embed.add_field(name=field1_name, value=field1_value, inline=line)
-    if field2_name:
-        embed.add_field(name=field2_name, value=field2_value, inline=line)
-    if field3_name:
-        embed.add_field(name=field3_name, value=field3_value)
-    if field4_name:
-        embed.add_field(name=field4_name, value=field4_value)
-    if field5_name:
-        embed.add_field(name=field5_name, value=field5_value, inline=line)
-    if field6_name:
-        embed.add_field(name=field6_name, value=field6_value, inline=line)
-    if author:
-        embed.set_author(name=author.display_name,
-                         icon_url=author.display_avatar.url)
-
-    if thumbnail:
-        embed.set_thumbnail(url=thumbnail)
-    if image:
-        embed.set_image(url=image)
-    if footer:
-        embed.set_footer(text=footer)
-    return embed
+# def check_id(id1, id2):
+#     if id1 == id2:
+#         return True
 
 
-def new_field(embed, name, value, line: bool = False, ephemeral: bool = False):
-    embed.add_field(name=name, value=value, inline=line, ephemeral=ephemeral)
-    return embed
+# def make_embed(title,
+#                description,
+#                thumbnail=None,
+#                image=None,
+#                footer=None,
+#                line=True,
+#                field1_name=None,
+#                field1_value=None,
+#                field2_name=None,
+#                field2_value=None,
+#                field3_name=None,
+#                field3_value=None,
+#                field4_name=None,
+#                field4_value=None,
+#                field5_name=None,
+#                field5_value=None,
+#                field6_name=None,
+#                field6_value=None,
+#                author=None):
+
+#     embed = discord.Embed(title=title, description=description)
+#     if field1_name:
+#         embed.add_field(name=field1_name, value=field1_value, inline=line)
+#     if field2_name:
+#         embed.add_field(name=field2_name, value=field2_value, inline=line)
+#     if field3_name:
+#         embed.add_field(name=field3_name, value=field3_value)
+#     if field4_name:
+#         embed.add_field(name=field4_name, value=field4_value)
+#     if field5_name:
+#         embed.add_field(name=field5_name, value=field5_value, inline=line)
+#     if field6_name:
+#         embed.add_field(name=field6_name, value=field6_value, inline=line)
+#     if author:
+#         embed.set_author(name=author.display_name,
+#                          icon_url=author.display_avatar.url)
+
+#     if thumbnail:
+#         embed.set_thumbnail(url=thumbnail)
+#     if image:
+#         embed.set_image(url=image)
+#     if footer:
+#         embed.set_footer(text=footer)
+#     return embed
 
 
-async def make_lobby_embed(bot, lobdata, description):
-    title = lobdata['name']
-    team1 = lobdata['team1']
-    team2 = lobdata['team2']
-    players = [lobdata['players']]
-    description = "### `LOBBY`"
-    field1n = "Host"
-    host = bot.load_character(lobdata['host'], lobdata['colony'])
-    equipped = "`None`"
-    ct = old_techniques.get_cursed_technique(host.technique)
-    if len(host.equipment) > 0:
-        equipped = "`" + ", ".join(host.equipment) + "`"
-    field1v = f"**{host.name}**"
-    player_names = []
-    thumbnail = bot.user.avatar.url
+# def new_field(embed, name, value, line: bool = False, ephemeral: bool = False):
+#     embed.add_field(name=name, value=value, inline=line, ephemeral=ephemeral)
+#     return embed
 
-    for p in players[0]:
-        char = bot.load_character(p, lobdata['colony'])
-        p_ce = ce_bar(char.ce, char.max_ce)
-        p_tech = old_techniques.get_cursed_technique(char.technique)
-        equipped = "`None`"
-        if len(char.equipment) > 0:
-            equipped = "`" + ", ".join(char.equipment) + "`"
-        player_names.append(
-            f"\n**PLAYER:** `{char.name}`\n**RANK:** `{char.get_grade()}`\n**CT:** `{char.technique}` {p_tech.emote}\n**CE POOL:** <a:blueflames:1279971716382326804> `{char.max_ce}`\n**EQUIP:** {equipped}\n"
-        )
-    field2n = "Players"
-    field2v = "\n".join(player_names)
-    field3n = None
-    field4n = None
-    field3v = None
-    field4v = None
-    if team1:
-        field3n = "Team A"
-        team1_names = []
-        for p in team1:
-            p = bot.load_character(p)
-            team1_names.append(p.name)
-        field3v = "\n".join(team1_names)
-    if team2:
-        field4n = "Team B"
-        team2_names = []
-        for p in team2:
-            p = bot.load_character(p)
-            team2_names.append(p.name)
-        field4v = "\n".join(team2_names)
-    embed = make_embed(title,
-                       description,
-                       thumbnail,
-                       field1_name=field1n,
-                       field1_value=field1v,
-                       field2_name=field2n,
-                       field2_value=field2v,
-                       field3_name=field3n,
-                       field3_value=field3v,
-                       field4_name=field4n,
-                       field4_value=field4v,
-                       line=False)
-    return embed
+
+# async def make_lobby_embed(bot, lobdata, description):
+#     title = lobdata['name']
+#     team1 = lobdata['team1']
+#     team2 = lobdata['team2']
+#     players = [lobdata['players']]
+#     description = "### `LOBBY`"
+#     field1n = "Host"
+#     host = bot.load_character(lobdata['host'], lobdata['colony'])
+#     equipped = "`None`"
+#     ct = old_techniques.get_cursed_technique(host.technique)
+#     if len(host.equipment) > 0:
+#         equipped = "`" + ", ".join(host.equipment) + "`"
+#     field1v = f"**{host.name}**"
+#     player_names = []
+#     thumbnail = bot.user.avatar.url
+
+#     for p in players[0]:
+#         char = bot.load_character(p, lobdata['colony'])
+#         p_ce = ce_bar(char.ce, char.max_ce)
+#         p_tech = old_techniques.get_cursed_technique(char.technique)
+#         equipped = "`None`"
+#         if len(char.equipment) > 0:
+#             equipped = "`" + ", ".join(char.equipment) + "`"
+#         player_names.append(
+#             f"\n**PLAYER:** `{char.name}`\n**RANK:** `{char.get_grade()}`\n**CT:** `{char.technique}` {p_tech.emote}\n**CE POOL:** <a:blueflames:1279971716382326804> `{char.max_ce}`\n**EQUIP:** {equipped}\n"
+#         )
+#     field2n = "Players"
+#     field2v = "\n".join(player_names)
+#     field3n = None
+#     field4n = None
+#     field3v = None
+#     field4v = None
+#     if team1:
+#         field3n = "Team A"
+#         team1_names = []
+#         for p in team1:
+#             p = bot.load_character(p)
+#             team1_names.append(p.name)
+#         field3v = "\n".join(team1_names)
+#     if team2:
+#         field4n = "Team B"
+#         team2_names = []
+#         for p in team2:
+#             p = bot.load_character(p)
+#             team2_names.append(p.name)
+#         field4v = "\n".join(team2_names)
+#     embed = make_embed(title,
+#                        description,
+#                        thumbnail,
+#                        field1_name=field1n,
+#                        field1_value=field1v,
+#                        field2_name=field2n,
+#                        field2_value=field2v,
+#                        field3_name=field3n,
+#                        field3_value=field3v,
+#                        field4_name=field4n,
+#                        field4_value=field4v,
+#                        line=False)
+#     return embed
 
 
 # def invite_embed(bot, lobby):
@@ -2572,6 +2575,3 @@ async def make_lobby_embed(bot, lobdata, description):
 #         await self.new_msg.delete()
 #         await aoe_results(self.bot, self.msg, self.attack, 'attack', targets, results, lob, self.player)
 
-
-async def setup(bot: commands.Bot):
-    await bot.add_cog(Battle(bot))
