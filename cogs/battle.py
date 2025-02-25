@@ -16,12 +16,6 @@ import asyncio
 
 bot = commands.Bot(command_prefix=',', intents=discord.Intents.all())
 
-domains = [
-    'Embodiment Of Perfection', 'Infinite Void', 'Threefold Affliction',
-    'Time Cell Moon Palace', 'Chimera Shadow Garden', 'Malevolent Shrine',
-    'Authentic Love', 'Garden of the Everlasting', 'Captivating Skandah', "Iron Mountain"
-]
-
 class Battle(commands.Cog): 
 
     def __init__(self, bot):
