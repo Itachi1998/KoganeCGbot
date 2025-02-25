@@ -2,7 +2,7 @@ import discord, asyncio,json
 from discord.ext import commands
 import dynamo
 from replit.object_storage import Client
-from techniques import get_cursed_technique
+from old_techniques import get_cursed_technique
 import game, time, asyncio
 
 

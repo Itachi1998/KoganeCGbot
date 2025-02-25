@@ -2,10 +2,10 @@ import discord, asyncio, os, traceback, game, requests, textwrap, PIL, aiohttp, 
 import math
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont, ImageSequence
-import techniques
+import old_techniques
 from game import Character, GameMode
 from cogs import colonies
-from techniques import enemy_techniques, BVs, cursed_tools, rules
+from old_techniques import enemy_techniques, BVs, cursed_tools, rules
 from technique_list import bloodmanip, boogiewoogie,cursedspiritmanip, heavenlyrestriction, idletranfig, limitless, mythicbeastamber, projectionsorcery, shrine, strawdoll, tenshadows, birdmanip, comedian, construction, copy, cursed_speech
 from io import BytesIO
 
@@ -400,13 +400,13 @@ async def create(ctx, name: str=None):
         
             case int(elo):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Shrine":
                         t = tech()
                         break
         
             case int(nate):
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Limitless":
                         t = tech()
                         break
@@ -414,7 +414,7 @@ async def create(ctx, name: str=None):
         
             case int(loud):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Shrine":
                         t = tech()
                     break
@@ -423,21 +423,21 @@ async def create(ctx, name: str=None):
         
             case int(dxrr):
             #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Blood Manipulation":
                         t = tech()
                         break
         
             case int(tiberius):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Ten Shadows":
                         t = tech()
                         break
 
             case int(mikael):
                 #loop through techniques subclasses
-                    for tech in techniques.Techniques.__subclasses__():
+                    for tech in old_techniques.Techniques.__subclasses__():
                         if tech().name == "Blood Manipulation":
                             t = tech()
                             break
@@ -445,38 +445,38 @@ async def create(ctx, name: str=None):
         
             case int(cats):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Comedian":
                         t = tech()
                         break
             case int(gam):
-                    for tech in techniques.Techniques.__subclasses__():
+                    for tech in old_techniques.Techniques.__subclasses__():
                         if tech().name == "Limitless":
                             t = tech()
                             break
             case int(chyna):
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Limitless":
                         t = tech()
                         break           
             
             case int(chris):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Ten Shadows":
                         t = tech()
                         break
     
             
             case int(greg):
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == 'Shrine':
                         t = tech()
                         break
             
             case int(legend):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Heavenly Restriction":
                         t = tech()
                         break
@@ -484,34 +484,34 @@ async def create(ctx, name: str=None):
     
             case int(myers):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Limitless":
                         t = tech()
                         break
                         
             case int(codes_id):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Bird Manipulation":
                         t = tech()
                         break
                         
             case int(snot):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Cursed Spirit Manip":
                         t = tech()
                         break
                         
             case int(owner_id):
                 #loop through techniques subclasses
-                for tech in techniques.Techniques.__subclasses__():
+                for tech in old_techniques.Techniques.__subclasses__():
                     if tech().name == "Star Rage":
                         t = tech()
                         break
                         
             case _:  # Use underscore for the default case instead of 'default'
-                t = techniques.set_technique(techs)
+                t = old_techniques.set_technique(techs)
                 t = t
 
         if not t:

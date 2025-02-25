@@ -1,5 +1,5 @@
 from sys import call_tracing
-from techniques import Techniques, enemy_techniques, get_cursed_technique, get_enemy_cursed_technique
+from old_techniques import Techniques, enemy_techniques, get_cursed_technique, get_enemy_cursed_technique
 
 import random, traceback, game
 

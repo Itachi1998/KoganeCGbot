@@ -6,7 +6,7 @@ from discord.ext.commands.converter import is_generic_type
 from cogs import colonies
 import traceback
 from types import new_class
-import discord, game, dynamo, techniques, random
+import discord, game, dynamo, old_techniques, random
 import os
 from time import time
 from typing import List
@@ -239,7 +239,7 @@ async def make_lobby_embed(bot, lobdata, description):
     field1n = "Host"
     host = bot.load_character(lobdata['host'], lobdata['colony'])
     equipped = "`None`"
-    ct = techniques.get_cursed_technique(host.technique)
+    ct = old_techniques.get_cursed_technique(host.technique)
     if len(host.equipment) > 0:
         equipped = "`" + ", ".join(host.equipment) + "`"
     field1v = f"**{host.name}**"
@@ -249,7 +249,7 @@ async def make_lobby_embed(bot, lobdata, description):
     for p in players[0]:
         char = bot.load_character(p, lobdata['colony'])
         p_ce = ce_bar(char.ce, char.max_ce)
-        p_tech = techniques.get_cursed_technique(char.technique)
+        p_tech = old_techniques.get_cursed_technique(char.technique)
         equipped = "`None`"
         if len(char.equipment) > 0:
             equipped = "`" + ", ".join(char.equipment) + "`"
@@ -315,7 +315,7 @@ async def pvp_fight(bot, lob, targets, msg):
     title = lob['name']
     description = "### Choose your `target`"
     field1n = 'PLAYER'
-    tech = techniques.get_cursed_technique(player.technique)
+    tech = old_techniques.get_cursed_technique(player.technique)
     field1v = f"**NAME:** `{player.name}`\n**RANK:** `{player.get_grade()}`\n**CT:** `{player.technique}` {tech.emote}\n**CE RESERVES:** `{player.max_ce}` <a:blueflames:1279971716382326804>"
     field2n = 'TARGETS'
     target_list = []
@@ -340,7 +340,7 @@ async def pvp_fight(bot, lob, targets, msg):
 
 async def pvp_embed(bot, host, players, lob, description, msg):
     host_char = bot.load_character(host, lob['colony'])
-    host_tech = techniques.get_cursed_technique(host_char.technique)
+    host_tech = old_techniques.get_cursed_technique(host_char.technique)
     title = lob['name']
     team1 = lob['team1'] if 'team1' in lob else None
     team2 = lob['team2'] if 'team2' in lob else None
@@ -354,7 +354,7 @@ async def pvp_embed(bot, host, players, lob, description, msg):
     player_list = []
     for p in lob['players']:
         char = bot.load_character(p, lob['colony'])
-        tech = techniques.get_cursed_technique(char.technique)
+        tech = old_techniques.get_cursed_technique(char.technique)
         player_list.append(
             f"**NAME:** `{char.name}`\n**RANK:**`{char.get_grade()}`\n**CT:** `{char.technique}` {tech.emote}\n**CE RESERVES:** <a:blueflames:1279971716382326804> `{char.max_ce}`\n"
         )
@@ -365,14 +365,14 @@ async def pvp_embed(bot, host, players, lob, description, msg):
     if team1:
         for t in team1:
             char = bot.load_character(t, lob['colony'])
-            tech = techniques.get_cursed_technique(char.technique)
+            tech = old_techniques.get_cursed_technique(char.technique)
             field3v += f"**NAME:** `{char.name}`\n**RANK:**`{char.get_grade()}`\n**CT:** `{char.technique}` {tech.emote}\n**CE RESERVES:** <a:blueflames:1279971716382326804> `{char.max_ce}`\n"
     field4n = 'TEAM B'
     field4v = ''
     if team2:
         for t in team2:
             char = bot.load_character(t, lob['colony'])
-            tech = techniques.get_cursed_technique(char.technique)
+            tech = old_techniques.get_cursed_technique(char.technique)
             field4v += f"**NAME:** `{char.name}`\n**RANK:**`{char.get_grade()}`\n**CT:** `{char.technique}` {tech.emote}\n**CE RESERVES:** <a:blueflames:1279971716382326804> `{char.max_ce}`\n"
     embed = make_embed(lob['name'],
                        description,
@@ -407,7 +407,7 @@ async def battle_info(bot,
         player.enemy = e_name
         player.mode = game.GameMode.PVE
         ready, xp_needed = player.ready_level_up()
-        t = techniques.get_cursed_technique(player.technique)
+        t = old_techniques.get_cursed_technique(player.technique)
         ct_name = t.name
         if "_" in ct_name:
             ct_name = t.name.replace("_", " ")
@@ -420,7 +420,7 @@ async def battle_info(bot,
         if isinstance(enemy, game.Character):
             enemy_ce = ce_bar(enemy.ce, enemy.max_ce)
             enemy_hp = healthbar(enemy.hp, enemy.max_hp)
-            enemy_ct = techniques.get_cursed_technique(enemy.technique)
+            enemy_ct = old_techniques.get_cursed_technique(enemy.technique)
             field2v = f"**HP:** {enemy_hp} `[{enemy.hp}/{enemy.max_hp}]` \n**CE:** {enemy_ce} `[{enemy.ce}/{enemy.max_ce}]`\n**STR:** `{enemy.attack}`\n**SPD:** `{enemy.speed}`\n**DEF:** `{enemy.defense}`\n**CT:** `{enemy.technique}` {enemy_ct.emote}"
         else:
             field2v = f"**HP:** {healthbar(enemy.hp, enemy.max_hp)}\n**Strength:** `{enemy.attack}`\n**Defense:** `{enemy.defense}`\n**Speed:** `{enemy.speed}`"
@@ -471,7 +471,7 @@ async def pve_embed(bot, msg, enemy, player, host_id, avatar):
         player.save_to_db()
         lobdata = dynamo.read_lobby(host_id, player.colony)
         description = f"### Select an Opponent!\n### `{player.name}'s turn`"
-        t = techniques.get_cursed_technique(player.technique)
+        t = old_techniques.get_cursed_technique(player.technique)
         ct_name = player.technique
         enemy_names = []
         if isinstance(enemy, list):
@@ -586,7 +586,7 @@ async def domain_embed(bot,
     dmg = results[0]
     killed = results[2]
     marks = results[3]
-    tech = techniques.get_cursed_technique(player.technique)
+    tech = old_techniques.get_cursed_technique(player.technique)
     print(f"Domain: {domain}")
     description = f"## DOMAIN EXPANSION : {domain}\n"
     soul_dmg = 0
@@ -687,7 +687,7 @@ async def technique_embed(bot, tech_name, result, msg, player, lobdata, target,
         soul_dmg = 0
         drain = 0
         stun = 0
-        t = techniques.get_cursed_technique(player.technique)
+        t = old_techniques.get_cursed_technique(player.technique)
         description = f"### Required player CE for technique use: `{t.ce_cost}`"
         if 'NA ce' in outcome:
             description = f"### `{player.name}` does not have enough CE to use `{player.technique} : {tech_name}` {t.emote}\n`Skipping to next turn`"
@@ -825,7 +825,7 @@ async def technique_embed(bot, tech_name, result, msg, player, lobdata, target,
             new_target = random.choice(next_targets)
             await msg.edit(embed=embed, view=None)
             if isinstance(new_target, game.Enemy):
-                tech = techniques.Techniques(**new_target.technique)
+                tech = old_techniques.Techniques(**new_target.technique)
                 
                 attack = random.choice([k for k in tech.attack.keys()])
                 atk_dict = tech.attack[attack]
@@ -841,7 +841,7 @@ async def technique_embed(bot, tech_name, result, msg, player, lobdata, target,
                         def_name = 'CE'
                 if " " in def_name:
                     def_name.replace(" ", "_")
-                pt = techniques.get_cursed_technique(player.technique)
+                pt = old_techniques.get_cursed_technique(player.technique)
                 def_func = getattr(pt, def_name.lower())
                 results = def_func(target, player, atk_dict)
                 await asyncio.sleep(5)
@@ -854,7 +854,7 @@ async def technique_embed(bot, tech_name, result, msg, player, lobdata, target,
                 return
             elif isinstance(new_target, dict):
                 new_target = game.Enemy(**new_target)
-                tech = techniques.Techniques(**new_target.technique)
+                tech = old_techniques.Techniques(**new_target.technique)
                 attack = random.choice([k for k in tech.attack.keys()])
                 atk_dict = tech.attack[attack]
                 def_name = None
@@ -869,7 +869,7 @@ async def technique_embed(bot, tech_name, result, msg, player, lobdata, target,
                         def_name = 'CE'
                 if " " in def_name:
                     def_name.replace(" ", "_")
-                pt = techniques.get_cursed_technique(player.technique)
+                pt = old_techniques.get_cursed_technique(player.technique)
                 def_func = getattr(pt, def_name.lower())
                 results = def_func(target, player, atk_dict)
                 await asyncio.sleep(5)
@@ -903,7 +903,7 @@ async def aoe_embed(bot,
                     chosen=None, defense=None):
     print(targets)
     title = lobdata['name']
-    tech = techniques.get_cursed_technique(player.technique)
+    tech = old_techniques.get_cursed_technique(player.technique)
     marks = lobdata['mark']
     attack_data = tech.attack[attack]
     current_targets = []
@@ -999,7 +999,7 @@ async def aoe_embed(bot,
 
 async def aoe_results(bot, msg, technique, move, targets, results, lob,
                       player):
-    tech = techniques.get_cursed_technique(player.technique)
+    tech = old_techniques.get_cursed_technique(player.technique)
     description = None
     is_enemy = False    
     mark=None
@@ -1007,7 +1007,7 @@ async def aoe_results(bot, msg, technique, move, targets, results, lob,
         mark = lob['mark']
     if move == 'attack':
 
-        if player.name in techniques.enemy_techniques:
+        if player.name in old_techniques.enemy_techniques:
             is_enemy = True
 
         if 'NA ce' in results:
@@ -1097,7 +1097,7 @@ async def aoe_results(bot, msg, technique, move, targets, results, lob,
             next_target = random.choice([t for t in targets])
         if next_target:
             if isinstance(next_target, game.Enemy):
-                technique = techniques.Techniques(**next_target.technique)
+                technique = old_techniques.Techniques(**next_target.technique)
                 attack = random.choice([k for k in technique.attack.keys()])
                 if player.defense is None:
                     player.defense = 'CE'
@@ -1136,7 +1136,7 @@ async def ai_turn(bot, outcome, attack_name, target, ai, msg, lobdata):
             description = f"### `{target.name}` did not have the experience to use `{target.defense}`\n"
             print('na lvl')
         elif 'NA imbue' in result:
-            target_tech = techniques.get_cursed_technique(target.defense)
+            target_tech = old_techniques.get_cursed_technique(target.defense)
             description = f"### `{target.name}` did not have enough CE imbued to use `{target.defense}`\n`{target.defense} requires {target_tech.defense[target.defense]['imbue cost']}`\n"
             if 'soul' in attack:
                 dmg += attack['soul']
@@ -1297,7 +1297,7 @@ class Battle(
             f"Lobby created by: {str(ctx.author)}\nNamed {str(name)}\nHost id: {str(host_id)}"
         )  #logging
 
-        ct = techniques.get_cursed_technique(player.technique)
+        ct = old_techniques.get_cursed_technique(player.technique)
         title = f"{name}"
         description = f"### Lobby created by host: `{player.name}`"
         field1_name = "Host"
@@ -1816,7 +1816,7 @@ class Target(discord.ui.Select):
 
         if isinstance(target, dict):
         
-            if target['name'] in techniques.enemy_techniques:
+            if target['name'] in old_techniques.enemy_techniques:
                     target = game.Enemy(**target)
             
             if 'user_id' in target.keys():
@@ -1927,7 +1927,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                 return
             if " " in t:
                 t.replace(" ", "_")
-            ct = techniques.get_cursed_technique(t)
+            ct = old_techniques.get_cursed_technique(t)
             description += f"\n`{ct.ce_cost} ce required`"
             self.label = f"{ct.name}"
             await self.msg.edit(view=self)
@@ -2086,7 +2086,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                 print("Player failed to escape")
                 attack = random.choice(
                     [key for key in self.enemy.technique['attack'].keys()])
-                tech = techniques.Techniques(**self.enemy.technique)
+                tech = old_techniques.Techniques(**self.enemy.technique)
                 if isinstance(enemy, game.Enemy):
                     atk_dict = tech.attack[attack]
                     defense = None
@@ -2094,7 +2094,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                         defense = self.player.defense
                     else:
                         defense = 'CE'
-                    p_tech = techniques.get_cursed_technique(
+                    p_tech = old_techniques.get_cursed_technique(
                         self.player.technique)
                     p_name = defense.replace(" ", "_")
                     d_func = getattr(p_tech, p_name.lower())
@@ -2131,12 +2131,12 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
             lobdata = dynamo.read_lobby(self.host_id, player.colony)
             if tool_list:
                 if len(tool_list) > 1:
-                    tool1 = techniques.get_cursed_tool(tool_list[0])
-                    tool2 = techniques.get_cursed_tool(tool_list[1])
+                    tool1 = old_techniques.get_cursed_tool(tool_list[0])
+                    tool2 = old_techniques.get_cursed_tool(tool_list[1])
                     description += f"\n`{player.name}` is `dual wielding` cursed tools `{tool1.name}` and `{tool2.name}`"
 
                 elif len(tool_list) == 1:
-                    tool = techniques.get_cursed_tool(tool_list[0])
+                    tool = old_techniques.get_cursed_tool(tool_list[0])
                     description += f"\n`{player.name}` is wielding the cursed tool {tool.name}"
 
             if 'hit' in outcome:
@@ -2192,7 +2192,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
 
             else:
                 if isinstance(enemy, game.Enemy):
-                    ct = techniques.get_cursed_technique(player.technique)
+                    ct = old_techniques.get_cursed_technique(player.technique)
                     def_name = None
                     if player.defense:
                         def_name = player.defense.lower()
@@ -2240,7 +2240,7 @@ class ImbueModal(discord.ui.Modal, title="Imbued"):
         imbued = int(self.amount.value)
         player = self.player
         enemy = self.enemy
-        technique = techniques.get_cursed_technique(player.technique)
+        technique = old_techniques.get_cursed_technique(player.technique)
         if player.ce >= imbued:
             player.ce -= imbued
             player.imbued += imbued

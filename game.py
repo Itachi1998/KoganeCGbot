@@ -3,7 +3,7 @@ from typing import Union, List
 import enum, random, sys
 from copy import deepcopy
 from cogs.battle import Target
-import techniques
+import old_techniques
 
 
 
@@ -76,13 +76,13 @@ class Actor:
             
             if isinstance(other, Enemy):
                       print(f"{other.name} is an ai, continuing player vs ai physical attack calculations")
-                      t = techniques.Techniques(**other.technique)
+                      t = old_techniques.Techniques(**other.technique)
                       defense = t.defense[other.defense]
                       other_speed = t.defense[other.defense]['speed']
                 
             elif isinstance(self, Enemy):
                 t_name = None
-                t = techniques.get_cursed_technique(other.technique)
+                t = old_techniques.get_cursed_technique(other.technique)
                 if other.defense:
                     t_name = other.defense.replace(" ","_")
                 else:
@@ -126,14 +126,14 @@ class Actor:
 
                 if tool:
                     if len(tool) > 1:
-                        tool1 =techniques.get_cursed_tool(tool[0])
-                        tool2 = techniques.get_cursed_tool(tool[1])
+                        tool1 =old_techniques.get_cursed_tool(tool[0])
+                        tool2 = old_techniques.get_cursed_tool(tool[1])
                         damage += tool1.attack, tool2.attack
                         if tool1.negate or tool2.negate:
                             defense=0
                             negate='negate'
                     else:
-                        tool1 = techniques.get_cursed_tool(tool[0])
+                        tool1 = old_techniques.get_cursed_tool(tool[0])
                         damage += tool1.attack + tool1.pen  #add tool attack power and penetration to the damage
                         if tool1.negate:
                           defense = 0  #negate defense if tool has the ability
@@ -169,9 +169,9 @@ class Actor:
             atk = None
             t=None
             if isinstance(self, Enemy):
-                t= techniques.Techniques(**self.technique)
+                t= old_techniques.Techniques(**self.technique)
                 atk = t.attack[technique]
-                target_tech = techniques.get_cursed_technique(target.technique)
+                target_tech = old_techniques.get_cursed_technique(target.technique)
                 if target.defense is not None:
                     def_name = technique.replace(" ", "_")
                     def_func = getattr(target_tech, def_name.lower())
@@ -184,7 +184,7 @@ class Actor:
                     results = def_func(self, target, atk)
                     
             else:
-                t = techniques.get_cursed_technique(self.technique)
+                t = old_techniques.get_cursed_technique(self.technique)
             print(f"{self.name} launching attack {technique}")
             atr = technique.lower()
             atr = atr.replace(" ","_")
@@ -205,7 +205,7 @@ class Actor:
             
         if move == "defense":
                 lobdat = dynamo.read_lobby(host, colony_id = self.colony)
-                t = techniques.get_cursed_technique(self.technique)
+                t = old_techniques.get_cursed_technique(self.technique)
                 self.defense=technique
                 technique = technique.replace(" ", "_")
                 if targets:
@@ -495,7 +495,7 @@ class Grade4(Enemy):
     min_level = 1
     
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Grade 4")
+        self.t = old_techniques.get_enemy_cursed_technique("Grade 4")
         self.defense=list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -519,7 +519,7 @@ class Grade4(Enemy):
 class Grade3(Enemy):
     min_level = 1
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Grade 3")
+        self.t = old_techniques.get_enemy_cursed_technique("Grade 3")
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -544,7 +544,7 @@ class Grade2(Enemy):
             min_level = 5
             
             def __init__(self):
-                self.t = techniques.get_enemy_cursed_technique("Grade 2")
+                self.t = old_techniques.get_enemy_cursed_technique("Grade 2")
                 self.defense = list(self.t.defense.keys())
                 if len(self.defense) > 1:
                     self.defense = random.choice(self.defense)
@@ -568,7 +568,7 @@ class Grade1(Enemy):
     min_level = 5
     
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Grade 1")
+        self.t = old_techniques.get_enemy_cursed_technique("Grade 1")
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -593,7 +593,7 @@ class FingerBearer(Enemy):
             min_level = 10
             
             def __init__(self):
-                self.t = techniques.get_enemy_cursed_technique("Finger Bearer")
+                self.t = old_techniques.get_enemy_cursed_technique("Finger Bearer")
                 self.defense = list(self.t.defense.keys())
                 if len(self.defense) > 1:
                     self.defense = random.choice(self.defense)
@@ -619,7 +619,7 @@ class Kechi(Enemy):
     min_level = 15
     
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Kechi")
+        self.t = old_techniques.get_enemy_cursed_technique("Kechi")
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -644,7 +644,7 @@ class Eso(Enemy):
     min_level = 15
     
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Eso")
+        self.t = old_techniques.get_enemy_cursed_technique("Eso")
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -669,7 +669,7 @@ class Choso(Enemy):
             min_level = 20
             
             def __init__(self):
-                self.t = techniques.get_enemy_cursed_technique("Choso")
+                self.t = old_techniques.get_enemy_cursed_technique("Choso")
                 self.defense = list(self.t.defense.keys())
                 if len(self.defense) > 1:
                     self.defense = random.choice(self.defense)
@@ -694,7 +694,7 @@ class Jogo(Enemy):
         min_level = 30
        
         def __init__(self):
-            self.t = techniques.get_enemy_cursed_technique("Jogo")
+            self.t = old_techniques.get_enemy_cursed_technique("Jogo")
             self.defense = list(self.t.defense.keys())
             if len(self.defense) > 1:
                 self.defense = random.choice(self.defense)
@@ -719,7 +719,7 @@ class Hanami(Enemy):
     min_level = 20
     
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Hanami")
+        self.t = old_techniques.get_enemy_cursed_technique("Hanami")
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -743,7 +743,7 @@ class Dagon(Enemy):
     min_level = 20
     
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Dagon")
+        self.t = old_techniques.get_enemy_cursed_technique("Dagon")
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -767,7 +767,7 @@ class Toji(Enemy):
             min_level = 80
             
             def __init__(self):
-                self.t = techniques.get_enemy_cursed_technique("Toji")
+                self.t = old_techniques.get_enemy_cursed_technique("Toji")
                 self.defense = list(self.t.defense.keys())
                 if len(self.defense) > 1:
                     self.defense = random.choice(self.defense)
@@ -791,7 +791,7 @@ class Toji(Enemy):
 class Reggie(Enemy):
         min_level = 40
         def __init__(self):
-            self.t = techniques.get_enemy_cursed_technique("Reggie")
+            self.t = old_techniques.get_enemy_cursed_technique("Reggie")
             self.defense = list(self.t.defense.keys())
             if len(self.defense) > 1:
                 self.defense = random.choice(self.defense)
@@ -816,7 +816,7 @@ class Uro(Enemy):
                 min_level = 40
                 
                 def __init__(self):
-                    self.t = techniques.get_enemy_cursed_technique("Uro")
+                    self.t = old_techniques.get_enemy_cursed_technique("Uro")
                     self.defense = list(self.t.defense.keys())
                     if len(self.defense) > 1:
                         self.defense = random.choice(self.defense)
@@ -840,7 +840,7 @@ class Mahito(Enemy):
                         min_level = 50
                        
                         def __init__(self):
-                            self.t = techniques.get_enemy_cursed_technique("Mahito")
+                            self.t = old_techniques.get_enemy_cursed_technique("Mahito")
                             self.defense = list(self.t.defense.keys())
                             if len(self.defense) > 1:
                                 self.defense = random.choice(self.defense)
@@ -865,7 +865,7 @@ class KingOfCurses(Enemy):
                         min_level = 150
                         
                         def __init__(self):
-                            self.t = techniques.get_enemy_cursed_technique("King Of Curses")
+                            self.t = old_techniques.get_enemy_cursed_technique("King Of Curses")
                             self.defense = list(self.t.defense.keys())
                             if len(self.defense) > 1:
                                 self.defense = random.choice(self.defense)
@@ -890,7 +890,7 @@ class Kenjaku(Enemy):
     min_level = 100
     
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Kenjaku")
+        self.t = old_techniques.get_enemy_cursed_technique("Kenjaku")
         self.defense = random.choice(list(self.t.defense.keys()))
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -913,7 +913,7 @@ class Kenjaku(Enemy):
 class Uraume(Enemy):
     min_level = 100
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique('Uraume')
+        self.t = old_techniques.get_enemy_cursed_technique('Uraume')
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)
@@ -924,7 +924,7 @@ class Uraume(Enemy):
 class Kashimo(Enemy):
     min_level = 100
     def __init__(self):
-        self.t = techniques.get_enemy_cursed_technique("Kashimo")
+        self.t = old_techniques.get_enemy_cursed_technique("Kashimo")
         self.defense = list(self.t.defense.keys())
         if len(self.defense) > 1:
             self.defense = random.choice(self.defense)

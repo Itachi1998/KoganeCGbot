@@ -1,6 +1,6 @@
 #wait
 import traceback
-from techniques import Techniques, get_cursed_technique, enemy_techniques
+from old_techniques import Techniques, get_cursed_technique, enemy_techniques
 import random, traceback, game
 
 class Idle_Transfiguration(Techniques):

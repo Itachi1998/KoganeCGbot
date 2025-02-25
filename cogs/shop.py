@@ -1,4 +1,4 @@
-import discord, techniques, dynamo, game
+import discord, old_techniques, dynamo, game
 from cogs import colonies
 from discord.ext import commands
 from PIL import ImageDraw, Image, ImageFont
@@ -92,7 +92,7 @@ def get_image(image, name: list, price, title):
 
 def cursed_tool_shop():
 
-    cursed_tool_items = list(techniques.cursed_tools.items())
+    cursed_tool_items = list(old_techniques.cursed_tools.items())
 
     name = ""
 
@@ -208,7 +208,7 @@ class C_Tool_Select(discord.ui.Select):
         self.id = id
         self.bot = bot
         self.color = color
-        cursed_tool_items = list(techniques.cursed_tools.values())
+        cursed_tool_items = list(old_techniques.cursed_tools.values())
 
         options = [
             discord.SelectOption(
@@ -234,7 +234,7 @@ class C_Tool_Select(discord.ui.Select):
 
         name = self.values[0]
 
-        tool = techniques.cursed_tools[name]
+        tool = old_techniques.cursed_tools[name]
 
         price = tool.cost
 
@@ -274,7 +274,7 @@ class Vow(discord.ui.Button):
         super().__init__(label="Vow Shop", style=discord.ButtonStyle.blurple)
 
     async def vow_shop(self):
-        binding_vows = techniques.BVs
+        binding_vows = old_techniques.BVs
         name = ""
         price = ""
         for key, vow_obj in binding_vows.items():
@@ -310,7 +310,7 @@ class VowSelect(discord.ui.Select):
             discord.SelectOption(
                 label=f"{vow_obj.name}    Price: {vow_obj.cost}",
                 description=vow_obj.description,
-                value=vow_obj.name) for vow_obj in techniques.BVs.values()
+                value=vow_obj.name) for vow_obj in old_techniques.BVs.values()
         ]
         super().__init__(placeholder="Select a vow", options=options)
         self.msg = msg
@@ -325,7 +325,7 @@ class VowSelect(discord.ui.Select):
                 content="You did not use this command", ephemeral=True)
             return
         name = self.values[0]
-        vow = techniques.BVs[name]
+        vow = old_techniques.BVs[name]
         price = vow.cost
         player = self.bot.load_character(self.id, interaction.guild.id)
         if player.cgp >= price:
@@ -357,7 +357,7 @@ class Rule(discord.ui.Button):
         super().__init__(label="Rule Shop", style=discord.ButtonStyle.blurple)
 
     async def rule_shop(self):
-        rules = techniques.rules
+        rules = old_techniques.rules
         name = ""
         price = ""
         for key, rule_obj in rules.items():
@@ -394,7 +394,7 @@ class RuleSelect(discord.ui.Select):
             discord.SelectOption(
                 label=f"{rule_obj.name}    Price: {rule_obj.cost}",
                 description=rule_obj.description,
-                value=rule_obj.name) for rule_obj in techniques.rules.values()
+                value=rule_obj.name) for rule_obj in old_techniques.rules.values()
         ]
         super().__init__(placeholder="Select a rule", options=options)
 
@@ -406,7 +406,7 @@ class RuleSelect(discord.ui.Select):
             return
         player = self.bot.load_character(self.id, interaction.guild.id)
         name = self.values[0]
-        rule = techniques.rules[name]
+        rule = old_techniques.rules[name]
         price = rule.cost
         if player.cgp >= price:
             player.cgp -= price

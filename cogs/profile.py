@@ -1,4 +1,4 @@
-import discord, techniques, dynamo, game, traceback
+import discord, old_techniques, dynamo, game, traceback
 from discord import player
 from discord.flags import MessageFlags
 from discord.enums import ButtonStyle, TextStyle
@@ -85,9 +85,9 @@ class Profile(commands.Cog):
                 stat =  self.bot.status_embed(user_profile, char, banner)
                 inv = [e for e in player_stats['inventory']]
                 for e in inv:
-                    if e in techniques.cursed_tools:
+                    if e in old_techniques.cursed_tools:
                         inv.remove(e)
-                        e = techniques.get_cursed_tool(e)
+                        e = old_techniques.get_cursed_tool(e)
                         inv.append("`" + e.name + "`" + e.emote )
                 string = "`Inventory:` " + ",".join(inv)
                 
@@ -95,9 +95,9 @@ class Profile(commands.Cog):
                 
                 equip = [e for e in player_stats['equipment']]
                 for e in equip:
-                    if e in techniques.cursed_tools:
+                    if e in old_techniques.cursed_tools:
                         equip.remove(e)
-                        e = techniques.get_cursed_tool(e)
+                        e = old_techniques.get_cursed_tool(e)
                         equip.append("`" + e.name + "`" +e.emote)
                         
                 
@@ -132,15 +132,15 @@ class Equip(discord.ui.Button):
         if interaction.user.id != self.player.user_id:
             await interaction.followup.send("You can't equip items for this player", ephemeral=True)
             return            
-        ct_list = [item for item in self.player.inventory if item in techniques.cursed_tools]
-        bv_list = [vow for vow in self.player.inventory if vow in techniques.BVs]
-        rule_list = [rule for rule in self.player.inventory if rule in techniques.rules]
+        ct_list = [item for item in self.player.inventory if item in old_techniques.cursed_tools]
+        bv_list = [vow for vow in self.player.inventory if vow in old_techniques.BVs]
+        rule_list = [rule for rule in self.player.inventory if rule in old_techniques.rules]
         ct_str = ''
         bv_str = ''
         rule_str = ''
         tool = None
         for ct in ct_list:
-            tool = techniques.get_cursed_tool(ct)
+            tool = old_techniques.get_cursed_tool(ct)
             ct_str += f'**{tool.name}** {tool.emote}\n**Dmg:** `{tool.attack}` **Pen:** `{tool.pen}`'
             if tool.negate:
                 ct_str += ' **Negs:** `Yes`'
@@ -149,11 +149,11 @@ class Equip(discord.ui.Button):
     
 
         for bv in bv_list:
-            vow = techniques.get_BV(bv)
+            vow = old_techniques.get_BV(bv)
             bv_str += f'{vow.name}\n**Description:** `{vow.description}`'
 
         for rule in rule_list:
-            cgrule = techniques.get_rule(rule)
+            cgrule = old_techniques.get_rule(rule)
             rule_str += f'{cgrule.name}\n**Description:** `{cgrule.description}`'
 
         print('tools: ' + ct_str)
@@ -235,7 +235,7 @@ class ToolSelect(discord.ui.Select):
             self.player = player
             self.msg = msg
             options=[]
-            for name, tool in techniques.cursed_tools.items():
+            for name, tool in old_techniques.cursed_tools.items():
                 if name in self.player.inventory:
                     options.append(discord.SelectOption(label=name, value=name))
             super().__init__(placeholder='Select a tool...', options=options)
@@ -250,7 +250,7 @@ class ToolSelect(discord.ui.Select):
                 await interaction.followup.send("Error: Tool not found", ephemeral=True)
                 return
             items = self.player.equipment
-            tools = [tool for tool in items if tool in techniques.cursed_tools]
+            tools = [tool for tool in items if tool in old_techniques.cursed_tools]
             if self.player.HR:
                 if len(tools) < 2:
                     self.player.equip(value)
