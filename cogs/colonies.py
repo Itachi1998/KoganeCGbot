@@ -4,17 +4,13 @@ from old_techniques import get_cursed_technique
 import game, time, asyncio
 
 
-class Colonies_cog(commands.Cog):
+class Colonies(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
         @commands.Cog.listener()
         async def on_ready(self):
             print('Colonies cog is ready!')
-
-
-async def setup(bot):
-    await bot.add_cog(Colonies_cog(bot))
 
 
 #client = Client()
