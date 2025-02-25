@@ -1,11 +1,12 @@
-import discord, os # Import general dependencies 
+import discord, os# Import general dependencies 
+from os import environ
 from discord.ext import commands
 import old_techniques
 from old_techniques import enemy_techniques, BVs, cursed_tools, rules, get_cursed_technique
 from technique_list import * # Import all techniques
 
-log_channel = os.environ["LOGCHANNEL"]
-token = os.environ['TOKEN']
+log_channel = os.getenv('LOGCHANNEL')
+token = os.getenv('TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
