@@ -1,9 +1,11 @@
-import discord, os# Import general dependencies 
-from os import environ
+import discord, os, dotenv# Import general dependencies 
+from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
 import old_techniques
 from old_techniques import enemy_techniques, BVs, cursed_tools, rules, get_cursed_technique
 from technique_list import * # Import all techniques
+dotenv = find_dotenv()
+load_dotenv(dotenv)
 
 log_channel = os.getenv('LOGCHANNEL')
 token = os.getenv('TOKEN')
@@ -12,7 +14,7 @@ intents.message_content = True
 intents.members = True
 bot = commands.Bot(command_prefix=',', intents=intents)
 
-async def setup_hook():
+async def load():
     for filename in os.listdir('cogs'):
         if filename.endswith('.py'):
             cog = filename[:-3]
@@ -26,14 +28,16 @@ async def setup_hook():
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} is ready')
-    
-    for cog in bot.cogs:
-        print(f"Cog loaded: {cog}")
-    print(f"Loaded cogs: {len(bot.cogs)}")
+    await main()
 
+async def main():
+    await load()
+    await bot.wait_until_ready()
+    await bot.change_presence(activity=discord.Game(name='Culling Games Commence! | /help'))
+    print('Bot is ready')
+    channel = bot.get_channel(int(log_channel))
+    await channel.send('Bot is ready')
 
-
-bot.setup_hook = setup_hook
 bot.run(token)
 
 
