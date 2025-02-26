@@ -1,9 +1,6 @@
 import discord, os, dotenv# Import general dependencies 
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
-import old_techniques
-from old_techniques import enemy_techniques, BVs, cursed_tools, rules, get_cursed_technique
-from technique_list import * # Import all techniques
 dotenv = find_dotenv()
 load_dotenv(dotenv)
 
@@ -47,6 +44,37 @@ async def sync(ctx):
     except Exception as e:
         await ctx.send("Error syncing commands check console")
         print(e) 
+
+
+
+@bot.tree.command(name='help', description='Learn how to play!')
+async def help(interaction: discord.Interaction):
+    embed = discord.Embed(title='Help', description="""/create a character, choose a class, and spin for your techniques, cursed energy reserves, and special traits!""", color=0x00ff00)
+    embed.add_field(name='##/command <command>', 
+                    value="""To learn about a specific command.
+                    Or see the subcommands for any command""", inline=False)
+    embed.add_field(name='##/help', value="""See this message again""", inline=False)
+    embed.add_field(name='##/pve', value="""Start a PvE lobby to fight against AI Culling Game players!""", inline=False)
+    embed.add_field(name='##/pvp', value="""Start a PvP lobby to fight against other Discord Culling Game players!""", inline=False)
+    embed.add_field(name='##/rules', value="""See the colony rules. 
+                    Use /commands rules to see more rule commands""", inline=False)
+    
+    embed.add_field(name='##/leaderboard', value="""See the leaderboard.
+                    Use /commands leaderboard to see more leaderboard commands""", inline=False)
+
+    embed.add_field(name='##/techniques', value="""See all the different techniques and classes available in the colony!""", inline=False)
+
+    embed.add_field(name='##/market,', value="""See the market. 
+                    Use /commands market to see more market commands""", inline=False)
+
+    embed.add_field(name='##/colony', value="""See your colony information. 
+                    Use /commands colony to see more colony commands""", inline=False)
+
+
+    embed.add_field(name='##/character', value="""See your character information. 
+                    Use /commands character to see more character commands""", inline=False)
+
+    await interaction.response.send_message(embed=embed)
 
 bot.run(token)
 
