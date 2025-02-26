@@ -25,12 +25,6 @@ async def load():
                 print(f'Failed to load cog {cog}: {e}')
 
 
-@bot.command()
-async def sync(ctx):
-    if ctx.author.id == bot.owner_id:
-        await bot.tree.sync()
-        await ctx.send("Commands synced! ")
-
 
 @bot.event
 async def on_ready():
@@ -44,6 +38,15 @@ async def main():
     print('Bot is ready')
     channel = bot.get_channel(int(log_channel))
     await channel.send('Bot is ready')
+
+@bot.command()
+async def sync(ctx):
+    try:
+      await bot.tree.sync()
+      await ctx.send("Commands synced")
+    except Exception as e:
+        await ctx.send("Error syncing commands check console")
+        print(e) 
 
 bot.run(token)
 
