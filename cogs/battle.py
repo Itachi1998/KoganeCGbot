@@ -13,13 +13,13 @@ class Battle(commands.Cog):
     async def on_ready(self):
         print("Battle cog is ready!")
 
-    @commands.command(name="Battle", description= "Load battle cog")
-    async def battle(self, ctx):
-        await ctx.send("Example of a context command")
+    # @commands.command(name="battle", description= "Load battle cog")
+    # async def battle(self, ctx):
+    #     await ctx.send("Example of a context command")
     
-    @app_commands.command(name="slash", description="Example of a slash command")
-    async def slash(self, interaction: discord.Interaction):
-        await interaction.response.send_message("This is a slash command!")
+    # @app_commands.command(name="slash", description="Example of a slash command")
+    # async def slash(self, interaction: discord.Interaction):
+    #     await interaction.response.send_message("This is a slash command!")
 
 async def setup(bot):
     await bot.add_cog(Battle(bot))
