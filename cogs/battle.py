@@ -12,7 +12,7 @@ class Battle(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("Battle cog is ready!")
-
+        
     # @commands.command(name="battle", description= "Load battle cog")
     # async def battle(self, ctx):
     #     await ctx.send("Example of a context command")

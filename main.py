@@ -6,7 +6,6 @@ dotenv = find_dotenv()
 load_dotenv(dotenv)
 log_channel = os.getenv('LOGCHANNEL')
 token = os.getenv('TOKEN')
-print(token)
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -38,14 +37,17 @@ async def main():
 
 @bot.command()
 async def sync(ctx):
-    try:
-      await bot.change_presence(activity=discord.Game(name="the Kogane's Culling Games"))
-      await bot.tree.sync()
-      await ctx.send("Commands synced")
-    except Exception as e:
-        await ctx.send("Error syncing commands check console")
-        print(e) 
-
+      channel = bot.get_channel(int(log_channel))
+      if ctx.author.id == bot.owner_id:
+            await bot.change_presence(activity=discord.Game(name="the Kogane's Culling Games"))
+            await bot.tree.sync()
+            await ctx.send("Commands synced")
+    
+      else:
+        await ctx.send("You are not the bot owner")
+        fstring = f"User ({ctx.author.id}) tried to sync commands but is not the bot owner in {ctx.guild.name} id {ctx.guild.id}"
+        await channel.send(fstring)
+        print(fstring)
 
 
 @bot.tree.command(name='help', description='Learn how to play!')
