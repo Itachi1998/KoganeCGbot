@@ -1,11 +1,12 @@
 import discord, os, dotenv# Import general dependencies 
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
+
 dotenv = find_dotenv()
 load_dotenv(dotenv)
-
 log_channel = os.getenv('LOGCHANNEL')
 token = os.getenv('TOKEN')
+print(token)
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -38,7 +39,7 @@ async def main():
 @bot.command()
 async def sync(ctx):
     try:
-      await bot.change_presence(activity=discord.Game(name='Culling Games Commence! | /help'))
+      await bot.change_presence(activity=discord.Game(name="the Kogane's Culling Games"))
       await bot.tree.sync()
       await ctx.send("Commands synced")
     except Exception as e:
