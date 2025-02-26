@@ -5,3 +5,4 @@ psycopg2==2.9.10
 Requests==2.32.3
 typing_extensions==4.12.2
 boto3==1.21.10
+dotenv==0.0.5
