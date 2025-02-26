@@ -25,6 +25,13 @@ async def load():
                 print(f'Failed to load cog {cog}: {e}')
 
 
+@bot.command()
+async def sync(ctx):
+    if ctx.author.id == bot.owner_id:
+        await bot.tree.sync()
+        await ctx.send("Commands synced! ")
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} is ready')
