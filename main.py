@@ -31,7 +31,6 @@ async def on_ready():
 async def main():
     await load()
     await bot.wait_until_ready()
-    await bot.change_presence(activity=discord.Game(name='Culling Games Commence! | /help'))
     print('Bot is ready')
     channel = bot.get_channel(int(log_channel))
     await channel.send('Bot is ready')
@@ -39,6 +38,7 @@ async def main():
 @bot.command()
 async def sync(ctx):
     try:
+      await bot.change_presence(activity=discord.Game(name='Culling Games Commence! | /help'))
       await bot.tree.sync()
       await ctx.send("Commands synced")
     except Exception as e:
