@@ -17,7 +17,7 @@ async def setup(bot):
 
 
 class Techniques():
-    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, discription: str, rarity: int):
+    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, discription: str, rarity: int, hr: bool):
         try:
             self.name = name
             self.level = level
@@ -26,11 +26,16 @@ class Techniques():
             self.emote = emote
             self.discription = discription
             self.rarity = rarity
+            self.hr = hr
+
 
         except Exception as e:
-            print("Failed to configure technique \n")
-
+            fstring=f"Failed to configure technique {name}\n Check console for error"
+            print(fstring)
             print(e)
+
+
+
 
         
     

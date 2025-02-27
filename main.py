@@ -49,7 +49,6 @@ async def sync(ctx):
         print(fstring)
 
 
-
 @bot.tree.command(name='help', description='Learn how to play!')
 async def help(interaction: discord.Interaction):
     embed = discord.Embed(title='Help', description="""/create a character, choose a class, and spin for your techniques, cursed energy reserves, and special traits!""", color=0x00ff00)
@@ -76,6 +75,7 @@ async def help(interaction: discord.Interaction):
 
     embed.add_field(name='##/character', value="""See your character information. 
                     Use /commands character to see more character commands""", inline=False)
+    
 
     await interaction.response.send_message(embed=embed)
 
