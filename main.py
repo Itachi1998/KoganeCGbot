@@ -38,16 +38,16 @@ async def main():
 @bot.command()
 async def sync(ctx):
       channel = bot.get_channel(int(log_channel))
-      if ctx.author.id == bot.owner_id:
-            await bot.change_presence(activity=discord.Game(name="the Kogane's Culling Games"))
-            await bot.tree.sync()
-            await ctx.send("Commands synced")
-    
+      if await bot.is_owner(ctx.author):
+        
+        await bot.tree.sync()
+        await ctx.send("Commands synced")
       else:
-        await ctx.send("You are not the bot owner")
-        fstring = f"User ({ctx.author.id}) tried to sync commands but is not the bot owner in {ctx.guild.name} id {ctx.guild.id}"
+        await ctx.send("You are not the owner of this bot")
+        fstring = f'User {ctx.author.id} ({ctx.author}) tried to sync commands but is not the owner in {ctx.guild.id} ({ctx.guild.name}) - {ctx.channel.id} ({ctx.channel.name}) '
         await channel.send(fstring)
         print(fstring)
+
 
 
 @bot.tree.command(name='help', description='Learn how to play!')
