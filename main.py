@@ -40,8 +40,9 @@ async def sync(ctx):
       channel = bot.get_channel(int(log_channel))
       if await bot.is_owner(ctx.author):
         
-        await bot.tree.sync()
+        synced = await bot.tree.sync()
         await ctx.send("Commands synced")
+        print(synced)
       else:
         await ctx.send("You are not the owner of this bot")
         fstring = f'User {ctx.author.id} ({ctx.author}) tried to sync commands but is not the owner in {ctx.guild.id} ({ctx.guild.name}) - {ctx.channel.id} ({ctx.channel.name}) '
@@ -52,28 +53,28 @@ async def sync(ctx):
 @bot.tree.command(name='help', description='Learn how to play!')
 async def help(interaction: discord.Interaction):
     embed = discord.Embed(title='Help', description="""/create a character, choose a class, and spin for your techniques, cursed energy reserves, and special traits!""", color=0x00ff00)
-    embed.add_field(name='##/command <command>', 
+    embed.add_field(name='/command <command>', 
                     value="""To learn about a specific command.
                     Or see the subcommands for any command""", inline=False)
-    embed.add_field(name='##/help', value="""See this message again""", inline=False)
-    embed.add_field(name='##/pve', value="""Start a PvE lobby to fight against AI Culling Game players!""", inline=False)
-    embed.add_field(name='##/pvp', value="""Start a PvP lobby to fight against other Discord Culling Game players!""", inline=False)
-    embed.add_field(name='##/rules', value="""See the colony rules. 
+    embed.add_field(name='/help', value="""See this message again""", inline=False)
+    embed.add_field(name='/pve', value="""Start a PvE lobby to fight against AI Culling Game players!""", inline=False)
+    embed.add_field(name='/pvp', value="""Start a PvP lobby to fight against other Discord Culling Game players!""", inline=False)
+    embed.add_field(name='/rules', value="""See the colony rules. 
                     Use /commands rules to see more rule commands""", inline=False)
     
-    embed.add_field(name='##/leaderboard', value="""See the leaderboard.
+    embed.add_field(name='/leaderboard', value="""See the leaderboard.
                     Use /commands leaderboard to see more leaderboard commands""", inline=False)
 
-    embed.add_field(name='##/techniques', value="""See all the different techniques and classes available in the colony!""", inline=False)
+    embed.add_field(name='/techniques', value="""See all the different techniques and classes available in the colony!""", inline=False)
 
-    embed.add_field(name='##/market,', value="""See the market. 
+    embed.add_field(name='/market,', value="""See the market. 
                     Use /commands market to see more market commands""", inline=False)
 
-    embed.add_field(name='##/colony', value="""See your colony information. 
+    embed.add_field(name='/colony', value="""See your colony information. 
                     Use /commands colony to see more colony commands""", inline=False)
 
 
-    embed.add_field(name='##/character', value="""See your character information. 
+    embed.add_field(name='/character', value="""See your character information. 
                     Use /commands character to see more character commands""", inline=False)
     
 
