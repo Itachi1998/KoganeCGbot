@@ -46,21 +46,24 @@ class GameMode(enum.IntEnum):
     Q = 4
 
 
+
+# Parent class for the Character and Enemy Subclasses
 class Actor:
 
-    def __init__(self, name, hp, max_hp, attack, defense, speed, xp, cgp,
-                 technique, imbued, equipped):
+    def __init__(self, name: str, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: int, classtype: str)):
         self.name = name
         self.hp = hp
         self.max_hp = max_hp
-        self.attack = attack
-        self.defense = defense
+        self.strength = strength
         self.xp = xp
         self.speed = speed
         self.cgp = cgp
         self.technique = technique
-        self.imbued = imbued
-        self.equipped = equipped
+
+
+    def __repr__(self):
+        return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
+    
         
 
     def fight(self, other):
@@ -216,103 +219,129 @@ class Actor:
                     defense_func = getattr(t, technique.lower())
                     results = defense_func(target, self, attack)
                     return results
+                
+    
+        def use_cursed_tool(self, tool: dict, **kwargs):
+                pass
         
+        def domain(self, **kwargs):
+             pass
+     
+
+
+
+
 class Enemy(Actor):
 
-    def __init__(self, name, hp, max_hp, attack, defense, speed, xp, cgp,
-                 technique, imbued, killed, equipped, timer):
-        super().__init__(name, hp, max_hp, attack, defense, speed, xp, cgp,
-                         technique, imbued, equipped)
-        self.enemy = self.__class__.__name__
+    def __init__(self, name: str, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: dict,killed: bool, timer: int, colony: int, equipped: dict):
+        super().__init__(name, hp, max_hp, strength, speed, xp, cgp,
+                         technique)
         self.name = name
+        self. hp = hp
+        self.max_hp = max_hp
         self.killed = killed
         self.timer = timer
-        
-    def to_dict(self):
-        diction = {
-            'name': self.name,
-            'hp': self.hp,
-            'max_hp': self.max_hp,
-            'attack': self.attack,
-            'defense': self.defense,
-            'speed': self.speed,
-            'xp': self.xp,
-            'cgp': self.cgp,
-            'technique': self.technique,
-            'imbued': self.imbued,
-            'killed': self.killed,
-            'equipped': self.equipped,
-            'timer': self.timer
-        }
-        return diction
+        self.strength = strength
+        self.speed = speed
+        self.equipped = equipped
+        self.colony = colony
+        self.technique = technique
+    
+    def __repr__(self):
+        return f"Enemy: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
+
+    
 
 
 class Character(Actor):
     level_cap = 200
-    def __init__(self, name, hp, max_hp, attack, defense, speed, xp, cgp,
-                 technique, imbued, ce, max_ce, level, ct_level, inventory, equipment, mode, user_id, skp, enemy, HR, RCT, colony, victory_msg, shiki, spirits, souls, rules, vows, tools, luck):
+    def __init__(self, 
+                 name: str, 
+                 hp: int, 
+                 max_hp: int,
+                strength: int, 
+                speed: int, 
+                xp: int, 
+                cgp: int, 
+                technique: dict,  
+                timer: int, 
+                colony: int, 
+                inventory: list, 
+                equipped: list, 
+                status: int, 
+                user_id: int, 
+                skp: int, 
+                **kwargs):
         super().__init__(name,
                          hp,
                          max_hp,
-                         attack,
-                         defense,
+                         strength,
                          speed,
                          xp,
-                         cgp,
-                         technique,
-                         imbued, equipped=equipment)
-        self.max_ce = max_ce
-        self.ct_level = ct_level
-        self.ce = ce
-        self.level = level
+                         cgp
+                         technique)
+        
+        self.name = name
+        self.hp = hp
+        self.max_hp = max_hp
+        self.strength = strength
+        self.speed = speed
+        self.xp = xp
+        self.cgp = cgp
+        self.technique = technique
+        self.colony = colony
         self.inventory = inventory
-        self.equipment = equipment
-        self.mode = mode
+        self.equipped = equipped
+        self.status = status
         self.user_id = user_id
         self.skp = skp
-        self.enemy = enemy
-        self.HR = HR
-        self.RCT = RCT
-        self.enemy = enemy
-        self.colony = colony
-        self.victory_msg = victory_msg
-        self.shiki = shiki
-        self.spirits = spirits
-        self.souls = souls
-        self.rules = rules
-        self.vows = vows
-        self.luck = luck
-        self.tools = tools
+        self.HR = None
+        self.RCT= None,
+        self.mutant = None,
+        self.curse= None,
+        self.sorcerer= None,
+        self.reincarnated=None
+        self.domain = None
+        self.maximum = None
+        self.fingers = None
+        self.deathpaintings = None
+    
+        if 'domain' in technique['keys']:
+            try:
+                 self.domain = technique['domain']
+
+            except Exception as e:
+                 print(f"Failed to retrieve technique domain {e}")
+
+        if 'HeavenlyRestriction' in technique['keys']:
+             if 'bathub' in technique['HeavenlyRestriction']:
+                    try:
+                        self.HR = True  
+                    except Exception as e:
+                         print(f"Failed to retrieve update HR stats for bathtub {e}")
+             else:                
+                try:
+                    self.HR = True                       
+                    self.speed += technique['HeavenlyRestriction']['speed']
+                    self.strength += technique['HeavenlyRestriction']['strength']
+
+                except Exception as e:            
+                        print(f"Failed to retrieve update HR stats {e}")
+
+        if 'ReverseCursedTechnique' in technique['keys']:
+             try:
+                  if self.level >= technique['ReverseCursedTechnique']['level']:
+                      self.RCT = True                        
+             except:
+                print(f"Failed to retrieve update RCT stats {e}")
+            
 
 
-    def to_dict(self):
-        diction = {
-            'name': self.name,
-            'hp': self.hp,
-            'max_hp': self.max_hp,
-            'attack': self.attack,
-            'defense': self.defense,
-            'speed': self.speed,
-            'xp': self.xp,
-            'cgp': self.cgp,
-            'technique': self.technique,
-            'imbued': self.imbued,
-            'ce': self.ce,
-            'max_ce': self.max_ce,
-            'level': self.level,
-            'ct_level': self.ct_level,
-            'inventory': self.inventory,
-            'equipment': self.equipment,
-            'mode': self.mode,
-            'user_id': self.user_id,
-            'skp': self.skp,
-            'enemy': self.enemy,
-            'HR': self.HR,
-            'RCT': self.RCT,
-            'colony': self.colony,
-            'victory_msg': self.victory_msg, 'shiki':self.shiki, 'spirits': self.spirits, 'souls':self.souls, 'stacks': self.stacks, 'charges': self.charges, 'luck': self.luck, 'tools': self.tools
-        }
-        return diction
+    def __repr__(self):
+        return f"Character: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - belonging to user_id: {self.user_id} - in colony: {self.colony}"
+    
+        
+
     
     def get_grade(self):
         level = self.level

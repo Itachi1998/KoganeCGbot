@@ -74,8 +74,7 @@ async def help(interaction: discord.Interaction):
                         Use ,command_help character to view character commands!')""", inline=False)
         await interaction.response.send_message(embed=embed)
     except Exception as e:
-        print(f'Error sending help message: {e}')
-
+        print(f'Error sending help message: {e})')
 
 bot.run(token)
 
