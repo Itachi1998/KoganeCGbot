@@ -47,14 +47,24 @@ class Utils_cog(commands.Cog):
             if command is None:
                 await ctx.send('Command not found')
             else:
-                embed = discord.Embed(title='PVE Command', description="""Will display the PVE lobby along with its buttons: 
+                embed = discord.Embed(title='PVE Command', description="""Will create a Player vs Environment lobby in the colony with the following buttons:
                                     - Start `will start the game if all players are ready!`
                                     - Lock `will lock the lobby!`
                                     - Invite `will prompt the invite screen`
                                     - Disband `will disband the lobby if you are the lobby owner`
                                     - Leave `will leave the lobby if you are not the owner. If the owner leaves as the last person the lobby will disband. If the owner leaves with others still in the lobby it will remain open, and a new owner will be chosen.`""", color=0x00ff00)
                 await ctx.send(embed=embed)
-
+    
+    @command_help.command(name='pvp', description="""Starts a Plyer vs Player lobby in the colony with the following buttons:
+                                    - Start `will start the game if all players are ready!`
+                                    - Lock `will lock the lobby!`
+                                    - Invite `will prompt the invite screen`
+                                    - Disband `will disband the lobby if you are the lobby owner`
+                                    - Leave `will leave the lobby if you are not the owner. If the owner leaves as the last person the lobby will disband. If the owner leaves with others still in the lobby it will remain open, and a new owner will be chosen.`
+                                    - Ready `will mark you as ready to start the game.`
+                                    - Unready `will mark you as not ready to start the game.`
+                                    - Kick `will kick a player from your lobby if you're the owner`
+                                    """)
 
 
 async def setup(bot):
