@@ -305,6 +305,7 @@ class Character(Actor):
         self.maximum = None
         self.fingers = None
         self.deathpaintings = None
+        self.imbued = None
     
         if 'domain' in technique['keys']:
             try:
@@ -313,8 +314,8 @@ class Character(Actor):
             except Exception as e:
                  print(f"Failed to retrieve technique domain {e}")
 
-        if 'HeavenlyRestriction' in technique['keys']:
-             if 'bathub' in technique['HeavenlyRestriction']:
+        if 'heavenlyrestriction' in technique['keys']:
+             if 'bathub' in technique['heavenlyrestriction']['keys']:
                     try:
                         self.HR = True  
                     except Exception as e:
@@ -328,7 +329,7 @@ class Character(Actor):
                 except Exception as e:            
                         print(f"Failed to retrieve update HR stats {e}")
 
-        if 'ReverseCursedTechnique' in technique['keys']:
+        if 'RCT' in technique['keys']:
              try:
                   if self.level >= technique['ReverseCursedTechnique']['level']:
                       self.RCT = True                        
@@ -361,460 +362,643 @@ class Character(Actor):
             self.inventory.append(item)
             self.equipment.remove(item)
             self.save_to_db()
+            return True
         else:
             print("You don't have that item!")
+            return False
 
     def equip(self, item):
             if item in self.inventory:
                 self.inventory.remove(item)
                 self.equipment.append(item)
                 self.save_to_db()
+                return True
             else:
                 print("Item not owned")
+                return False
+
+
+    #spawn a shikigami, curse, mechabot, or ultimate mechabot
+    def spawn(self, **kwargs):
+        self.curse = []
+        self.shikigami = []
+        self.mechabot = []
+        self.ultimateMechabot = []
+
+        for k, v in kwargs.items():
+            try:
+                if k == 'Shikigami':
+                    self.shikigami.append([{k:v}])
+                    return True
+                if k == 'Curse':
+                    self.curse.append([{k:v}])
+                    return True
+                if k == 'Mechabot':
+                    self.mechabot.append([{k:v}])
+                    return True
+                if k == 'UltimateMechabot':
+                    self.ultimateMechabot.append([{k:v}])
+                    return True
+                if k == 'ShadowInventory':
+                    self.inventory.append({k:v})
+                    return True
+                self.save_to_db()
+
+            except Exception as e:
+                print(f"Failed to spawn {k} {e} due to {e}")
+                return False
+        
+            
+            
 
     def level_up(self, xp_needed):
+
         if self.level >= self.level_cap:
             self.level = self.level_cap
             self.save_to_db()
-            return (True, self.level)
-        
+            return (False, self.level, self.xp) #if the player has reached the level cap, they will no longer level up, and will no longer gain skill points
+
         if self.xp >= xp_needed:
             while self.xp >= xp_needed:
-                    self.level += 1
-                    if self.level < 10:
-                        self.skp += 2
-                    if self.level > 10: 
-                        self.skp += 4
-                    if self.level > 50: # 200 skill points
-                        self.skp += 6
-                    if self.level > 100: # 500 skill points
-                        self.skp += 8
-                    if self.level > 180: # 1940
-                        self.skp += 10
-                    grade = self.get_grade()
-                    if self.user_id !=  677718946270543882 or 1164740316738355313:
-                        if 'Grade 4' in grade:
-                                self.ct_level = 1
-                        if 'Grade 3' in grade:
-                                self.ct_level = 2
-                        if 'Grade 2' in grade:
-                                self.ct_level = 3
-                        if 'Grade 1' in grade:
-                                self.ct_level = 4
-                        if 'Special Grade' in grade:
-                                self.ct_level = 5
-                    else:
-                        self.ct_level = 5
                     
-                    ready, next_xp = self.ready_level_up()
-                    xp_needed = next_xp
+                    self.level += 1 # If the players xp is greater than or equal to the xp needed to level up, they will level up
+
+                    if self.level < 10: # If the players level is under 10, they will gain 2 skill points 
+                        self.skp += 2
+                    if self.level > 10: # If the players level is over 10, they will gain 4 skill points
+                        self.skp += 4
+                    if self.level > 50: # If the players level is over 50, they will gain 6 skill points
+                        self.skp += 6
+                    if self.level > 100: # If the players level is over 100, they will gain 8 skill points
+                        self.skp += 8
+                    if self.level > 180: # If the players level is over 180, they will gain 10 skill points per level
+                        self.skp += 10
+                    
+                    grade = self.get_grade() # Use the calss method get_grade to determine the players grade
+
+                    # Set player CT level per grade
+
+                    if 'Grade 4' in grade:
+                                self.ct_level = 1
+                    if 'Grade 3' in grade:
+                                self.ct_level = 2
+                    if 'Grade 2' in grade:
+                                self.ct_level = 3
+                    if 'Grade 1' in grade:
+                                self.ct_level = 4
+                    if 'Special Grade' in grade:
+                                self.ct_level = 5
+
                     self.save_to_db()
+                    xp_needed = self.ready_level_up()[1]
+                    if self.xp >= xp_needed:
+                        continue
+                    else:
+                        break
             return (True, self.level, self.skp)
-        return (False, self.level, self.skp)
+        return (False, self.level, self.xp)
         
-    def ready_level_up(self):
+    def ready_level_up(self): # Method that returns xp needed for next level up
         level_cap = self.level_cap
         if self.level == level_cap:
-            return (False, 0)
-        xp_needed = (self.level) * 5
-        if self.level > 10:
-            xp_needed = self.level * 10
+            return (False, self.level)
+        xp_needed = self.level * 5 # Start with the base XP needed being the players level multiplied by 5
+        if self.level > 10: 
+            xp_needed = self.level * 10 
         if self.level > 20:
-            xp_needed = (self.level) * 15
+            xp_needed = (self.level) * 12 
         if self.level > 30:
-            xp_needed = (self.level) * 20
+            xp_needed = (self.level) * 14 
         if self.level > 40:
-            xp_needed = (self.level) * 25
+            xp_needed = (self.level) * 16 
         if self.level > 50:
-            xp_needed = (self.level) * 30
+            xp_needed = (self.level) * 18 
         if self.level > 60:
-            xp_needed = (self.level) * 40
+            xp_needed = (self.level) * 20
         if self.level > 80:
-            xp_needed = (self.level) * 50           
+            xp_needed = (self.level) * 22
+        if self.level > 100:
+            xp_needed = (self.level) * 24
+        if self.level > 120:
+            xp_needed = (self.level) * 26
+        if self.level > 140:
+            xp_needed = (self.level) * 28
+        if self.level > 160:
+            xp_needed = (self.level) * 30
+        if self.level > 180:
+            xp_needed = (self.level) * 32
         return (self.xp >= xp_needed, xp_needed)
 
     def save_to_db(self):
-        save_player(self)
+        save_player(self) #the imported save_player method from the database file
 
-    def run(self, target):
-        if self.speed > target.speed:
-            chance = random.randint(0, (200 - (self.speed + self.imbued - target.speed + target.imbued)))
+    def run(self, target: dict):
+        self_speed = self.speed + self.imbued  #add the players imbued speed to their speed
+        target_speed = target.speed + target.imbued #add the targets imbued speed to their speed
+        if self_speed > target_speed:
+            chance = random.randint(0, (200 - (self_speed - target_speed)))
             if chance < 5:
                 return False
             else:
                 return True
 
     def pve(self, colony_id: int) -> Union[List['Enemy'], 'Enemy']:
-        colony = dynamo.read_colony(colony_id)
-        enemies = colony['ai'][0]
-        enemy = None
-        enemy_list = []
-        for e in enemies:
-            name = e.replace(" ", "")
-            for i in Enemy.__subclasses__():
-                if i.__name__.lower() == name.lower(): # Corrected a match condition
-                    if i.min_level <= self.level and i.min_level >= self.level-100:
-                        enemy_list.append(i())
-        enemies = []
-        enemy = random.choice(enemy_list)           
-        if enemy.name == "Grade 4":
-            enemies = [deepcopy(enemy), deepcopy(enemy), deepcopy(enemy), deepcopy(enemy), deepcopy(enemy)]
-        elif enemy.name == "Grade 3":
-            enemies = [deepcopy(enemy), deepcopy(enemy), deepcopy(enemy), deepcopy(enemy)]
-        elif enemy.name == "Grade 2":
-            enemies = [deepcopy(enemy), deepcopy(enemy), deepcopy(enemy)]
-        elif enemy.name == "Grade 1":
-            enemies = [deepcopy(enemy), deepcopy(enemy)]
-        elif enemy.name == "Kechi":
-            eso = Eso()
-            enemies = [deepcopy(enemy),deepcopy(eso)]
-        elif enemy.name == "Eso":
-            kechi = Kechi()
-            enemies = [deepcopy(enemy), deepcopy(kechi)]
-        elif enemy.name == "Mahito" or "Jogo" or "Dagon" or "Hanami":
-            list = [1, 2, 3, 4]
-            choice = random.choice(list)
-            if choice == 1:
-                 enemies = [deepcopy(enemy)]
-            if choice == 2:
-                if enemy.name == 'Mahito':
-                    enemies = [deepcopy(enemy), deepcopy(Jogo())]
-                if enemies == 'Hanami':
-                    enemies = [deepcopy(enemy), deepcopy(Jogo())]
-                if enemy.name == 'Jogo':
-                        enemies = [deepcopy(enemy), deepcopy(Hanami())]
-                if enemy.name == "Dagon":
-                    enemies = [deepcopy(enemy), deepcopy(Jogo())]
-            if choice == 3:
-                if enemy.name == 'Mahito':
-                    enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami())]
-                if enemy.name == 'Hanami':
-                    enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Dagon())]
-                if enemy.name == 'Jogo':
-                        enemies = [deepcopy(enemy), deepcopy(Hanami()), deepcopy(Mahito())]
-                if enemy.name == "Dagon":
-                    enemy_list = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami())]
-            if choice == 4:
-                if enemy.name == 'Mahito':
-                    enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami()), deepcopy(Dagon())]
-                if enemy.name == 'Hanami':
-                    enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Dagon()), deepcopy(Mahito())]
-                if enemy.name == 'Jogo':
-                        enemies = [deepcopy(enemy), deepcopy(Hanami()), deepcopy(Mahito()), deepcopy(Dagon())]
-                if enemy.name == "Dagon":
-                    enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami()), deepcopy(Mahito())]
+        pass
+    #TODO implement the pve method to return a list of enemies or a single enemy based on the players level and colony_id and colony events
+        # colony = dynamo.read_colony(colony_id)
+        # enemies = colony['ai'][0]
+        # enemy = None
+        # enemy_list = []
+        # for e in enemies:
+        #     name = e.replace(" ", "")
+        #     for i in Enemy.__subclasses__():
+        #         if i.__name__.lower() == name.lower(): # Corrected a match condition
+        #             if i.min_level <= self.level and i.min_level >= self.level-100:
+        #                 enemy_list.append(i())
+        # enemies = []
+        # enemy = random.choice(enemy_list)           
+        # if enemy.name == "Grade 4":
+        #     enemies = [deepcopy(enemy), deepcopy(enemy), deepcopy(enemy), deepcopy(enemy), deepcopy(enemy)]
+        # elif enemy.name == "Grade 3":
+        #     enemies = [deepcopy(enemy), deepcopy(enemy), deepcopy(enemy), deepcopy(enemy)]
+        # elif enemy.name == "Grade 2":
+        #     enemies = [deepcopy(enemy), deepcopy(enemy), deepcopy(enemy)]
+        # elif enemy.name == "Grade 1":
+        #     enemies = [deepcopy(enemy), deepcopy(enemy)]
+        # elif enemy.name == "Kechi":
+        #     eso = Eso()
+        #     enemies = [deepcopy(enemy),deepcopy(eso)]
+        # elif enemy.name == "Eso":
+        #     kechi = Kechi()
+        #     enemies = [deepcopy(enemy), deepcopy(kechi)]
+        # elif enemy.name == "Mahito" or "Jogo" or "Dagon" or "Hanami":
+        #     list = [1, 2, 3, 4]
+        #     choice = random.choice(list)
+        #     if choice == 1:
+        #          enemies = [deepcopy(enemy)]
+        #     if choice == 2:
+        #         if enemy.name == 'Mahito':
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo())]
+        #         if enemies == 'Hanami':
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo())]
+        #         if enemy.name == 'Jogo':
+        #                 enemies = [deepcopy(enemy), deepcopy(Hanami())]
+        #         if enemy.name == "Dagon":
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo())]
+        #     if choice == 3:
+        #         if enemy.name == 'Mahito':
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami())]
+        #         if enemy.name == 'Hanami':
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Dagon())]
+        #         if enemy.name == 'Jogo':
+        #                 enemies = [deepcopy(enemy), deepcopy(Hanami()), deepcopy(Mahito())]
+        #         if enemy.name == "Dagon":
+        #             enemy_list = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami())]
+        #     if choice == 4:
+        #         if enemy.name == 'Mahito':
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami()), deepcopy(Dagon())]
+        #         if enemy.name == 'Hanami':
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Dagon()), deepcopy(Mahito())]
+        #         if enemy.name == 'Jogo':
+        #                 enemies = [deepcopy(enemy), deepcopy(Hanami()), deepcopy(Mahito()), deepcopy(Dagon())]
+        #         if enemy.name == "Dagon":
+        #             enemies = [deepcopy(enemy), deepcopy(Jogo()), deepcopy(Hanami()), deepcopy(Mahito())]
 
-        elif enemy.name == "King Of Curses":
-            uraume = Uraume()
-            list = [1, 2]
-            choice = random.choice(list)
-            if choice == 1:
-                enemies = [deepcopy(enemy), deepcopy(uraume)]
+        # elif enemy.name == "King Of Curses":
+        #     uraume = Uraume()
+        #     list = [1, 2]
+        #     choice = random.choice(list)
+        #     if choice == 1:
+        #         enemies = [deepcopy(enemy), deepcopy(uraume)]
                 
-        else:
+        # else:
             
-            enemies = [enemy]
+        #     enemies = [enemy]
             
-        return enemies
+        # return enemies
         
         
         
 
-class Grade4(Enemy):
-    min_level = 1
-    
-    def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Grade 4")
-        self.defense=list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(
-            name="Grade 4",
-            hp=25,
-            max_hp=25,
-            attack=20,
-            defense=self.defense,
-            speed=20,
-            xp=5,
-            cgp=2,
-            technique=self.t.to_dict(),
-            imbued=20,
-            killed=False,
-            equipped=[], timer=0)
-
-
-class Grade3(Enemy):
+class Grade4_BugFly(Enemy):
     min_level = 1
     def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Grade 3")
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(
-            name="Grade 3",
-            hp=30,
-            max_hp=30,
-            attack=34,
-            defense=self.defense,
-            speed=32,
-            xp=5,
-            cgp=2,
-            technique=self.t.to_dict(),
-            imbued=40,
-            killed=False,
-            equipped=[], timer=0)
+        #t=technique
+        super.init(
+            name="BugFly", 
+            hp=20, 
+            max_hp=20, 
+            strength=10, 
+            speed=40, 
+            xp=10, 
+            cgp=5, 
+            technique=t, 
+            killed=False, 
+            timer=1, 
+            colony=None, 
+            equipped=[], 
+            avatar=None, 
+            quantity=random.choice([1, 2, 3, 4, 5]) * 10, 
+            ce=20, 
+            max_ce=20)
 
 
-class Grade2(Enemy):
-            min_level = 5
-            
-            def __init__(self):
-                self.t = old_techniques.get_enemy_cursed_technique("Grade 2")
-                self.defense = list(self.t.defense.keys())
-                if len(self.defense) > 1:
-                    self.defense = random.choice(self.defense)
-                else:
-                    self.defense = self.defense[0]
-                super().__init__(
-                    name="Grade 2",
-                    hp=50,
-                    max_hp=50,
-                    attack=40,
-                    defense=self.defense,
-                    speed=40,
-                    xp=10,
-                    cgp=2,
-                    technique=self.t.to_dict(),
-                    imbued=4,
-                    killed=False,
-                    equipped=[], timer=0)
-
-class Grade1(Enemy):
-    min_level = 5
-    
+class  Grade4_FloatJelly(Enemy):
+    min_level = 1
     def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Grade 1")
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(
-            name="Grade 1",
-            hp=100,
-            max_hp=100,
-            attack=60,
-            defense=self.defense,
-            speed=100,
-            xp=10,
-            cgp=2,
-            technique=self.t.to_dict(),
-            imbued=4,
-            killed=False,
-            equipped=[], timer=3)
+        super.init(
+            name="FloatJelly", 
+            hp=30, 
+            max_hp=30, 
+            strength=20, 
+            speed=10, 
+            xp=10, 
+            cgp=5, 
+            technique=FloatJelly,  
+            killed=False, 
+            timer=1, 
+            colony=None, 
+            equipped=[], 
+            avatar=None, 
+            quantity=random.choice([1, 2, 3, 4, 5]) * 10, 
+            poisonous=(True, 2), 
+            ce=20, 
+            max_ce=20)
 
-
-class FingerBearer(Enemy):
-            min_level = 10
-            
-            def __init__(self):
-                self.t = old_techniques.get_enemy_cursed_technique("Finger Bearer")
-                self.defense = list(self.t.defense.keys())
-                if len(self.defense) > 1:
-                    self.defense = random.choice(self.defense)
-                else:
-                    self.defense = self.defense[0]
-                super().__init__(
-                    name="Finger Bearer",
-                    hp=100,
-                    max_hp=100,
-                    attack=20,
-                    defense=self.defense,
-                    speed=50,
-                    xp=10,
-                    cgp=2,
-                    technique=self.t.to_dict(),
-                    imbued=10,
-                    killed=False,
-                    equipped=[], timer=3)
-                
-
-
-class Kechi(Enemy):
-    min_level = 15
     
+class Grade4_FlyMouth(Enemy):
+    min_level= 1
     def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Kechi")
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(
-            name="Kechi",
-            hp=120,
-            max_hp=120,
-            attack=80,
-            defense=self.defense,
-            speed=130,
-            xp=20,
-            cgp=5,
-            technique=self.t.to_dict(),
-            imbued=120,
-            killed=False,
-            equipped=[], timer=20)
+        super.init(
+                name="Flymouth curse"
+                max_hp=40, 
+                strength=30, 
+                speed=30, 
+                xp=10, 
+                cgp=5, 
+                technique=t,  
+                killed=False, 
+                timer=1, 
+                colony=1, 
+                equipped=[], 
+                avatar=None, 
+                quantity=random.choice([1, 2, 3, 4, 5]) * 10, 
+                ce=20, 
+                max_ce=20)
 
 
-class Eso(Enemy):
-    min_level = 15
-    
+class Grade3_HandBear(Enemy):
+    min_level = 1
     def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Eso")
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(
-            name="Eso",
-            hp=120,
-            max_hp=120,
-            attack=80,
-            defense=self.defense,
-            speed=80,
-            xp=20,
-            cgp=5,
-            technique=self.t.to_dict(),
-            imbued=120,
-            killed=False,
-            equipped=[], timer=20)
+        super.init(
+            name="Barehand curse", 
+            hp=150,
+            max_hp=150, 
+            strength=60, 
+            speed=200, 
+            xp=20, 
+            cgp=5, 
+            technique=Handbear, 
+            killed=False, 
+            timer=20, 
+            colony=None, 
+            equipped=[],
+            avatar=None, 
+            ce=50, 
+            max_ce=50
+            )
+
+class Grade3_Furrpede(Enemy):
+    min_level = 1
+    def __init__(self)
+      super.init(
+        name="Furrpede curse", 
+        hp=150, 
+        max_hp=150, 
+        strength=80, 
+        speed=150, 
+        xp=20, 
+        cgp=5, 
+        technique=Furrpede, 
+        imbued=150, 
+        killed=False, 
+        timer=20, 
+        colony=None, 
+        equipped=[], 
+        avatar=None, 
+        ce=50, 
+        max_ce=50
+        )
+
+class Grade3_AnxietyCurse(Enemy):
+    min_level = 1
+    def __init__(self):
+        super.init(
+            name="Anxiety Curse", 
+            hp=200, 
+            max_hp=200, 
+            strength=100, 
+            speed=100, 
+            xp=20, 
+            cgp=5, 
+            technique=t, 
+            imbued=150, 
+            killed=False, 
+            timer=20, 
+            colony=None, 
+            equipped=[], 
+            avatar=None, 
+            ce=50, 
+            max_ce=50)
+
+class Grade2_StingerSpore(Enemy):
+    min_level = 1
+    def __init__(self):
+        super.init(
+            name="Stinger-Spore Curse", 
+            hp=300, 
+            max_hp=300, 
+            strength=150, 
+            speed=200, 
+            xp=30, 
+            cgp=5, 
+            technique=StingerSpore, 
+            imbued=200, 
+            killed=False, 
+            timer=60, 
+            colony=1, 
+            equipped=[], 
+            avatar=None, 
+            ce=100, 
+            max_ce=100, 
+            poisounous=(True, 10)
+            )
 
 
-class Choso(Enemy):
-            min_level = 20
-            
-            def __init__(self):
-                self.t = old_techniques.get_enemy_cursed_technique("Choso")
-                self.defense = list(self.t.defense.keys())
-                if len(self.defense) > 1:
-                    self.defense = random.choice(self.defense)
-                else:
-                    self.defense = self.defense[0]
-                super().__init__(
-                    name="Choso",
-                    hp=200,
-                    max_hp=200,
-                    attack=150,
-                    defense=self.defense,
-                    speed=150,
-                    xp=30,
-                    cgp=5,
-                    technique=self.t.to_dict(),
-                    imbued=200,
-                    killed=False,
-                    equipped=[], timer=60)
+class Grade2_Monkeybrain(Enemy):
+    min_level = 1
+    def __init__(self):
+        super.init(
+            name="MonkeyBrain", 
+            hp=300, 
+            max_hp=300, 
+            strength=150, 
+            speed=200, 
+            xp=30, 
+            cgp=5, 
+            technique=Monkeybrain, 
+            imbued=200, 
+            killed=False, 
+            timer=60, 
+            colony=None, 
+            equipped=[], 
+            avatar=None, 
+            ce=100, 
+            max_ce=100
+            )
 
 
-class Jogo(Enemy):
+class Grade1_OrbMaster(Enemy):
+    min_level = 1
+    def __init__(self):
+        super.init(
+            name="OrbMaster", 
+            hp=400, 
+            max_hp=400, 
+            strength=300, 
+            speed=500, 
+            xp=40, 
+            cgp=5, 
+            technique=Orbmaster,  
+            killed=False, 
+            timer=60, 
+            colony=1, 
+            equipped=[], 
+            avatar=None, 
+            ce=150, 
+            max_ce=150
+            )
+
+class Grade1_Charger(Enemy):
+    min_level = 1
+    def __init__(self):
+        super.init(
+            name="Charger", 
+            hp=400,
+            max_hp=400, 
+            strength=400, 
+            speed=600, 
+            xp=40, 
+            cgp=5, 
+            technique=Charger, 
+            killed=False, 
+            timer=60, 
+            colony=1, 
+            equipped=[], 
+            avatar=None, 
+            ce=150, 
+            max_ce=150
+            )
+
+class SpecialGrade_FingerBearer(Enemy):
+    min_level = 1
+    def __init__(self):
+        super.init(
+             name="Finger Bearer",
+               hp=600, 
+               max_hp=600, 
+               strength=800, 
+               speed=700, 
+               xp=50, 
+               cgp=5, 
+               technique=Fingerbear,  
+               killed=False, 
+               timer=60, 
+               colony=None, 
+               equipped=[{'finger':1}], 
+               avatar=None,
+               ce=200, 
+               max_ce=200
+               )
+
+
+class SpecialGrade_Obstacle(Enemy):
+    min_level = 1
+    def __init__(self):
+        super.init(
+             name="Obstacle",
+               hp=900, 
+               max_hp=900, 
+               strength=300, 
+               speed=600, 
+               xp=50, 
+               cgp=5, 
+               technique=ObstacleRemoval,  
+               killed=False, 
+               timer=60, 
+               colony=None, 
+               avatar=None,
+               ce=300, 
+               max_ce=300
+               )
+
+class SpecialGrade_DisasterFlame(Enemy):
         min_level = 30
-       
         def __init__(self):
-            self.t = old_techniques.get_enemy_cursed_technique("Jogo")
-            self.defense = list(self.t.defense.keys())
-            if len(self.defense) > 1:
-                self.defense = random.choice(self.defense)
-            else:
-                self.defense = self.defense[0]
             super().__init__(
-            name="Jogo",
-            hp=200,
-            max_hp=200,
-            attack=350,
-            defense=self.defense,
-            speed=300,
-            xp=50,
-            cgp=2,
-            technique=self.t.to_dict(),
-            imbued=300,
+            name="Distaster Flame Curse",
+            hp=800,
+            max_hp=800,
+            strength=900,
+            speed=900,
+            xp=200,
+            cgp=5,
+            technique=DisasterFire,
             killed=False,
-            equipped=[], timer=60)
+            equipped=[], 
+            killcount=[], 
+            avatar=None,
+            colony=None,
+            ce=600,
+            max_ce=600,
+            domain=True)
 
 
-class Hanami(Enemy):
-    min_level = 20
-    
-    def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Hanami")
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(
-        name="Hanami",
-        hp=300,
-        max_hp=300,
-        attack=200,
-        defense=self.defense,
-        speed=200,
-        xp=50,
-        cgp=2,
-        technique=self.t.to_dict(),
-        imbued=300,
-        killed=False,
-        equipped=[], timer=60)
+class SpecialGrade_NatureSpirit(Enemy):
+        min_level = 30
+        def __init__(self):
+            super().__init__(
+            name="Spirit of Nature",
+            hp=1500,
+            max_hp=1500,
+            strength=700,
+            speed=700,
+            xp=200,
+            cgp=5,
+            technique=NatureManipulation,
+            killed=False,
+            equipped=[], 
+            killcount=[], 
+            avatar=None,
+            colony=None,
+            ce=300,
+            max_ce=300,
+            domain=True)
 
-class Dagon(Enemy):
-    min_level = 20
-    
-    def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Dagon")
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(
-                        name="Dagon",
-                        hp=400,
-                        max_hp=400,
-                        attack=150,
-                        defense=self.defense,
-                        speed=150,
-                        xp=50,
-                        cgp=2,
-                        technique=self.t.to_dict(),
-                        imbued=300,
-                        killed=False,
-                        equipped=[], timer=60)
+
+class SpecialGrade_TideCurse(Enemy):
+        min_level = 30
+        def __init__(self):
+            super().__init__(
+            name="Disaster Tides Curse",
+            hp=1500,
+            max_hp=1500,
+            strength=400,
+            speed=400,
+            xp=200,
+            cgp=5,
+            technique=DisasterTides,
+            killed=False,
+            equipped=[], 
+            killcount=[],
+            shikigami=[], 
+            avatar=None,
+            colony=None,
+            ce=500,
+            max_ce=500,
+            domain=True)
+
+
+
+
+class SpecialGrade_DeathSpirit(Enemy):
+        min_level = 30
+        def __init__(self):
+            super().__init__(
+            name="Disaster Human Curse",
+            hp=1500,
+            max_hp=1500,
+            strength=400,
+            speed=400,
+            xp=200,
+            cgp=5,
+            technique=DisasterTies,
+            killed=False,
+            equipped=[], 
+            killcount=[],
+            shikigami=[], 
+            avatar=None,
+            colony=None,
+            ce=500,
+            max_ce=8500,
+            domain=True)
+
+
+
+
+
+
+class SpecialGrade_ThreeFingerSukuna():
+     min_level = 30
+     def __init__(self):
+            super().__init__(
+            name="King of Curses: 3 Fingers",
+            hp=1200,
+            max_hp=1200,
+            strength=1000,
+            speed=1000,
+            xp=500,
+            cgp=5,
+            technique=Shrine,
+            killed=False,
+            equipped=[{'fingers': 3}], 
+            killcount=[{'killed' : []}],
+            shikigami=[], 
+            avatar=None,
+            colony=None,
+            ce=1000,
+            max_ce=1000,
+            domain=True
+            )
+
+class SpecualGrade_Mahito(Enemy):
+                        min_level = 30
+                        super().__init__(
+                                name="Disaster Human Curse",
+                                hp=1000,
+                                max_hp=1000,
+                                strength=1000,
+                                speed=1000,
+                                xp=600,
+                                cgp=5,
+                                technique="Idle Transfiguration",
+                                imbued=80,
+                                killed=False,
+                                equipped=[],
+                                inventory=[]
+                                timer=100)
+                        
+
 
 class Toji(Enemy):
             min_level = 80
-            
             def __init__(self):
-                self.t = old_techniques.get_enemy_cursed_technique("Toji")
-                self.defense = list(self.t.defense.keys())
-                if len(self.defense) > 1:
-                    self.defense = random.choice(self.defense)
-                else:
-                    self.defense = self.defense[0]
                 super().__init__(
                     name="Toji",
-                    hp=400,
-                    max_hp=400,
-                    attack=350,
-                    defense=self.defense,
-                    speed=350,
-                    xp=150,
+                    hp=900,
+                    max_hp=900,
+                    strength=1500,
+                    speed=2000,
+                    xp=700,
                     cgp=5,
-                    technique=self.t.to_dict(),
-                    imbued=0,
+                    technique=PhysicalRestriction,
+                    colony=None,
                     killed=False,
-                    equipped=['Eternal Chain'], timer=90)
+                    equipped=['Eternal Chain', 'ISOH'], 
+                    timer=90, 
+                    antidomain=True
+                    )
+
 
 
 class Reggie(Enemy):
@@ -865,29 +1049,7 @@ class Uro(Enemy):
                         killed=False,
                         equipped=[], timer=80)
 
-class Mahito(Enemy):
-                        min_level = 50
-                       
-                        def __init__(self):
-                            self.t = old_techniques.get_enemy_cursed_technique("Mahito")
-                            self.defense = list(self.t.defense.keys())
-                            if len(self.defense) > 1:
-                                self.defense = random.choice(self.defense)
-                            else:
-                                self.defense = self.defense[0]
-                            super().__init__(
-                                name="Mahito",
-                                hp=300,
-                                max_hp=300,
-                                attack=150,
-                                defense=self.defense,
-                                speed=250,
-                                xp=150,
-                                cgp=2,
-                                technique=self.t.to_dict(),
-                                imbued=80,
-                                killed=False,
-                                equipped=[], timer=100)
+
 
 
 class KingOfCurses(Enemy):
