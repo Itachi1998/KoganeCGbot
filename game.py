@@ -592,7 +592,7 @@ class Grade4_BugFly(Enemy):
             speed=40, 
             xp=10, 
             cgp=5, 
-            technique=t, 
+            technique=None,
             killed=False, 
             timer=1, 
             colony=None, 
@@ -614,7 +614,7 @@ class  Grade4_FloatJelly(Enemy):
             speed=10, 
             xp=10, 
             cgp=5, 
-            technique=FloatJelly,  
+            technique=Sting,
             killed=False, 
             timer=1, 
             colony=None, 
@@ -636,18 +636,18 @@ class Grade4_FlyMouth(Enemy):
                 speed=30, 
                 xp=10, 
                 cgp=5, 
-                technique=t,  
+                technique=None,
                 killed=False, 
                 timer=1, 
                 colony=1, 
                 equipped=[], 
                 avatar=None, 
-                quantity=random.choice([1, 2, 3, 4, 5]) * 10, 
+                quantity=random.choice([0.5, 1, 2]) * 10,
                 ce=20, 
                 max_ce=20)
 
 
-class Grade3_HandBear(Enemy):
+class Grade3_Hermithand(Enemy):
     min_level = 1
     def __init__(self):
         super.init(
@@ -690,18 +690,18 @@ class Grade3_Furrpede(Enemy):
         max_ce=50
         )
 
-class Grade3_AnxietyCurse(Enemy):
+class Grade3_AnxiousEars(Enemy):
     min_level = 1
     def __init__(self):
         super.init(
-            name="Anxiety Curse", 
+            name="AnxiousEars"
             hp=200, 
             max_hp=200, 
             strength=100, 
             speed=100, 
             xp=20, 
             cgp=5, 
-            technique=t, 
+            technique=AudioManipulation,
             imbued=150, 
             killed=False, 
             timer=20, 
@@ -715,7 +715,7 @@ class Grade2_StingerSpore(Enemy):
     min_level = 1
     def __init__(self):
         super.init(
-            name="Stinger-Spore Curse", 
+            name="Stinger-Spore", 
             hp=300, 
             max_hp=300, 
             strength=150, 
@@ -790,7 +790,7 @@ class Grade1_Charger(Enemy):
             speed=600, 
             xp=40, 
             cgp=5, 
-            technique=Charger, 
+            technique=ElectricCharge,
             killed=False, 
             timer=60, 
             colony=1, 
@@ -869,8 +869,8 @@ class SpecialGrade_NatureSpirit(Enemy):
         def __init__(self):
             super().__init__(
             name="Spirit of Nature",
-            hp=1500,
-            max_hp=1500,
+            hp=1200,
+            max_hp=1200,
             strength=700,
             speed=700,
             xp=200,
@@ -922,7 +922,7 @@ class SpecialGrade_DeathSpirit(Enemy):
             speed=400,
             xp=200,
             cgp=5,
-            technique=DisasterTies,
+            technique=SoulManipulation,
             killed=False,
             equipped=[], 
             killcount=[],
@@ -958,26 +958,9 @@ class SpecialGrade_ThreeFingerSukuna():
             colony=None,
             ce=1000,
             max_ce=1000,
-            domain=True
+            domain=True, 
+            timer=300
             )
-
-class SpecualGrade_Mahito(Enemy):
-                        min_level = 30
-                        super().__init__(
-                                name="Disaster Human Curse",
-                                hp=1000,
-                                max_hp=1000,
-                                strength=1000,
-                                speed=1000,
-                                xp=600,
-                                cgp=5,
-                                technique="Idle Transfiguration",
-                                imbued=80,
-                                killed=False,
-                                equipped=[],
-                                inventory=[]
-                                timer=100)
-                        
 
 
 class Toji(Enemy):
@@ -995,122 +978,109 @@ class Toji(Enemy):
                     colony=None,
                     killed=False,
                     equipped=['Eternal Chain', 'ISOH'], 
-                    timer=90, 
+                    timer=300,
                     antidomain=True
                     )
 
 
 
 class Reggie(Enemy):
-        min_level = 40
+        min_level = 30
         def __init__(self):
-            self.t = old_techniques.get_enemy_cursed_technique("Reggie")
-            self.defense = list(self.t.defense.keys())
-            if len(self.defense) > 1:
-                self.defense = random.choice(self.defense)
-            else:
-                self.defense = self.defense[0]
             super().__init__(
                 name="Reggie",
-                hp=150,
-                max_hp=150,
-                attack=150,
-                defense=self.defense,
-                speed=250,
-                xp=50,
+                hp=500,
+                max_hp=500,
+                strength=500,
+                speed=800,
+                xp=500,                
                 cgp=5,
-                technique=self.t.to_dict(),
-                imbued=150,
+                technique=Receipts,
                 killed=False,
-                equipped=[], timer=90)
+                equipped=['receipts' : 5000], 
+                timer=300,
+                ce=500,
+                max_ce=500)
 
 
 class Uro(Enemy):
                 min_level = 40
-                
                 def __init__(self):
-                    self.t = old_techniques.get_enemy_cursed_technique("Uro")
-                    self.defense = list(self.t.defense.keys())
-                    if len(self.defense) > 1:
-                        self.defense = random.choice(self.defense)
-                    else:
-                        self.defense = self.defense[0]
                     super().__init__(
                         name="Uro",
-                        hp=250,
-                        max_hp=250,
-                        attack=250,
-                        defense=self.defense,
-                        speed=300,
+                        hp=450,
+                        max_hp=450,
+                        strength=650,
+                        speed=700,
                         xp=100,
                         cgp=5,
-                        technique=self.t.to_dict(),
-                        imbued=30,
+                        technique=SkyManip,
                         killed=False,
-                        equipped=[], timer=80)
+                        equipped=[], 
+                        timer=200,
+                        ce=450,
+                        ce_max=450)
 
 
 
 
-class KingOfCurses(Enemy):
+
+class KingOfCurses(Enemy):                  
                         min_level = 150
-                        
                         def __init__(self):
-                            self.t = old_techniques.get_enemy_cursed_technique("King Of Curses")
-                            self.defense = list(self.t.defense.keys())
-                            if len(self.defense) > 1:
-                                self.defense = random.choice(self.defense)
-                            else:
-                                self.defense = self.defense[0]
+                     
                             super().__init__(
                                 name="King Of Curses",
                                 hp=900,
                                 max_hp=900,
-                                attack=1000,
-                                defense=self.defense,
+                                strength=1000,
                                 speed=900,
                                 xp=200,
                                 cgp=5,
-                                technique=self.t.to_dict(),
-                                imbued=20,
+                                technique=Shrine,
+                              
                                 killed=False,
-                                equipped=[], timer=100)
+                                equipped=[], 
+                                timer=100)
 
 
 class Kenjaku(Enemy):
     min_level = 100
     
     def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Kenjaku")
-        self.defense = random.choice(list(self.t.defense.keys()))
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
+     
         super().__init__(
             name="Kenjaku",
             hp= 700,
             max_hp=700,
-            attack=300,
-            defense=self.defense,
+            strength=300,
             speed=500,
             xp=150,
             cgp=5,
-            technique=self.t.to_dict(),
+            technique=Kenjaku,
             imbued=150,
             killed=False,
-            equipped=[], timer=100)
+            equipped=[], 
+            timer=100
+            )
 
 class Uraume(Enemy):
     min_level = 100
     def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique('Uraume')
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
-        super().__init__(name="Uraume", hp=900, max_hp=900, attack=200, defense=self.defense, speed = 500, xp=150, cgp=5, technique=self.t, imbued=150, killed = False, equipped = [], timer=100)
+        super().__init__(
+            name="Uraume", 
+            hp=900, 
+            max_hp=900, 
+            strength=500,
+            speed = 500, 
+            xp=150, 
+            cgp=5, 
+            technique=Frozen, 
+            imbued=150, 
+            killed = False, 
+            equipped = [], 
+            timer=100
+            )
     
 class Kashimo(Enemy):
     min_level = 100
