@@ -578,12 +578,12 @@ class Character(Actor):
         # return enemies
         
         
+## ENEMY CLASSES 
+## SUBCLASS OF ENEMY CLASS
         
-
 class Grade4_BugFly(Enemy):
     min_level = 1
     def __init__(self):
-        #t=technique
         super.init(
             name="BugFly", 
             hp=20, 
@@ -592,7 +592,7 @@ class Grade4_BugFly(Enemy):
             speed=40, 
             xp=10, 
             cgp=5, 
-            technique=None,
+            technique=Bugyfly,
             killed=False, 
             timer=1, 
             colony=None, 
@@ -614,7 +614,7 @@ class  Grade4_FloatJelly(Enemy):
             speed=10, 
             xp=10, 
             cgp=5, 
-            technique=Sting,
+            technique=FloatJelly,
             killed=False, 
             timer=1, 
             colony=None, 
@@ -636,7 +636,7 @@ class Grade4_FlyMouth(Enemy):
                 speed=30, 
                 xp=10, 
                 cgp=5, 
-                technique=None,
+                technique=Flymouth,
                 killed=False, 
                 timer=1, 
                 colony=1, 
@@ -1083,14 +1083,6 @@ class Uraume(Enemy):
             )
     
 class Kashimo(Enemy):
-    min_level = 100
-    def __init__(self):
-        self.t = old_techniques.get_enemy_cursed_technique("Kashimo")
-        self.defense = list(self.t.defense.keys())
-        if len(self.defense) > 1:
-            self.defense = random.choice(self.defense)
-        else:
-            self.defense = self.defense[0]
         super().__init__(
             name="Kashimo",
             hp=900,
