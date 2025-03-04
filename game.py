@@ -647,18 +647,18 @@ class Grade4_FlyMouth(Enemy):
                 max_ce=20)
 
 
-class Grade3_Hermithand(Enemy):
+class Grade3_Backhand(Enemy):
     min_level = 1
     def __init__(self):
         super.init(
-            name="Barehand curse", 
+            name="Backhand Curse", 
             hp=150,
             max_hp=150, 
             strength=60, 
             speed=200, 
             xp=20, 
             cgp=5, 
-            technique=Handbear, 
+            technique=Backhand, 
             killed=False, 
             timer=20, 
             colony=None, 
@@ -670,7 +670,7 @@ class Grade3_Hermithand(Enemy):
 
 class Grade3_Furrpede(Enemy):
     min_level = 1
-    def __init__(self)
+    def __init__(self):
       super.init(
         name="Furrpede curse", 
         hp=150, 
@@ -694,14 +694,14 @@ class Grade3_AnxiousEars(Enemy):
     min_level = 1
     def __init__(self):
         super.init(
-            name="AnxiousEars"
+            ame="AnxiousEars Curse",
             hp=200, 
             max_hp=200, 
             strength=100, 
             speed=100, 
             xp=20, 
             cgp=5, 
-            technique=AudioManipulation,
+            technique=AnxiousEars,
             imbued=150, 
             killed=False, 
             timer=20, 
@@ -747,7 +747,6 @@ class Grade2_Monkeybrain(Enemy):
             xp=30, 
             cgp=5, 
             technique=Monkeybrain, 
-            imbued=200, 
             killed=False, 
             timer=60, 
             colony=None, 
@@ -854,7 +853,8 @@ class SpecialGrade_DisasterFlame(Enemy):
             xp=200,
             cgp=5,
             technique=DisasterFire,
-            killed=False,
+            killed=False
+            timer=200,
             equipped=[], 
             killcount=[], 
             avatar=None,
@@ -876,6 +876,7 @@ class SpecialGrade_NatureSpirit(Enemy):
             xp=200,
             cgp=5,
             technique=NatureManipulation,
+            timer=200,
             killed=False,
             equipped=[], 
             killcount=[], 
@@ -899,6 +900,7 @@ class SpecialGrade_TideCurse(Enemy):
             cgp=5,
             technique=DisasterTides,
             killed=False,
+            timer=200,
             equipped=[], 
             killcount=[],
             shikigami=[], 
@@ -924,6 +926,7 @@ class SpecialGrade_DeathSpirit(Enemy):
             cgp=5,
             technique=SoulManipulation,
             killed=False,
+            timer=200,
             equipped=[], 
             killcount=[],
             shikigami=[], 
@@ -951,6 +954,7 @@ class SpecialGrade_ThreeFingerSukuna():
             cgp=5,
             technique=Shrine,
             killed=False,
+            timer=300,
             equipped=[{'fingers': 3}], 
             killcount=[{'killed' : []}],
             shikigami=[], 
@@ -959,7 +963,6 @@ class SpecialGrade_ThreeFingerSukuna():
             ce=1000,
             max_ce=1000,
             domain=True, 
-            timer=300
             )
 
 
@@ -977,6 +980,7 @@ class Toji(Enemy):
                     technique=PhysicalRestriction,
                     colony=None,
                     killed=False,
+                    timer=300,
                     equipped=['Eternal Chain', 'ISOH'], 
                     timer=300,
                     antidomain=True
@@ -997,7 +1001,7 @@ class Reggie(Enemy):
                 cgp=5,
                 technique=Receipts,
                 killed=False,
-                equipped=['receipts' : 5000], 
+                equipped=[{'receipts' : 5000}], 
                 timer=300,
                 ce=500,
                 max_ce=500)
@@ -1038,10 +1042,10 @@ class KingOfCurses(Enemy):
                                 xp=200,
                                 cgp=5,
                                 technique=Shrine,
-                              
                                 killed=False,
                                 equipped=[], 
-                                timer=100)
+                                timer=500
+                                )
 
 
 class Kenjaku(Enemy):
@@ -1061,7 +1065,7 @@ class Kenjaku(Enemy):
             imbued=150,
             killed=False,
             equipped=[], 
-            timer=100
+            timer=500
             )
 
 class Uraume(Enemy):
@@ -1079,20 +1083,22 @@ class Uraume(Enemy):
             imbued=150, 
             killed = False, 
             equipped = [], 
-            timer=100
+            timer=500
             )
     
 class Kashimo(Enemy):
+        min_level=120
         super().__init__(
             name="Kashimo",
             hp=900,
             max_hp=900,
-            attack=400,
-            defense=self.defense,
+            strength=400,
             speed=500,
             xp=150,
             cgp=5,
-            technique=self.t.to_dict(),
+            technique=Kashimo,
             imbued=150,
             killed=False,
-            equipped=[], timer=100)
+            timer=100,
+            equipped=[]
+            )
