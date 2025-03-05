@@ -6,4 +6,4 @@ Requests==2.32.3
 typing_extensions==4.12.2
 boto3==1.21.10
 dotenv==0.9.9
-sqlalchemy = 2.0.38
+sqlalchemy== 2.0.38
