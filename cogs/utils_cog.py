@@ -22,7 +22,7 @@ class Utils_cog(commands.Cog):
 
     # Tutorial command group
     @app_commands.group(name='learn', description='Get help with the bot', invoke_without_command=True)
-    async def tutorial(self, interaction: discord.Interaction):
+    async def learn(self, interaction: discord.Interaction):
         await interaction.response.send_message('Help command group', ephemeral=True)
         # list out subcommands using a forloop inside an embed
         return
