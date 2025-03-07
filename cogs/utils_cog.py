@@ -22,6 +22,7 @@ class Utils_cog(commands.Cog):
         for subc in learn.commands:
            name=subc.name
            description=sync.description
+           group_embed.add_field(name=name, description=descriptio
         await ctx.send('Tutorial command group', embed=group_embed)
 
 
