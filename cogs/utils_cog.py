@@ -18,7 +18,11 @@ class Utils_cog(commands.Cog):
     # learn command group
     @commands.hybrid_group(name='learn', desciption='Learn how to play the game')
     async def learn(self, ctx):
-        await ctx.send('Tutorial command group', ephemeral=True)
+        group_embed = discord.Embed(title="Tutorial", description="Choose one of the following commands to learn about!\nYou can use either `/learn <command_name>` or the prefix `,learn <command_name>`")
+        for subc in learn.commands:
+           name=subc.name
+           description=sync.description
+        await ctx.send('Tutorial command group', embed=group_embed)
 
 
     # CHANGED TO 'CHARACTER' INSTEAD OF 'CREATE' JUST SEEMED MORE FITTING LMK
