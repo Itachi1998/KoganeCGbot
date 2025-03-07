@@ -20,26 +20,26 @@ class Utils_cog(commands.Cog):
     async def on_ready(self):
         print('Utils cog is ready!')
 
-    # Tutorial command group
-    @app_commands.group(name='learn', description='Get help with the bot', invoke_without_command=True)
-    async def tutorial(self, interaction: discord.Interaction):
-        await interaction.response.send_message('Help command group', ephemeral=True)
+    # learn command group
+    @commands.hybrid_group(name='learn', desciption='Learn how to play the game')
+    async def learn(self, ctx):
+        await ctx.send('Help command group', ephemeral=True)
         return
     
-    @tutorial.command(name='create', description='Learn how to create a character')
-    async def create(self, interaction: discord.Interaction):
-        await interaction.response.send_message('Create a character', ephemeral=True)
-        # We will be creating characters with a /create command that will have buttons to spin for the class, technique, and CE amount
+    @learn.command(name='create', description='Learn how to create a character')
+    async def create(self, ctx):
+        #create_embed = discord.Embed(title=''We will be creating characters with a /create command that will have buttons to spin for the class, technique, and CE amount')
         # Create an embed using the bot's avatar as a thumbnail and a title of "Learn: Create a character"
         # Add a field that explains how to spin for a class
         # Add a field that explains how to spin for a technique
         # Add a field that explains how to spin for a CE amount
+        await ctx.send('Create a character', ephemeral=True)
         return
         
 
-    @tutorial.command(name='battle', description='Learn how to battle')
-    async def battle(self, interaction: discord.Interaction):
-        await interaction.response.send_message('Learn: Battle commandS!', ephemeral=True)
+    @learn.command(name='battle', description='Learn how to battle')
+    async def battle(self, ctx):
+        await ctx.send('Learn: Battle commandS!', ephemeral=True)
         # We will be using /lobby create to create lobby's to battle in, once in a lobby they can use /lobby pve to enable, or /lobby pvp to enable pvp mode, or they can use the lobby buttons
         
         # Create an embed using the bot's avatar as a thumbnail and a title of "Learn: Battle commands"
@@ -50,7 +50,7 @@ class Utils_cog(commands.Cog):
         # Add a field that tells them to do /learn pve and /learn pvp to learn more about pve and pvp lobby's
         return
 
-    
+    # lobby (invite, kick, leave, ready up, lock, start), pve (), pvp
 
     
 
@@ -59,17 +59,17 @@ class Utils_cog(commands.Cog):
 # class Help_buttons(discord.ui.View):
 #     def __init__(self):
 #         super().__init__(timeout=200)
-#         self.add_item(tutorial_button())
+#         self.add_item(learn_button())
 
-#     @discord.ui.button(label='Tutorial', style=discord.ButtonStyle.primary)
-#     async def tutorial_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+#     @discord.ui.button(label='learn', style=discord.ButtonStyle.primary)
+#     async def learn_button(self, button: discord.ui.Button, ctx: discord.ctx):
 #         button.disabled=True
-#         await Utils_cog.help(interaction)
+#         await Utils_cog.help(ctx)
 #         description = """
 # Use /create to create a character, choose a class, and spin 
 # """ 
-#         embed=discord.Embed(title='Tutorial', description='Learn how to play!', color=discord.Color.green())
-#         await interaction.response.send_message(embed=embed, view=self)
+#         embed=discord.Embed(title='learn', description='Learn how to play!', color=discord.Color.green())
+#         await ctx.response.send_message(embed=embed, view=self)
         
     
 async def setup(bot):
