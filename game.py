@@ -43,15 +43,21 @@ class GameMode(enum.IntEnum):
     ROAM = 1
     PVE = 2 #learn game and farm
     PVP = 3 #earn more xp from killing players, team up against stronger players, team battles, earn higher points
-    Q = 4
-
+    Q = 4 # for when the player is in a queue
+    Mutant= 5 # number to roll for Mutant class
+    Sorcerer=6 # number to roll for Sorcerer class
+    Curse=7 # number to roll for Curse class
+    Reincarnated=8 # numeber to roll for Reincarnated class
+    HeavenlyRestriction=9 #number to roll for heavenly restriction
+    HeavenlyRestrictionBath=10 # Number to roll for mechamaru Heavenly Restriction
 
 
 # Parent class for the Character and Enemy Subclasses
 class Actor:
 
-    def __init__(self, name: str, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: int, classtype: str)):
+    def __init__(self, name: str, level:int, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: int, colony:int):
         self.name = name
+        self.level=level
         self.hp = hp
         self.max_hp = max_hp
         self.strength = strength
@@ -59,6 +65,7 @@ class Actor:
         self.speed = speed
         self.cgp = cgp
         self.technique = technique
+        self.colony=colony
 
 
     def __repr__(self):
@@ -233,10 +240,11 @@ class Actor:
 
 class Enemy(Actor):
 
-    def __init__(self, name: str, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: dict,killed: bool, timer: int, colony: int, equipped: dict):
-        super().__init__(name, hp, max_hp, strength, speed, xp, cgp,
-                         technique)
+    def __init__(self, name: str, level: int, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: dict,killed: bool, timer: int, colony: int, equipped: list, ce:int, max_ce: int, killed_by: str=None):
+        super().__init__(name, level, hp, max_hp, strength, speed, xp, cgp,
+                         technique, colony)
         self.name = name
+        self.level = level
         self. hp = hp
         self.max_hp = max_hp
         self.killed = killed
@@ -246,6 +254,14 @@ class Enemy(Actor):
         self.equipped = equipped
         self.colony = colony
         self.technique = technique
+        self.cgp = cgp
+        self.xp = xp
+        self.ce = ce
+        self.max_ce= max_ce
+        if killed_by:
+             self.killed_by=killed_by
+    
+    
     
     def __repr__(self):
         return f"Enemy: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
@@ -264,23 +280,19 @@ class Character(Actor):
                 xp: int, 
                 cgp: int, 
                 technique: dict,  
-                timer: int, 
                 colony: int, 
                 inventory: list, 
                 equipped: list, 
                 status: int, 
                 user_id: int, 
-                skp: int, 
-                **kwargs):
-        super().__init__(name,
-                         hp,
-                         max_hp,
-                         strength,
-                         speed,
-                         xp,
-                         cgp
-                         technique)
-        
+                skp: int,
+                charclass: int,
+                HR: int=None,
+                RCT: bool=False,
+                domain: bool=False,
+                maximum: bool=False
+                ):
+        super().__init__(name, hp, max_hp, strength, speed, xp, cgp, technique, colony)
         self.name = name
         self.hp = hp
         self.max_hp = max_hp
@@ -295,47 +307,11 @@ class Character(Actor):
         self.status = status
         self.user_id = user_id
         self.skp = skp
-        self.HR = None
-        self.RCT= None,
-        self.mutant = None,
-        self.curse= None,
-        self.sorcerer= None,
-        self.reincarnated=None
-        self.domain = None
-        self.maximum = None
-        self.fingers = None
-        self.deathpaintings = None
-        self.imbued = None
-    
-        if 'domain' in technique['keys']:
-            try:
-                 self.domain = technique['domain']
-
-            except Exception as e:
-                 print(f"Failed to retrieve technique domain {e}")
-
-        if 'heavenlyrestriction' in technique['keys']:
-             if 'bathub' in technique['heavenlyrestriction']['keys']:
-                    try:
-                        self.HR = True  
-                    except Exception as e:
-                         print(f"Failed to retrieve update HR stats for bathtub {e}")
-             else:                
-                try:
-                    self.HR = True                       
-                    self.speed += technique['HeavenlyRestriction']['speed']
-                    self.strength += technique['HeavenlyRestriction']['strength']
-
-                except Exception as e:            
-                        print(f"Failed to retrieve update HR stats {e}")
-
-        if 'RCT' in technique['keys']:
-             try:
-                  if self.level >= technique['ReverseCursedTechnique']['level']:
-                      self.RCT = True                        
-             except:
-                print(f"Failed to retrieve update RCT stats {e}")
-            
+        self.HR = HR,
+        self.RCT= RCT,
+        self.charclass=charclass
+        self.domain = domain,
+        self.maximum = maximum
 
 
     def __repr__(self):

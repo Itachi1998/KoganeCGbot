@@ -12,18 +12,26 @@ class Battle(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("Battle cog is ready!")
-        
-    # @commands.command(name="battle", description= "Load battle cog")
-    # async def battle(self, ctx):
-    #     await ctx.send("Example of a context command")
+
+    @commands.hybrid_group(name="battle", description= "Choose a subcommand")
+    async def battle(self, ctx):
+        await ctx.send("This is a hybrid group")
+
+    @battle.hybrid_command(name="lobby", description="Host a lobby")
+    async def lobby(self, ctx):
+        await ctx.send("Lobby created")
+
+    @battle.hybrid_command(name="pvp", description="Start a PVP lobby")
+    async def pvp(self, ctx):       
+        await ctx.send("PVP enabled")
+
+    @battle.hybrid_command(name="pve", description="Change an existing lobby mode to PVE or start a PVE lobby")
+    async def pve(self, ctx):
+        await ctx.send("PvE enabled")
     
     # @app_commands.command(name="slash", description="Example of a slash command")
     # async def slash(self, interaction: discord.Interaction):
     #     await interaction.response.send_message("This is a slash command!")
-
-async def setup(bot):
-    await bot.add_cog(Battle(bot))
-
 
     # @commands.hybrid_command(name="lobby", description="Host a lobby")
     # async def lobby(self, ctx, name: str = None):
@@ -2563,3 +2571,8 @@ async def setup(bot):
 #         await self.new_msg.delete()
 #         await aoe_results(self.bot, self.msg, self.attack, 'attack', targets, results, lob, self.player)
 
+
+
+
+async def setup(bot):
+    await bot.add_cog(Battle(bot))
