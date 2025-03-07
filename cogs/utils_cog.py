@@ -20,19 +20,11 @@ class Utils_cog(commands.Cog):
     async def on_ready(self):
         print('Utils cog is ready!')
 
-<<<<<<< HEAD
     # learn command group
     @commands.hybrid_group(name='learn', desciption='Learn how to play the game')
     async def learn(self, ctx):
         await ctx.send('Help command group', ephemeral=True)
-=======
-    # Tutorial command group
-    @app_commands.group(name='learn', description='Get help with the bot', invoke_without_command=True)
-    async def learn(self, interaction: discord.Interaction):
-        await interaction.response.send_message('Help command group', ephemeral=True)
-        # list out subcommands using a forloop inside an embed
->>>>>>> ffe724fa66c6866c3a4b7d54be2ff8cac63bbff0
-        return
+
     
     @learn.command(name='create', description='Learn how to create a character')
     async def create(self, ctx):
