@@ -1,7 +1,17 @@
+import os, dotenv
+from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
 #from old_techniques import get_cursed_technique
 #import game, time, asyncio
+# GLOBAL VARIABLES
+
+dotenv = find_dotenv()
+load_dotenv(dotenv)
+
+log_channel = os.getenv("LOGCHANNEL")
+
+
 
 
 class Colonies(commands.Cog):
@@ -12,7 +22,9 @@ class Colonies(commands.Cog):
         async def on_ready(self):
             print('Colonies cog is ready!')
 
-    
+        @commands.command(name="colony", description="Colony Command")
+        async def colony(self, ctx):
+            channel = await bot.fetch_channel(int(log_channel))
 async def setup(bot):
     await bot.add_cog(Colonies(bot))
 
