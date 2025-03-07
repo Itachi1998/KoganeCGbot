@@ -63,6 +63,9 @@ class Actor:
             damage = strength - def_strength
 
             if damage > 0:
+                 if attack.stun:
+                     target.stun = attack.stun
+                     target.save_to_db()
                  return (damage, "hit", target.hp <= 0, bf)
 
             elif damage <= 0:
@@ -70,154 +73,91 @@ class Actor:
             
         except Exception as e:
             print(f"Error in physical_attack_checks: {e}")
-    
-            
-            # if isinstance(other, Enemy):
-            #           print(f"{other.name} is an ai, continuing player vs ai physical attack calculations")
-            #           t = old_techniques.Techniques(**other.technique)
-            #           defense = t.defense[other.defense]
-            #           other_speed = t.defense[other.defense]['speed']
-                
-            # elif isinstance(self, Enemy):
-            #     t_name = None
-            #     t = old_techniques.get_cursed_technique(other.technique)
-            #     if other.defense:
-            #         t_name = other.defense.replace(" ","_")
-            #     else:
-            #         defense_names = list(t.defense.keys())
-            #         if len(defense_names) > 1: 
-            #             other.defense = random.choice(defense_names)
-            #             t_name = other.defense.replace(" ", "_")
-            #     physic_dic = self.technique['attack']['Physical']
-            #     d_func = None
-            #     if t_name:    
-            #         d_func = getattr(t, t_name.lower())
-            #     else:
-            #         t_name = None
-            #         if self.technique != 'Heavenly Restriction':
-            #             self.defense = 'CE'
-            #             t_name = self.defense
-            #         else:
-            #             self.defense = 'Heavenly Body'
-            #             t_name = self.defense.replace(' ', '_')
-                    
-            #         d_func = getattr(t, t_name.lower())        
-            #     results = d_func(self, other, physic_dic)
-            #     other.imbued = 0
-            #     other.save_to_db()
-            #     return results
-                
-            # tool = None
-            # negate = None
-            # print(f"{self.name}'s  speed: {speed}, {other.name}'s  {other.defense} speed: {other_speed}")
-            
-            # if self.equipped is not None:
-            #     tool = self.equipped
-            # if speed >= other_speed:
-            #     spd_calc = max(0, speed - other_speed)
-            #     print(f"spd_calc: {spd_calc}")  # log the calculated speed
-            #     if spd_calc < 20:
-            #         chance_to_hit = random.randint(0, max(1, 200 - (defense['def'] + spd_calc)))
-            #     else:
-            #         chance_to_hit = random.randint(0, max(1, 200 - defense['def'])) 
-            #     damage = self.attack + self.imbued
-
-            #     if tool:
-            #         if len(tool) > 1:
-            #             tool1 =old_techniques.get_cursed_tool(tool[0])
-            #             tool2 = old_techniques.get_cursed_tool(tool[1])
-            #             damage += tool1.attack, tool2.attack
-            #             if tool1.negate or tool2.negate:
-            #                 defense=0
-            #                 negate='negate'
-            #         else:
-            #             tool1 = old_techniques.get_cursed_tool(tool[0])
-            #             damage += tool1.attack + tool1.pen  #add tool attack power and penetration to the damage
-            #             if tool1.negate:
-            #               defense = 0  #negate defense if tool has the ability
-            #               negate = 'negate'  #set the negation variable to 'negate
-                    
-            #     print(f"Chance to Hit: {chance_to_hit}, Damage: {damage}")
-
-
-            #     if self.technique == "HeavenlyRestriction":
-            #         damage += speed  #add the players speed to damage
-
-            #     if chance_to_hit:
-            #         other.hp -= damage
-            #         print(f"Hit! Damage: {damage}, Enemy HP: {other.hp}")
-            #         return (
-            #             damage, "hit", other.hp <= 0, tool)  #add negate variable to check if the hit negated defense
-            #     else:
-            #         print("Tanked! Enemy HP not reduced")
-            #         return (0, "tank", other.hp <= 0, tool)
-            # else:
-            #     print("Missed! Speed too low")
-            #     return (0, "miss", other.hp <= 0, tool)
-
-        except Exception as e:
-            print(f"Error in fight method: {e}")
-            traceback.print_exc()
-            return (0, "error", False)
-
+     
    
-    def use_technique(self, technique, move, target=None, attack=None, host=None, targets=None):
-        if move == "attack":
-            atr = None
-            atk = None
-            t=None
-            if isinstance(self, Enemy):
-                t= old_techniques.Techniques(**self.technique)
-                atk = t.attack[technique]
-                target_tech = old_techniques.get_cursed_technique(target.technique)
-                if target.defense is not None:
-                    def_name = technique.replace(" ", "_")
-                    def_func = getattr(target_tech, def_name.lower())
-                    results = def_func(self, target, atk)
-                    return results
+    def use_technique(self, technique, move, target, defense):
+        name = technique.name
+        domain = technique.domain
+        maximum = technique.maximum
+        rct = technique.rct
+        attack_type = technique.type
+        defense_type = defense.type
+        
+        if attack_type == "melee":
+             pass
+        if attack_type == "ranged":
+            pass
+        if attack_type == "curse":
+            pass
+        if attack_type == "domain":
+            pass
+        if attack_type == "maximum":
+            pass
+        if attack_type == "shikigami":
+            pass
+        if attack_type = 'mechabot':
+            pass
+        elif attack_type == None:
+            print("No attack type")
+            return False
+        
+        # if move == "attack":
+        #     atr = None
+        #     atk = None
+        #     t=None
+        #     if isinstance(self, Enemy):
+        #         t= old_techniques.Techniques(**self.technique)
+        #         atk = t.attack[technique]
+        #         target_tech = old_techniques.get_cursed_technique(target.technique)
+        #         if target.defense is not None:
+        #             def_name = technique.replace(" ", "_")
+        #             def_func = getattr(target_tech, def_name.lower())
+        #             results = def_func(self, target, atk)
+        #             return results
                     
-                else:
-                    def_name = 'ce'
-                    def_func = getattr(target_tech, def_name.lower())
-                    results = def_func(self, target, atk)
+        #         else:
+        #             def_name = 'ce'
+        #             def_func = getattr(target_tech, def_name.lower())
+        #             results = def_func(self, target, atk)
                     
-            else:
-                t = old_techniques.get_cursed_technique(self.technique)
-            print(f"{self.name} launching attack {technique}")
-            atr = technique.lower()
-            atr = atr.replace(" ","_")
-            atk = getattr(t, atr)
-            results=None
+        #     else:
+        #         t = old_techniques.get_cursed_technique(self.technique)
+        #     print(f"{self.name} launching attack {technique}")
+        #     atr = technique.lower()
+        #     atr = atr.replace(" ","_")
+        #     atk = getattr(t, atr)
+        #     results=None
             
-            if target:
-                results = atk(self, target)
+        #     if target:
+        #         results = atk(self, target)
                 
-            if targets:
-                results, targets =atk(self, targets)
-                if targets:
-                 return results, targets
-                else:
-                    return results
+        #     if targets:
+        #         results, targets =atk(self, targets)
+        #         if targets:
+        #          return results, targets
+        #         else:
+        #             return results
    
-            return results
+        #     return results
             
-        if move == "defense":
-                lobdat = dynamo.read_lobby(host, colony_id = self.colony)
-                t = old_techniques.get_cursed_technique(self.technique)
-                self.defense=technique
-                technique = technique.replace(" ", "_")
-                if targets:
-                    defense_func = getattr(t, technique.lower())
-                    results, targets = defense_func(self, targets)
-                    return results, targets
-                else:
-                    defense_func = getattr(t, technique.lower())
-                    results = defense_func(target, self, attack)
-                    return results
+        # if move == "defense":
+        #         lobdat = dynamo.read_lobby(host, colony_id = self.colony)
+        #         t = old_techniques.get_cursed_technique(self.technique)
+        #         self.defense=technique
+        #         technique = technique.replace(" ", "_")
+        #         if targets:
+        #             defense_func = getattr(t, technique.lower())
+        #             results, targets = defense_func(self, targets)
+        #             return results, targets
+        #         else:
+        #             defense_func = getattr(t, technique.lower())
+        #             results = defense_func(target, self, attack)
+        #             return results
                 
     
         def use_cursed_tool(self, tool: dict, **kwargs):
-                pass
+            if tool[type] == 'melee':
+                 
         
         def domain(self, **kwargs):
              pass
