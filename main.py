@@ -26,7 +26,7 @@ async def load():
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user.name} is ready')
+    #print(f'{bot.user.name} is ready') ALREADY PRINTS 'BOT IS READY'
     synced= await bot.tree.sync()
     print(f"Commands synced: {synced}")
     await main()
