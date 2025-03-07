@@ -5,63 +5,73 @@ from discord import app_commands
 import os
 
 
-bot = commands.Bot(command_prefix=',', intents=discord.Intents.all())
-log_channel = int(os.getenv('LOGCHANNEL'))
-channel = bot.get_channel(log_channel)
 
 
 class Utils_cog(commands.Cog):
 
+
     def __init__(self, bot):
         self.bot = bot
+        self.log_channel = int(os.getenv('LOGCHANNEL'))
+        self.channel = bot.get_channel(self.log_channel)
 
+    #@bot.events
     @commands.Cog.listener()
     async def on_ready(self):
         print('Utils cog is ready!')
 
-
-
-
-    # @bot.group(name='command_help', description='Learn about a specific command', with_app_command=True, fallback='get')
-    # async def command_help(self, ctx):
-    #         if ctx.invoked_subcommand is None:
-    #             commands = bot.tree.get_commands()
-    #             embed = discord.Embed(title='Commands', description='List of all commands', color=0x00ff00)
-    #             for c in commands:
-    #                 name = c.name
-    #                 description = c.description
-    #                 embed.add_field(name=name, value=description, inline=False)
-    #             await ctx.send(embed=embed)
-
-    # @command_help.command(name='create', description='Learn about the create command')
-    # async def create(self, ctx):
-    #         command = bot.tree.get_command('create')
-    #         if command is None:
-    #             await ctx.send('Command not found')
-    #         else:
-    #             embed = discord.Embed(title='Create Command', description='Will display the character creation screen', color=0x00ff00)
-    #             await ctx.send(embed=embed)
+    # Tutorial command group
+    @app_commands.group(name='learn', description='Get help with the bot', invoke_without_command=True)
+    async def tutorial(self, interaction: discord.Interaction):
+        await interaction.response.send_message('Help command group', ephemeral=True)
+        return
+    
+    @tutorial.command(name='create', description='Learn how to create a character')
+    async def create(self, interaction: discord.Interaction):
+        await interaction.response.send_message('Create a character', ephemeral=True)
+        # We will be creating characters with a /create command that will have buttons to spin for the class, technique, and CE amount
+        # Create an embed using the bot's avatar as a thumbnail and a title of "Learn: Create a character"
+        # Add a field that explains how to spin for a class
+        # Add a field that explains how to spin for a technique
+        # Add a field that explains how to spin for a CE amount
+        return
         
-    # @command_help.command(name='pve', description='Learn about the pve command')
-    # async def pve(self, ctx):
-    #         command = bot.tree.get_command('pve')
-    #         if command is None:
-    #             await ctx.send('Command not found')
-    #         else:
-    #             embed = discord.Embed(title='PVE Command', description="""Will create a Player vs Environment lobby in the colony with the following buttons:
-    #                                 - Start `will start the game if all players are ready!`
-    #                                 - Lock `will lock the lobby!`
-    #                                 - Invite `will prompt the invite screen`
-    #                                 - Disband `will disband the lobby if you are the lobby owner`
-    #                                 - Leave `will leave the lobby if you are not the owner. If the owner leaves as the last person the lobby will disband. If the owner leaves with others still in the lobby it will remain open, and a new owner will be chosen.`""", color=0x00ff00)
-    #             await ctx.send(embed=embed)
-    
-    # @command_help.command(name='pvp', description="Starts a Plyer vs Player lobby in the colony with the following buttons")
 
-
+    @tutorial.command(name='battle', description='Learn how to battle')
+    async def battle(self, interaction: discord.Interaction):
+        await interaction.response.send_message('Learn: Battle commandS!', ephemeral=True)
+        # We will be using /lobby create to create lobby's to battle in, once in a lobby they can use /lobby pve to enable, or /lobby pvp to enable pvp mode, or they can use the lobby buttons
+        
+        # Create an embed using the bot's avatar as a thumbnail and a title of "Learn: Battle commands"
+        # Add a field Explain that players will be able to create invite only lobby's.
+        # Add a field that explains how to create a lobby
+        # Add a field that explains how to enable pve mode
+        # Add a field that explains how to enable pvp mode
+        # Add a field that tells them to do /learn pve and /learn pvp to learn more about pve and pvp lobby's
+        return
 
     
 
+    
+
+
+
+# class Help_buttons(discord.ui.View):
+#     def __init__(self):
+#         super().__init__(timeout=200)
+#         self.add_item(tutorial_button())
+
+#     @discord.ui.button(label='Tutorial', style=discord.ButtonStyle.primary)
+#     async def tutorial_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+#         button.disabled=True
+#         await Utils_cog.help(interaction)
+#         description = """
+# Use /create to create a character, choose a class, and spin 
+# """ 
+#         embed=discord.Embed(title='Tutorial', description='Learn how to play!', color=discord.Color.green())
+#         await interaction.response.send_message(embed=embed, view=self)
+        
+    
 async def setup(bot):
     await bot.add_cog(Utils_cog(bot))
 

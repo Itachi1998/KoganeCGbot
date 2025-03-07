@@ -1,19 +1,9 @@
 import json, traceback
-from typing import Union, List
+from typing import Union, List, Optional
 import enum, random, sys
 from copy import deepcopy
 from cogs.battle import Target
 import old_techniques
-
-
-
-
-
-
-
-
-
-
 
 #currencies:
 # CGP = CULLING GAME POINTS - Points used to buy items from the shop
@@ -21,151 +11,149 @@ import old_techniques
 # XP = EXPERIENCE POINTS - Points that level you up and level up your cursed technique 
 
 
-
-
-
-
-
-
-
-
-
 #this is where we will create most of the functionaliy for our characters and enemies
-
-def str_to_class(classname):
-    for e in Enemy.__subclasses__():
-        if e.__name__.lower() == classname.lower():
-            return e
-    raise ValueError(f"Unknown Enemy class name: {classname}")
-
-
 class GameMode(enum.IntEnum):
-    ROAM = 1
-    PVE = 2 #learn game and farm
-    PVP = 3 #earn more xp from killing players, team up against stronger players, team battles, earn higher points
+    Roam = 1 #Roam status for when player does nothing
+    Pve = 2 #Pve status for when player begins a PvE fight
+    Pvp = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points
     Q = 4 # for when the player is in a queue
-    Mutant= 5 # number to roll for Mutant class
-    Sorcerer=6 # number to roll for Sorcerer class
-    Curse=7 # number to roll for Curse class
-    Reincarnated=8 # numeber to roll for Reincarnated class
-    HeavenlyRestriction=9 #number to roll for heavenly restriction
-    HeavenlyRestrictionBath=10 # Number to roll for mechamaru Heavenly Restriction
 
 
-# Parent class for the Character and Enemy Subclasses
+# Parent class for the Player and Enemy Subclasses
 class Actor:
 
-    def __init__(self, name: str, level:int, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: int, colony:int):
+    def __init__(self, name: str, level:int, hp: int, max_hp: int, ce: int, max_ce: int, strength: int, speed: int, xp: int, cgp: int, technique: str, colony:int, luck:int, antidomain: bool):
         self.name = name
-        self.level=level
-        self.hp = hp
+        self.level= level
+        self.hp = hp # be represented by a healthbar
         self.max_hp = max_hp
-        self.strength = strength
-        self.xp = xp
-        self.speed = speed
-        self.cgp = cgp
-        self.technique = technique
-        self.colony=colony
-
-
+        self.ce = ce # be represented by a ce bar unless they are ZERO restricted
+        self.max_ce = max_ce 
+        self.strength = strength # enemy or player strength (physical)
+        self.speed = speed # physical speed
+        self.xp = xp  # experience points of current player of experience of enemy reward
+        self.cgp = cgp # culling game points
+        self.technique = technique # cursed technique: will be a cursed technique class name
+        self.colony= colony
+        self.luck = luck
+        self.antidomain = antidomain
+        
     def __repr__(self):
         return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
-    
-        
 
-    def fight(self, other):
+
+    # sukuna.physical_attack_checks(gojo, gojo.defense)
+    def physical_attack_checks(self, target, attack, defense, **kwargs):
         try:
-            print(f"{self.name} attacks {other.name}"
-                  )
-            
-            speed = self.imbued + self.speed
-            
-            other_speed = other.imbued + other.speed
-            
-            defense = None
-            
-            if isinstance(other, Enemy):
-                      print(f"{other.name} is an ai, continuing player vs ai physical attack calculations")
-                      t = old_techniques.Techniques(**other.technique)
-                      defense = t.defense[other.defense]
-                      other_speed = t.defense[other.defense]['speed']
-                
-            elif isinstance(self, Enemy):
-                t_name = None
-                t = old_techniques.get_cursed_technique(other.technique)
-                if other.defense:
-                    t_name = other.defense.replace(" ","_")
-                else:
-                    defense_names = list(t.defense.keys())
-                    if len(defense_names) > 1: 
-                        other.defense = random.choice(defense_names)
-                        t_name = other.defense.replace(" ", "_")
-                physic_dic = self.technique['attack']['Physical']
-                d_func = None
-                if t_name:    
-                    d_func = getattr(t, t_name.lower())
-                else:
-                    t_name = None
-                    if self.technique != 'Heavenly Restriction':
-                        self.defense = 'CE'
-                        t_name = self.defense
-                    else:
-                        self.defense = 'Heavenly Body'
-                        t_name = self.defense.replace(' ', '_')
-                    
-                    d_func = getattr(t, t_name.lower())        
-                results = d_func(self, other, physic_dic)
-                other.imbued = 0
-                other.save_to_db()
-                return results
-                
-            tool = None
-            negate = None
-            print(f"{self.name}'s  speed: {speed}, {other.name}'s  {other.defense} speed: {other_speed}")
-            
-            if self.equipped is not None:
-                tool = self.equipped
-            if speed >= other_speed:
-                spd_calc = max(0, speed - other_speed)
-                print(f"spd_calc: {spd_calc}")  # log the calculated speed
-                if spd_calc < 20:
-                    chance_to_hit = random.randint(0, max(1, 200 - (defense['def'] + spd_calc)))
-                else:
-                    chance_to_hit = random.randint(0, max(1, 200 - defense['def'])) 
-                damage = self.attack + self.imbued
-
-                if tool:
-                    if len(tool) > 1:
-                        tool1 =old_techniques.get_cursed_tool(tool[0])
-                        tool2 = old_techniques.get_cursed_tool(tool[1])
-                        damage += tool1.attack, tool2.attack
-                        if tool1.negate or tool2.negate:
-                            defense=0
-                            negate='negate'
-                    else:
-                        tool1 = old_techniques.get_cursed_tool(tool[0])
-                        damage += tool1.attack + tool1.pen  #add tool attack power and penetration to the damage
-                        if tool1.negate:
-                          defense = 0  #negate defense if tool has the ability
-                          negate = 'negate'  #set the negation variable to 'negate
-                    
-                print(f"Chance to Hit: {chance_to_hit}, Damage: {damage}")
-
-
-                if self.technique == "HeavenlyRestriction":
-                    damage += speed  #add the players speed to damage
-
-                if chance_to_hit:
-                    other.hp -= damage
-                    print(f"Hit! Damage: {damage}, Enemy HP: {other.hp}")
-                    return (
-                        damage, "hit", other.hp <= 0, tool)  #add negate variable to check if the hit negated defense
-                else:
-                    print("Tanked! Enemy HP not reduced")
-                    return (0, "tank", other.hp <= 0, tool)
+            print(f"{self.name} attacks {target.name}")
+            speed = self.speed + attack.speed # 100
+            strength = self.strength= + attack.strength
+            bf = attack.bf
+            def_speed = target.speed + defense.speed # 50
+            def_strength = target.strenght + defense.strength
+            speed_buff_percentage = (def_speed / speed) * 100 # 75+ to have a chance to dodge
+            if speed_buff_percentage > 100:
+                 return(0, "dodge")
             else:
-                print("Missed! Speed too low")
-                return (0, "miss", other.hp <= 0, tool)
+                                            # 0-15
+                result = random.randint(0, speed_buff_percentage)
+                if result > 75:
+                    return (0, "dodge")
+        
+            damage = strength - def_strength
+
+            if damage > 0:
+                 return (damage, "hit", target.hp <= 0, bf)
+
+            elif damage <= 0:
+                 return (damage, 'tank')
+            
+        except Exception as e:
+            print(f"Error in physical_attack_checks: {e}")
+    
+            
+            # if isinstance(other, Enemy):
+            #           print(f"{other.name} is an ai, continuing player vs ai physical attack calculations")
+            #           t = old_techniques.Techniques(**other.technique)
+            #           defense = t.defense[other.defense]
+            #           other_speed = t.defense[other.defense]['speed']
+                
+            # elif isinstance(self, Enemy):
+            #     t_name = None
+            #     t = old_techniques.get_cursed_technique(other.technique)
+            #     if other.defense:
+            #         t_name = other.defense.replace(" ","_")
+            #     else:
+            #         defense_names = list(t.defense.keys())
+            #         if len(defense_names) > 1: 
+            #             other.defense = random.choice(defense_names)
+            #             t_name = other.defense.replace(" ", "_")
+            #     physic_dic = self.technique['attack']['Physical']
+            #     d_func = None
+            #     if t_name:    
+            #         d_func = getattr(t, t_name.lower())
+            #     else:
+            #         t_name = None
+            #         if self.technique != 'Heavenly Restriction':
+            #             self.defense = 'CE'
+            #             t_name = self.defense
+            #         else:
+            #             self.defense = 'Heavenly Body'
+            #             t_name = self.defense.replace(' ', '_')
+                    
+            #         d_func = getattr(t, t_name.lower())        
+            #     results = d_func(self, other, physic_dic)
+            #     other.imbued = 0
+            #     other.save_to_db()
+            #     return results
+                
+            # tool = None
+            # negate = None
+            # print(f"{self.name}'s  speed: {speed}, {other.name}'s  {other.defense} speed: {other_speed}")
+            
+            # if self.equipped is not None:
+            #     tool = self.equipped
+            # if speed >= other_speed:
+            #     spd_calc = max(0, speed - other_speed)
+            #     print(f"spd_calc: {spd_calc}")  # log the calculated speed
+            #     if spd_calc < 20:
+            #         chance_to_hit = random.randint(0, max(1, 200 - (defense['def'] + spd_calc)))
+            #     else:
+            #         chance_to_hit = random.randint(0, max(1, 200 - defense['def'])) 
+            #     damage = self.attack + self.imbued
+
+            #     if tool:
+            #         if len(tool) > 1:
+            #             tool1 =old_techniques.get_cursed_tool(tool[0])
+            #             tool2 = old_techniques.get_cursed_tool(tool[1])
+            #             damage += tool1.attack, tool2.attack
+            #             if tool1.negate or tool2.negate:
+            #                 defense=0
+            #                 negate='negate'
+            #         else:
+            #             tool1 = old_techniques.get_cursed_tool(tool[0])
+            #             damage += tool1.attack + tool1.pen  #add tool attack power and penetration to the damage
+            #             if tool1.negate:
+            #               defense = 0  #negate defense if tool has the ability
+            #               negate = 'negate'  #set the negation variable to 'negate
+                    
+            #     print(f"Chance to Hit: {chance_to_hit}, Damage: {damage}")
+
+
+            #     if self.technique == "HeavenlyRestriction":
+            #         damage += speed  #add the players speed to damage
+
+            #     if chance_to_hit:
+            #         other.hp -= damage
+            #         print(f"Hit! Damage: {damage}, Enemy HP: {other.hp}")
+            #         return (
+            #             damage, "hit", other.hp <= 0, tool)  #add negate variable to check if the hit negated defense
+            #     else:
+            #         print("Tanked! Enemy HP not reduced")
+            #         return (0, "tank", other.hp <= 0, tool)
+            # else:
+            #     print("Missed! Speed too low")
+            #     return (0, "miss", other.hp <= 0, tool)
 
         except Exception as e:
             print(f"Error in fight method: {e}")
@@ -1013,8 +1001,8 @@ class KingOfCurses(Enemy):
                                 name="King Of Curses",
                                 hp=900,
                                 max_hp=900,
-                                strength=1000,
-                                speed=900,
+                                strength=7000, # highest NPC strength in the game
+                                speed=7000, # highest NPC speed in the game
                                 xp=200,
                                 cgp=5,
                                 technique=Shrine,
@@ -1033,8 +1021,8 @@ class Kenjaku(Enemy):
             name="Kenjaku",
             hp= 700,
             max_hp=700,
-            strength=300,
-            speed=500,
+            strength=3000,
+            speed=5000,
             xp=150,
             cgp=5,
             technique=Kenjaku,
@@ -1051,8 +1039,8 @@ class Uraume(Enemy):
             name="Uraume", 
             hp=900, 
             max_hp=900, 
-            strength=500,
-            speed = 500, 
+            strength=5000,
+            speed = 5000, 
             xp=150, 
             cgp=5, 
             technique=Frozen, 
@@ -1068,8 +1056,8 @@ class Kashimo(Enemy):
             name="Kashimo",
             hp=900,
             max_hp=900,
-            strength=400,
-            speed=500,
+            strength=4000,
+            speed=5000,
             xp=150,
             cgp=5,
             technique=Kashimo,

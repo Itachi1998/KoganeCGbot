@@ -36,9 +36,6 @@ class Techniques():
 
 
 
-
-
-
 class Offense():
     def __init__(self, name: str, level: int, damage: int, reforce: reforce, accuracy: int, crit: int, speed: int, cost: int, neg: bool, pen: int, aoe: int):
         try:

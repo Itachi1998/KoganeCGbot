@@ -14,13 +14,13 @@ passw = os.getenv('PASS')
 db_url = f"postgresql+psycopg2://postgres:{passw}@localhost/postgres"
 
 engine = create_engine(db_url)
+
 class Base(DeclarativeBase):
-    pass
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 class Technique(Base):
     __tablename__ = 'technique'
-    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
     ct_level: Mapped[int] = mapped_column()
     domain: Mapped[Optional[int]] = mapped_column(nullable=True)
@@ -33,7 +33,6 @@ class Technique(Base):
     
 class Colony(Base):
     __tablename__ = 'colony'
-    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
     owner_id: Mapped[int] = mapped_column()
     colony_id: Mapped[int] = mapped_column()
@@ -48,28 +47,20 @@ class Colony(Base):
     players: Mapped[List["Player"]] = relationship("Player", backref="colony")
     enemies: Mapped[List['Enemy']] = relationship("Enemy", backref="colony")
 
-
 class Player(Base):
     __tablename__ = 'player'
-    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String)
     user_id: Mapped[int] = mapped_column()
     level: Mapped[int] = mapped_column()
 
-
+    def __repr__(self):
+        return f"Player {self.name} is level {self.level}"
 
 class Enemy(Base):
     __tablename__ = 'enemy'
-    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     level: Mapped[int] = mapped_column()
  
-
-
-
-
-
-
 # Create tables
 Base.metadata.create_all(engine)
 

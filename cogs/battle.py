@@ -2,7 +2,33 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-bot = commands.Bot(command_prefix=',', intents=discord.Intents.all())
+def healthbar(health, max_health):
+    max_dashes = 4
+    dash_ratio = max_health / max_dashes
+    filled_dashes = int(health / dash_ratio)
+    dashes = "❤️" * filled_dashes
+    if filled_dashes % 1 != 0:
+        dashes += "💔"
+
+    percent = f"`{round((health / max_health) * 100)}%`"
+    if '-' in percent:
+        percent = "`0%`"
+    bar = f"{dashes}{percent}"
+    return bar
+
+
+def ce_bar(ce, max_ce):
+    max_dashes = 4
+    dash_ratio = max_ce / max_dashes
+    filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio)
+    dashes = "<a:blueflames:1279971716382326804>" * filled_dashes
+    if filled_dashes % 1 != 0:
+        dashes += "<a:blueflames:1279971716382326804>"
+    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
+    if '-' in percent:
+        percent = "`0%`"
+    bar = f"{dashes}{percent}"
+    return bar
 
 class Battle(commands.Cog): 
 
@@ -13,22 +39,7 @@ class Battle(commands.Cog):
     async def on_ready(self):
         print("Battle cog is ready!")
 
-    @commands.hybrid_group(name="battle", description= "Choose a subcommand")
-    async def battle(self, ctx):
-        await ctx.send("This is a hybrid group")
-
-    @battle.hybrid_command(name="lobby", description="Host a lobby")
-    async def lobby(self, ctx):
-        await ctx.send("Lobby created")
-
-    @battle.hybrid_command(name="pvp", description="Start a PVP lobby")
-    async def pvp(self, ctx):       
-        await ctx.send("PVP enabled")
-
-    @battle.hybrid_command(name="pve", description="Change an existing lobby mode to PVE or start a PVE lobby")
-    async def pve(self, ctx):
-        await ctx.send("PvE enabled")
-    
+  
     # @app_commands.command(name="slash", description="Example of a slash command")
     # async def slash(self, interaction: discord.Interaction):
     #     await interaction.response.send_message("This is a slash command!")
@@ -221,33 +232,6 @@ class Battle(commands.Cog):
     #     traceback.print_exc()
 
 
-# def healthbar(health, max_health):
-#     max_dashes = 4
-#     dash_ratio = max_health / max_dashes
-#     filled_dashes = int(health / dash_ratio)
-#     dashes = "❤️" * filled_dashes
-#     if filled_dashes % 1 != 0:
-#         dashes += "💔"
-
-#     percent = f"`{round((health / max_health) * 100)}%`"
-#     if '-' in percent:
-#         percent = "`0%`"
-#     bar = f"{dashes}{percent}"
-#     return bar
-
-
-# def ce_bar(ce, max_ce):
-#     max_dashes = 4
-#     dash_ratio = max_ce / max_dashes
-#     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio)
-#     dashes = "<a:blueflames:1279971716382326804>" * filled_dashes
-#     if filled_dashes % 1 != 0:
-#         dashes += "<a:blueflames:1279971716382326804>"
-#     percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
-#     if '-' in percent:
-#         percent = "`0%`"
-#     bar = f"{dashes}{percent}"
-#     return bar
 
 
 # def check_id(id1, id2):
