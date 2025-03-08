@@ -1,14 +1,9 @@
-import discord
+import discord, os
 from discord.ext import commands
-import os
 
 
 class Utils_cog(commands.Cog):
-<<<<<<< HEAD
-
-=======
     
->>>>>>> 446596f4fdf529f6fd98274dcc86326bda6fb894
     def __init__(self, bot):
         self.bot = bot
         self.log_channel = int(os.getenv('LOGCHANNEL'))
@@ -22,12 +17,20 @@ class Utils_cog(commands.Cog):
     # learn command group
     @commands.hybrid_group(name='learn', desciption='Learn how to play the game')
     async def learn(self, ctx):
-        group_embed = discord.Embed(title="Tutorial", description="Choose one of the following commands to learn about!\nYou can use either `/learn <command_name>` or the prefix `,learn <command_name>`")
-        for subc in learn.commands:
-           name=subc.name
-           description=sync.description
-           group_embed.add_field(name=name, description=descriptio
-        await ctx.send('Tutorial command group', embed=group_embed)
+        group_embed = discord.Embed(title="Tutorial", 
+                                    description="Choose one of the following commands to learn about!\nYou can use either" 
+                                    " `/learn <command_name>` or the prefix `,learn <command_name>`")
+        try:
+            for subc in learn.commands: #this doesn't access the learn command properly
+                name=subc.name
+                description=sync.description #sync isn't correctly done
+                group_embed.add_field(name=name, description=description)
+            await ctx.send('Tutorial command group', embed=group_embed)
+
+        except Exception as e:
+            error = (f'<learn command> from file <{__name__}> ERROR:\n{e}') #no clue how to get the name the method
+            print(error)
+            await ctx.send(error)
 
 
     # CHANGED TO 'CHARACTER' INSTEAD OF 'CREATE' JUST SEEMED MORE FITTING LMK
