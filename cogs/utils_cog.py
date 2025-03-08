@@ -9,7 +9,6 @@ import os
 
 class Utils_cog(commands.Cog):
 
-
     def __init__(self, bot):
         self.bot = bot
         self.log_channel = int(os.getenv('LOGCHANNEL'))
