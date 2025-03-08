@@ -1,14 +1,14 @@
 import discord
 from discord.ext import commands
-from discord import app_commands
-
 import os
 
 
-
-
 class Utils_cog(commands.Cog):
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 446596f4fdf529f6fd98274dcc86326bda6fb894
     def __init__(self, bot):
         self.bot = bot
         self.log_channel = int(os.getenv('LOGCHANNEL'))
@@ -22,38 +22,55 @@ class Utils_cog(commands.Cog):
     # learn command group
     @commands.hybrid_group(name='learn', desciption='Learn how to play the game')
     async def learn(self, ctx):
-        await ctx.send('Help command group', ephemeral=True)
+        group_embed = discord.Embed(title="Tutorial", description="Choose one of the following commands to learn about!\nYou can use either `/learn <command_name>` or the prefix `,learn <command_name>`")
+        for subc in learn.commands:
+           name=subc.name
+           description=sync.description
+           group_embed.add_field(name=name, description=descriptio
+        await ctx.send('Tutorial command group', embed=group_embed)
 
-    
-    @learn.command(name='create', description='Learn how to create a character')
-    async def create(self, ctx):
-        #create_embed = discord.Embed(title=''We will be creating characters with a /create command that will have buttons to spin for the class, technique, and CE amount')
-        # Create an embed using the bot's avatar as a thumbnail and a title of "Learn: Create a character"
-        # Add a field that explains how to spin for a class
-        # Add a field that explains how to spin for a technique
-        # Add a field that explains how to spin for a CE amount
-        await ctx.send('Create a character', ephemeral=True)
+
+    # CHANGED TO 'CHARACTER' INSTEAD OF 'CREATE' JUST SEEMED MORE FITTING LMK
+    @learn.command(name='character', description='Learn how to create a character') 
+    async def character(self, ctx):
+        create_embed = discord.Embed(title='Learn: Create a character', description='You will learn how to create a character')
+        create_embed.add_field(name='Create', value='Use the /create command to bring up the create menu... ', inline=False)
+        create_embed.add_field(name='Spinning for a class', value='...', inline=False)
+        create_embed.add_field(name='Spinning for a technique', value='...', inline=False)
+        create_embed.add_field(name='Spinning for a CE amount', value='...', inline=False)
+        create_embed.add_field(name='Deleting you\'re character', value='...', inline=False)
+        create_embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar)
+        await ctx.send(embed=create_embed, ephemeral=True)
         return
         
+
+    # SHOULD THE LOBBY/BATTLE HELP COMMANDS BE TOGETHER OR SEPARATE ?
+    @learn.command(name='lobby', description='Learn how to use the lobby functions') 
+    async def lobby(self, ctx):
+        lobby_embed = discord.Embed(title='Learn: Lobby functions', description='...')
+        lobby_embed.add_field(name='Create invite only lobby', value='...', inline=False)
+        lobby_embed.add_field(name='Create an open lobby', value='...', inline=False)
+        lobby_embed.add_field(name='Invite players', value='...', inline=False)
+        lobby_embed.add_field(name='Kick players', value='...', inline=False)
+        lobby_embed.add_field(name='Leave lobby', value='...', inline=False)
+        lobby_embed.add_field(name='Lock lobby', value='...', inline=False)
+        lobby_embed.add_field(name='Ready up', value='...', inline=False)
+        lobby_embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar)
+        await ctx.send(embed=lobby_embed, ephemeral=True)
+        return
+
 
     @learn.command(name='battle', description='Learn how to battle')
     async def battle(self, ctx):
-        await ctx.send('Learn: Battle commandS!', ephemeral=True)
-        # We will be using /lobby create to create lobby's to battle in, once in a lobby they can use /lobby pve to enable, or /lobby pvp to enable pvp mode, or they can use the lobby buttons
-        
-        # Create an embed using the bot's avatar as a thumbnail and a title of "Learn: Battle commands"
-        # Add a field Explain that players will be able to create invite only lobby's.
-        # Add a field that explains how to create a lobby
-        # Add a field that explains how to enable pve mode
-        # Add a field that explains how to enable pvp mode
-        # Add a field that tells them to do /learn pve and /learn pvp to learn more about pve and pvp lobby's
+        battle_embed = discord.Embed(title='Learn: Battle commands', description='You will learn how to use battle commands...')
+        battle_embed.add_field(name='Enable PVE', value='To enable PVE...', inline=False)
+        battle_embed.add_field(name='Enable PVP', value='To enable PVP...', inline=False)
+        battle_embed.add_field(name='More about PVE & PVP', value='To learn more about PVE lobbies, enter "/learn pve". '
+        'To learn more about PVP lobbies, enter "/learn pvp."', inline=False)
+        battle_embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar)
+        await ctx.send(embed=battle_embed, ephemeral=True)
         return
-
-    # lobby (invite, kick, leave, ready up, lock, start), pve (), pvp
-
-    
-
-
+ 
 
 # class Help_buttons(discord.ui.View):
 #     def __init__(self):
@@ -72,10 +89,4 @@ class Utils_cog(commands.Cog):
         
     
 async def setup(bot):
-    await bot.add_cog(Utils_cog(bot))
-
-            
-           
-        
-
-            
+    await bot.add_cog(Utils_cog(bot))  
