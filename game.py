@@ -22,7 +22,7 @@ class GameMode(enum.IntEnum):
 # Parent class for the Player and Enemy Subclasses
 class Actor:
 
-    def __init__(self, name: str, level:int, hp: int, max_hp: int, ce: int, max_ce: int, strength: int, speed: int, xp: int, cgp: int, technique: str, colony:int, luck:int, antidomain: bool):
+    def __init__(self, name: str, level:int, hp: int, max_hp: int, ce: int, max_ce: int, strength: int, speed: int, xp: int, cgp: int, technique: str, colony:int, luck:int, antidomain: bool, charclass: tuple):
         self.name = name
         self.level= level
         self.hp = hp # be represented by a healthbar
@@ -37,6 +37,7 @@ class Actor:
         self.colony= colony
         self.luck = luck
         self.antidomain = antidomain
+        self.charclass = charclass
         
     def __repr__(self):
         return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
@@ -168,9 +169,9 @@ class Actor:
 
 class Enemy(Actor):
 
-    def __init__(self, name: str, level: int, hp: int, max_hp: int, strength: int, speed: int, xp: int, cgp: int, technique: dict,killed: bool, timer: int, colony: int, equipped: list, ce:int, max_ce: int, killed_by: str=None):
+    def __init__(self, name: str, level: int, hp: int, max_hp: int, ce: int, max_ce: int, strength: int, speed: int, xp: int, cgp: int, technique: str, colony: int, luck: int, antidomain: bool, charclass: tuple, killed: bool, timer: int, equipped: list, killed_by: int=None):
         super().__init__(name, level, hp, max_hp, strength, speed, xp, cgp,
-                         technique, colony)
+                         technique, colony, technique, colony, luck, antidomain, charclass)
         self.name = name
         self.level = level
         self. hp = hp
@@ -186,6 +187,10 @@ class Enemy(Actor):
         self.xp = xp
         self.ce = ce
         self.max_ce= max_ce
+        self.luck = luck
+        self.charclass= charclass
+        self.antidomain = antidomain
+        
         if killed_by:
              self.killed_by=killed_by
     
@@ -200,15 +205,21 @@ class Enemy(Actor):
 class Character(Actor):
     level_cap = 200
     def __init__(self, 
-                 name: str, 
+                 name: str,
+                 level: int, 
                  hp: int, 
                  max_hp: int,
+                 ce: int, 
+                 max_ce: int,
                 strength: int, 
                 speed: int, 
                 xp: int, 
                 cgp: int, 
                 technique: dict,  
-                colony: int, 
+                colony: int,
+                luck: int,
+                antidomain: int,
+
                 inventory: list, 
                 equipped: list, 
                 status: int, 

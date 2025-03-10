@@ -27,8 +27,7 @@ async def load():
 @bot.event
 async def on_ready():
     #print(f'{bot.user.name} is ready') ALREADY PRINTS 'BOT IS READY'
-    synced= await bot.tree.sync()
-    print(f"Commands synced: {synced}")
+
     await main()
 
 
@@ -38,6 +37,12 @@ async def main():
     print('Bot is ready')
     channel = bot.get_channel(int(log_channel))
     await channel.send('Bot is ready')
+    synced = await bot.tree.sync()
+    print(f'Commands synced {synced}')
+    commands = bot.all_commands
+    for command in commands:
+        print(command)
+    print('Commands printed')
 
 
 # @bot.command()
