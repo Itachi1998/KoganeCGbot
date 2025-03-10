@@ -67,11 +67,10 @@ class Utils_cog(commands.Cog):
 
     @learn.command(name='battle', description='Learn how to battle')
     async def battle(self, ctx):
-        battle_embed = discord.Embed(title='Learn: Battle commands', description='You will learn how to use battle commands...')
-        battle_embed.add_field(name='Enable PVE', value='To enable PVE...', inline=False)
-        battle_embed.add_field(name='Enable PVP', value='To enable PVP...', inline=False)
-        battle_embed.add_field(name='More about PVE & PVP', value='To learn more about PVE lobbies, enter "/learn pve". '
-        'To learn more about PVP lobbies, enter "/learn pvp."', inline=False)
+        battle_embed = discord.Embed(title='Learn: Battle commands', description='### Before you can start a battle, you must have a lobby with every player ready. Once everyone in the lobby is ready, and the game mode is selected, use the start button or /start | ,start command'
+        battle_embed.add_field(name='PvP', value='```PVP is the player vs player mode. Here you will face off against real players in turn based rounds.```\n* Enabled using the (,pvp | /pvp) commands or using the button.\n* Greater rewards than battling NPCs in PVE (usually)', inline=False)
+        battle_embed.add_field(name='PvE', value="```PVE is the player vs enviornment mode. Here you will face off against NPC culling game players.```\n* Enabled using the (,pve | /pvp) commands or button\n* Rewards grow as you fight higher level enemies.\n* Stronger enemies have respawn timers", inline=False)
+        # TODO add field for leaving battles, add fields for technique usages, add field for physical attacks, add field for cursed tool usage, add field for summons
         battle_embed.set_author(name=self.botname, icon_url=self.bot.user.avatar, url=self.avatar)
         battle_embed.set_thumbnail(url=self.avatar)
         await ctx.send(embed=battle_embed, ephemeral=True)
