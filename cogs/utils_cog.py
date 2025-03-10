@@ -3,11 +3,7 @@ from discord.ext import commands
 
 
 class Utils_cog(commands.Cog):
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 633bd848223991f88277710626f700338eb54a5b
     def __init__(self, bot):
         self.bot = bot
         self.log_channel = int(os.getenv('LOGCHANNEL'))
@@ -22,16 +18,6 @@ class Utils_cog(commands.Cog):
     # learn command group
     @commands.hybrid_group(name='learn', desciption='Learn how to play the game', invoke_without_command=True)
     async def learn(self, ctx):
-<<<<<<< HEAD
-        group_embed = discord.Embed(title="Tutorial", description="# Welcome to the culling games!\n### Use one of the following learn commands to learn how to play!\n`Make sure to use ,learn <command> or /learn command to learn about each part!" )
-        for subc in self.learn.walk_commands():
-           name=subc.name
-           description=subc.description
-           group_embed.add_field(name=name, value=description)
-        group_embed.set_author(name=self.botname, icon_url=self.avatar, url=self.avatar)
-        group_embed.set_thumbnail(url=self.avatar)
-        await ctx.send('Tutorial command group', embed=group_embed)
-=======
         group_embed = discord.Embed(title="Tutorial", 
                                     description="Choose one of the following commands to learn about!\nYou can use either" 
                                     " `/learn <command_name>` or the prefix `,learn <command_name>`")
@@ -46,7 +32,6 @@ class Utils_cog(commands.Cog):
             error = (f'<learn command> from file <{__name__}> ERROR:\n{e}') #no clue how to get the name the method
             print(error)
             await ctx.send(error)
->>>>>>> 633bd848223991f88277710626f700338eb54a5b
 
 
     # CHANGED TO 'CHARACTER' INSTEAD OF 'CREATE' JUST SEEMED MORE FITTING LMK
