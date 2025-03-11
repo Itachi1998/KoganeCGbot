@@ -17,16 +17,15 @@ async def setup(bot):
 
 
 class Techniques():
-    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, discription: str, rarity: int, techclass :str, **kwargs):
+    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, techclass :str, **kwargs):
         try:
             self.name = name
             self.level = level
-            self.offense = offense
-            self.defense = defense
             self.emote = emote
-            self.discription = discription
-            self.rarity = rarity
-            self.techclass= techclass
+            self.techclass= techclass # (is it for awakened sorcerers, curses, reincarnated, or mutants)
+
+         
+            
 
 
         except Exception as e:
@@ -36,52 +35,53 @@ class Techniques():
 
 
 
-class Offense():
-    def __init__(self, name: str, level: int, damage: int, reforce: reforce, accuracy: int, crit: int, speed: int, cost: int, neg: bool, pen: int, aoe: int):
-        try:
-            self.reforce = reforce #ce reinforcement cost per use
-            self.damage = damage #damage of technique
-            self.accuracy = accuracy #hit chance
-            self.crit = crit #black flash chance
-            self.speed = speed #speed of technique
-            self.cost = cost # ce cost per use
-            self.neg = neg  #negate's defense
-            self.pen = pen #penetration
-            self.aoe = aoe #area of effect
+class Offense(Technique):
+     def __init__(self, name, level emote, techclass, activation_speed: int, activation_cost: int,activation_dur: int, strength: int, speed: int, aoe: int,imbued: int, poison: tuple, stun: int, sure_hit: bool, maximum: bool, negates: bool, soul: bool):
+          super.__init__(name, level, emote, techclass)
+          self.name = name
+          self.level = level
+          self.emoji = emote
+          self.class = techclass
+          self.act_spd = self.activation_speed
+          self.act_cost = self.activation_cost
+          self.act_dur = self.activation_duration
+          self.strength = strength
+          self.speed = speed
+          self.aoe = aoe
+          self.imbued=imbued
+          self.poison = poison
+          self.stun = stun
+          self.sure_hit = sure_hit
+          self.maximum = maximum
+          self.negates = negates
+          self.soul = soul
+
+class Defense(Technique)
+       def __init__(self, name, level, technique, emote, techclass, activation_speed, activation_cost, activation_dur, debuffs, buffs, aoe, imbued, poison, stun, sure_hit, maximum, negates, soul):
+           super.__init__(name, level, technique, emote, techclass, activation_speed, activation_cost, activation_dur)
+           self.name = name
+           self.level = level
+           self.tech = technique
+           self.emoji = emote
+           self.class =techclass
+           self.act_speed = activation_speed
+           self.act_cost = activation_cost
+           self.act_dur = activation_duration
+           self.debuffs = debuffs
+           self.buffs = buffs
+           self.aoe = aoe
+           self.imbued = imbued
+           self.poison = poison
+           self.stun = stun
+           self.sure_hit = sure_hit
+           self.maximum = maximum
+           self.soul = soul
+
+          
+
+
    
-            self.name = name
-            self.level = level #level required
-        except Exception as e:
-            fstring=f"Failed to configure offense {damage}\n Check console for error"
-            print(fstring)
-            print(e)
-    
-    def to_dict(self):
-        return self.__dict__
-    
-    
-
-class Defense():
-    def __init__(self, name: str, level: int, block: int, dodge: int, reforce: int, speed: int, cost: int, neg: bool, debuff: int):
-        try:
-            self.name = name 
-            self.block = block #block chance
-            self.dodge = dodge #dodge chance
-            self.reforce = reforce #ce reinforcement cost per use
-            self.speed = speed #speed of defense
-            self.cost = cost # ce cost per use
-            self.neg = neg  #negate's attack
-            self.level = level #level required
-            self.debuff = debuff #debuff like simple domain or falling blossom emotion
-        
-
-        except Exception as e:
-            fstring=f"Failed to configure defense {block}\n Check console for error"
-            print(fstring)
-            print(e)
-
-    def to_dict(self):
-        return self.__dict__
+      
     
 
 class Domain():
