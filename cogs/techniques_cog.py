@@ -37,9 +37,9 @@ class Techniques():
 
 
 class Offense():
-    def __init__(self, name: str, level: int, damage: int, reforce: reforce, accuracy: int, crit: int, speed: int, cost: int, neg: bool, pen: int, aoe: int):
+    def __init__(self, name: str, level: int, damage: int, accuracy: int, crit: int, speed: int, cost: int, neg: bool, pen: int, aoe: int):
         try:
-            self.reforce = reforce #ce reinforcement cost per use
+            self.imbued = imbued#ce reinforcement cost per use
             self.damage = damage #damage of technique
             self.accuracy = accuracy #hit chance
             self.crit = crit #black flash chance
