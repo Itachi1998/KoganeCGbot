@@ -17,7 +17,7 @@ async def setup(bot):
 
 
 class Techniques():
-    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, techclass :str,activation_speed: int, activation_duration: int, activation_cost: int, poison: tuple, stun: tuple, negates: bool):
+    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, techclass :str,activation_speed: int, activation_duration: int, activation_cost: int, aoe: int, poison: tuple, stun: tuple, negates: bool, soul: tuple):
         try:
             self.name = name
             self.level = level
@@ -25,7 +25,13 @@ class Techniques():
             self.techclass= techclass # (is it for awakened sorcerers, curses, reincarnated, or mutants)
             self.act_spd = activation_speed
             self.act_dur = activation_duration
-            self.act_cost = activation_cost 
+            self.act_cost = activation_cost
+            self.aoe = int
+            self.poison = poison
+            self.stun = stun
+            self.negates = negates
+            self.soul = soul
+
 
         except Exception as e:
             fstring=f"Failed to configure technique {name}\n Check console for error"
@@ -35,25 +41,20 @@ class Techniques():
 
 
 class Offense(Technique):
-     def __init__(self, name, level emote, techclass, activation_speed: int, activation_cost: int,activation_dur: int, strength: int, speed: int, aoe: int,imbued: int, poison: tuple, stun: int, sure_hit: bool, maximum: bool, negates: bool, soul: bool):
-          super.__init__(name, level, emote, techclass)
-          self.name = name
-          self.level = level
-          self.emoji = emote
-          self.class = techclass
-          self.act_spd = self.activation_speed
-          self.act_cost = self.activation_cost
-          self.act_dur = self.activation_duration
-          self.strength = strength
-          self.speed = speed
-          self.aoe = aoe
-          self.imbued=imbued
-          self.poison = poison
-          self.stun = stun
-          self.sure_hit = sure_hit
-          self.maximum = maximum
-          self.negates = negates
-          self.soul = soul
+     def __init__(self, name; str, level; int, emote: str, techclass: str, activation_speed: int, activation_dur: int, activation_cost: int, aoe: int, poison: tuple, stun: int, negates: bool, soul: tuple,strength: int, speed:int, charge: tuple, stack: tuple, sure_hit: bool, type: str):
+          super.__init__(name, level, emote, techclass, activation_speed, activation_dur, activation_cost, aoe, poison, stun, negate, soul)
+          
+          self.charge = charge # a tuple of charge stacks for MBA users
+          self.stack = stack # a tuple of projection stacks for projection sorcerers
+          self.sure_hit = sure_hit # a Boolean if this can be used in domain
+          self.strength = strength # the strength of attack
+          self.speed = speed # the speed of attack 
+          self.type = type # the type of attack (melee, projectile)
+
+          
+          
+
+     
 
 class Defense(Technique)
        def __init__(self, name, level, technique, emote, techclass, activation_speed, activation_cost, activation_dur, debuffs, buffs, aoe, imbued, poison, stun, sure_hit, maximum, negates, soul):
