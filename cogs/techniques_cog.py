@@ -17,16 +17,15 @@ async def setup(bot):
 
 
 class Techniques():
-    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, techclass :str, **kwargs):
+    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, techclass :str,activation_speed: int, activation_duration: int, activation_cost: int, poison: tuple, stun: tuple, negates: bool):
         try:
             self.name = name
             self.level = level
             self.emote = emote
             self.techclass= techclass # (is it for awakened sorcerers, curses, reincarnated, or mutants)
-
-         
-            
-
+            self.act_spd = activation_speed
+            self.act_dur = activation_duration
+            self.act_cost = activation_cost 
 
         except Exception as e:
             fstring=f"Failed to configure technique {name}\n Check console for error"
