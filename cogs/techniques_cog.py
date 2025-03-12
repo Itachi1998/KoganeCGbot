@@ -41,7 +41,7 @@ class Techniques():
 
 
 class Offense(Technique):
-     def __init__(self, name; str, level; int, emote: str, techclass: str, activation_speed: int, activation_dur: int, activation_cost: int, aoe: int, poison: tuple, stun: int, negates: bool, soul: tuple,strength: int, speed:int, charge: tuple, stack: tuple, sure_hit: bool, type: str):
+     def __init__(self, name; str, level; int, emote: str, techclass: str, activation_speed: int, activation_dur: int, activation_cost: int, aoe: int, poison: tuple, stun: int, negates: bool, soul: tuple,strength: int, speed:int, charge: tuple, stack: tuple, sure_hit: bool, type: str, maximum: bool):
           super.__init__(name, level, emote, techclass, activation_speed, activation_dur, activation_cost, aoe, poison, stun, negate, soul)
           
           self.charge = charge # a tuple of charge stacks for MBA users
@@ -50,6 +50,7 @@ class Offense(Technique):
           self.strength = strength # the strength of attack
           self.speed = speed # the speed of attack 
           self.type = type # the type of attack (melee, projectile)
+          self.maximum = maximum 
 
           
           
