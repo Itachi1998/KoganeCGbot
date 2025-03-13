@@ -545,7 +545,7 @@ class Grade3_Furrpede(Enemy):
 
 class Grade3_AnxiousEars(Enemy):
     def __init__(self, **kwargs):
-        super.init(name="Anxious Ears", level=1, hp=250, max_hp=250, ce=200, max_ce=200, strength=50, speed=50, xp=100, cgp=1, technique="AnxiousEars", playerclass="curse")
+        super.init(name="Anxious Ears", level=15, hp=250, max_hp=250, ce=200, max_ce=200, strength=50, speed=50, xp=100, cgp=1, technique="AnxiousEars", playerclass="curse")
         for k, v in kwargs:
              if k == "qunatity" and isinstance(v, int):
                   self.quantity = v
@@ -561,7 +561,7 @@ class Grade3_AnxiousEars(Enemy):
 
 class Grade2_Stinkaspor(Enemy):
     def __init__(self, **kwargs):
-        super.init(name="Stinkaspor", level=10, hp=350, max_hp=350, ce=350, max_ce=350, strength=150, speed=150, xp=200, cgp=1, technique="Stinkaspor", playerclass="curse")
+        super.init(name="Stinkaspor", level=30, hp=350, max_hp=350, ce=350, max_ce=350, strength=150, speed=150, xp=200, cgp=1, technique="Stinkaspor", playerclass="curse")
         for k, v in kwargs:
              if k == "qunatity" and isinstance(v, int):
                   self.quantity = v
@@ -578,7 +578,7 @@ class Grade2_Stinkaspor(Enemy):
 
 class Grade2_Monkeybrain(Enemy):
     def __init__(self, **kwargs):
-        super.init(name="Monkeybrain", level=10, hp=300, max_hp=300, ce=350, max_ce=350, strength=150, speed=150, xp=200, cgp=1, technique="Monkeybrain", playerclass="curse")
+        super.init(name="Monkeybrain", level=30, hp=300, max_hp=300, ce=350, max_ce=350, strength=150, speed=150, xp=200, cgp=1, technique="Monkeybrain", playerclass="curse")
         for k, v in kwargs:
              if k == "qunatity" and isinstance(v, int):
                   self.quantity = v
@@ -595,7 +595,7 @@ class Grade2_Monkeybrain(Enemy):
 
 class Grade1_Orbmaster(Enemy):
     def __init__(self, **kwargs):
-        super.init(name="OrbMaster", level=10, hp=400, max_hp=400, ce=500, max_ce=500, strength=200, speed=300, xp=400, cgp=1, technique="Orbmaster", playerclass="curse")
+        super.init(name="OrbMaster", level=40, hp=400, max_hp=400, ce=500, max_ce=500, strength=200, speed=300, xp=400, cgp=1, technique="Orbmaster", playerclass="curse")
         for k, v in kwargs:
              if k == "killed" and isinstance(v, dict):
                   self.killed=v
@@ -608,10 +608,8 @@ class Grade1_Orbmaster(Enemy):
 
 class Grade1_Charger(Enemy):
     def __init__(self, **kwargs):
-            super.init(name="Charger", level=10, hp=400, max_hp=400, ce=400, max_ce=400, strength=400, speed=400, xp=400, cgp=1, technique="Triplebackhand", playerclass="curse")
+            super.init(name="Charger", level=40, hp=400, max_hp=400, ce=400, max_ce=400, strength=400, speed=400, xp=400, cgp=1, technique="Charger", playerclass="curse")
             for k, v in kwargs:
-                if k == "qunatity" and isinstance(v, int):
-                    self.quantity = v
                 if k == "killed" and isinstance(v, dict):
                     self.killed=v
                 if k == "killcount" and isinstance(v, dict):
@@ -624,163 +622,249 @@ class Grade1_Charger(Enemy):
 
 class SpecialGrade_FingerBearer(Enemy):
     def __init__(self, **kwargs):
-        super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+        super.init(
+             name="Fingerbearer", 
+             level=80, 
+             hp=600, 
+             max_hp=600, 
+             ce=400, 
+             max_ce=600, 
+             strength=700,
+             speed=800,
+             xp=600,
+             cgp=1,
+             technique="Fingerbearer",
+             playerclass="curse")
         for k, v in kwargs:
-             if k == "qunatity" and isinstance(v, int):
-                  self.quantity = v
-             if k == "killed" and isinstance(v, dict):
-                  self.killed=v
-             if k == "killcount" and isinstance(v, dict):
-                    self.killcount=v
-             if k == "poison" and isinstance(v, tuple):
-                    self.poison = v 
-             if k == "colony" and isinstance(v, int):
-                  self.colony = v
+                if k == "killed" and isinstance(v, dict):
+                    self.killed=v
+                if k == "killcount" and isinstance(v, dict):
+                        self.killcount=v
+                if k == "colony" and isinstance(v, int):
+                    self.colony = v
+                if k == "equipped" and isinstance(v, int):
+                     self.equipped=v
 
 
-class SpecialGrade_Obstacle(Enemy):
-    def __init__(self, **kwargs):
-        super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
-        for k, v in kwargs:
-             if k == "qunatity" and isinstance(v, int):
-                  self.quantity = v
-             if k == "killed" and isinstance(v, dict):
-                  self.killed=v
-             if k == "killcount" and isinstance(v, dict):
-                    self.killcount=v
-             if k == "poison" and isinstance(v, tuple):
-                    self.poison = v 
-             if k == "colony" and isinstance(v, int):
-                  self.colony = v
 
-
-class SpecialGrade_DisasterFlame(Enemy):
+class SpecialGrade_DisasterFlames(Enemy):
         def __init__(self, **kwargs):
-        super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
-        for k, v in kwargs:
-             if k == "qunatity" and isinstance(v, int):
-                  self.quantity = v
-             if k == "killed" and isinstance(v, dict):
-                  self.killed=v
-             if k == "killcount" and isinstance(v, dict):
-                    self.killcount=v
-             if k == "poison" and isinstance(v, tuple):
-                    self.poison = v 
-             if k == "colony" and isinstance(v, int):
-                  self.colony = v
+            super.init(name="Disaster Flames",
+                        level=80, hp=800, max_hp=800, ce=1200, max_ce=1200, strength=800, speed=1500, xp=1000, cgp=1, technique="Disaster Flames", playerclass="curse")
+            for k, v in kwargs:
+                if k == "killed" and isinstance(v, dict):
+                    self.killed=v
+                if k == "killcount" and isinstance(v, dict):
+                        self.killcount=v
+                if k == "colony" and isinstance(v, int):
+                    self.colony = v
+            
+                
+                
+
 
 
 
 class SpecialGrade_NatureSpirit(Enemy):
         def __init__(self, **kwargs):
-        super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
-        for k, v in kwargs:
-             if k == "qunatity" and isinstance(v, int):
-                  self.quantity = v
-             if k == "killed" and isinstance(v, dict):
-                  self.killed=v
-             if k == "killcount" and isinstance(v, dict):
-                    self.killcount=v
-             if k == "poison" and isinstance(v, tuple):
-                    self.poison = v 
-             if k == "colony" and isinstance(v, int):
-                  self.colony = v
-
+            super.init(name="Nature Spirit",
+                       level=80, hp=1200, max_hp=1200, ce=1000, max_ce=1000, strength=900, speed=900, xp=1000, cgp=1, technique="Nature Spirit", playerclass="curses")
+                   
+            for k, v in kwargs:
+                 if k == "killed" and isinstance(v, dict):
+                      self.killed=  v
+                 if k == "killcount" and isinstance(v, dict):
+                      self.killcount=v
+                 if k == "colony" and isinstance(v, int):
+                      self.colony= v
 
 
 class SpecialGrade_TideCurse(Enemy):
        def __init__(self, **kwargs):
-        super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+        super.init(name="Tide Curse",
+                   level=60,
+                   hp=800, max_hp=800, ce=1000, max_ce=1000, strength=800, speed=800, xp=1000, cgp=1, technique="Tide Curse", playerclass="curses")
+        
         for k, v in kwargs:
-             if k == "qunatity" and isinstance(v, int):
-                  self.quantity = v
-             if k == "killed" and isinstance(v, dict):
-                  self.killed=v
-             if k == "killcount" and isinstance(v, dict):
-                    self.killcount=v
-             if k == "poison" and isinstance(v, tuple):
-                    self.poison = v 
-             if k == "colony" and isinstance(v, int):
-                  self.colony = v
+                 if k == "killed" and isinstance(v, dict):
+                      self.killed=  v
+                 if k == "killcount" and isinstance(v, dict):
+                      self.killcount=v
+                 if k == "colony" and isinstance(v, int):
+                          self.colony= v
 
 
-
-
-class SpecialGrade_DeathSpirit(Enemy):
+class SpecialGrade_Satasha(Enemy):
        def __init__(self, **kwargs):
-        super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+        super.init(name="Satasha",
+                   level=80, 
+                   hp=1000,
+                   max_hp=1000,
+                   ce=1000,
+                   max_ce=1000,
+                   strength=600,
+                   speed=800,
+                   xp=1000,
+                   cgp=1,
+                   technique="Satasha",
+                   playerclass="curses")
         for k, v in kwargs:
-             if k == "qunatity" and isinstance(v, int):
-                  self.quantity = v
-             if k == "killed" and isinstance(v, dict):
-                  self.killed=v
-             if k == "killcount" and isinstance(v, dict):
-                    self.killcount=v
-             if k == "poison" and isinstance(v, tuple):
-                    self.poison = v 
-             if k == "colony" and isinstance(v, int):
-                  self.colony = v
+                 if k == "killed" and isinstance(v, dict):
+                      self.killed=  v
+                 if k == "killcount" and isinstance(v, dict):
+                      self.killcount=v
+                 if k == "colony" and isinstance(v, int):
+                      self.colony= v
+                
+
 
 class Toji(Enemy):
            def __init__(self, **kwargs):
-            super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+            super.init(name="Toji",
+                       level=100,
+                       hp=1200,
+                       max_hp=1200,
+                       ce=0,
+                       max_ce=0,
+                       strength=1200,
+                       speed=1200,
+                       xp=1200,
+                       cgp=5,
+                       technique="Toji", 
+                       playerclass="reincarnated")
+            
             for k, v in kwargs:
-                if k == "qunatity" and isinstance(v, int):
-                    self.quantity = v
-                if k == "killed" and isinstance(v, dict):
-                    self.killed=v
-                if k == "killcount" and isinstance(v, dict):
-                        self.killcount=v
-                if k == "poison" and isinstance(v, tuple):
-                        self.poison = v 
-                if k == "colony" and isinstance(v, int):
-                    self.colony = v
-
-
+                 if k == "equipped" and isinstance(v, list):
+                      self.equipped=v
+                 if k == "killed" and isinstance(v, dict):
+                      self.killed=v
+                 if k == "killcount" and isinstance(v, dict):
+                      self.killcount=v
+                 if k == "inventory" and isinstance(v, list):
+                      self.inventory=v
+                 if k == "curses" and isinstance(v, list):
+                    self.curses= v
+                 if k == "airhop" and isinstance(v, bool):
+                      self.airhop=v
 
 
 class Reggie(Enemy):
         def __init__(self, **kwargs):
-                super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+                super.init(name="Reggie", 
+                           level=60,
+                           hp=600,
+                           max_hp=600,
+                           ce=700,
+                           max_ce=700,
+                           strength=800,
+                           speed=800,
+                           xp=1000,
+                           cgp=5,
+                           technique="Reggie",
+                           playerclass="sorcerer"
+                )
+
                 for k, v in kwargs:
-                    if k == "qunatity" and isinstance(v, int):
-                        self.quantity = v
+                    if k == "equipped" and isinstance(v, list):
+                        self.equipped=v
                     if k == "killed" and isinstance(v, dict):
                         self.killed=v
                     if k == "killcount" and isinstance(v, dict):
-                            self.killcount=v
-                    if k == "poison" and isinstance(v, tuple):
-                            self.poison = v 
-                    if k == "colony" and isinstance(v, int):
-                        self.colony = v
-
-
+                        self.killcount=v
+                    if k == "inventory" and isinstance(v, list):
+                        self.inventory=v
+                
 
 class Uro(Enemy):
         def __init__(self, **kwargs):
-                        super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+                        super.init(name="Uro",
+                                   level=80,
+                                   hp=800,
+                                   max_hp=800,
+                                   ce=1000,
+                                   max_ce=1000,
+                                   strength=600,
+                                   speed=1200,
+                                   xp=1000,
+                                   cgp=5,
+                                   technique="Uro",
+                                   playerclass="reincarnated")
                         for k, v in kwargs:
-                            if k == "qunatity" and isinstance(v, int):
-                                self.quantity = v
-                            if k == "killed" and isinstance(v, dict):
-                                self.killed=v
-                            if k == "killcount" and isinstance(v, dict):
-                                    self.killcount=v
-                            if k == "poison" and isinstance(v, tuple):
-                                    self.poison = v 
-                            if k == "colony" and isinstance(v, int):
-                                self.colony = v
+                             if k == "flying" and isinstance(v, bool):
+                                  self.flyin=v
+                             if k == "killed" and isinstance(v, dict):
+                                    self.killed=v
+                             if k == "killcount" and isinstance(v, dict):
+                                    self.killcount
+                             if k == "colony" and isinstance(v, int):
+                                   self.colony = v
+
+class Ryu(Enemy):
+     def __init__(self, **kwargs):
+          super.init(name="Ryu",
+                     hp=1000,
+                     max_hp=1000,
+                     ce=1200,
+                     max_ce=1200,
+                     strength=1000,
+                     speed=1000,
+                     xp=1000,
+                     cgp=5,
+                     technique="Ryu",
+                     playerclass="reincarnated"
+                     )
+          
+          for k, v in kwargs:
+                    if k == "flying" and isinstance(v, bool):
+                                  self.flyin=v
+                    if k == "killed" and isinstance(v, dict):
+                                    self.killed=v
+                    if k == "killcount" and isinstance(v, dict):
+                                    self.killcount
+                    if k == "colony" and isinstance(v, int):
+                                   self.colony = v
 
 
+class Kashimo(Enemy):
+     def __init__(self, **kwargs):
+          super.init(name="Kashimo",
+                     hp=1500,
+                     max_hp=1500,
+                     ce=1600,
+                     max_ce=1600,
+                     strength=1800,
+                     speed=1800,
+                     xp=1500,
+                     cgp=5,
+                     technique="Kashimo",
+                     playerclass="reincarnated"
+                     )
+          for k, v in kwargs:
+                if k == "equipped" and isinstance(v, list):
+                    self.equipped=v
+                if k == "charge" and isinstance(v, tuple):
+                    self.charge= v
+                if k == "tech_activ" and isinstance(v, bool):
+                    self.tech_activ = v
+        
 
-
-
-class KingOfCurses(Enemy):                  
+class KungOfCurses(Enemy):                  
         def __init__(self, **kwargs):
-                super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+                super.init(name="King of Curses", 
+                           level=100, 
+                           hp=7000, 
+                           max_hp=7000, 
+                           ce=4000, 
+                           max_ce=4000, 
+                           strength=5000, 
+                           speed=5000, 
+                           xp=2000, 
+                           cgp=5, 
+                           technique="King of Curses", 
+                           playerclass="reincarnated")
                 for k, v in kwargs:
-                    if k == "qunatity" and isinstance(v, int):
-                        self.quantity = v
+                    if k == "equipped" and isinstance(v, list):
+                          self.equipped=v
                     if k == "killed" and isinstance(v, dict):
                         self.killed=v
                     if k == "killcount" and isinstance(v, dict):
@@ -788,52 +872,21 @@ class KingOfCurses(Enemy):
                     if k == "poison" and isinstance(v, tuple):
                             self.poison = v 
                     if k == "colony" and isinstance(v, int):
-                        self.colony = v
+                          self.colony=v
 
 
 class Kenjaku(Enemy):
         def __init__(self, **kwargs):
-                super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
+                super.init(name="Kenjaku", level=100, hp=3000, max_hp=3000, ce=2000, max_ce=2000, strength=2000, speed=2000, xp=2000, cgp=1, technique="Kenjaku", playerclass="curse")
                 for k, v in kwargs:
-                    if k == "qunatity" and isinstance(v, int):
-                        self.quantity = v
                     if k == "killed" and isinstance(v, dict):
                         self.killed=v
                     if k == "killcount" and isinstance(v, dict):
                             self.killcount=v
-                    if k == "poison" and isinstance(v, tuple):
-                            self.poison = v 
                     if k == "colony" and isinstance(v, int):
                         self.colony = v
+                    if k == "equipped" and isinstance(v, list):
+                          self.equipped=v
 
 
-class Uraume(Enemy):
-        def __init__(self, **kwargs):
-                super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
-                for k, v in kwargs:
-                    if k == "qunatity" and isinstance(v, int):
-                        self.quantity = v
-                    if k == "killed" and isinstance(v, dict):
-                        self.killed=v
-                    if k == "killcount" and isinstance(v, dict):
-                            self.killcount=v
-                    if k == "poison" and isinstance(v, tuple):
-                            self.poison = v 
-                    if k == "colony" and isinstance(v, int):
-                        self.colony = v
 
-    
-class Kashimo(Enemy):
-        def __init__(self, **kwargs):
-                super.init(name="Flymouth", level=1, hp=30, max_hp=30, ce=20, max_ce=20, strength=10, speed=20, xp=10, cgp=1, technique="Triplebackhand", playerclass="curse")
-                for k, v in kwargs:
-                    if k == "qunatity" and isinstance(v, int):
-                        self.quantity = v
-                    if k == "killed" and isinstance(v, dict):
-                        self.killed=v
-                    if k == "killcount" and isinstance(v, dict):
-                            self.killcount=v
-                    if k == "poison" and isinstance(v, tuple):
-                            self.poison = v 
-                    if k == "colony" and isinstance(v, int):
-                        self.colony = v

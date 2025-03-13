@@ -84,7 +84,7 @@ class Techniques():
 
 enemy_techs = {
         "Orbmaster" :
-        [ # list of moves
+        [ # list of moves 
             {
                 "Impending Doom" : Techniques(
                     name="Orbmaster: Impending Doom",
@@ -113,7 +113,8 @@ enemy_techs = {
                     sure_hit=True
                     )
             }
-        ]
+        ],
+        
 }    
 
 for k, v in enemy_techs.items():
