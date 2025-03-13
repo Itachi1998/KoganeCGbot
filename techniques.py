@@ -18,7 +18,7 @@ async def setup(bot):
 
 class Techniques():
     def __init__(self, 
-                 name: str, # "Blood Manipulation: Piercing Blood"
+                 name: str,  # "Blood Manipulation: Piercing Blood"
                  level: int, # 1-5
                  act_speed: int, # activation speed of technique: 1-5 (can be changed with binding vows)
                  act_dur: int, #activation duration in turn counts: can very in numbers and be changed with binding vows
@@ -82,92 +82,44 @@ class Techniques():
  
 
 
+enemy_techs = {
+        "Orbmaster" :
+        [ # list of moves
+            {
+                "Impending Doom" : Techniques(
+                    name="Orbmaster: Impending Doom",
+                    level=1,
+                    act_speed=10,
+                    act_dur=1,
+                    act_cost=100,
+                    aoe=1,
+                    strength=420,
+                    speed=100,
+                    type="attack projectile", # attack projectile, attack melee
+                    sure_hit=True,
+                )
+            },
+            {
+                "Foresight" : Techniques(
+                    name="Orbmaster: Foresight",
+                    level=1,
+                    act_speed=10,
+                    act_dur=1,
+                    act_cost=100,
+                    aoe=1,
+                    strength=400,
+                    speed=200,
+                    type="defense dodge", #defense tank, defense dodge, defense counter
+                    sure_hit=True
+                    )
+            }
+        ]
+}    
+
+for k, v in enemy_techs.items():
+    print(k,v)
+
+
+
     
-
-class Defense():
-    def __init__(self, name: str, level: int, block: int, dodge: int, reforce: int, speed: int, cost: int, neg: bool, debuff: int):
-        try:
-            self.name = name 
-            self.block = block #block chance
-            self.dodge = dodge #dodge chance
-            self.reforce = reforce #ce reinforcement cost per use
-            self.speed = speed #speed of defense
-            self.cost = cost # ce cost per use
-            self.neg = neg  #negate's attack
-            self.level = level #level required
-            self.debuff = debuff #debuff like simple domain or falling blossom emotion
-        
-
-        except Exception as e:
-            fstring=f"Failed to configure defense {block}\n Check console for error"
-            print(fstring)
-            print(e)
-
-    def to_dict(self):
-        return self.__dict__
-    
-
-class Domain():
-    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, turns: int):
-        try:
-            self.name = name
-            self.level = level
-            self.offense = offense
-            self.defense = defense
-            self.emote = emote
-            self.turns = turns #amount of turns active
-
-        except Exception as e:
-            fstring=f"Failed to configure domain {name}\n Check console for error"
-            print(fstring)
-            print(e)
-
-    def to_dict(self):
-        return self.__dict__
-    
-class MaximumTech():
-    def __init__(self, level: int, name: str, reforce: int, damage: int, accuracy: int, speed: int, cost: int, aoe: int, pen: int, neg: bool):
-        try:
-            self.level = level
-            self.reforce = reforce #ce reinforcement cost per use
-            self.damage = damage #damage of technique
-            self.accuracy = accuracy #hit chance
-            self.speed = speed #speed of technique
-            self.cost = cost # ce cost per use
-            self.neg = neg  #negate's defense
-            self.pen = pen #penetration
-            self.aoe = aoe #area of effect
-
-        except Exception as e:
-            fstring=f"Failed to configure maximum technique {name}\n Check console for error"
-            print(fstring)
-            print(e)
-
-    def to_dict(self):
-        return self.__dict__
-    
-
-class Shikigami():
-    def __init__(self, name: str, level: int, offense: dict, defense: dict, emote: str, discription: str, rarity: int, shikiclass :str, **kwargs):
-        try:
-            self.name = name
-            self.level = level
-            self.offense = offense
-            self.defense = defense
-            self.emote = emote
-            self.discription = discription
-            self.rarity = rarity
-            self.shikiclass= shikiclass
-
-        except Exception as e:
-            fstring=f"Failed to configure shikigami {name}\n Check console for error"
-            print(fstring)
-            print(e)
-
-    def to_dict(self):
-        return self.__dict__
-    
-
-
-
 
