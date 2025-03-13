@@ -608,7 +608,7 @@ class Grade1_Orbmaster(Enemy):
 
 class Grade1_Charger(Enemy):
     def __init__(self, **kwargs):
-            super.init(name="Charger", level=10, hp=400, max_hp=400, ce=20, max_ce=20, strength=400, speed=400, xp=400, cgp=1, technique="Triplebackhand", playerclass="curse")
+            super.init(name="Charger", level=10, hp=400, max_hp=400, ce=400, max_ce=400, strength=400, speed=400, xp=400, cgp=1, technique="Triplebackhand", playerclass="curse")
             for k, v in kwargs:
                 if k == "qunatity" and isinstance(v, int):
                     self.quantity = v
