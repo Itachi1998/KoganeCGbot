@@ -70,6 +70,8 @@ class Techniques():
                         self.curses = v #list of curses tamed by user
                     if k == "souls" and isinstance(v, list):
                         self.souls = v # list of souls transfigured by users
+                    if k == "poison" and isinstance(v, tuple):
+                        self.poison = v # tuple of poison damage and duration
                 except Exception as e:
                     string= "Error loading optional attributes for Techniques class"
                     print(string)
@@ -111,9 +113,135 @@ enemy_techs = {
                     speed=200,
                     type="defense dodge", #defense tank, defense dodge, defense counter
                     sure_hit=True
-                    )
+                )
             }
-        ]
+        ],
+
+        # PHYSICAL ATTACK
+        "Bugfly" : 
+        [
+            {
+                "Bugfly Sting" : Techniques(
+                    name="Bugfly: Sting",
+                    level=1,
+                    act_speed=2,
+                    act_dur=1,
+                    act_cost=1,
+                    aoe=1,
+                    strength=5,
+                    speed=15,
+                    type="attack melee",
+                )
+            },
+            {
+                "Bugfly Dodge" : Techniques(
+                    name="Bugfly: Dodge",
+                    level=1,
+                    act_speed=2,
+                    act_dur=1,
+                    act_cost=1,
+                    aoe=1,
+                    strength=15,
+                    speed=30,
+                    type="defense dodge",
+                )
+            }
+        ],
+
+        # PHYSICAL ATTACK
+        "Floatjelly" : 
+        [
+            {
+                "FloatJelly Sting" : Techniques(
+                    name="FloatJelly: Sting",
+                    level=1,
+                    act_speed=5,
+                    act_dur=1,
+                    act_cost=3,
+                    aoe=1,
+                    strength=20,
+                    speed=10,
+                    type="attack melee"
+                )
+            },
+            {
+                "Floatjelly Float" : Techniques(
+                    name="FloatJelly : Float",
+                    level=1,
+                    act_speed=4,
+                    act_dur=1,
+                    act_cost=2,
+                    aoe=1,
+                    strength=15,
+                    speed=15,
+                    type="defense dodge"
+                )
+            }
+        ],
+
+        "Stinkaspore" : 
+        [
+            {
+                "Gas Manipulation" : Techniques(
+                    name="Stinkaspore: Gas Manipulation",
+                    level=1,
+                    act_speed=3,
+                    act_dur=2,
+                    act_cost=20,
+                    aoe=5,
+                    strength=100,
+                    speed=100,
+                    type="attack poison",
+                    poison=((5-20), 2)
+                )
+            },
+            {
+                "" : Techniques(
+                    name="",
+                    level=,
+                    act_speed=,
+                    act_dur=,
+                    act_cost=,
+                    aoe=,
+                    strength=,
+                    speed=,
+                    type="",
+                    sure_hit=
+                )
+            }
+        ],
+
+        "" : 
+        [
+            {
+                "" : Techniques(
+                    name="",
+                    level=,
+                    act_speed=,
+                    act_dur=,
+                    act_cost=,
+                    aoe=,
+                    strength=,
+                    speed=,
+                    type="",
+                    sure_hit=
+                )
+            },
+            {
+                "" : Techniques(
+                    name="",
+                    level=,
+                    act_speed=,
+                    act_dur=,
+                    act_cost=,
+                    aoe=,
+                    strength=,
+                    speed=,
+                    type="",
+                    sure_hit=
+                )
+            }
+        ],
 }    
 
 for k, v in enemy_techs.items():
