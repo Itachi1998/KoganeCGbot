@@ -18,7 +18,53 @@ class GameMode(enum.IntEnum):
     Pvp = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points
     Q = 4 # for when the player is in a queue
 
+class BodyPart:
+    def __init__(self, name, max_health):
+        self.name = name
+        self.max_health = max_health
+        self.health = max_health
 
+    def take_damage(self, damage):
+        self.health -= damage
+        if self.health < 0:
+            self.health = 0
+        print(f"{self.name} took {damage} damage. Remaining health: {self.health}")
+
+    def is_destroyed(self):
+        return self.health <= 0
+
+# class Character:
+   # def __init__(self, name):
+       # self.name = name
+       # self.body_parts = {}
+
+   # def add_body_part(self, body_part):
+        self.body_parts[body_part.name] = body_part
+
+   # def take_damage(self, body_part_name, damage):
+        if body_part_name in self.body_parts:
+           #  self.body_parts[body_part_name].take_damage(damage)
+           # if self.body_parts[body_part_name].is_destroyed():
+               # print(f"{self.body_parts[body_part_name].name} is destroyed!")
+       #  else:
+           # print(f"{body_part_name} not found on {self.name}.")
+
+# Example usage
+# player = Character("Hero")
+# head = BodyPart("Head", 50)
+# arm_left = BodyPart("Left Arm", 30)
+# arm_right = BodyPart("Right Arm", 30)
+# torso = BodyPart("Torso", 100)
+
+# player.add_body_part(head)
+# player.add_body_part(arm_left)
+# player.add_body_part(arm_right)
+# player.add_body_part(torso)
+
+# player.take_damage("Head", 20)
+# player.take_damage("Left Arm", 30)
+# player.take_damage("Torso", 110)
+# player.take_damage("Legs", 40) # Body part not found
 # Parent class for the Player and Enemy Subclasses
 class Actor:
     def __init__(self,
