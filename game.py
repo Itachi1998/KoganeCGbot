@@ -21,12 +21,20 @@ class GameMode(enum.IntEnum):
 
 # Parent class for the Player and Enemy Subclasses
 class Actor:
-    def __init__(self, name: str, level:int, hp: int, max_hp: int, ce: int, max_ce: int, strength: int, speed: int, xp: int, cgp: int, technique: str, playerclass: str):
+    def __init__(self,
+ name: str, 
+level:int,
+max_hp,
+ max_ce: int,
+ strength: int, 
+speed: int,
+ xp: int, 
+cgp: int,
+ technique: str, 
+playerclass: str):
         self.name=name
         self.level=level
-        self.hp=hp
         self.max_hp = max_hp
-        self.ce = ce
         self.max_ce = max_ce
         self.strength = strength
         self.speed = speed,
@@ -34,6 +42,8 @@ class Actor:
         self.cgp=cgp,
         self.technique = technique
         self.playerclass= playerclass
+        self.hp = max_hp
+        self.ce = max_ce
     def __repr__(self):
         return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
 
@@ -164,7 +174,7 @@ class Actor:
 
 class Enemy(Actor):
 
-    def __init__(self, name, level, hp, max_hp, ce, max_ce, strength, speed, xp, cgp, technique, playerclass, **kwargs):
+    def __init__(self, name, level, max_hp, max_ce, strength, speed, xp, cgp, technique, playerclass, **kwargs):
         super.__init__(self, name, level, hp, max_hp, ce, max_ce, strength, speed, xp, cgp, technique,  playerclass)
         for k,v in kwargs:
              if k == "colony" and isinstance(v, int):
@@ -204,7 +214,7 @@ class Enemy(Actor):
 
 class Player(Actor):
     level_cap = 200
-    def __init__(self, name, level, hp, max_hp, ce, max_ce, strength, speed, xp, cgp, technique, playerclass, **kwargs):
+    def __init__(self, name, level, max_hp max_ce, strength, speed, xp, cgp, technique, playerclass, **kwargs):
          super.__init__(self, name, level, hp, max_hp, ce, max_ce, strength, speed, xp, cgp, technique, playerclass)
          for k,v  in kwargs:
               if k == "colony" and isinstance(v, int):
