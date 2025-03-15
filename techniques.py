@@ -83,10 +83,53 @@ class Techniques():
             print(e)
  
 
-
+# Decending order (special grade -> grade 4)
 enemy_techs = {
-        "Orbmaster" :
-        [ # list of moves
+        "The Reshaper" : # Femhito - special grade
+        [
+            {
+                "Callous Formation" : Techniques( # rearrangement (deformation) of a player (physically via the souls shape) in a cruel manner
+                    name="The Reshaper : Callous Formation",
+                    level=1,
+                    act_speed=2,
+                    act_dur=1, # possibly perminant - use 0 as a way to check for permanent?
+                    act_cost=50,
+                    aoe=1,
+                    strength=800,
+                    speed=600,
+                    type="attack melee",
+                )
+            },
+            {
+                "Soul Transmute Attack" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
+                    name="The Reshaper : Soul Transmute", 
+                    level=1,
+                    act_speed=1,
+                    act_dur=1,
+                    act_cost=50,
+                    aoe=1,
+                    strength=600,
+                    speed=800,
+                    type="attack melee", # change body into weapons
+                )
+            },
+            {
+                "Soul Transmute Escape" : Techniques( # will need sub techniques for separate abilities
+                    name="The Reshaper : Soul Transmute",
+                    level=1,
+                    act_speed=1,
+                    act_dur=1,
+                    act_cost=50,
+                    aoe=1,
+                    strength=600,
+                    speed=800,
+                    type="defense dodge" # wings/legs or smth
+                )
+            } 
+        ],
+
+        "Orbmaster" : # grade 1
+        [ # list of all moves
             {
                 "Impending Doom" : Techniques(
                     name="Orbmaster: Impending Doom",
@@ -111,14 +154,132 @@ enemy_techs = {
                     aoe=1,
                     strength=400,
                     speed=200,
-                    type="defense dodge", #defense tank, defense dodge, defense counter
+                    type="defense counter", #defense tank, defense dodge, defense counter
                     sure_hit=True
                 )
             }
         ],
 
+        "Charger" : # grade 1
+        [
+            {
+                "Charged Punch" : Techniques(
+                    name="Charger : Charged Punch",
+                    level=1,
+                    act_speed=3,
+                    act_dur=1,
+                    act_cost=40,
+                    aoe=1,
+                    strength=500,
+                    speed=300,
+                    type="attack melee"
+                )
+            },
+            {
+                "Electric Ground-pound" : Techniques(
+                    name="Charger : Electric Ground-pound",
+                    level=1,
+                    act_speed=3,
+                    act_dur=1,
+                    act_cost=50,
+                    aoe=5,
+                    strength=400,
+                    speed=300,
+                    type="attack projectile" # add a 'wave' or 'spread' type of attack?
+                )
+            },
+            {
+                "Charged Field" : Techniques(
+                    name="Charger : Charged Field",
+                    level=1,
+                    act_speed=2,
+                    act_dur=1,
+                    act_cost=40,
+                    aoe=5,
+                    strength=400,
+                    speed=500,
+                    type="defense tank"
+                )
+            }
+        ],
+
+        "Stinkaspore" : # grade 2
+        [
+            {
+                "Hydrogen Sulfide Bomb" : Techniques( # rotten egg smelling gas that can cause; unconsciousness, memory loss, death
+                    name="Stinkaspore: Hydrogen Sulfide Bomb",
+                    level=1,
+                    act_speed=3,
+                    act_dur=2,
+                    act_cost=20,
+                    aoe=5,
+                    strength=50,
+                    speed=100,
+                    type="attack poison",
+                    poison=(range(10, 20), 2)
+                )
+            },
+            {
+                "Carbon Monoxide Disperse" : Techniques( # colorless odorless gas that can be fatal in high enough quantities
+                    name="Stinkaspore : Carbon Monoxide Disperse",
+                    level=1,
+                    act_speed=3,
+                    act_dur=3,
+                    act_cost=60,
+                    aoe=5,
+                    strength=100,
+                    speed=100,
+                    type="attack poison"
+                    #sure_hit=True - Maybe
+                )
+            },
+            {
+                "Ammonia Cloud" : Techniques( # can cause skin burns, respitory damage and is highly flammable
+                    name="Stinkaspore : Ammonia Cloud", 
+                    level=1,
+                    act_speed=3,
+                    act_dur=1,
+                    act_cost=60,
+                    aoe=5,
+                    strength=80,
+                    speed=150,
+                    type="defense counter"
+                )
+            }
+        ],
+
+        "MonkeyBrain" : 
+        [
+            {
+                "Thought Manipulation Attack" : Techniques(
+                    name="MonkeyBrain : Thought Manipulation Attack",
+                    level=1,
+                    act_speed=2,
+                    act_dur=1,
+                    act_cost=30,
+                    aoe=1,
+                    strength=200,
+                    speed=500,
+                    type="attack cognitive" # new types for targeting the mind etc.
+                )
+            },
+            {
+                "Thought Manipulation Defense" : Techniques(
+                    name="MonkeyBrain : Thought Manipulation Defense",
+                    level=1,
+                    act_speed=2,
+                    act_dur=1,
+                    act_cost=50,
+                    aoe=5,
+                    strength=300,
+                    speed=400,
+                    type="defense counter"
+                )
+            }
+        ],
+              
         # PHYSICAL ATTACK
-        "Bugfly" : 
+        "Bugfly" : # grade 4
         [
             {
                 "Bugfly Sting" : Techniques(
@@ -130,7 +291,7 @@ enemy_techs = {
                     aoe=1,
                     strength=5,
                     speed=15,
-                    type="attack melee",
+                    type="attack melee"
                 )
             },
             {
@@ -143,17 +304,17 @@ enemy_techs = {
                     aoe=1,
                     strength=15,
                     speed=30,
-                    type="defense dodge",
+                    type="defense dodge"
                 )
             }
         ],
 
         # PHYSICAL ATTACK
-        "Floatjelly" : 
+        "Floatjelly" : # grade 4
         [
             {
-                "FloatJelly Sting" : Techniques(
-                    name="FloatJelly: Sting",
+                "Floatjelly Sting" : Techniques(
+                    name="Floatjelly: Sting",
                     level=1,
                     act_speed=5,
                     act_dur=1,
@@ -166,7 +327,7 @@ enemy_techs = {
             },
             {
                 "Floatjelly Float" : Techniques(
-                    name="FloatJelly : Float",
+                    name="Floatjelly : Float",
                     level=1,
                     act_speed=4,
                     act_dur=1,
@@ -177,77 +338,42 @@ enemy_techs = {
                     type="defense dodge"
                 )
             }
-        ],
+        ]
 
-        "Stinkaspore" : 
-        [
-            {
-                "Gas Manipulation" : Techniques(
-                    name="Stinkaspore: Gas Manipulation",
-                    level=1,
-                    act_speed=3,
-                    act_dur=2,
-                    act_cost=20,
-                    aoe=5,
-                    strength=100,
-                    speed=100,
-                    type="attack poison",
-                    poison=((5-20), 2)
-                )
-            },
-            {
-                "" : Techniques(
-                    name="",
-                    level=,
-                    act_speed=,
-                    act_dur=,
-                    act_cost=,
-                    aoe=,
-                    strength=,
-                    speed=,
-                    type="",
-                    sure_hit=
-                )
-            }
-        ],
-
-        "" : 
-        [
-            {
-                "" : Techniques(
-                    name="",
-                    level=,
-                    act_speed=,
-                    act_dur=,
-                    act_cost=,
-                    aoe=,
-                    strength=,
-                    speed=,
-                    type="",
-                    sure_hit=
-                )
-            },
-            {
-                "" : Techniques(
-                    name="",
-                    level=,
-                    act_speed=,
-                    act_dur=,
-                    act_cost=,
-                    aoe=,
-                    strength=,
-                    speed=,
-                    type="",
-                    sure_hit=
-                )
-            }
-        ],
+    # TEMPLATE
+        # "" : 
+        # [
+        #     {
+        #         "" : Techniques(
+        #             name="",
+        #             level=,
+        #             act_speed=,
+        #             act_dur=,
+        #             act_cost=,
+        #             aoe=,
+        #             strength=,
+        #             speed=,
+        #             type="",
+        #             sure_hit=
+        #         )
+        #     },
+        #     {
+        #         "" : Techniques(
+        #             name="",
+        #             level=,
+        #             act_speed=,
+        #             act_dur=,
+        #             act_cost=,
+        #             aoe=,
+        #             strength=,
+        #             speed=,
+        #             type=""
+        #         )
+        #     }
+        # ],
+        #       
 }    
+
 
 for k, v in enemy_techs.items():
     print(k,v)
-
-
-
-    
-
