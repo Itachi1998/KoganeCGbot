@@ -114,7 +114,6 @@ enemy_techs = {
                     )
             }
         ],
-        
 }    
 
 for k, v in enemy_techs.items():
