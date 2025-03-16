@@ -20,28 +20,74 @@ class Utils_cog(commands.Cog):
     @commands.hybrid_group(name='learn', desciption='Learn how to play the game', invoke_without_command=True)
     async def learn(self, ctx):
         group_embed = discord.Embed(title="Tutorial", 
-                                    description="Choose one of the following commands to learn about!\nYou can use either" 
-                                    " `/learn <command_name>` or the prefix `,learn <command_name>`")
-        try:
-            for subc in learn.commands: #this doesn't access the learn command properly
-                name=subc.name
-                description=sync.description #sync isn't correctly done
-                group_embed.add_field(name=name, description=description)
-            await ctx.send('Tutorial command group', embed=group_embed)
-
-        except Exception as e:
-            error = (f'<learn command> from file <{__name__}> ERROR:\n{e}') #no clue how to get the name the method
-            print(error)
+                                    description="Choose a game concept to learn about!\nYou can use" 
+                                    " `/learn <(create, lobby, battle)>`")
+        await ctx.send(view=group_embed)
 
 
     # CHANGED TO 'CHARACTER' INSTEAD OF 'CREATE' JUST SEEMED MORE FITTING LMK
     @learn.command(name='create', description='Learn how to create a character') 
     async def character(self, ctx):
-        pages= [
-            discord.Embed(title="Learn: How to Create a player! - Page 1", description="# Table of Contents\n* Learn how to spin for a class: Page 1\n* Learn how to spin for a technique: Page 2\n* Learn how to Spin for your CE amount: Page 3\n* Learn How to delete your player: Page 4\n# Player Class information:\n### `use (,spin class or /spin class) spin for your class`\n```You will get one of the following classes when creating your player```\n* Sorcerer: `Chance to inherit a technique. Chance to get the 6 eyes. May gain CE by consuming fingers, but if CE is too much it can be poisonous. Types: support or attack. `\n* Mutant: `enhanced physical abilities, can gain CE by consuming death wombs, abiliy to gain shrine through consuming fingers, immune to poison, advanced self-rct, enhanced black flash luck. Slow CT level up. Type: attack. `\n* Reincarnated: `Chance to get ancient sorcery techniques. Ability to consume fingers without the worry of poison. High base CT level due to prior experience in their past lives. Type: attack or support.`\n* Curse: `Best base healing of all the classes, fastest ct level ups, access to techniques known for curses. Take extra damage from RCT attacks. Type: attack or support`"),
-            discord.Embed(title="Learn: How to Create a player! - Page 2", description ="# Technique Spins\n### `spin for a technique using the (,spin tech | /spin tech) commands or the spin button`\n```This phase will take you through spinning for a technique specific to your class type```\n* Only sorcerer's can get a 6 eyes technique.\n* Only 1 six eyes per colony is allowed.\n* Only reincarnated sorcerers can unlock Shrine\n* A sorcerer's blood manipulaton technique is capped much lower than a Mutant\n* There are two types of heavenley restrictions: `max` or `zero`\n* Max HR users gain the ability to flood the battle with mechabots and increase their CE with skillpoints\n* Techniques have levels to them, some technique levels go higher than others.\n* Some techniques have domains\n* Some techniques have maximum techniques\n* Distaster techniques are unique to curses\n* 6 eye techniques get special moves\n* Mutants can unlock Shrine by eating fingers"),
-            discord.Embed(title="Learn: How to Create a player! - Page 3", description='# Spinning for your cursed energy\n### `Use the (,spin ce | /spin ce) commands to spin!`\n```This will determine the amount of CE reserves your character will have access to.```\n* This stat cannot be increased by skillpoints.\n* Mutants may increase CE by consuming death paintings.\n* Sorcerers may increase CE by being heavenly restricted, or consuming fingers. `warning: mutants are the only ones capable of controlling the demon inside the fingers`\n'),
-            discord.Embed(title="Learn how to Delete a player! - Page 4", description = '```You my use the /remove or ,remove command to delete your character from its current colony.```\n* `Warning: once a character is deleted you will not get it back`\n* If you wish to delete another users player, defeat them in battle!')
+        pages = [
+            discord.Embed(
+            title="Learn: How to Create a player! - Page 1",
+            description=(
+                "# Table of Contents\n"
+                "* Learn how to spin for a class: Page 1\n"
+                "* Learn how to spin for a technique: Page 2\n"
+                "* Learn how to Spin for your CE amount: Page 3\n"
+                "* Learn How to delete your player: Page 4\n"
+                "# Player Class information:\n"
+                "### `use (,spin class or /spin class) spin for your class`\n"
+                "```You will get one of the following classes when creating your player```\n"
+                "* Sorcerer: `Chance to inherit a technique. Chance to get the 6 eyes. Chance of being part of an Ancient Clan"
+                "May gain CE by consuming fingers, but if CE is too much it can be poisonous. "
+                "Types: support or attack.`\n"
+                "* Reincarnated: `Chance to get ancient sorcery techniques. Ability to consume fingers. Chance of being part of an Ancient CLan "
+                "without the worry of poison. High base CT level due to prior experience in their past lives. "
+                "Type: attack or support.`\n"
+                "* Curse: `Best base healing of all the classes, fastest ct level ups, access to technique. Chance of being part of the Disaster Curse Clan "
+                "known for curses. Take extra damage from RCT attacks. Type: attack or support`"
+            )
+            ),
+            discord.Embed(
+            title="Learn: How to Create a player! - Page 2",
+            description=(
+                "# Technique Spins\n"
+                "### `spin for a technique using the (,spin tech | /spin tech) commands or the spin button`\n"
+                "```This phase will take you through spinning for a technique specific to your class type```\n"
+                "* Only sorcerers can get a 6 eyes technique.\n"
+                "* Only 1 six eyes per colony is allowed.\n"
+                "* Only reincarnated sorcerers can land on Shrine as a technique\n"
+                "* There are two types of heavenly restrictions: `max` or `zero`\n"
+                "* Max HR users gain the ability to flood the battle with mechabots and increase their CE with skillpoints\n"
+                "* Zero HR users will have no CE costs to their moves. Will not have a technique."
+                "* Techniques have levels to them, some technique levels go higher than others.\n"
+                "* Some techniques have domains\n"
+                "* Some techniques have maximum techniques\n"
+                "* Disaster techniques are unique to curses\n"
+                "* 6 eye techniques get special moves\n"
+            )
+            ),
+            discord.Embed(
+            title="Learn: How to Create a player! - Page 3",
+            description=(
+                '# Spinning for your cursed energy\n'
+                "### `Use the (,spin ce | /spin ce) commands to spin!`\n"
+                "```This will determine the amount of CE reserves your character will have access to.```\n"
+                "* This stat cannot be increased by skillpoints.\n"
+                "* Sorcerers may increase CE by being heavenly restricted, or consuming fingers.\n "
+                "* Increasing CT level increasaes your CE effeciency. Your CT level increases with your Grade."
+            )
+            ),
+            discord.Embed(
+            title="Learn how to Delete a player! - Page 4",
+            description=(
+                '```You may use the /remove or ,remove command to delete your character from its current colony.```\n'
+                "* `Warning: once a character is deleted you will not get it back`\n"
+                "* If you wish to delete another user's player, defeat them in battle!"
+            )
+            )
         ]
 
         async def get_page(page: int):
@@ -49,7 +95,9 @@ class Utils_cog(commands.Cog):
             emb.set_author(name=self.botname, icon_url=self.avatar, url=self.avatar)
             emb.set_thumbnail(url=self.avatar)
             return emb, len(pages)
-        
+        if ctx.interaction == None:
+            await ctx.send("This command can only be used as a / command")
+            return
         pagination = Pagination(ctx.interaction, get_page)
         await pagination.navegate()
 
@@ -88,14 +136,16 @@ class Utils_cog(commands.Cog):
             emb.set_author(name=self.botname, icon_url=self.avatar, url=self.avatar)
             emb.set_thumbnail(url=self.avatar)
             return emb, len(pages)
-      
+
+         if ctx.interaction == None:
+            await ctx.send("This command can only be used as a / command")
+            return
 
          pagination = Pagination(ctx.interaction, get_page)
          await pagination.navegate()
 
 
         
-
         
 
         
@@ -128,28 +178,16 @@ class Utils_cog(commands.Cog):
             emb.set_thumbnail(url=self.avatar)
             return emb, len(pages)
         
+        if ctx.interaction == None:
+            await ctx.send("This command can only be used as a / command")
+            return
         pagination = Pagination(ctx.interaction, get_page)
         await pagination.navegate()
 
     
 
- 
 
-# class Help_buttons(discord.ui.View):
-#     def __init__(self):
-#         super().__init__(timeout=200)
-#         self.add_item(learn_button())
-
-#     @discord.ui.button(label='learn', style=discord.ButtonStyle.primary)
-#     async def learn_button(self, button: discord.ui.Button, ctx: discord.ctx):
-#         button.disabled=True
-#         await Utils_cog.help(ctx)
-#         description = """
-# Use /create to create a character, choose a class, and spin 
-# """ 
-#         embed=discord.Embed(title='learn', description='Learn how to play!', color=discord.Color.green())
-#         await ctx.response.send_message(embed=embed, view=self)
-        
     
+
 async def setup(bot):
     await bot.add_cog(Utils_cog(bot))  
