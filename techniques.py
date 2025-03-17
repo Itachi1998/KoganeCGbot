@@ -22,7 +22,8 @@ class Techniques():
                  level: int, # 1-5
                  act_speed: int, # activation speed of technique: 1-5 (can be changed with binding vows)
                  act_dur: int, #activation duration in turn counts: can very in numbers and be changed with binding vows
-                 act_cost: int, # activation cost per turn of activating this technique: can be changed with binding vows
+                 act_cost: int,
+                 act_body: int, # activation cost per turn of activating this technique: can be changed with binding vows
                  aoe: int, # amount of players targetable (can be changed with binding vows)
                  strength: int, # strength of attack or defense (will be used in attack vs defense checks, can be changed with binding vows)
                  speed: int, # speed of attack or defense (will be used in attack vs defense checks, can be changed with binding vows) 
@@ -34,6 +35,7 @@ class Techniques():
             self.act_speed = act_speed
             self.act_dur = act_dur
             self.act_cost = act_cost
+            self.act_body= act_body
             self.aoe = aoe
             self.strength = strength
             self.speed = speed
@@ -72,6 +74,9 @@ class Techniques():
                         self.souls = v # list of souls transfigured by users
                     if k == "poison" and isinstance(v, tuple):
                         self.poison = v # tuple of poison damage and duration
+                    if k == 'stun' and isinstance(v, int):
+                        self.stun = v
+                        
                 except Exception as e:
                     string= "Error loading optional attributes for Techniques class"
                     print(string)
@@ -85,48 +90,56 @@ class Techniques():
 
 # Decending order (special grade -> grade 4)
 enemy_techs = {
-        "The Reshaper" : # Femhito - special grade
-        [
-            {
-                "Callous Formation" : Techniques( # rearrangement (deformation) of a player (physically via the souls shape) in a cruel manner
-                    name="The Reshaper : Callous Formation",
+        "Soul Manipulation" : # Femhito - special grade
+    [
+        { "Attack":
+             [
+                  { "Callous Formation" : Techniques(
+                    name="Soul Manipulation: Callous Formation",
                     level=1,
                     act_speed=2,
                     act_dur=1, # possibly perminant - use 0 as a way to check for permanent?
                     act_cost=50,
+                    act_body=("hands", "legs").
                     aoe=1,
                     strength=800,
                     speed=600,
-                    type="attack melee",
-                )
-            },
+                    type="melee",
+                    soul=200,
+                    buff=(1, "strength", 200))},
             {
-                "Soul Transmute Attack" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
-                    name="The Reshaper : Soul Transmute", 
+                "Soul Transmute" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
+                    name="Soul Manipulation: Soul Transmute", 
                     level=1,
                     act_speed=1,
                     act_dur=1,
                     act_cost=50,
+                    act_body=("hands"),
                     aoe=1,
                     strength=600,
                     speed=800,
-                    type="attack melee", # change body into weapons
+                    type="melee", # change body into weapons
                 )
-            },
+                }
+            ] 
+        },
             {
-                "Soul Transmute Escape" : Techniques( # will need sub techniques for separate abilities
-                    name="The Reshaper : Soul Transmute",
+                "Defense" :[ 
+                {"Soul Transmute Escape" : Techniques( # will need sub techniques for separate abilities
+                    name="Soul Manipulation : Soul Transmute",
                     level=1,
                     act_speed=1,
                     act_dur=1,
                     act_cost=50,
+                    act_body=("hands","legs", "torso", "head")
                     aoe=1,
                     strength=600,
                     speed=800,
                     type="defense dodge" # wings/legs or smth
                 )
-            } 
-        ],
+                }
+            ] }
+        ]
 
         "Orbmaster" : # grade 1
         [ # list of all moves
@@ -137,6 +150,7 @@ enemy_techs = {
                     act_speed=10,
                     act_dur=1,
                     act_cost=100,
+                    act_body=("hands", "torso")
                     aoe=1,
                     strength=420,
                     speed=100,
@@ -151,6 +165,7 @@ enemy_techs = {
                     act_speed=10,
                     act_dur=1,
                     act_cost=100,
+                    act_body=("head")
                     aoe=1,
                     strength=400,
                     speed=200,
@@ -169,9 +184,11 @@ enemy_techs = {
                     act_speed=3,
                     act_dur=1,
                     act_cost=40,
+                    act_body=("hands")
                     aoe=1,
                     strength=500,
                     speed=300,
+                    buff=(2, 'strength', 100)
                     type="attack melee"
                 )
             },
@@ -260,7 +277,7 @@ enemy_techs = {
                     aoe=1,
                     strength=200,
                     speed=500,
-                    type="attack cognitive" # new types for targeting the mind etc.
+                    type="attack stun" # new types for targeting the mind etc.
                 )
             },
             {

@@ -38,6 +38,7 @@ class Player(Base):
     grade: Mapped[str] = mapped_column(str(100))
     technique: Mapped[list]
     playerclass: Mapped[str] = mapped_column(str(100))
+    six_eyes: Mapped[bool]
 
 
 class Colony(Base):
@@ -48,20 +49,25 @@ class Colony(Base):
     players: Mapped[list]
     enemies: Mapped[list]
     items: Mapped[list]
-    ce: Mapped[list]
-    xp: Mapped[list]
+    ce: Mapped[int]
+    xp: Mapped[int]
     shop: Mapped[list]
     rules: Mapped[list]
     districts: Optional[Mapped[list]]
     graveyard: Mapped[list]
+    six_eyes: Mapped[bool]
 
 
-def create_player(user_id, colony_id, playername, playerclass, technique, max_ce):
+def create_player(user_id, colony_id, playername, playerclass, technique, max_ce, max_hp, six_eyes):
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if existing_player:
             raise ValueError("You cannot create more than one player per colony")
-        
+        grade="Grade 4"
+        if six_eyes==True:
+            grade="Special Grade"
+        col = session.query(Colony).filter_by(colony_id=colony_id).first()
+
         new_player = Player(
             user_id=user_id,
             colony_id=colony_id,
@@ -69,16 +75,121 @@ def create_player(user_id, colony_id, playername, playerclass, technique, max_ce
             player_name=playername,
             player_equipped=[],
             player_inventory=[],
-            max_hp=100,
-            hp=100,
-            max_ce=100,
-            ce=100,
+            max_hp=max_hp,
+            hp=max_hp
+            max_ce=max_ce,
+            ce=max_ce,
             cgp=0,
             xp=0,
             skp=0,
-            grade="Grade 4",
+            grade=grade,
             technique=technique,
-            playerclass=playerclass""
+            playerclass=playerclass,
+            six_eyes=six_eyes
         )
+        col.players.append(new_player.user_id)
         session.add(new_player)
         session.commit()
+        session.close()
+        
+def create_colony(colony_id, owner_id, districts=None):
+        with Session(engine) as session:
+             existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
+             if existing_colony:
+                  raise ValueError("Colony already exists")
+             else:
+                  new_colony=Colony(
+                       colony_id=colony_id,
+                       owner_id=owner_id,
+                       players=[],
+                       enemies=[]
+                       items=[],
+                       ce=0,
+                       xp=0,
+                       shop=[],
+                       rules=[],
+                       graveyard=[],
+                       districts=districts
+                       graveyard=[],
+                       six_eyes=False
+                  )
+
+
+def read_colony(colony_id, value=None):
+     with Session(engine) as session:
+          existing_colony= session.query(Colony).filter_by(colony_id).first()
+          if existing_colony:
+               if value:
+                    session.close()
+                    return getattr(existing_colony, value)
+
+               else:
+                    session.close()
+                    return existing_colony
+          else:
+               session.close()
+               raise ValueError("Error reading colony_id. Colony does not exist")
+
+def read_player(player_id, user_id, colony_id, value=None):
+        with Session(engine) as session:
+       
+                existing_player = session.query(Player).filter_by(id=player_id, user_id=user_id, colony_id=colony_id).first()
+                if existing_player:
+                        if value:
+                            session.close()
+                            return {column.name: getattr(existing_player, column.name) for column in existing_player.__table__.columns}
+                        else:
+                            session.close()
+                            return existing_player
+                else:
+                        session.close()
+                        raise ValueError("Error reading player. Player does not exist")
+                
+                
+def update_player(user_id, colony_id, value=None):
+    with Session(engine) as session:
+        existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
+        if not existing_player:
+            raise ValueError("Player does not exist")
+        
+        for key, val in value.items():
+            setattr(existing_player, key, val)
+
+        session.commit()
+        session.close()
+        return existing_player
+
+def update_colony(colony_id, value=None):
+     with Session(engine) as session:
+          existing_colony= session.query(Colony).filter_by(colony_id=colony_id).first()
+        
+          if not existing_colony:
+               raise ValueError("Colony does not exist")
+
+          for key, val in value.items():
+               setattr(existing_colony, key, val)
+        
+          session.commit()
+          session.close()
+          return existing_colony
+
+def del_player(colony_id, user_id):
+    with Session(engine) as session:
+        existing_player = session.query(Player).filter_by(colony_id=colony_id, user_id=user_id).first()
+
+        if not existing_player:
+            raise ValueError("Player does not exist")
+        
+        session.delete(existing_player)
+        session.commit()
+        session.close()
+
+
+def del_colony(colony_id, user_id):
+     with Session(engine) as session:
+          existing_colony= session.query(Colony).filter_by(colony_id=colony_id).first()
+          if not existing_colony:
+               raise ValueError("Colony does not exist")
+          session.delete(existing_colony)
+          session.commit()
+          session.close()

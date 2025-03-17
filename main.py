@@ -1,4 +1,4 @@
-import discord, os, dotenv# Import general dependencies 
+import discord, os, dotenv # Import general dependencies 
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
 
