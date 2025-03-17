@@ -1,7 +1,7 @@
-import discord, os, random
+import discord, os, random, techniques, db
 from discord.ext import commands
 from discord import app_commands
-import techniques
+
 
 log_channel = int(os.getenv('LOGCHANNEL'))
 
@@ -56,6 +56,8 @@ class CreateButtons(discord.ui.View):
                 ct_level = 3
                 create_player(user_id, col.colony_id, playername=self.name, playerclass=pclass, technique=tech, max_ce=ce, max_hp=1000, six_eyes=True)
                 update_colony(interaction.guild.id, {"six_eyes": True})
+
+        
             
             
 
