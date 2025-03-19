@@ -95,9 +95,6 @@ playerclass: str, colony):
         self.hp = max_hp
         self.ce = max_ce
 
-
-
-
     def __repr__(self):
         return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
 
@@ -383,7 +380,7 @@ class Player(Actor):
             return False
            
      except:
-          print("#" * 50 + "\n# Error in get_grade(self) function of the  Player Class\n\n")
+          print("#" * 50 + "\n# Error in store(self, item) function of the  Player Class\n\n")
           traceback.print_exc()
              
     def equip(self, item):
@@ -396,7 +393,7 @@ class Player(Actor):
                 return False
 
     def level_up(self, xp_needed):
-
+      try:
         if self.level >= self.level_cap:
             self.level = self.level_cap
             self.save_to_db()
@@ -422,7 +419,7 @@ class Player(Actor):
 
                     self.save_to_db()
                     xp_needed = self.ready_level_up()[1]
-                
+                  
             grade = self.get_grade() # Use the calss method get_grade to determine the players grade
 
                     # Set player CT level per grade
@@ -438,10 +435,15 @@ class Player(Actor):
             if 'Special Grade' in grade:
                                 self.ct_level = 5
 
+
             return (True, self.level, self.skp)
         return (False, self.level, self.xp)
-        
+      except:
+           print("#" * 50 "\nError leveling up user: \n" + self.user_id + "\n")
+           traceback.print_exc()
+
     def ready_level_up(self): # Method that returns xp needed for next level up
+      try:
         level_cap = self.level_cap
         if self.level == level_cap:
             return (False, self.level)
@@ -470,8 +472,10 @@ class Player(Actor):
             xp_needed = (self.level) * 30
         if self.level > 180:
             xp_needed = (self.level) * 32
-        return (self.xp >= xp_needed, xp_needed)
-
+        return (self.xp >= xp_needed, xp_needed)  
+      except:
+         print("#" * 50 "\nError leveling up user: \n" + self.user_id + "\n")
+         traceback.print_exc()
 #     def save_to_db(self):
 #      save_player(self) #the imported save_player method from the database file
 
@@ -481,6 +485,7 @@ class Player(Actor):
         
 class Grade4_Bugfly(Enemy):
     def __init__(self):
+     try:
         super().__init__(
              name="Bugfly", 
              level=1,
@@ -502,7 +507,9 @@ class Grade4_Bugfly(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 
-
+     except:
+      print("#" * 50 "\nError leveling up user: \n" + self.user_id + "\n")
+      traceback.print_exc()
             
 class  Grade4_Floatjelly(Enemy):
     def __init__(self):
