@@ -81,22 +81,22 @@ max_hp,
  max_ce: int,
  strength: int, 
 speed: int,
- xp: int, 
-cgp: int,
  technique: str, 
-playerclass: str):
+playerclass: str, colony):
         self.name=name
         self.level=level
         self.max_hp = max_hp
         self.max_ce = max_ce
         self.strength = strength
         self.speed = speed,
-        self.xp = xp,
-        self.cgp=cgp,
         self.technique = technique
         self.playerclass= playerclass
+        self.colony-colony
         self.hp = max_hp
         self.ce = max_ce
+
+
+
 
     def __repr__(self):
         return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
@@ -228,153 +228,172 @@ playerclass: str):
 
 class Enemy(Actor):
 
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, xp, cgp, technique, playerclass, **kwargs):
-        super().__init__(name, level, max_hp, max_ce, strength, speed, xp, cgp, technique, playerclass)
-        self.ce=max_ce
-        self.hp = max_hp
-        for k,v in kwargs:
-             if k == "colony" and isinstance(v, int):
-                  self.colony = v
-             if k == "grade" and isinstance(v, str):
-                  self.grade = v 
-             if k == "killed" and isinstance(v, bool):
-                  self.killed = v # if this enemy is dead
-             if k == "timer" and isinstance(v, tuple) and  all(isinstance(i, int) for i in v):
-                  self.timer = v # (date_killed, timer)
-             if k == "tamed" and isinstance(v, tuple) and all(isinstance(i, int) for i in v):
-                   self.tamed = v # (owner_player_id, colony_id, date_tamed)
-             if k == "equipped" and isinstance(v, list) and all(isinstance(i, dict) for i in v):
-                   self.equipped = v # list of equipped items
-             if k == "shikigami" and isinstance(v, list) and all(isinstance(i, dict) for i in v):
-                   self.shikigami = v # list of shikigami
-             if k == "killby" and isinstance(v, tuple) and all(isinstance(i, int) for i in v):
-                    self.killby = v # who it was killed by (player_id, colony_id)
-             if k == "poison" and isinstance(v, tuple) and all(isinstance(i, int) for i in v):
-                  self.poison = v # poison damage and duration
-             if k == "stun" and isinstance(v, int):
-                  self.stun=v
-             if k == "charged" and isinstance(v, int):
-                  self.charged=v
-             if k == "quantity" and isinstance(v, int):
-                  self.quantity=v
-             if k == "transfigured souls" and isinstance(v, list):
-                  self.tranf_souls = v
-             if k == "stacks" and isinstance(v, int):
-                  self.stacks = v # number of stacks needed to duplicate speed if Proj Sorcery
-             if k == "hr" and isinstance(v, str):
-                  self.hr = v
-     
+    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony,
+                 inventory: list, equipped: list, xp: int, cgp: int, stacked: tuple=None, poison: tuple=None, charged: tuple=None,
+                stunned: tuple=None, hi: bool=None, hr: str=None, prescience: int=None, debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None):
+        try:   
+            super().__init__(
+                name, 
+                level, 
+                max_hp, 
+                max_ce, 
+                strength, 
+                speed, 
+                technique, 
+                playerclass, 
+                colony)
+         
+            self.name = name
+            self.ce = max_ce
+            self.hp = max_hp
+            self.max_hp = max_hp
+            self.max_ce = max_ce
+            self.level = level
+            self.strength = strength
+            self.speed = speed
+            self.technique = technique
+            self.playerclass = playerclass
+            self.colony = colony
+            self.inventory = inventory 
+            self.equipped = equipped 
+            self.xp = xp
+            self.cgp = cgp
+            self.stacked = stacked
+            self.charged = charged
+            self.stunned = stunned
+            self.hi = hi
+            self.hr = hr
+            self.prescience = prescience
+            self.debuffed = debuffed 
+            self.buffed = buffed
+            self.summons = summons
+            self.poison= poison
+            self.healed=healed
+            self.bodyparts=[]
+                
+        except:
+            traceback.print_exc()
 
     def __repr__(self):
-        return f"Enemy: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
+        return f"Enemy: {self.name} - {self.level} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
 
 class Player(Actor):
     level_cap = 200
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, xp, cgp, technique, playerclass, **kwargs):
-          super().__init__(name, level, max_hp, max_ce, strength, speed, xp, cgp, technique, playerclass)
+    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
+                  xp: int, cgp: int, skp: int, user_id: int=None, equipped: list=None, inventory: list=None, shikigami: list=None,
+                   summons: list=None, stacked: tuple=None, poisoned: tuple=None, stunned: tuple=None, hr: str=None, hi: bool=None, 
+                     rct: bool=None, healed: int=None, killcount: list=None, buffed: list=None, debuffed: list=None):
+        try:
+          
+
+          super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
+          self.xp = xp
+          self.cgp = cgp
+          self.skp = skp
+          self.userd_id=user_id
+          self.equipped=equipped
+          self.inventory=inventory
+          self.shikigami = shikigami
+          self.summons=summons
+          self.stacked=stacked
+          self.poisoned=poisoned
+          self.stunned=stunned
+          self.hr=hr
+          self.hi =hi
+          self.rct = rct
+          self.healed=healed
+          self.killcount=killcount
+          self.buffed=buffed
+          self.debuffed=debuffed
+          self.body_parts = {
+            'Head': BodyPart(name='Head', max_hp=self.max_hp * 10 // 100, max_ce=self.max_ce * 10 // 100),
+            'Torso': BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50 // 100),
+            'Legs': BodyPart(name='Legs', max_hp=self.max_hp * 20 // 100, max_ce=self.max_ce * 20 // 100),
+            'Arms': BodyPart(name='Arms', max_hp=self.max_hp * 20 // 100, max_ce=self.max_ce * 20 // 100)
+        }
+          
+        except:
+             traceback.print_exc()
    
-          if 'luck' in kwargs.keys() and isinstance(kwargs['luck'], int):
-                        self.luck = kwargs['luck']
-
-          if "clan" in kwargs.keys() and isinstance(kwargs['clan'], str):
-                     self.clan = kwargs['clan']
-
-          if "awakened" in kwargs.keys() and isinstance(kwargs['awakened'], bool):
-                    self.awakened= kwargs['awakened']
-                    self.luck = 0
-          if "rct" in kwargs.keys() and isinstance(kwargs['rct'], bool):
-                   self.rct = kwargs['rct']
-                   self.max_hp += 100
-                   self.hp = self.max_hp
-          if 'hr' in kwargs.keys() and isinstance(kwargs['hr'], str):
-                   self.hr = kwargs['hr']
-
-          if 'six eyes' in kwargs.keys() and isinstance(kwargs['six eyes'], bool):
-                   self.six_eyes = True
-               
-          if 'bodyparts' in kwargs.keys() and isinstance(kwargs['bodyparts'], list):
-                   self.bodyparts = kwargs['bodyparts'] 
-          if 'colony' in kwargs.keys() and isinstance(kwargs['colony'], int):
-                   self.colony = kwargs['colony']
-
-          self.buffs = []
-          self.debuffs = []
-          self.shikigami = []
-          self.inventory = []
-          self.equipped = []
-          self.curses = []
-          self.copied_techs = []
-          self.bindvows = []
-          self.rules = []
-          self.souls = []
-          self.killcount = []
-          self.selling = []
-          self.bought = []
-          self.shadowstore = []
-          self.rikastore = []
-          self.status = GameMode.ROAM
-          self.head = BodyPart(name='Head', max_hp=self.max_hp//4, max_ce=self.max_ce//4)
-          self.torso = BodyPart(name='Torso', max_hp= self.max_hp//4)
-          self.legs = BodyPart(name="Legs", max_hp = self.max_hp//4, max_ce = self.max_ce//4)
-          self.arms = BodyPart(name="Arms", max_hp=self.max_hp//4, max_ce = self.max_ce//4)
           
 
     def __repr__(self):
         return f"Character: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - belonging to user_id: {self.user_id} - in colony: {self.colony}"
 
 
-    def sell(self, item, price):
+    def sell(self, item, price, shop):
+        try:
          if item in self.inventory:
               forsale = self.inventory.pop(item)
-              self.selling.append((forsale, price))
-              self.save_to_db()
+              shop.append[{
+                   "forsale" : 
+                    [
+                    {"name": forsale.name}, 
+                    {"price" : price},
+                     {"owner" : self.user_id}
+                    ]
+                    }]
+              self.save_player()
               return True
          else:
               return False
-         
-    def bought(self, item, price, colony):
-         if isinstance(item, dict):
-              self.inventory.append(item)
-              date = datetime.datetime.now()
-              printable = f"{date.strftime("%c")}"
-              self.bought.append(item['name'], item['price'], printable, colony)
+        except:
+            print("Erorr selling " + item "\n#" * 50 + "\n# Error in def sell(self, item, price, shop) function of the  Player Class\n"))
+            traceback.print_exc()
+
 
      
-                    
+    def add_body_part(self, bodypart):
+        try:
+            parts = self.body_parts
+            self.body_parts[bodypart.name] = bodypart
+            self.saveplayer()
+        except:
+             print("#" * 50 + "\n# Error in add_body_parts(self, bodypart) function of the  Player Class\n")
+             traceback.print_exc()
+    
+                            
     def get_grade(self):
-         level = self.level
-         if self.level >= 1 and self.level < 10:
-             return "Grade 4"
-         elif self.level >= 10 and self.level < 20:
-             return "Grade 3"
-         elif self.level >= 20 and self.level < 40:
-             return "Grade 2"
-         elif self.level >= 40 and self.level < 60:
-             return "Grade 1"
-         else:
-             return "Special Grade"
+        try:
+            level = self.level
+            if self.level >= 1 and self.level < 10:
+                return "Grade 4"
+            elif self.level >= 10 and self.level < 20:
+                return "Grade 3"
+            elif self.level >= 20 and self.level < 40:
+                return "Grade 2"
+            elif self.level >= 40 and self.level < 60:
+                return "Grade 1"
+            else:
+                return "Special Grade"
+        except:
+             print("#" * 50 + "\n# Error in get_grade(self) function of the  Player Class\n\n")
+             traceback.print_exc()
+             
 
     def store(self, item):
+     try:
         if item in self.equipment:
             self.inventory.append(item)
             self.equipment.remove(item)
-            self.save_to_db()
+            self.saveplayer()
             return True
         else:
             print("You don't have that item!")
             return False
-
+           
+     except:
+          print("#" * 50 + "\n# Error in get_grade(self) function of the  Player Class\n\n")
+          traceback.print_exc()
+             
     def equip(self, item):
             if item in self.inventory:
                 self.inventory.remove(item)
                 self.equipment.append(item)
-                self.save_to_db()
+                self.saveplayer()
                 return True
             else:
-                print("Item not owned")
                 return False
-            
-            
 
     def level_up(self, xp_needed):
 
@@ -462,7 +481,7 @@ class Player(Actor):
         
 class Grade4_Bugfly(Enemy):
     def __init__(self):
-        super.init(
+        super().__init__(
              name="Bugfly", 
              level=1,
              hp=15, 
