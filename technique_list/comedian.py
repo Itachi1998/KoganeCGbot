@@ -25,6 +25,32 @@ class Comedian(Techniques):
           "<:takaba_doomed:1275115036578287657>")
 
 
+
+  def attack_jokes(self, joke, answer, correct, imbued, defense=None):
+        
+        if answer == correct:
+             if defense:
+               if "counter" in defense["type"]:
+                   return (0, 'counter')
+             return (0, 'miss')
+        else:
+              dmg = self.moves['Attack']['Joke']['dmg']
+              dmg += imbued
+              speed = self.moves['Attack']['Joke']['speed']
+              speed += imbued
+
+              if defense:
+                  def_spd = defense['speed']
+                  def_str = defense['strength']
+                  
+                  speed -= def_spd
+                  if speed > 50:
+                       return(dmg, 'hit')
+                  else:
+                        return
+
+              
+
   def flying_kick(self, player, target):
     
     results = attack_checks(self.attack['Flying Kick'], target, player)
