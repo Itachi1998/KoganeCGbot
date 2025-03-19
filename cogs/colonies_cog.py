@@ -2,6 +2,7 @@ import os, dotenv
 from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
+import game
 #from old_techniques import get_cursed_technique
 #import game, time, asyncio
 # GLOBAL VARIABLES
@@ -52,23 +53,26 @@ async def setup(bot):
 #         colony['ai'].append[ai.to_dict()]
         
 
-# class Colonies(commands.Cog):
-#     def __init__(self, bot):
-#                 self.bot = bot
+# Update after postgres database is set up
+class Colonies(commands.Cog):
+    def __init__(self, bot):
+                self.bot = bot
 
-#     @commands.Cog.listener()
-#     async def on_guild_join(self, guild):
-#         ai_pool = []
-#         for enemy in game.Enemy.__subclasses__():
-#             ai_pool.append(enemy.name)
-#         colony = Colony(id=guild.id, name=guild.name, owner=guild.owner.id, members=[], ai=[ai_pool], xp=0, colony_color='gray')
-#         dynamo.update_colony(colony.id, "colony_color", colony.colony_color)
-#         colony_data = dynamo.read_colony(colony.id)
-#         colony_name = colony_data['name']
-#         colony_owner = colony_data['owner']
-#         colony_id = colony_data['id']
-#         colony_color = colony_data['colony_color']
-#         print(f"Colony added: {colony_name}\nColony id: {colony_id}\nColony owner: {colony_owner}")
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        enemies = []
+        for enemy in game.Enemy.__subclasses__():
+            enemies.append(enemy.name)
+        colony = Colony(self, colony_name, colony_id, owner_id, creation_date, colony_color='gray', districts=None)
+        update_colony(colony.id, "colony_color", colony.colony_color)
+        colony_id = read_colony(colony.id)
+        colony_name = colony_data['name']
+        colony_owner = colony_data['owner']
+        colony_id = colony.owner_id
+        colony_date = colony_date['creation_date']
+        colony_color = colony_data['colony_color'] # needed to have a default or no?
+        colony_districts = colony_data['districts'] # optional
+        print(f"Colony added: {colony_name}\nColony id: {colony_id}\nColony owner: {colony_owner}")
 
 
 
@@ -214,12 +218,20 @@ async def setup(bot):
 # async def setup(bot: commands.Bot):
 #             await bot.add_cog(Colonies(bot))
 
-# class Colony:
-#     def __init__(self, id, name, owner, members: list, ai: list, xp, colony_color):
-#         self.id = id
-#         self.name = name
-#         self.owner = owner
-#         self.members = members
-#         self.ai = ai
-#         self.xp = xp
-#         self.colony_color = colony_color
+
+class Colony:
+    def __init__(self, colony_name, colony_id, owner_id, creation_date, colony_color='gray', districts=None):
+        self.colony_name = colony_name
+        self.colony_id = colony_id
+        self.owner_id = owner_id
+        self.creation_date = creation_date
+        districts=districts
+        players=[]
+        enemies=[]
+        items=[]
+        ce=0
+        xp=0
+        shop=[]
+        rules=[]
+        graveyard=[]
+        leaderboard=[]
