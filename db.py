@@ -1,33 +1,33 @@
-import os
+import os, json
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import create_engine, ForeignKey, String, func, Column
-from sqlalchemy.orm import mapped_column, relationship, Mapped, DeclarativeBase, Session
+from sqlalchemy import create_engine, String, JSON
+from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, Session
 
 from dotenv import find_dotenv, load_dotenv
-from sqlalchemy import Table
-from sqlalchemy import UniqueConstraint
 dotfile = find_dotenv('.env')
 loaded = load_dotenv(dotfile)
 passw = os.getenv('PASS')
 
-db_url = f"postgresql+psycopg2://postgres:{passw}@localhost/postgres"
+db_url = "sqlite:////kgc.db"
 
 engine = create_engine(db_url)
 
 class Base(DeclarativeBase):
-    id: Mapped[int] = mapped_column(primary_key=True)
+    pass
 
 
 class Player(Base):
     __tablename__ = "player"
     
+    id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int]
     colony_id: Mapped[int]
+    date_entered: Mapped[str]
     player_level: Mapped[int]
-    player_name: Mapped[str] =  mapped_column(str(200))
-    player_equipped: Mapped[list]
-    player_inventory: Mapped[list]
+    player_name: Mapped[str] = mapped_column(String(200))
+    player_equipped: Mapped[List] = mapped_column(JSON)
+    player_inventory: Mapped[List] = mapped_column(JSON)
     max_hp: Mapped[int]
     hp: Mapped[int]
     max_ce: Mapped[int]
@@ -35,30 +35,44 @@ class Player(Base):
     cgp: Mapped[int]
     xp: Mapped[int]
     skp: Mapped[int]
-    grade: Mapped[str] = mapped_column(str(100))
-    technique: Mapped[list]
-    playerclass: Mapped[str] = mapped_column(str(100))
+    technique: Mapped[List[str]] = mapped_column(JSON)
+    playerclass: Mapped[str] = mapped_column(String(100))
     six_eyes: Mapped[bool]
+    buffs: Mapped[Optional[List]] = mapped_column(JSON)
+    debuffs: Mapped[Optional[List]] = mapped_column(JSON)
+    heals: Mapped[Optional[List]] = mapped_column(JSON)
+    kills: Mapped[Optional[List]] = mapped_column(JSON)
 
 
 class Colony(Base):
     __tablename__ = "colony"
-
-    owner_id: Mapped[int]
+    id: Mapped[int] = mapped_column(primary_key=True)
+    colony_name: Mapped[str]
     colony_id: Mapped[int]
-    players: Mapped[list]
-    enemies: Mapped[list]
-    items: Mapped[list]
+    owner_id: Mapped[int]
+    creation_date: Mapped[str]
+    color: Mapped[str]
+    players: Mapped[Optional[List]] = mapped_column(JSON)
+    enemies: Mapped[Optional[List]] = mapped_column(JSON)
+    items: Mapped[Optional[List]] = mapped_column(JSON)
     ce: Mapped[int]
     xp: Mapped[int]
-    shop: Mapped[list]
-    rules: Mapped[list]
-    districts: Optional[Mapped[list]]
-    graveyard: Mapped[list]
     six_eyes: Mapped[bool]
+    shop: Mapped[Optional[List]] = mapped_column(JSON)
+    rules: Mapped[Optional[List]] = mapped_column(JSON)
+    districts: Mapped[Optional[List]] = mapped_column(JSON)
+    graveyard: Mapped[Optional[List]] = mapped_column(JSON)
+    leaderboard: Mapped[Optional[List]] = mapped_column(JSON)
+    special_grades: Mapped[Optional[List]] = mapped_column(JSON)
+    events: Mapped[Optional[List]] = mapped_column(JSON)
 
 
-def create_player(user_id, colony_id, playername, playerclass, technique, max_ce, max_hp, six_eyes):
+
+Base.metadata.create_all(bind=engine)
+
+
+
+def create_player(user_id: int, colony_id: int, playername: str, playerclass:str, technique: str, max_ce: int, max_hp: int, six_eyes:bool):
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if existing_player:
@@ -66,17 +80,19 @@ def create_player(user_id, colony_id, playername, playerclass, technique, max_ce
         grade="Grade 4"
         if six_eyes==True:
             grade="Special Grade"
+             
         col = session.query(Colony).filter_by(colony_id=colony_id).first()
 
         new_player = Player(
             user_id=user_id,
             colony_id=colony_id,
-            player_level=1
+            date_entered=datetime.now().astimezone().strftime("%c"),
+            player_level=1,
             player_name=playername,
             player_equipped=[],
             player_inventory=[],
             max_hp=max_hp,
-            hp=max_hp
+            hp=max_hp,
             max_ce=max_ce,
             ce=max_ce,
             cgp=0,
@@ -85,54 +101,62 @@ def create_player(user_id, colony_id, playername, playerclass, technique, max_ce
             grade=grade,
             technique=technique,
             playerclass=playerclass,
-            six_eyes=six_eyes
+            six_eyes=six_eyes,
+            buffs=[],
+            debuffs=[],
+            heals=[],
+            kills=[]
         )
         col.players.append(new_player.user_id)
         session.add(new_player)
         session.commit()
         session.close()
         
-def create_colony(colony_id, owner_id, districts=None):
+def create_colony(colony_data):
         with Session(engine) as session:
              existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
              if existing_colony:
                   raise ValueError("Colony already exists")
              else:
-                  new_colony=Colony(
-                       colony_id=colony_id,
-                       owner_id=owner_id,
-                       players=[],
-                       enemies=[]
-                       items=[],
-                       ce=0,
-                       xp=0,
-                       shop=[],
-                       rules=[],
-                       graveyard=[],
-                       districts=districts
-                       graveyard=[],
-                       six_eyes=False
-                  )
-
+                colony = Colony(
+                    colony_name=colony_data['name'],
+                    colony_id=colony_data['colonyid'],
+                    creation_date=colony_data['creation date'],
+                    owner_id=colony_data['owner id'],
+                    color=colony_data['color'],
+                    players=json.dumps(colony_data.get('players', [])),
+                    enemies=json.dumps(colony_data.get('enemies', [])),
+                    items=json.dumps(colony_data.get('items', [])),
+                    ce=colony_data['ce'],
+                    xp=colony_data['xp'],
+                    six_eyes=colony_data['six eyes'],
+                    shop=json.dumps(colony_data.get('shop', [])),
+                    rules=json.dumps(colony_data.get('rules', [])),
+                    districts=json.dumps(colony_data.get('districts', [])),
+                    graveyard=json.dumps(colony_data.get('graveyard', [])),
+                    leaderboard=json.dumps(colony_data.get('leaderboard', [])),
+                    special_grades=json.dumps(colony_data.get('special_grades', [])),
+                    events=json.dumps(colony_data.get('events', []))
+                )
+                session.add(colony)
+                session.commit()
+                session.close()
 
 def read_colony(colony_id, value=None):
      with Session(engine) as session:
-          existing_colony= session.query(Colony).filter_by(colony_id).first()
-          if existing_colony:
-               if value:
+          existing_colony= session.query(Colony).filter_by(colony_id=colony_id).first()
+          if value:
                     session.close()
                     return getattr(existing_colony, value)
 
-               else:
+          else:
                     session.close()
                     return existing_colony
-          else:
-               session.close()
-               raise ValueError("Error reading colony_id. Colony does not exist")
+    
 
-def read_player(player_id, user_id, colony_id, value=None):
+def read_player(player_id: int, user_id: int, colony_id: int, value=None):
         with Session(engine) as session:
-       
+                
                 existing_player = session.query(Player).filter_by(id=player_id, user_id=user_id, colony_id=colony_id).first()
                 if existing_player:
                         if value:
