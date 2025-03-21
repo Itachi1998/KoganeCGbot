@@ -66,10 +66,7 @@ class Colony(Base):
     special_grades: Mapped[Optional[List]] = mapped_column(JSON)
     events: Mapped[Optional[List]] = mapped_column(JSON)
 
-
-
 Base.metadata.create_all(bind=engine)
-
 
 
 def create_player(user_id: int, colony_id: int, playername: str, playerclass:str, technique: str, max_ce: int, max_hp: int, six_eyes:bool):

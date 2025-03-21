@@ -1,4 +1,6 @@
-import os, dotenv
+import os, dotenv, datetime
+from datetime import datetime
+from db import create_colony, update_colony, create_player, update_player
 from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
@@ -13,47 +15,41 @@ load_dotenv(dotenv)
 log_channel = os.getenv("LOGCHANNEL")
 
 
-
-
 class Colonies(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        @commands.Cog.listener()
-        async def on_ready(self):
-            print('Colonies cog is ready!')
-
-        @commands.command(name="colony", description="Colony Command")
+        @commands.command(name="colony", description="Sync colonies")
         async def colony(self, ctx):
             channel = await bot.fetch_channel(int(log_channel))
+            for guild in self.bot.guilds:
+                enemies = [enemy.name for enemy in game.Enemy.__subclasses__()]
+                colony_data = {
+                    'colony name': guild.name,
+                    'colony id': guild.id,
+                    'owner id': guild.owner_id,
+                    'creation date': datetime.now().astimezone().strftime("%c"),
+                    'colony color': 'gray',
+                    'districts': [],
+                    'players': [],
+                    'enemies': enemies,
+                    'items': [],
+                    'ce': 0,
+                    'xp': 0,
+                    'shop': [],
+                    'rules': [],
+                    'graveyard': [],
+                    'leaderboard': []
+                }
+                create_colony(colony_data)
+            
+
+
 async def setup(bot):
     await bot.add_cog(Colonies(bot))
 
-
-#client = Client()
-
-
-# async def ai_respawn(ai, colony):
-#     time_end = ai.timer
-#     while time_end > 0:
-#         if ai.name in colony['ai']:
-#             colony['ai'].remove(ai.name)
-#         print(f"Removing {ai.name} from {colony['name']}")
-#         dynamo.save_colony(Colony(**colony))
-#         await asyncio.sleep(time_end)
-#         colony = dynamo.read_colony(colony['id'])
-#         colony['ai'].append(ai.name)
-#         print(f"Respawning {ai.name} in {colony['name']}")
-#         colony = Colony(**colony)
-#         dynamo.save_colony(colony)
-#         await asyncio.sleep(time_end)
-#         time_end = 0
-        
-#     if ai.name not in colony['ai']:
-#         colony['ai'].append[ai.to_dict()]
-        
-
 # Update after postgres database is set up
+
 class Colonies(commands.Cog):
     def __init__(self, bot):
                 self.bot = bot
@@ -63,17 +59,27 @@ class Colonies(commands.Cog):
         enemies = []
         for enemy in game.Enemy.__subclasses__():
             enemies.append(enemy.name)
-        colony = Colony(self, colony_name, colony_id, owner_id, creation_date, colony_color='gray', districts=None)
-        update_colony(colony.id, "colony_color", colony.colony_color)
-        colony_id = read_colony(colony.id)
-        colony_name = colony_data['name']
-        colony_owner = colony_data['owner']
-        colony_id = colony.owner_id
-        colony_date = colony_date['creation_date']
-        colony_color = colony_data['colony_color'] # needed to have a default or no?
-        colony_districts = colony_data['districts'] # optional
-        print(f"Colony added: {colony_name}\nColony id: {colony_id}\nColony owner: {colony_owner}")
-
+        colony_data = {
+            'colony name': guild.name,
+            'colony id': guild.id,
+            'owner id': guild.owner_id,
+            'creation date': datetime.now().astimezone().strftime("%c"),
+            'colony color': 'gray',
+            'districts': [],
+            'players': [],
+            'enemies': enemies,
+            'items': [],
+            'ce': 0,
+            'xp': 0,
+            'shop': [],
+            'rules': [],
+            'graveyard': [],
+            'leaderboard': []
+        }
+        
+        create_colony(colony_data)
+        
+       
 
 
 
@@ -220,18 +226,32 @@ class Colonies(commands.Cog):
 
 
 class Colony:
-    def __init__(self, colony_name, colony_id, owner_id, creation_date, colony_color='gray', districts=None):
+    def __init__(self, colony_name: str, colony_id: int, owner_id: int, creation_date: str, color: str, 
+                 players: list, enemies: list, items: list, ce: int, xp: int, shop: list, rules: list, graveyard: list, leaderboard: list, events: list):
+        # 'colony_name': guild.name,
+        #     'colony_id': guild.id,
+        #     'owner_id': guild.owner_id,
+        #     'creation_date': datetime.now().astimezone().strftime("%c"),
+        #     'colony_color': 'gray',
+        #     'districts': [],
+        #     'players': [],
+        #     'enemies': enemies,
+        #     'items': [],
+        #     'ce': 0,
+        #     'xp': 0,
+        #     'shop': [],
+        #     'rules': [],
+        #     'graveyard': [],
+        #     'leaderboard': []
         self.colony_name = colony_name
         self.colony_id = colony_id
         self.owner_id = owner_id
         self.creation_date = creation_date
-        districts=districts
-        players=[]
-        enemies=[]
-        items=[]
-        ce=0
-        xp=0
-        shop=[]
-        rules=[]
-        graveyard=[]
-        leaderboard=[]
+        self.color = color
+        self.players = players
+        self.enemies=enemies
+        self.items=items
+        self.ce=ce
+        self.xp=xp
+        self.shop=shop
+        self.rules

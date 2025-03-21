@@ -1,23 +1,204 @@
-import discord
+import discord, datetime
+from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 
 
+
+
+
+# MAIN CLASS FOR LOBBIES
+# Use this to instantiate lobby instances
+
+class Lobby():
+    def __init__(self, name: str, owner: int, id: int, colony_id: int, private: bool, players: list, invited: list, team1: list, team2: list, ready: list, turn: int, 
+                 created_at=datetime.now().astimezone().strftime("%c"), field: list=None, graveyard: list=None):
+        self.name = name
+        self.owner = owner
+        self.id = id
+        self.colony_id = colony_id
+        self.private = private
+        self.players=players
+        self.invited=invited
+        self.team1=team1
+        self.team2=team2
+        self.read = ready
+        self.turn = turn
+        self.create_at = created_at
+        self.field = field
+        self.graveyard = graveyard
+
 class Lobby_Cog(commands.Cog):
     def __init__(self, bot): 
          self.bot = bot
-    
 
-    @discord.app_commands.command(name="create_private_thread", description="Creates a private thread")
-    @discord.app_commands.describe(thread_name="The name of the thread")
-    async def create_private_thread(self, interaction: discord.Interaction, thread_name: str):
-        try:
-            thread = await interaction.channel.create_thread(name=thread_name, type=discord.ChannelType.private_thread)
-            await interaction.response.send_message(f"Private thread '{thread_name}' created successfully!", ephemeral=True)
-        except discord.Forbidden:
-            await interaction.response.send_message("I do not have the required permissions to create a private thread.", ephemeral=True)
-        except discord.HTTPException as e:
-             await interaction.response.send_message(f"Failed to create thread: {e}", ephemeral=True)
+    @commands.hybrid_group(name="lobby", description="Use /lobby <option>")
+    async def lobby(self, ctx):
+        if ctx.invoked_subcommand is None:
+            embed = discord.Embed(title="Lobby commands", description="## Use /lobby `<command>`\n"
+            "### /lobby create\n"
+            "* Creates a public lobby\n### /lobby private\n* Creates a private lobby (private thread)\n### /lobby lock\n* Use to lock a public lobby (make public thread private)"
+            "\n### /lobby invite\n* Allow players into lobby\n### /lobby leave\n"
+            "* Any player can leave the lobby\n* If the owner leaves a new owner will be selected.\n* If the last person leaves the lobby it will be disbanded\n* Lobby must not be in active battle\n### /lobby kick"
+            "\n* Kick a player from lobby (if private will need a new invite)"
+            "\n### /lobby disband\n* Disband a lobby in queue status if owner(Archives thread)")
+            await ctx.send(embed=embed, ephemeral=True)
+        
+    def thread_check(self, ctx, lob=None):
+        if isinstance(ctx.channel, discord.Thread):
+            if lob:
+                    if ctx.author.id == lob.owner_id:
+                        if ctx.channel.type == discord.ChannelType.private_thread:
+                            return "private"
+                        elif ctx.channel.type == discord.ChannelType.public_thread:
+                            return "public"
+                    else:
+                        return "not owner"
+            else:
+                    return  False
+
+    
+    @lobby.command(name='create')
+    async def create(self, ctx, name: str=None):
+        if name == None:
+            name=ctx.author.name + "'s Lobby"
+
+        if self.thread_check(ctx):
+            await ctx.send("Already in a lobby", ephemeral=True)
+        else:
+            channel = ctx.channel
+            if name:
+                thread = await channel.create_thread(name=name, type=discord.ChannelType.public_thread)
+                await thread.edit(owner=ctx.author)
+                await ctx.send(f"`Created a public lobby:` {thread.mention}")
+            else:
+                thread = await channel.create_thread(name=ctx.author.name + "'s Public Culling Game Lobby", type=discord.ChannelType.public_thread)
+                await thread.edit(owner=ctx.author)
+                await ctx.send(f"`Created a public lobby:` {thread.mention}")
+
+
+    @lobby.command(name='private')
+    async def private(self, ctx, name: str = None):
+        if self.thread_check(ctx):
+            await ctx.send("Already in a lobby", ephemeral=True)
+        else:
+            channel = ctx.channel
+            if name:
+                thread = await channel.create_thread(name=name, type=discord.ChannelType.private_thread)
+            else:
+                thread = await channel.create_thread(name=ctx.author.name + "'s Private Culling Game Lobby", type=discord.ChannelType.private_thread)
+            
+            await thread.edit(owner=ctx.author)
+            await ctx.send(f"`Created a private lobby:` {thread.mention}")
+
+
+    @lobby.command(name='lock')
+    async def lock(self, ctx):
+        thread= self.thread_check(ctx)
+        if thread:
+            if thread == "not owner":
+                if ctx.interaction:
+                    await ctx.interaction.response.send_message("You are not the owner of this lobby", ephemeral=True)
+                    return
+                else:
+                    await ctx.send("You are not the owner of this lobby", ephemeral=True)
+                    return
+            if thread == "private":
+                if ctx.interaction:
+                    await ctx.interaction.response.send_message("Already in a private lobby", ephemeral=True)
+                    return
+                else:
+                    await ctx.send("Already in a private lobby", ephemeral=True)
+                    return
+            if thread == "public":
+                realt = await ctx.channel
+                await realt.edit(type=discord.ChannelType.private_thread, invitable=False)
+                if ctx.interaction:
+                    await ctx.interaction.response.send_message("Private lobby enabled", ephemeral=True)
+                    return
+                else:
+                    await ctx.send("Private lobby enabled", ephemeral=True)
+                    return
+        else:
+            if ctx.interaction:
+                await ctx.interaction.response.send_message("You are not in a lobby", ephemeral=True)
+            await ctx.send("You are not in a lobby", ephemeral=True)
+   
+
+    @lobby.command(name='invite')
+    async def invite(self, ctx, member: discord.Member):
+        thread = self.thread_check(ctx)
+        if thread:
+            if thread == "not owner":
+                if ctx.interaction:
+                  await ctx.interaction.response.send_message("Only the lobby owner may invite people", ephemeral=True)
+                  return
+                else:
+                    ctx.send("Only the lobby owner may invite people", ephemeral=True)
+                    return
+            if thread == "private":
+                    realt = await ctx.channel
+                    await realt.add_user(member)
+                    if ctx.interaction:
+                     await ctx.interaction.response.send_message(member.mention + " has been invited to the private lobby", ephemeral=True)
+                     return
+                    else:
+                        await ctx.send(member.mention +  " has been invited to the private lobby", ephemeral=True)
+                        return
+
+            else:
+                if ctx.interaction:
+                    await ctx.interaction.response.send_message("You can only invite people to a private lobby ( if you are owner )", ephemeral=True)
+                    return
+                else:
+                  await ctx.send("You can only invite people to a private lobby ( if you are owner )", ephemeral=True)
+                  return
+        else:
+            if ctx.interaction:
+                await ctx.interaction.response.send_message("You are not in a lobby", ephemeral=True)
+                return
+            else:
+              await ctx.send("You are not in a lobby", ephemeral=True)
+              return
+
+
+    @lobby.command(name='leave')
+    async def leave(self, ctx):
+        thread = self.thread_check(ctx)
+        if thread:
+            if thread == "not owner":
+                await ctx.channel.remove_user(ctx.author)
+                if ctx.interaction:
+                 await ctx.interaction.response.send_message("You have left the lobby", ephemeral=True)
+                 return
+                else:
+                    await ctx.send("You have left the lobby", ephemeral=True)
+            else:
+                if ctx.interaction:
+                 await ctx.interaction.response.send_message("Lobby owner cannot leave the lobby. Use /lobby disband to disband the lobby.", ephemeral=True)
+                 return
+                else:
+                    await ctx.send("Lobby owner cannot leave the lobby. Use /lobby disband to disband the lobby.", ephemeral=True)
+                    return
+        else:
+            if ctx.interaction:
+             await ctx.interaction.response.send_message("You are not in a lobby", ephemeral=True)
+            else:
+                await ctx.send("You are not in a lobby", ephemeral=True)
+
+    @lobby.command(name='kick')
+    async def kick(self, ctx, user: discord.Member):
+        thread = self.thread_check(ctx)
+        if thread:
+            if thread == "not owner":
+                await ctx.send("you are not the owner of this lobby " + ctx.author.mention)
+            if thread == "private":
+                await ctx.channel.remove_user(user)
+                await ctx.interaction.response.send_message(user.mention + " `has been kicked by`" + ctx.author.mention)
+                
+    @lobby.command(name='disband')
+    async def disband(self, ctx):
+        await ctx.send("Disbanding the lobby...")
 
 async def setup(bot):
-    await bot.add_cog(ThreadCog(bot))
+    await bot.add_cog(Lobby_Cog(bot))
