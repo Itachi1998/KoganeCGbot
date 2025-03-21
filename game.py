@@ -281,11 +281,9 @@ class Player(Actor):
     level_cap = 200
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
                   xp: int, cgp: int, skp: int, user_id: int=None, equipped: list=None, inventory: list=None, shikigami: list=None,
-                   summons: list=None, stacked: tuple=None, poisoned: tuple=None, stunned: tuple=None, hr: str=None, hi: bool=None, 
-                     rct: bool=None, healed: int=None, killcount: list=None, buffed: list=None, debuffed: list=None):
-        try:
-          
-
+                   summons: list=None, stacked: tuple=None, poisoned: tuple=None, stunned: tuple=None, hr: str=None, hi: str=None, 
+                     rct: tuple=None, healed: int=None, killcount: list=None, buffed: list=None, debuffed: list=None):
+        try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
           self.xp = xp
           self.cgp = cgp
@@ -306,15 +304,18 @@ class Player(Actor):
           self.buffed=buffed
           self.debuffed=debuffed
           self.body_parts = {
-            'Head': BodyPart(name='Head', max_hp=self.max_hp * 10 // 100, max_ce=self.max_ce * 10 // 100),
-            'Torso': BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50 // 100),
-            'Legs': BodyPart(name='Legs', max_hp=self.max_hp * 20 // 100, max_ce=self.max_ce * 20 // 100),
-            'Arms': BodyPart(name='Arms', max_hp=self.max_hp * 20 // 100, max_ce=self.max_ce * 20 // 100)
+            'Head': BodyPart(name='Head', max_hp=self.max_hp * 10 % 100),
+            'Torso': BodyPart(name='Torso', max_hp=self.max_hp * 50 % 100, max_ce=self.max_ce),
+            "Left Arm" : BodyPart(name='Left Arm', max_hp=self.maxp_hp * 10 % 100),
+            "Right Arm" : BodyPart(name='Right Arm', max_hp=self.maxp_hp * 10 % 100),
+            "Left Leg" : BodyPart(name='Left Leg', max_hp=self.maxp_hp * 10 % 100),
+            "Right Leg" : BodyPart(name='Right Leg', max_hp=self.maxp_hp * 10 % 100)
         }
+          
           
         except:
              traceback.print_exc()
-   
+                                        
           
 
     def __repr__(self):
