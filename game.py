@@ -339,7 +339,7 @@ class Player(Actor):
          else:
               return False
         except:
-            print("Erorr selling " + item "\n#" * 50 + "\n# Error in def sell(self, item, price, shop) function of the  Player Class\n"))
+            print("Erorr selling " + item "\n#" * 50 + "\n# Error in def sell(self, item, price, shop) function of the  Player Class\n") #############################################
             traceback.print_exc()
 
 

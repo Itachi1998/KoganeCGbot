@@ -43,12 +43,14 @@ class Techniques():
             self.strength = strength
             self.speed = speed
 
+
 # Decending order (special grade -> grade 4)
 enemy_techs = {
-        "Soul Manipulation" : # Femhito - special grade
-    [
-        { "Attack":
-                  { "Callous Formation" : Techniques(
+    
+    "Soul Manipulation" : # Femhito - special grade
+        [
+            { "Attack" :
+                { "Callous Formation" : Techniques(
                     name="Soul Manipulation: Callous Formation",
                     level=1,
                     act_speed=2,
@@ -72,13 +74,12 @@ enemy_techs = {
                     aoe=1,
                     strength=600,
                     speed=800,
-                    type="melee", # change body into weapons
-                )
-                }
-            
-        },
-            {
-                "Defense" :
+                    type="melee" # change body into weapons
+                    )
+                }   
+            },
+
+            { "Defense" :
                 {"Soul Transmute Escape" : Techniques( # will need sub techniques for separate abilities
                     name="Soul Manipulation : Soul Transmute",
                     level=1,
@@ -90,15 +91,15 @@ enemy_techs = {
                     strength=600,
                     speed=800,
                     type="defense dodge" # wings/legs or smth
-                )
-                
-             }
+                    )
+                }
             }
         ],
-        "Orbmaster" : # grade 1
-        # dict of all moves
-            {
-                "Impending Doom" : Techniques(
+        
+    "Orbmaster" : # grade 1
+        [    
+            { "Attack" : 
+                {"Impending Doom" : Techniques(
                     name="Orbmaster: Impending Doom",
                     level=1,
                     act_speed=10,
@@ -109,9 +110,12 @@ enemy_techs = {
                     strength=420,
                     speed=100,
                     type="attack projectile", # attack projectile, attack melee
-                    sure_hit=True,
-                ),          
-                "Foresight" : Techniques(
+                    sure_hit=True
+                    )
+                }
+            },
+            { "Defense" :         
+                {"Foresight" : Techniques(
                     name="Orbmaster: Foresight",
                     level=1,
                     act_speed=10,
@@ -123,7 +127,10 @@ enemy_techs = {
                     speed=200,
                     type="defense counter", #defense tank, defense dodge, defense counter
                     sure_hit=True
-                ),
+                    )
+                }
+            }
+        ],
 
         "Charger" : # grade 1
             {"Attack" :
