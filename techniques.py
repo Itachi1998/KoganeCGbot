@@ -31,7 +31,11 @@ class Techniques():
                  soul: int,
                  buff: tuple=None,
                  debuff: tuple=None,
-
+                 poison: tuple = None,
+                 stun: int = None,
+                 stack: int = None,
+                 charge: list=None,
+                 summon: dict=None,
                  ):
             self.name = name
             self.level=level
@@ -42,6 +46,15 @@ class Techniques():
             self.aoe = aoe
             self.strength = strength
             self.speed = speed
+            self.type=type
+            self.soul=soul
+            self.buff=buff
+            self.debuff=debuff
+            self.poison=poison
+            self.stun=stun
+            self.stack=stack
+            self.charge=charge
+            self.summon=summon
 
 
 # Decending order (special grade -> grade 4)
@@ -49,7 +62,7 @@ enemy_techs = {
     
     "Soul Manipulation" : # Femhito - special grade
         [
-            { "Attack" :
+            {"Attack" :
                 { "Callous Formation" : Techniques(
                     name="Soul Manipulation: Callous Formation",
                     level=1,
@@ -62,8 +75,8 @@ enemy_techs = {
                     speed=600,
                     type="melee",
                     soul=200,
-                    buff=(1, "strength", 200))
-                    ,
+                    buff=(1, "strength", 200)
+                    ),
                 "Soul Transmute" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
                     name="Soul Manipulation: Soul Transmute", 
                     level=1,
@@ -78,8 +91,7 @@ enemy_techs = {
                     )
                 }   
             },
-
-            { "Defense" :
+            {"Defense" :
                 {"Soul Transmute Escape" : Techniques( # will need sub techniques for separate abilities
                     name="Soul Manipulation : Soul Transmute",
                     level=1,
@@ -98,7 +110,7 @@ enemy_techs = {
         
     "Orbmaster" : # grade 1
         [    
-            { "Attack" : 
+            {"Attack" : 
                 {"Impending Doom" : Techniques(
                     name="Orbmaster: Impending Doom",
                     level=1,
@@ -114,7 +126,7 @@ enemy_techs = {
                     )
                 }
             },
-            { "Defense" :         
+            {"Defense" :         
                 {"Foresight" : Techniques(
                     name="Orbmaster: Foresight",
                     level=1,
@@ -132,10 +144,10 @@ enemy_techs = {
             }
         ],
 
-        "Charger" : # grade 1
+    "Charger" : 
+        [ 
             {"Attack" :
-             {
-                "Charged Punch" : Techniques(
+                {"Charged Punch" : Techniques(
                     name="Charger : Charged Punch",
                     level=1,
                     act_speed=3,
@@ -145,11 +157,9 @@ enemy_techs = {
                     aoe=1,
                     strength=500,
                     speed=300,
-                    buff=(2, 'strength', 100)
+                    buff=(2, 'strength', 100),
                     type="attack melee"
-                )
-
-            ,
+                    ),
                 "Electric Ground-pound" : Techniques(
                     name="Charger : Electric Ground-pound",
                     level=1,
@@ -160,12 +170,11 @@ enemy_techs = {
                     strength=400,
                     speed=300,
                     type="attack projectile" # add a 'wave' or 'spread' type of attack?
-                ),
-             },
-             {
-                  "Defense" : {
-
-                "Charged Field" : Techniques(
+                    )
+                }
+            },
+            {"Defense" : 
+                {"Charged Field" : Techniques(
                     name="Charger : Charged Field",
                     level=1,
                     act_speed=2,
@@ -175,14 +184,15 @@ enemy_techs = {
                     strength=400,
                     speed=500,
                     type="defense tank"
-                )
+                    )
+                }
             }
-             },
+        ],
 
-        "Stinkaspore" : # grade 2
+    "Stinkaspore" : # grade 2
         [
-            { "Attack" : {
-                "Hydrogen Sulfide Bomb" : Techniques( # rotten egg smelling gas that can cause; unconsciousness, memory loss, death
+            {"Attack" : 
+                {"Hydrogen Sulfide Bomb" : Techniques( # rotten egg smelling gas that can cause; unconsciousness, memory loss, death
                     name="Stinkaspore: Hydrogen Sulfide Bomb",
                     level=1,
                     act_speed=3,
@@ -193,7 +203,7 @@ enemy_techs = {
                     speed=100,
                     type="attack poison",
                     poison=(range(10, 20), 2)
-                ),
+                    ),
                 "Carbon Monoxide Disperse" : Techniques( # colorless odorless gas that can be fatal in high enough quantities
                     name="Stinkaspore : Carbon Monoxide Disperse",
                     level=1,
@@ -205,13 +215,11 @@ enemy_techs = {
                     speed=100,
                     type="attack poison"
                     #sure_hit=True - Maybe
-                )}
+                    )
+                }
             },
-            {
-                    
-            "Defense" :
-                
-            {    "Ammonia Cloud" : Techniques( # can cause skin burns, respitory damage and is highly flammable
+            {"Defense" :
+                {"Ammonia Cloud" : Techniques( # can cause skin burns, respitory damage and is highly flammable
                     name="Stinkaspore : Ammonia Cloud", 
                     level=1,
                     act_speed=3,
@@ -221,16 +229,15 @@ enemy_techs = {
                     strength=80,
                     speed=150,
                     type="defense counter"
-                )
-            }
+                    )
+                }
             }
         ],
 
-        "Primal Curse" : 
+    "Primal Curse" : 
         [ 
-            { "Attack" :
-             {
-                "Thought Manipulation Attack" : Techniques(
+            {"Attack" :
+                {"Thought Manipulation Attack" : Techniques(
                     name="MonkeyBrain : Thought Manipulation Attack",
                     level=1,
                     act_speed=2,
@@ -240,12 +247,11 @@ enemy_techs = {
                     strength=200,
                     speed=500,
                     type="attack stun" # new types for targeting the mind etc.
-                )
-            }
+                    )
+                }
             },
-            { "Defense" :{
-
-                "Thought Manipulation Defense" : Techniques(
+            {"Defense" :
+                {"Thought Manipulation Defense" : Techniques(
                     name="MonkeyBrain : Thought Manipulation Defense",
                     level=1,
                     act_speed=2,
@@ -255,78 +261,78 @@ enemy_techs = {
                     strength=300,
                     speed=400,
                     type="defense counter"
-                )
-            }
-            }
-        ],
-              
-        # PHYSICAL ATTACK
-        "Bugfly" : # grade 4
-        [
-            { "Attack" : { 
-                "Bugfly Sting" : Techniques(
-                    name="Bugfly: Sting",
-                    level=1,
-                    act_speed=2,
-                    act_dur=1,
-                    act_cost=1,
-                    aoe=1,
-                    strength=5,
-                    speed=15,
-                    type="attack melee"
-                ),}
-            }
-                ,
-                {
-                
-                "Defense:" {
-                "Bugfly Dodge" : Techniques(
-                    name="Bugfly: Dodge",
-                    level=1,
-                    act_speed=2,
-                    act_dur=1,
-                    act_cost=1,
-                    aoe=1,
-                    strength=15,
-                    speed=30,
-                    type="defense dodge"
-                )}
-            }
-        ],
-
-        # PHYSICAL ATTACK
-        "Floatjelly" : # grade 4
-        [
-            { "Attack" : {
-                "Floatjelly Sting" : Techniques(
-                    name="Floatjelly: Sting",
-                    level=1,
-                    act_speed=5,
-                    act_dur=1,
-                    act_cost=3,
-                    aoe=1,
-                    strength=20,
-                    speed=10,
-                    type="attack melee"
-                )
-            }
-            },
-            { 
-                "Defense": {
-                "Floatjelly Float" : Techniques(
-                    name="Floatjelly : Float",
-                    level=1,
-                    act_speed=4,
-                    act_dur=1,
-                    act_cost=2,
-                    aoe=1,
-                    strength=15,
-                    speed=15,
-                    type="defense dodge"
-                )
+                    )
                 }
             }
         ]
+              
+        # PHYSICAL ATTACK
+        # "Bugfly" : # grade 4
+        # [
+        #     { "Attack" : { 
+        #         "Bugfly Sting" : Techniques(
+        #             name="Bugfly: Sting",
+        #             level=1,
+        #             act_speed=2,
+        #             act_dur=1,
+        #             act_cost=1,
+        #             aoe=1,
+        #             strength=5,
+        #             speed=15,
+        #             type="attack melee"
+        #         ),}
+        #     }
+        #         ,
+        #         {
+                
+        #         "Defense:" {
+        #         "Bugfly Dodge" : Techniques(
+        #             name="Bugfly: Dodge",
+        #             level=1,
+        #             act_speed=2,
+        #             act_dur=1,
+        #             act_cost=1,
+        #             aoe=1,
+        #             strength=15,
+        #             speed=30,
+        #             type="defense dodge"
+        #         )}
+        #     }
+        # ],
+
+        # PHYSICAL ATTACK
+        # "Floatjelly" : # grade 4
+        # [
+        #     { "Attack" : {
+        #         "Floatjelly Sting" : Techniques(
+        #             name="Floatjelly: Sting",
+        #             level=1,
+        #             act_speed=5,
+        #             act_dur=1,
+        #             act_cost=3,
+        #             aoe=1,
+        #             strength=20,
+        #             speed=10,
+        #             type="attack melee"
+        #         )
+        #     }
+        #     },
+        #     { 
+        #         "Defense": {
+        #         "Floatjelly Float" : Techniques(
+        #             name="Floatjelly : Float",
+        #             level=1,
+        #             act_speed=4,
+        #             act_dur=1,
+        #             act_cost=2,
+        #             aoe=1,
+        #             strength=15,
+        #             speed=15,
+        #             type="defense dodge"
+        #         )
+        #         }
+        #     }
+        # ]
 
     # TEMPLATE
         # "" : 
@@ -364,7 +370,8 @@ enemy_techs = {
         #     }}
         # ],
         #       
-    
+
+}    
 
 
 for k, v in enemy_techs.items():
