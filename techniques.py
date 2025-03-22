@@ -31,7 +31,11 @@ class Techniques():
                  soul: int,
                  buff: tuple=None,
                  debuff: tuple=None,
-
+                 poison: tuple = None,
+                 stun: int = None,
+                 stack: int = None,
+                 charge: list=None,
+                 summon: dict=None,
                  ):
             self.name = name
             self.level=level
@@ -42,6 +46,15 @@ class Techniques():
             self.aoe = aoe
             self.strength = strength
             self.speed = speed
+            self.type=type
+            self.soul=soul
+            self.buff=buff
+            self.debuff=debuff
+            self.poison=poison
+            self.stun=stun
+            self.stack=stack
+            self.charge=charge
+            self.summon=summon
 
 # Decending order (special grade -> grade 4)
 enemy_techs = {
@@ -97,6 +110,9 @@ enemy_techs = {
         ],
         "Orbmaster" : # grade 1
         # dict of all moves
+         [
+              {"Attack" :
+
             {
                 "Impending Doom" : Techniques(
                     name="Orbmaster: Impending Doom",
@@ -110,7 +126,12 @@ enemy_techs = {
                     speed=100,
                     type="attack projectile", # attack projectile, attack melee
                     sure_hit=True,
-                ),          
+                ),
+            }
+              },
+            {  "Defense" : 
+             {
+                         
                 "Foresight" : Techniques(
                     name="Orbmaster: Foresight",
                     level=1,
@@ -123,9 +144,12 @@ enemy_techs = {
                     speed=200,
                     type="defense counter", #defense tank, defense dodge, defense counter
                     sure_hit=True
-                ),
+                )
+            }
+              },
 
-        "Charger" : # grade 1
+{
+        "Charger" : [ 
             {"Attack" :
              {
                 "Charged Punch" : Techniques(
@@ -138,7 +162,7 @@ enemy_techs = {
                     aoe=1,
                     strength=500,
                     speed=300,
-                    buff=(2, 'strength', 100)
+                    buff=(2, 'strength', 100),
                     type="attack melee"
                 )
 
@@ -154,10 +178,12 @@ enemy_techs = {
                     speed=300,
                     type="attack projectile" # add a 'wave' or 'spread' type of attack?
                 ),
-             },
+             }
+            }
+            ,
              {
-                  "Defense" : {
-
+                  "Defense" : 
+             {
                 "Charged Field" : Techniques(
                     name="Charger : Charged Field",
                     level=1,
@@ -170,8 +196,8 @@ enemy_techs = {
                     type="defense tank"
                 )
             }
-             },
-
+             }]
+},
         "Stinkaspore" : # grade 2
         [
             { "Attack" : {
