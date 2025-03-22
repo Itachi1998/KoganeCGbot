@@ -38,7 +38,7 @@ class CreateButtons(discord.ui.View):
         self.msg = msg
         self.embed=embed
         self.name = name
-        self.welcome = "## Welcome to Kogane Culling Games!"
+        self.welcome = "## `Welcome to Kogane Culling Games!`"
 
 
     @discord.ui.button(label="Spin", style=discord.ButtonStyle.premium)
