@@ -3,7 +3,6 @@ import datetime
 from typing import Union, List, Optional
 import enum, random, sys
 from copy import deepcopy
-from cogs.battle import Target
 import old_techniques
 
 #currencies:
@@ -230,7 +229,8 @@ class Enemy(Actor):
 
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony,
                  inventory: list, equipped: list, xp: int, cgp: int, stacked: tuple=None, poison: tuple=None, charged: tuple=None,
-                stunned: tuple=None, hi: bool=None, hr: str=None, prescience: int=None, debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None):
+                stunned: tuple=None, hi: bool=None, hr: str=None, prescience: int=None, debuffed: list=None, buffed: list=None,
+                  summons: list=None, healed: int=None, bodyparts: dict=None):
         try:   
             super().__init__(
                 name, 
@@ -269,13 +269,34 @@ class Enemy(Actor):
             self.summons = summons
             self.poison= poison
             self.healed=healed
-            self.bodyparts=[]
+            self.humanoid_body = {
+              "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
+              "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce),
+              "Left Arm": BodyPart(name='Left Arm', max_hp=self.max_hp * 10 // 100),
+              "Right Arm": BodyPart(name='Right Arm', max_hp=self.max_hp * 10 // 100),
+              "Left Leg": BodyPart(name='Left Leg', max_hp=self.max_hp * 10 // 100),
+              "Right Leg": BodyPart(name='Right Leg', max_hp=self.max_hp * 10 // 100)
+          }
+            self.grade4_curse = { "Head" : BodyPart(name="Head", max_hp=self.max_hp, max_ce=self.max_ce)}
+            self.grade3_Curse= {""
+            "Head" : BodyPart(name="Head", max_hp=self.max_hp, max_ce=self.max_ce * 50 % 100), 
+            "Torso" : BodyPart(name="Head", max_hp=self.max_hp, max_ce=self.max_ce * 50 % 100)
+            }
+            self.grade2_Curse= {""
+            "Head" : BodyPart(name="Head", max_hp=self.max_hp * 25 % 100, max_ce=self.max_ce * 25 % 100), 
+            "Torso" : BodyPart(name="Head", max_hp=self.max_hp * 50 % 100, max_ce=self.max_ce * 50 % 100),
+            "Legs" : BodyPart(name="legs" , max_hp=self.max_hp * 25 % 100, max_ce = self.max_ce * 25 % 100),
+            }
+            self.bodyparts=bodyparts
                 
         except:
             traceback.print_exc()
 
     def __repr__(self):
         return f"Enemy: {self.name} - {self.level} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
+
+
+
 
 class Player(Actor):
     level_cap = 200
@@ -303,14 +324,16 @@ class Player(Actor):
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
-          self.body_parts = {
-            'Head': BodyPart(name='Head', max_hp=self.max_hp * 10 % 100),
-            'Torso': BodyPart(name='Torso', max_hp=self.max_hp * 50 % 100, max_ce=self.max_ce),
-            "Left Arm" : BodyPart(name='Left Arm', max_hp=self.maxp_hp * 10 % 100),
-            "Right Arm" : BodyPart(name='Right Arm', max_hp=self.maxp_hp * 10 % 100),
-            "Left Leg" : BodyPart(name='Left Leg', max_hp=self.maxp_hp * 10 % 100),
-            "Right Leg" : BodyPart(name='Right Leg', max_hp=self.maxp_hp * 10 % 100)
-        }
+          
+          humanoid_body = {
+              "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
+              "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce),
+              "Left Arm": BodyPart(name='Left Arm', max_hp=self.max_hp * 10 // 100),
+              "Right Arm": BodyPart(name='Right Arm', max_hp=self.max_hp * 10 // 100),
+              "Left Leg": BodyPart(name='Left Leg', max_hp=self.max_hp * 10 // 100),
+              "Right Leg": BodyPart(name='Right Leg', max_hp=self.max_hp * 10 // 100)
+          }
+          self.body_parts = humanoid_body
           
           
         except:
@@ -339,7 +362,7 @@ class Player(Actor):
          else:
               return False
         except:
-            print("Erorr selling " + item "\n#" * 50 + "\n# Error in def sell(self, item, price, shop) function of the  Player Class\n") #############################################
+            print("Erorr selling " + item + "\n#" * 50 + "\n# Error in def sell(self, item, price, shop) function of the  Player Class\n") #############################################
             traceback.print_exc()
 
 
@@ -494,12 +517,9 @@ class Grade4_Bugfly(Enemy):
              cgp=1, 
              technique="Bugfly", 
              playerclass="curse4", 
-             quantity=random.randrange(1, 8)
+             quantity=random.randrange(1, 8),
+             bodyparts=self.grade4_curse
              )
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
         self.hp = self.max_hp
         self.ce = self.max_ce
 
@@ -521,12 +541,8 @@ class  Grade4_Floatjelly(Enemy):
              technique="Floatjelly", 
              playerclass="curse4", 
              quantity=random.randrange(1, 6), 
-             stun=1
-             )
-          self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-          self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-          self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-          self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+             stun=1,
+             bodyparts=self.Grade4_curse)
           self.hp = self.max_hp
           self.ce = self.max_ce
 
@@ -546,13 +562,10 @@ class Grade4_Flymouth(Enemy):
              technique="Flymouth", 
              playerclass="curse4", 
              quantity=random.randrange(1, 4),
-             poison=(3, 1) 
+             poison=(3, 1),
+             bodyparts=self.grade4_curse
              )
-        
-          self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-          self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-          self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-          self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+    
           self.hp = self.max_hp
           self.ce = self.max_ce
           
@@ -574,7 +587,8 @@ class Grade3_Backhand(Enemy):
              cgp=1, 
              technique="Backhand", 
              playerclass="curse3", 
-             quantity=random.randrange(1, 3)
+             quantity=random.randrange(1, 3),
+             bodyparts=self.grade3_Curse
              )
           self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
           self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
@@ -596,12 +610,9 @@ class Grade3_Furrpede(Enemy):
              cgp=1, 
              technique="Furrpede", 
              playerclass="curse3", 
-             quantity=random.randrange(1,3)
+             quantity=random.randrange(1,3),
+             bodyparts=self.grade3_Curse
              )
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
         self.hp = self.max_hp
         self.ce = self.max_ce
 
@@ -618,12 +629,10 @@ class Grade3_AnxiousEars(Enemy):
              cgp=1, 
              technique="AnxiousEars", 
              playerclass="curse3", 
-             quantity=random.randrange(1,3)
+             quantity=random.randrange(1,3),
+             bodyparts=self.grade3_Curse
              )
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+
         self.hp = self.max_hp
         self.ce = self.max_ce
 
@@ -641,12 +650,10 @@ class Grade2_Stinkaspor(Enemy):
              cgp=1, 
              technique="Stinkaspor", 
              playerclass="curse2",
-             quantity=random.randrange(1, 2)
+             quantity=random.randrange(1, 2),
+             bodyparts=self.grade2_Curse
              )
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+ 
         self.hp = self.max_hp
         self.ce = self.max_ce
 
@@ -666,12 +673,9 @@ class Grade2_Monkeybrain(Enemy):
              cgp=1, 
              technique="Monkeybrain",
              playerclass="curse2",
-             quantity=random.randrange(1,2)
+             quantity=random.randrange(1,2),
+             bodyparts=self.grade2_Curse
               )
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
         self.hp = self.max_hp
         self.ce = self.max_ce
         
@@ -693,11 +697,8 @@ class Grade1_Orbmaster(Enemy):
              xp=400, 
              cgp=1, 
              technique="Orbmaster", 
-             playerclass="curse1")
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+             playerclass="curse1",
+             bodyparts=self.humanoid_body)
         self.hp = self.max_hp
         self.ce = self.max_ce
 
@@ -716,12 +717,9 @@ class Grade1_Charger(Enemy):
                  xp=400, 
                  cgp=1, 
                  technique="Charger", 
-                 playerclass="curse1"
+                 playerclass="curse1",
+                 bodyparts=self.humanoid_body
                  )
-            self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-            self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-            self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-            self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
             self.hp = self.max_hp
             self.ce = self.max_ce
 
@@ -740,11 +738,8 @@ class SpecialGrade_FingerBearer(Enemy):
              xp=600,
              cgp=1,
              technique="Fingerbearer",
-             playerclass="curse0")
-          self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-          self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-          self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-          self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+             playerclass="curse0",
+             bodyparts=self.humanoid_body)
           self.hp = self.max_hp
           self.ce = self.max_ce
 
@@ -763,12 +758,9 @@ class SpecialGrade_DisasterFlames(Enemy):
                         xp=1000, 
                         cgp=1, 
                         technique="Disaster Flames", 
-                        playerclass="curse0"
+                        playerclass="curse0",
+                        bodyparts=self.humanoid_body
                         )
-            self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-            self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-            self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-            self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
             self.hp = self.max_hp
             self.ce = self.max_ce
                 
@@ -790,12 +782,10 @@ class SpecialGrade_NatureSpirit(Enemy):
                        xp=1000, 
                        cgp=1, 
                        technique="Nature Spirit", 
-                       playerclass="curse"
+                       playerclass="curse",
+                       bodyparts=self.humanoid_body
                        )
-            self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-            self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-            self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-            self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+   
             self.hp = self.max_hp
             self.ce = self.max_ce
 
@@ -813,17 +803,12 @@ class SpecialGrade_TideCurse(Enemy):
                    xp=1000, 
                    cgp=1, 
                    technique="Tide Curse", 
-                   playerclass="curses"
-                   )
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+                   playerclass="curses",
+                   bodyparts=self.humanoid_body
+        )
         self.hp = self.max_hp
         self.ce = self.max_ce
         
-
-
 class SpecialGrade_Satasha(Enemy):
        def __init__(self):
         super.init(name="Satasha",
@@ -837,12 +822,10 @@ class SpecialGrade_Satasha(Enemy):
                    xp=1000,
                    cgp=1,
                    technique="Satasha",
-                   playerclass="curses"
+                   playerclass="curses",
+                   bodyparts=self.humanoid_body
                    )
-        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
+     
         self.hp = self.max_hp
         self.ce = self.max_ce
 
@@ -861,12 +844,9 @@ class Toji(Enemy):
                        xp=1200,
                        cgp=5,
                        technique="Toji", 
-                       playerclass="reincarnated"
+                       playerclass="reincarnated",
+                       bodyparts=self.humanoid_body
                        )
-            self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-            self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-            self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-            self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
             self.hp = self.max_hp
             self.ce = self.max_ce
 
@@ -885,13 +865,10 @@ class Reggie(Enemy):
                            xp=1000,
                            cgp=5,
                            technique="Reggie",
-                           playerclass="reincarnated"
+                           playerclass="reincarnated",
+                           bodyparts=self.humanoid_body
                 )
 
-                self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-                self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-                self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-                self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
                 self.hp = self.max_hp
                 self.ce = self.max_ce
 class Uro(Enemy):
@@ -907,13 +884,9 @@ class Uro(Enemy):
                                    xp=1000,
                                    cgp=5,
                                    technique="Uro",
-                                   playerclass="reincarnated"
+                                   playerclass="reincarnated",
+                                   bodyparts=self.humanoid_body
                                    )
-
-                        self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-                        self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-                        self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-                        self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
                         self.hp = self.max_hp
                         self.ce = self.max_ce
 class Ryu(Enemy): 
@@ -928,12 +901,9 @@ class Ryu(Enemy):
                      xp=1000,
                      cgp=5,
                      technique="Ryu",
-                     playerclass="reincarnated"
+                     playerclass="reincarnated",
+                     bodyparts=self.humanoid_body
                      )
-          self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-          self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-          self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-          self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
           self.hp = self.max_hp
           self.ce = self.max_ce
           
@@ -953,12 +923,9 @@ class Kashimo(Enemy):
                      technique="Kashimo",
                      playerclass="reincarnated",
                      stun=2,
-                     soul={"strength" : 100}
+                     soul={"strength" : 100},
+                     bodyparts=self.humanoid_body
                      )
-          self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-          self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-          self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-          self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
           self.hp = self.max_hp
           self.ce = self.max_ce
 
@@ -975,12 +942,9 @@ class KungOfCurses(Enemy):
                            xp=2000, 
                            cgp=5, 
                            technique="King of Curses", 
-                           playerclass="reincarnated"
+                           playerclass="reincarnated",
+                           bodyparts=self.humanoid_body
                            )
-                self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-                self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-                self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-                self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
                 self.hp = self.max_hp
                 self.ce = self.max_ce
 
@@ -999,13 +963,9 @@ class Kenjaku(Enemy):
                      xp=2000, 
                      cgp=1, 
                      technique="Kenjaku",
-                     playerclass="reincarnated"
+                     playerclass="reincarnated",
+                     bodyparts=self.humanoid_body
                      )
-                self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-                self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-                self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-                self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
                 
-                if sum(self.head.hp, self.torsohp.hp, self.legs.hp, self.arms.hp) == self.max_hp:
-                    self.hp = self.max_hp
-                    self.ce = self.max_ce
+                self.hp = self.max_hp
+                self.ce = self.max_ce

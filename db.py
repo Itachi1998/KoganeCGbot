@@ -42,6 +42,7 @@ class Player(Base):
     debuffs: Mapped[Optional[List]] = mapped_column(JSON)
     heals: Mapped[Optional[List]] = mapped_column(JSON)
     kills: Mapped[Optional[List]] = mapped_column(JSON)
+    bodyparts: Mapped[Optional[List]] = mapped_column(JSON)
 
 
 class Colony(Base):

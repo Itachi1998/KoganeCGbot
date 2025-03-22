@@ -5,33 +5,31 @@ from discord import app_commands
 
 
 
-
-
+lobed = discord.Embed(title="", description="Lobby Created")
 # MAIN CLASS FOR LOBBIES
 # Use this to instantiate lobby instances
 
 class Lobby():
-    def __init__(self, name: str, owner: int, id: int, colony_id: int, private: bool, players: list, invited: list, team1: list, team2: list, ready: list, turn: int, 
-                 created_at=datetime.now().astimezone().strftime("%c"), field: list=None, graveyard: list=None):
-        self.name = name
-        self.owner = owner
-        self.id = id
-        self.colony_id = colony_id
-        self.private = private
-        self.players=players
-        self.invited=invited
-        self.team1=team1
-        self.team2=team2
-        self.read = ready
-        self.turn = turn
-        self.create_at = created_at
-        self.field = field
-        self.graveyard = graveyard
+    def __init__(self, name: str, owner: int, colony_id: int, private: bool, players: list, invited: list, team1: list, team2: list, ready: list, turn: int, 
+                 created_at=datetime.now().astimezone().strftime("%c"), field: list=None, graveyard: list=None, feed: list=None):
+        self.name = name # name of lobby default to "<player name>'s Lobby"
+        self.owner = owner # user_id of the owner of the lobby
+        self.colony_id = colony_id # id of colony lobby is created in
+        self.private = private # if lobby is private = True
+        self.players=players # list of total players in the lobby
+        self.invited=invited # list of invited players 
+        self.team1=team1 # list of players who joined team1
+        self.team2=team2 # list of players who joined team2
+        self.read = ready # list of payers ready 
+        self.turn = turn # int of the current turn
+        self.create_at = created_at # date of creation EST
+        self.field = field # players and items on the field 
+        self.graveyard = graveyard # players killed in this battle
+        self.feed = feed # battle feed 
 
 class Lobby_Cog(commands.Cog):
     def __init__(self, bot): 
          self.bot = bot
-
     @commands.hybrid_group(name="lobby", description="Use /lobby <option>")
     async def lobby(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -44,18 +42,14 @@ class Lobby_Cog(commands.Cog):
             "\n### /lobby disband\n* Disband a lobby in queue status if owner(Archives thread)")
             await ctx.send(embed=embed, ephemeral=True)
         
-    def thread_check(self, ctx, lob=None):
+    def thread_check(self, ctx):
         if isinstance(ctx.channel, discord.Thread):
-            if lob:
-                    if ctx.author.id == lob.owner_id:
                         if ctx.channel.type == discord.ChannelType.private_thread:
                             return "private"
                         elif ctx.channel.type == discord.ChannelType.public_thread:
                             return "public"
-                    else:
-                        return "not owner"
-            else:
-                    return  False
+                        else:
+                            return False
 
     
     @lobby.command(name='create')

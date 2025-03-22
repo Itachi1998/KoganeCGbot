@@ -15,7 +15,6 @@ class Techniques_cog(commands.Cog):
 async def setup(bot):
     await bot.add_cog(Techniques_cog(bot))
 
-
 class Techniques():
     def __init__(self, 
                  name: str,  # "Blood Manipulation: Piercing Blood"
@@ -23,12 +22,12 @@ class Techniques():
                  act_speed: int, # activation speed of technique: 1-5 (can be changed with binding vows)
                  act_dur: int, #activation duration in turn counts: can very in numbers and be changed with binding vows
                  act_cost: int,
-                 act_body: list, # activation cost per turn of activating this technique: can be changed with binding vows
+                 act_body: tuple, # activation cost per turn of activating this technique: can be changed with binding vows
                  aoe: int, # amount of players targetable (can be changed with binding vows)
                  strength: int, # strength of attack or defense (will be used in attack vs defense checks, can be changed with binding vows)
                  speed: int, # speed of attack or defense (will be used in attack vs defense checks, can be changed with binding vows) 
                  type: str,
-                 soul: int,
+                 soul: int=None,
                  buff: tuple=None,
                  debuff: tuple=None,
                  poison: tuple = None,
@@ -36,6 +35,8 @@ class Techniques():
                  stack: int = None,
                  charge: list=None,
                  summon: dict=None,
+                 sure_hit=None,
+                 target=None
                  ):
             self.name = name
             self.level=level
@@ -55,6 +56,8 @@ class Techniques():
             self.stack=stack
             self.charge=charge
             self.summon=summon
+            self.sure_hit=sure_hit
+            self.target=target
 
 
 # Decending order (special grade -> grade 4)
@@ -153,7 +156,7 @@ enemy_techs = {
                     act_speed=3,
                     act_dur=1,
                     act_cost=40,
-                    act_body=("hands"),
+                    act_body=("right arm"),
                     aoe=1,
                     strength=500,
                     speed=300,
@@ -166,6 +169,7 @@ enemy_techs = {
                     act_speed=3,
                     act_dur=1,
                     act_cost=50,
+                    act_body=("right arm", "left arm"),
                     aoe=5,
                     strength=400,
                     speed=300,
@@ -180,6 +184,7 @@ enemy_techs = {
                     act_speed=2,
                     act_dur=1,
                     act_cost=40,
+                    act_body=("right arm"),
                     aoe=5,
                     strength=400,
                     speed=500,
@@ -265,111 +270,6 @@ enemy_techs = {
                 }
             }
         ]
-              
-        # PHYSICAL ATTACK
-        # "Bugfly" : # grade 4
-        # [
-        #     { "Attack" : { 
-        #         "Bugfly Sting" : Techniques(
-        #             name="Bugfly: Sting",
-        #             level=1,
-        #             act_speed=2,
-        #             act_dur=1,
-        #             act_cost=1,
-        #             aoe=1,
-        #             strength=5,
-        #             speed=15,
-        #             type="attack melee"
-        #         ),}
-        #     }
-        #         ,
-        #         {
-                
-        #         "Defense:" {
-        #         "Bugfly Dodge" : Techniques(
-        #             name="Bugfly: Dodge",
-        #             level=1,
-        #             act_speed=2,
-        #             act_dur=1,
-        #             act_cost=1,
-        #             aoe=1,
-        #             strength=15,
-        #             speed=30,
-        #             type="defense dodge"
-        #         )}
-        #     }
-        # ],
-
-        # PHYSICAL ATTACK
-        # "Floatjelly" : # grade 4
-        # [
-        #     { "Attack" : {
-        #         "Floatjelly Sting" : Techniques(
-        #             name="Floatjelly: Sting",
-        #             level=1,
-        #             act_speed=5,
-        #             act_dur=1,
-        #             act_cost=3,
-        #             aoe=1,
-        #             strength=20,
-        #             speed=10,
-        #             type="attack melee"
-        #         )
-        #     }
-        #     },
-        #     { 
-        #         "Defense": {
-        #         "Floatjelly Float" : Techniques(
-        #             name="Floatjelly : Float",
-        #             level=1,
-        #             act_speed=4,
-        #             act_dur=1,
-        #             act_cost=2,
-        #             aoe=1,
-        #             strength=15,
-        #             speed=15,
-        #             type="defense dodge"
-        #         )
-        #         }
-        #     }
-        # ]
-
-    # TEMPLATE
-        # "" : 
-        # [ 
-         #   {"Attacl" :
-             
-        #     {
-        #         "" : Techniques(
-        #             name="",
-        #             level=,
-        #             act_speed=,
-        #             act_dur=,
-        #             act_cost=,
-        #             aoe=,
-        #             strength=,
-        #             speed=,
-        #             type="",
-        #             sure_hit=
-        #         )
-        #     }
-        # },
-        #     { "Defense" : 
-        #{
-        #         "" : Techniques(
-        #             name="",
-        #             level=,
-        #             act_speed=,
-        #             act_dur=,
-        #             act_cost=,
-        #             aoe=,
-        #             strength=,
-        #             speed=,
-        #             type=""
-        #         )
-        #     }}
-        # ],
-        #       
 
 }    
 
