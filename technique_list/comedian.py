@@ -1,61 +1,14 @@
 from techniques import Techniques
 import random, traceback, game
 
-
-class Comedian(Techniques):
-
-  rarity = 5
-
-
-  def __init__(self):
-      super().__init__(
-          "Comedian",
-          1,
-          {"Flying Kick": {"dmg": 150, "speed": 300, 'ct lvl' : 1, 'imbue cost' : 5},
-            "Comedy Skit": { "dmg": 200, "speed":600, 'aoe' : 3, 'ct lvl' : 2, 'imbue cost' : 15}, 
-            "Truck Kun" : {"dmg" : 300, "speed" : 700, 'ct lvl' : 3, 'imbue cost' : 20}},
-           {"Red Is Taboo": {"def": 10, "speed": 300, 'negate' : True, 'ct lvl' : 1, 'imbue cost' : 0}, 
-            "Fanta Sea" : {"def" : 800, 'speed' : 800, 'counter' : True, 'dmg' : 200, 'ct lvl' : 2, 'imbue cost' : 15}, 
-            "Be My Wifi": {"def": 300, "speed": 300, 'ct lvl' : 2, 'imbue cost' : 30},
-            "Sauced Up" : {'def' : 250, 'speed' : 600, 'imbue cost' : 15, 'ct lvl' : 2},
-            'CE' : {'def' : 10, 'speed' : 10, 'ct lvl' : 1, 'imbue cost' : 0}},
-          0,
-          20, 
-          "<:takaba_doomed:1275115036578287657>")
-
-
-
-  def attack_jokes(self, joke, answer, correct, imbued, defense=None):
-        
-        if answer == correct:
-             if defense:
-               if "counter" in defense["type"]:
-                   return (0, 'counter')
-             return (0, 'miss')
-        else:
-              dmg = self.moves['Attack']['Joke']['dmg']
-              dmg += imbued
-              speed = self.moves['Attack']['Joke']['speed']
-              speed += imbued
-
-              if defense:
-                  def_spd = defense['speed']
-                  def_str = defense['strength']
-                  
-                  speed -= def_spd
-                  if speed > 50:
-                       return(dmg, 'hit')
-                  else:
-                        return
-
               
 
-  def flying_kick(self, player, target):
+def flying_kick(self, player, target):
     
     results = attack_checks(self.attack['Flying Kick'], target, player)
     return results
 
-  def comedy_skit(self, player, targets):
+def comedy_skit(self, player, targets):
     if player.ct_level < self.attack['Comedy Skit']['ct lvl']:
           return(0, 'NA lvl', False, [])
     if player.imbued < self.attack['Comedy Skit']['imbue cost']:
@@ -64,7 +17,7 @@ class Comedian(Techniques):
     return results, targets
 
     
-  def truck_kun(self, player, target):
+def truck_kun(self, player, target):
     if player.ct_level < self.attack['Truck Kun']['ct lvl']:
             return(0, 'NA lvl', False, [])
         
@@ -73,11 +26,11 @@ class Comedian(Techniques):
     results = attack_checks(self.attack['Truck Kun'], target, player)
     return results
 
-  def red_is_taboo(self, enemy, player, attack):
+def red_is_taboo(self, enemy, player, attack):
     results = defense_checks(self.defense['Red Is Taboo'], enemy, player, attack)
     return results
       
-  def sauced_up(self, enemy, player, attack):
+def sauced_up(self, enemy, player, attack):
       if player.ct_level < self.attack['Sauced Up']['ct lvl']:
           return(0, 'NA lvl', False, [])
       if player.imbued < self.attack['Sauced Up']['imbue cost']:
@@ -85,7 +38,7 @@ class Comedian(Techniques):
       results= defense_checks(self.defense['Sauced Up'], enemy, player, attack)
       return results
       
-  def fanta_sea(self, enemy, player, attack):
+def fanta_sea(self, enemy, player, attack):
     if player.imbued < self.attack['Sauced Up']['imbue cost']:
             return(0, 'NA imbue', False, [])
     if player.ct_level < self.attack['Fanta Sea']['ct lvl']:
@@ -94,7 +47,7 @@ class Comedian(Techniques):
     results = defense_checks(self.defense['Fanta Sea'], enemy, player, attack)
     return results
 
-  def be_my_wifi(self, enemy, player, attack):
+def be_my_wifi(self, enemy, player, attack):
     if player.ct_level < self.attack['Truck Kun']['ct lvl']:
           return(0, 'NA lvl', False, [])
         
@@ -104,7 +57,7 @@ class Comedian(Techniques):
     results = defense_checks(self.defense['Be My Wifi'], enemy, player, attack)
     return results
 
-  def ce(self, enemy, player, attack):                                       
+def ce(self, enemy, player, attack):                                       
         results = defense_checks(self.defense['CE'], enemy, player, attack, ce=player.ce)
         return results
 
