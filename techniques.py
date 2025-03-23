@@ -289,7 +289,7 @@ bird_manip = {
                        act_speed=100,
                        act_dur=1,
                        act_cost=100,
-                       act_body={"Head", "Right Arm", "Left Arm"},
+                       act_body=("Head", "Right Arm", "Left Arm"),
                        aoe=3,
                        strength=50,
                        speed=250,
@@ -301,7 +301,7 @@ bird_manip = {
                        act_speed=50,
                        act_dur=3,
                        act_cost=300,
-                       act_body={"head", "left arm", "right arm"},
+                       act_body=("head", "left arm", "right arm"),
                        aoe=3,
                        strength=200,
                        speed=400,
@@ -314,11 +314,12 @@ bird_manip = {
                      act_speed=20,
                      act_dur=1,
                      act_cost=400,
-                     act_body={"Head", "left arm", "right arm"},
+                     act_body=("Head", "left arm", "right arm"),
                      aoe=2,
                      strength=1500,
                      speed=500,
-                     stun=3
+                     stun=3,
+                     type="Projectile"
                 )
                        
 
@@ -333,7 +334,7 @@ bird_manip = {
                          act_speed=40,
                          act_dur=3,
                          act_cost=50,
-                         act_body={"Head", "left arm", "right arm"},
+                         act_body=("Head", "left arm", "right arm"),
                          aoe=3,
                          strength=50,
                          speed=100,
@@ -344,13 +345,98 @@ bird_manip = {
                          act_speed=20,
                          act_dur=5,
                          act_cost=10,
-                         act_body={"head"},
+                         act_body=("head"),
                          aoe=5,
                          strength=150,
                          speed=500,
-                         buff=("speed", 250)
+                         buff=("speed", 550),
+                         type="dodge"
                     )
-               }}
-     ], 
-     "Rarity" : 60
-}
+
+               }}],
+                "Rarity" : 60}
+
+     
+blood_manip= {"Blood Manip" :[
+        {
+             "Attack" : {
+                    "Piercing Blood" :
+                    Techniques(name="Blood Manip: Piercing Blood", 
+                             level=1,
+                             act_speed=100,
+                             act_dur=2,
+                             act_cost=100,
+                             act_body=("Head", "left arm", "right arm"),
+                             aoe=1,
+                             strength=400,
+                             speed=1200,
+                             type="projectile",
+                             poison=(10, 4),
+                             stun=1
+                             ),
+                    "Blood Edge" : 
+                    Techniques(name="Blood Manip: Blood Edge",
+                                        level=2,
+                                        act_speed=50,
+                                        act_dur=4,
+                                        act_cost=300,
+                                        act_body=("Head", "left arm", "right arm"),
+                                        aoe=5,
+                                        strength=800,
+                                        speed=500,
+                                        type="Projectile",
+                                        poison=(5, 8)
+
+                                        ),
+                    "Red Scale" : 
+                    Techniques(name="Blood Manip: Red Scale",
+                               level=1,
+                               act_speed=10,
+                               act_cost=500,
+                               act_dur=5,
+                               act_body=("Head", "right arm", "left arm", "left leg", "right leg"),
+                               aoe=1,
+                               strength=500,
+                               speed=500,
+                               type="melee",
+                               buff=("strength", "speed"),
+
+
+                    ) 
+                            
+             }
+                  
+        }, 
+        {
+                "Defense" : {
+                "Blood Meteor" : 
+                Techniques(name="Blood Manip: Blood Meteor",
+                                                        level=1,
+                                                        act_speed=100,
+                                                        act_cost=300,
+                                                        act_dur=1,
+                                                        act_body=("Head", "left arm", "right arm"),
+                                                        aoe=1,
+                                                        strength=400,
+                                                        speed=100,
+                                                        type="Counter",
+                                                        stun=3
+                                                        ),
+                "Blood Armor":
+                Techniques(name="Blood Manip: Blood Armor",
+                                           level=3,
+                                           act_speed=20,
+                                           act_cost=500,
+                                           act_dur=5,
+                                           act_body=("Head", "Torso", "Right Arm", "Left Arm", "Right Leg", "Left Leg"),
+                                           aoe=1,
+                                           strength=1000,
+                                           speed=1000,
+                                           type="Block"
+                                )
+                                                        
+        }
+        }
+        ], 
+        "Rarity" : 30
+        }
