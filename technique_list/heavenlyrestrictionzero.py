@@ -1,11 +1,10 @@
-from old_techniques import Techniques, enemy_techniques, get_cursed_technique, get_enemy_cursed_technique
-
+from techniques import Techniques
 import random, traceback, game
 
 ##Technique attack results format -------- (damage, (tank, miss, hit), killed
 ##Technique defense results format ------- (defense, (block, dodge, counter), killed)
 
-class HeavenlyRestriction(Techniques):
+class HeavenlyRestrictionZero(Techniques):
     
     rarity = 5
 

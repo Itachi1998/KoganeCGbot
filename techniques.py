@@ -1,8 +1,6 @@
 import os
 import discord 
 from discord.ext import commands
-
-
 class Techniques_cog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -203,6 +201,7 @@ enemy_techs = {
                     act_speed=3,
                     act_dur=2,
                     act_cost=20,
+                    act_body=("Head", "Torso"),
                     aoe=5,
                     strength=50,
                     speed=100,
@@ -215,6 +214,7 @@ enemy_techs = {
                     act_speed=3,
                     act_dur=3,
                     act_cost=60,
+                    act_body=("Head", "Torso"),
                     aoe=5,
                     strength=100,
                     speed=100,
@@ -230,6 +230,7 @@ enemy_techs = {
                     act_speed=3,
                     act_dur=1,
                     act_cost=60,
+                    act_body=("Head", "Torso"),
                     aoe=5,
                     strength=80,
                     speed=150,
@@ -248,6 +249,7 @@ enemy_techs = {
                     act_speed=2,
                     act_dur=1,
                     act_cost=30,
+                    act_body=("Head", "Torso"),
                     aoe=1,
                     strength=200,
                     speed=500,
@@ -262,6 +264,7 @@ enemy_techs = {
                     act_speed=2,
                     act_dur=1,
                     act_cost=50,
+                    act_body=("Head"),
                     aoe=5,
                     strength=300,
                     speed=400,
@@ -273,6 +276,81 @@ enemy_techs = {
 
 }    
 
-
 for k, v in enemy_techs.items():
     print(k,v)
+
+
+bird_manip = {
+     "Bird Manipulation" : [
+          {"Attack" : 
+           { "Talon Attack" :
+            Techniques(name="Bird Manip: Talon Attack",
+                       level=1,
+                       act_speed=100,
+                       act_dur=1,
+                       act_cost=100,
+                       act_body={"Head", "Right Arm", "Left Arm"},
+                       aoe=3,
+                       strength=50,
+                       speed=250,
+                       type="projectile"
+                       ),
+            "Bird Flock" :
+            Techniques(name="Bird Manip: Bird Flock",
+                       level=2,
+                       act_speed=50,
+                       act_dur=3,
+                       act_cost=300,
+                       act_body={"head", "left arm", "right arm"},
+                       aoe=3,
+                       strength=200,
+                       speed=400,
+                       type="projectile"
+                       )
+                    ,
+                "Bird Sacrifice" : Techniques(
+                     name="Bird Manip: Bird Sacrifice",
+                     level=3,
+                     act_speed=20,
+                     act_dur=1,
+                     act_cost=400,
+                     act_body={"Head", "left arm", "right arm"},
+                     aoe=2,
+                     strength=1500,
+                     speed=500,
+                     stun=3
+                )
+                       
+
+           }
+           },
+
+           {"Defense": 
+               {
+                    "Feather Screen" : Techniques(
+                         name="Bird Manip: Feathered Screen",
+                         level=1,
+                         act_speed=40,
+                         act_dur=3,
+                         act_cost=50,
+                         act_body={"Head", "left arm", "right arm"},
+                         aoe=3,
+                         strength=50,
+                         speed=100,
+                         type="dodge"),
+                    "Birds Eye" : Techniques(
+                         name="Bird Manip: Birds Eye",
+                         level=2,
+                         act_speed=20,
+                         act_dur=5,
+                         act_cost=10,
+                         act_body={"head"},
+                         aoe=5,
+                         strength=150,
+                         speed=500,
+                         buff=("speed", 250)
+                    )
+               }}
+     ], 
+     "Rarity" : 60
+}

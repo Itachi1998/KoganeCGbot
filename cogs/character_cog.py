@@ -49,6 +49,7 @@ class CreateButtons(discord.ui.View):
         tech_dict= generate_tech()
         ce = random.randrange(200, 2000)
         
+        
             
             
 

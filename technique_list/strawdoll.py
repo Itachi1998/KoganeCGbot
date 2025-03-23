@@ -1,5 +1,4 @@
-from old_techniques import Techniques, enemy_techniques, get_cursed_technique, get_enemy_cursed_technique
-
+from techniques import Techniques
 import random, traceback, game
 
 
