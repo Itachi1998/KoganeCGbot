@@ -791,6 +791,264 @@ construction={
 
 # endregion
 
+# region ### PLAYER COPY TECH
+
+copy={
+     "Copy" : [
+     {
+          "Attack" : 
+      {
+           "Freeze"  : Techniques(
+                name="Copied Technique: Freeze",
+                level=1,
+                act_speed=30,
+                act_dur=1,
+                act_cost=50,
+                act_body=("Head"),
+                aoe=5,
+                strength=10,
+                speed=800,
+                type="Projectile",
+                stun=4),
+                "Die" : Techniques(
+                     name="Copied Technique: Die",
+                     level=2,
+                     act_speed=30,
+                     act_dur=2,
+                     act_cost=500,
+                     act_body=("full"),
+                     aoe=4,
+                     strength=400,
+                     speed=1000,
+                     type="Projectile"
+                ),
+                "Sword Blast" : Techniques(
+                     name="Sword Reinforcement Discharge",
+                     level=3,
+                     act_speed=3,
+                     act_dur=3,
+                     act_cost=300,
+                     act_body=("Full", "sword"),
+                     aoe=5,
+                     strength=1000,
+                     speed=1000,
+                     type="Melee"
+                ),
+                "Authentic Love Beam" : Techniques(
+                     name="Authentic Love Beam",
+                     level=1,
+                     act_speed=20,
+                     act_dur=5,
+                     act_cost=500,
+                     act_body=("Full", "Rika"),
+                     aoe=5,
+                     strength=2000,
+                     speed=2000,
+                     type="Projectile"
+                ),
+                "Rika Summon" : Techniques(
+                     name="Come out, RIKA",
+                     level=1,
+                     act_speed=1,
+                     act_dur=10,
+                     act_cost=100,
+                     act_body=("Head"),
+                     aoe=1,
+                     strength=4000,
+                     speed=4000,
+                     type="summon",
+                     summon={"Rika" : {"Speed" : 4000, "Strength" : 4000, "Max CE" : 4000}}
+                )
+      }},
+     {
+          "Defend" :
+      {
+        "Don't Move" : Techniques(
+             name="Copied technique: Don't Move",
+             level=1,
+             act_speed=20,
+             act_dur=1,
+             act_cost=50,
+             act_body=("Head"),
+             aoe=3,
+             strength=50,
+             speed=800,
+             type="counter",
+             stun=2,
+             
+        )
+      }
+      }
+      ]
+}
+
+
+# endregion
 
 
 
+# region #### CURSED SPEECH TECH
+
+cursed_speech={
+     "Cursed Speech" : [
+          {"Attack" : {
+               
+                "Blast Away" : Techniques(
+                     name="Blast Away!",
+                     level=1,
+                     act_speed=10,
+                     act_dur=1,
+                     act_cost=100,
+                     act_body=("Head", "Torso"),
+                     aoe=1,
+                     strength=800,
+                     speed=800,
+                     type="Projectile",
+                     stun=3
+                ),
+                "Plummet" : Techniques(
+                     name="Plummet!",
+                     level=3,
+                     act_speed=10,
+                     act_dur=3,
+                     act_cost=100,
+                     act_body=("Head", "torso"),
+                     aoe=2,
+                     strength=1000,
+                     speed=1000,
+                     type="Projectile",
+                     stun=5
+                )
+          }},
+          {"Defend" : {
+               "Freeze" : Techniques(name="Freeze!", 
+                                     level=1, 
+                                     act_speed=10, 
+                                     act_dur=1,
+                                     act_cost=100,
+                                     act_body=("Head", "Torso"),
+                                     aoe=2,
+                                     strength=600,
+                                     speed=900,
+                                     type="counter",
+                                     stun=3)
+               
+          }}
+     ]
+}
+
+#endregion
+
+
+
+# region #### Cursed Spirit Manipulation
+cursed_spirit_manip={
+     "Cursed Spirit Manip" : [
+          {"Attack" : {
+            "Summon" : Techniques(
+                 name="Cursed Spirit Manipulation: Summoning",
+                 level=1,
+                 act_speed=20,
+                 act_cost=100,
+                 act_dur=1,
+                 act_body=("Full"),
+                 aoe=5,
+                 strength=1000,
+                 speed=1000,
+                 type="summon",
+                 summon={}
+            )
+          }},
+          {"Defend" :{
+               "Summon" : Techniques(
+                    name="Cursed Spirit Manipulation: Summoning",
+                    level=1,
+                    act_speed=10,
+                    act_dur=1,
+                    act_cost=50,
+                    act_body=("Full"),
+                    aoe=5,
+                    strength=1000,
+                    speed=1000,
+                    type="Summon",
+                    summon={}
+               )
+          }}
+     ]
+}
+
+
+
+
+# endregion
+
+
+
+
+
+# region ### HR: Zero
+
+hr_zero={
+     "Heavenly Restriction: Zero" :
+     [
+          {"Attack" : 
+           {
+                "3 Piece" : 
+                Techniques(
+                     name="Three Piece Combo",
+                     level=1,
+                     act_speed=1,
+                     act_dur=1,
+                     act_cost=0,
+                     act_body=("Left Arm", "Right Arm"),
+                     aoe=3,
+                     strength=1000,
+                     speed=1000,
+                     type="Melee"
+                ),
+                "Spinning Back Kick":
+                Techniques(
+                     name="Spinning Back Kick",
+                     level=1,
+                     act_speed=3,
+                     act_cost=0, 
+                     act_dur=1,
+                     act_body=("Left Leg", "Right Leg"),
+                     aoe=1,
+                     strength=1200,
+                     speed=1200,
+                     type="Melee"
+                ),
+                "Yeet Car" : 
+                Techniques(
+                     name="Yeet Car",
+                     act_speed=10,
+                     acT_cost=0,
+                     act_dur=1,
+                     act_body=("arms", "legs"),
+                     aoe=1,
+                     strength=800,
+                     speed=800,
+                     type="Projectile"
+                )
+           }},
+          {"Defend": 
+           {
+                "Heavenly Body" : Techniques(
+                     name="Heavenly Body",
+                     level=1,
+                     act_speed=0,
+                     act_dur=1,
+                     act_body=("Full"),
+                     aoe=2,
+                     strength=2000,
+                     speed=2000,
+                     type="tank"
+                ),
+           }}
+     ]
+
+}
+
+
+# endregion
