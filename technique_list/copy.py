@@ -1,5 +1,5 @@
 from sys import call_tracing
-from old_techniques import Techniques, enemy_techniques, get_cursed_technique, get_enemy_cursed_technique
+from techniques import Techniques
 
 import random, traceback, game
 
@@ -12,7 +12,7 @@ class Copy(Techniques):
     super().__init__(
       "Copy",
       1,
-      {"Partial Rika" : {'dmg': 200, 'speed': 300, 'ct lvl': 1, 'aoe' : 2, 'imbue cost': 20},
+      {,
        "Copy" : {'dmg': 10, 'speed': 10, 'ct lvl': 1, 'imbue cost': 50}, 'Manifest Rika' : {'dmg' : 600, 'speed' : 600, 'ct lvl' : 1,'soul' : 50, 'imbue cost' : 60},    
        "Authentic Love" : {'dmg' : 999, 'domain' : {'name': 'Authentic Love', 'dmg' : 999, 'speed' : 999, 'imbue cost' : 150}, 'speed' :999, 'ct lvl' : 3, 'imbue cost' : 150}},
       {"Partial Rika Defense": {'def': 200, 'speed': 375, 'ct lvl': 1, 'imbue cost': 30}, 

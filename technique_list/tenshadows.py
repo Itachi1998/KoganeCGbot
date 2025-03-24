@@ -1,7 +1,4 @@
-#wait
-
-from old_techniques import Techniques, enemy_techniques, get_cursed_technique
-
+from techniques import Techniques
 import random, traceback, game
 
 class Ten_Shadows(Techniques):

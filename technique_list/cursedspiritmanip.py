@@ -1,6 +1,5 @@
 #wait
-
-from old_techniques import Techniques, enemy_techniques, get_cursed_technique
+from techniques import Techniques
 import random, traceback, game
 
 class Cursed_Spirit_Manip(Techniques):

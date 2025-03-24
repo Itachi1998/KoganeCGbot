@@ -1,26 +1,7 @@
-from old_techniques import Techniques, enemy_techniques, get_cursed_technique, get_enemy_cursed_technique
-
+from techniques import bird_manip
 import random, traceback, game
 
-class Bird_Manipulation(Techniques):
-
-    rarity = 50
-
-    def __init__(self):
-        super().__init__(
-          "Bird Strike",
-          1,
-          {"Bird Strike": {"dmg": 150, "speed": 250, 'ct lvl' : 1, 'imbue cost' : 20, 'soul' : 50}, 
-            'Murder' : {"dmg" : 500, 'speed' : 400, 'soul' : 50,'ct lvl' : 3, 'imbue cost' : 15, 'aoe' : 3}},
-          {"Bird Eye": {"def": 450, "speed": 450, 'ct lvl' : 3, 'imbue cost' : 2}, 
-            'Crow Call' : {'def' : 200, 'speed' : 100, 'ct lvl' : 2, 'imbue cost' : 5}, 
-            'CE' : {'def' : 10, 'speed' : 10, 'ct lvl' : 1, 'imbue cost' : 0}},
-          0,
-          10, 
-          "<:birdstrike:1229455608001069076>")
-
-
-    def bird_strike(self, player, target):
+def bird_strike(self, player, target):
           if player.ce < self.ce_cost:
               results = (0, 'NA ce', False, [])
               return results
@@ -40,7 +21,7 @@ class Bird_Manipulation(Techniques):
           return results
 
 
-    def murder(self, player, targets):
+def murder(self, player, targets):
           if player.ce < self.ce_cost:
               results = (0, 'NA ce', False, [])
               targets = targets
@@ -60,15 +41,15 @@ class Bird_Manipulation(Techniques):
           return results, targets
 
 
-    def bird_eye(self, enemy, player, attack):
+def bird_eye(self, enemy, player, attack):
           results = defense_checks(self.defense['Bird Eye'], enemy, player, attack)
           return results
         
-    def crow_call(self, enemy, player, attack):
+def crow_call(self, enemy, player, attack):
       results = defense_checks(self.defense['Crow Call'], enemy, player, attack)
       return results
 
-    def ce(self, enemy, player, attack):
+def ce(self, enemy, player, attack):
       results = defense_checks(self.defense['CE'], enemy, player,attack )
       return results
 
