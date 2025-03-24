@@ -102,7 +102,7 @@ enemy_techs = {
                     aoe=1,
                     strength=600,
                     speed=800,
-                    type="defense dodge" # wings/legs or smth
+                    type="dodge" # wings/legs or smth
                     )
                 }
             }
@@ -121,7 +121,7 @@ enemy_techs = {
                     aoe=1,
                     strength=420,
                     speed=100,
-                    type="attack projectile", # attack projectile, attack melee
+                    type="projectile", # attack projectile, attack melee
                     sure_hit=True
                     )
                 }
@@ -137,7 +137,7 @@ enemy_techs = {
                     aoe=1,
                     strength=400,
                     speed=200,
-                    type="defense counter", #defense tank, defense dodge, defense counter
+                    type="counter", #defense tank, defense dodge, defense counter
                     sure_hit=True
                     )
                 }
@@ -158,7 +158,7 @@ enemy_techs = {
                     strength=500,
                     speed=300,
                     buff=(2, 'strength', 100),
-                    type="attack melee"
+                    type="melee"
                     ),
                 "Electric Ground-pound" : Techniques(
                     name="Charger : Electric Ground-pound",
@@ -169,7 +169,7 @@ enemy_techs = {
                     aoe=5,
                     strength=400,
                     speed=300,
-                    type="attack projectile" # add a 'wave' or 'spread' type of attack?
+                    type="projectile" # add a 'wave' or 'spread' type of attack?
                     )
                 }
             },
@@ -183,7 +183,7 @@ enemy_techs = {
                     aoe=5,
                     strength=400,
                     speed=500,
-                    type="defense tank"
+                    type="tank"
                     )
                 }
             }
@@ -201,7 +201,7 @@ enemy_techs = {
                     aoe=5,
                     strength=50,
                     speed=100,
-                    type="attack poison",
+                    type="poison",
                     poison=(range(10, 20), 2)
                     ),
                 "Carbon Monoxide Disperse" : Techniques( # colorless odorless gas that can be fatal in high enough quantities
@@ -213,7 +213,7 @@ enemy_techs = {
                     aoe=5,
                     strength=100,
                     speed=100,
-                    type="attack poison"
+                    type="poison"
                     #sure_hit=True - Maybe
                     )
                 }
@@ -228,7 +228,7 @@ enemy_techs = {
                     aoe=5,
                     strength=80,
                     speed=150,
-                    type="defense counter"
+                    type="counter"
                     )
                 }
             }
@@ -246,7 +246,7 @@ enemy_techs = {
                     aoe=1,
                     strength=200,
                     speed=500,
-                    type="attack stun" # new types for targeting the mind etc.
+                    type="stun"
                     )
                 }
             },
@@ -260,7 +260,7 @@ enemy_techs = {
                     aoe=5,
                     strength=300,
                     speed=400,
-                    type="defense counter"
+                    type="counter"
                     )
                 }
             }

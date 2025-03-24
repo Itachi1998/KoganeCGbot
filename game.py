@@ -6,6 +6,7 @@ from copy import deepcopy
 from cogs.battle import Target
 import old_techniques
 
+
 #currencies:
 # CGP = CULLING GAME POINTS - Points used to buy items from the shop
 # SKP = SKILL POINTS - Points used to level up Skillsets
@@ -18,6 +19,16 @@ class GameMode(enum.IntEnum):
     PVE = 2 #Pve status for when player begins a PvE fight
     PVP = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points
     Q = 4 # for when the player is in a queue
+
+
+# to be used for all human characters/enemies
+human_body_parts = [
+    {"head" : "BodyPart('Head', 0)"},
+    {"arm_left" : "BodyPart('Left Arm', 0)"},
+    {"arm_right" : "BodyPart('Right Arm', 0)"},
+    {"torso" : "BodyPart('Torso', 100)"}
+]
+
 
 class BodyPart:
     def __init__(self, name, max_hp, max_ce):
@@ -39,6 +50,7 @@ class BodyPart:
     def is_destroyed(self):
         return self.hp <= 0
 
+
 # class Character:
    # def __init__(self, name):
        # self.name = name
@@ -54,6 +66,7 @@ class BodyPart:
                # print(f"{self.body_parts[body_part_name].name} is destroyed!")
        #  else:
            # print(f"{body_part_name} not found on {self.name}.")
+
 
 # Example usage
 # player = Character("Hero")
@@ -73,29 +86,29 @@ class BodyPart:
 # player.take_damage("Legs", 40) # Body part not found
 # Parent class for the Player and Enemy Subclasses
 
+
 class Actor:
     def __init__(self,
- name: str, 
-level:int,
-max_hp,
- max_ce: int,
- strength: int, 
-speed: int,
- technique: str, 
-playerclass: str, colony):
+            name: str, 
+            level:int,
+            max_hp,
+            max_ce: int,
+            strength: int, 
+            speed: int,
+            technique: str, 
+            playerclass: str, colony
+            ):
         self.name=name
         self.level=level
-        self.max_hp = max_hp
-        self.max_ce = max_ce
-        self.strength = strength
-        self.speed = speed,
-        self.technique = technique
-        self.playerclass= playerclass
-        self.colony-colony
-        self.hp = max_hp
-        self.ce = max_ce
-
-
+        self.max_hp=max_hp
+        self.max_ce=max_ce
+        self.strength=strength
+        self.speed=speed
+        self.technique=technique
+        self.playerclass=playerclass
+        self.colony=colony
+        self.hp=max_hp
+        self.ce=max_ce
 
 
     def __repr__(self):
