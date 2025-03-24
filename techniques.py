@@ -17,8 +17,7 @@ class Techniques():
     def __init__(self, 
                  name: str,  # "Blood Manipulation: Piercing Blood"
                  level: int, # 1-5
-                 act_speed: int, # activation speed of technique: 1-5 (can be changed with binding vows)
-                 act_dur: int, #activation duration in turn counts: can very in numbers and be changed with binding vows
+                 act_speed: int, # activation speed of technique: 1-5 (can be changed with binding vows) 
                  act_cost: int,
                  act_body: tuple, # activation cost per turn of activating this technique: can be changed with binding vows
                  aoe: int, # amount of players targetable (can be changed with binding vows)
@@ -36,6 +35,7 @@ class Techniques():
                  sure_hit=None,
                  target=None,
                  negates: bool =None,
+                 duration: int=None
                  ):
             self.name = name
             self.level=level
@@ -57,6 +57,8 @@ class Techniques():
             self.summon=summon
             self.sure_hit=sure_hit
             self.target=target
+            self.negates=negates
+            self.duration=duration
 
 # region ##### ENEMY TECH DICT
 # Decending order (special grade -> grade 4)
