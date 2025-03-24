@@ -35,7 +35,8 @@ class Techniques():
                  sure_hit=None,
                  target=None,
                  negates: bool =None,
-                 duration: int=None
+                 duration: int=None,
+                 cooldown: int=None
                  ):
             self.name = name
             self.level=level
@@ -58,8 +59,9 @@ class Techniques():
             self.target=target
             self.negates=negates
             self.duration=duration
+            self.cooldown=cooldown ### NEW ###
 
-# region ##### ENEMY TECH DICT
+# region ### ENEMY TECH DICT
 # Decending order (special grade -> grade 4)
 enemy_techs = {
     
@@ -283,7 +285,7 @@ for k, v in enemy_techs.items():
 
 # endregion
 
-# region #### PLAYER TECH BIRD MANIP
+# region ### PLAYER TECH BIRD MANIP
 bird_manip = {
      "Bird Manipulation" : [
           {"Attack" : 
@@ -362,7 +364,7 @@ bird_manip = {
 
 # endregion
 
-# region #### PLAYER TECH BLOOD MANIP
+# region ### PLAYER TECH BLOOD MANIP
 blood_manip= {"Blood Manip" :[
         {
              "Attack" : {
@@ -449,7 +451,7 @@ blood_manip= {"Blood Manip" :[
 
 # endregion
 
-# region #### PLAYER TECH BOOGIE WOOGIE
+# region ### PLAYER TECH BOOGIE WOOGIE
 boogie_woogie = {
 
 "Boogie Woogie" : 
@@ -932,7 +934,7 @@ copy={
 
 
 
-# region #### CURSED SPEECH TECH
+# region ### CURSED SPEECH TECH
 
 cursed_speech={
      "Cursed Speech" :
@@ -1000,7 +1002,7 @@ cursed_speech={
 
 
 
-# region #### Cursed Spirit Manipulation
+# region ### Cursed Spirit Manipulation
 cursed_spirit_manip={
      "Cursed Spirit Manip" : [
           {
@@ -1131,3 +1133,412 @@ hr_zero={
 
 
 
+# region ### Idle Transfiguration
+
+idle_transfig={
+     
+"Idle Transfiguration" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Transfigure" : 
+                         Techniques(
+                              name="Transfigure",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1000,
+                              speed=800,
+                              type="Melee",
+                              soul=True
+                         ),
+                    "Transfigured Humans":
+                         Techniques(
+                              name="Transfigured Humans",
+                              level=1,
+                              act_speed=3,
+                              act_cost=50, 
+                              act_dur=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=4,
+                              strength=300,
+                              speed=400,
+                              type="summon",
+                              summon={"Transfigured Humans" : {"Speed" : 400, "Strength" : 300, "Max CE" : 100}} 
+                         ),
+                    "Polymorphic Soul Isomer" : 
+                         Techniques(
+                              name="Polymorphic Soul Isomer",
+                              level=2,
+                              act_speed=3,
+                              act_cost=70,
+                              act_dur=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=2,
+                              strength=700,
+                              speed=600,
+                              type="summon",
+                              summon={"Polymorphic Soul Isomer" : {"Speed" : 600, "Strength" : 700, "Max CE" : 200}}
+                         ),
+
+                    "ISBODK Transform" : # make a general move like a domain?
+                         Techniques(
+                              name="ISBODK Transform",
+                              level=3,
+                              act_speed=2,
+                              act_cost=150,
+                              act_dur=1,
+                              act_body=("Full"),
+                              aoe=0,
+                              strength=1200,
+                              speed=1000,
+                              type="transform" ###
+                            )
+               }
+          },
+
+          {
+               "Defend": 
+           
+               {
+                    "Soul Repel" : # always active
+                        Techniques(
+                            name="Soul Repel",
+                            level=1,
+                            act_speed=0,
+                            act_cost=0,
+                            act_dur=1, ###
+                            act_body=("Full"),
+                            aoe=1, ###
+                            strength=500,
+                            speed=1000, ###
+                            type="tank",
+                            soul=True
+                            ),
+
+                    "Soul Mulitiplicity" : 
+                        Techniques(
+                            name="Soul Mulitiplicity",
+                            level=2,
+                            act_speed=2,
+                            act_cost=80,
+                            act_dur=1,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=200,
+                            speed=800,
+                            type="dodge"
+                            )
+           
+               }
+          }
+     ],
+"Rarity" : 8
+}
+
+# endregion
+
+
+# region ### Limitless
+
+limitless={
+     
+"Limitless" :
+        [
+            {
+                "Attack" : 
+                {
+                    "Blue" : 
+                        Techniques(
+                            name="Blue",
+                            level=1,
+                            act_speed=1,
+                            act_dur=1,
+                            act_cost=50,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=range(1, 5), ###
+                            strength=800,
+                            speed=1000,
+                            type="projectile"
+                         ),
+                    
+                    "Red": # RCT required
+                        Techniques(
+                            name="Red",
+                            level=2,
+                            act_speed=2,
+                            act_cost=100, 
+                            act_dur=1,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=1600,
+                            speed=1000,
+                            type="projectile"
+                         ),
+                    
+                    "Hollow Purple" : 
+                        Techniques(
+                            name="Hollow Purple",
+                            level=3,
+                            act_speed=3,
+                            act_cost=150,
+                            act_dur=1,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=2500,
+                            speed=1000,
+                            type="projectile"
+                         ),
+                    
+                    "Unlimited Hollow Purple" : # reduced dmg from own ce
+                        Techniques(
+                            name="Unlimited Hollow Purple",
+                            level=3,
+                            act_speed=3,
+                            act_cost=150,
+                            act_dur=1,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=10,
+                            strength=2500,
+                            speed=1000,
+                            type="projectile"
+                         )
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "Infinity" : # always active
+                        Techniques(
+                            name="Infinty",
+                            level=1,
+                            act_speed=0,
+                            act_cost=1,
+                            act_dur=1, ###
+                            act_body=("Full"),
+                            aoe=1, ###
+                            strength=1000,
+                            speed=1000, ###
+                            type="tank"
+                        ),
+
+                    "Blue" : 
+                        Techniques(
+                            name="Blue",
+                            level=1,
+                            act_speed=1,
+                            act_dur=1,
+                            act_cost=50,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=range(1, 5), ###
+                            strength=800,
+                            speed=1000,
+                            type="dodge"
+                        ),
+                    
+                    "Red": # RCT required
+                        Techniques(
+                            name="Red",
+                            level=2,
+                            act_speed=2,
+                            act_cost=100, 
+                            act_dur=1,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=1600,
+                            speed=1000,
+                            type="counter"
+                        ),
+                }
+            }
+        ],
+"Rarity" : 3,
+"Six Eyes Rarity" : 100 # Lowkey useless without it
+}
+
+# endregion
+
+
+
+# region ### MBA
+
+mba={
+     
+"Mythic Beast Amber" : # add a constant hp decrease per turn and stat boost while activated?
+        [
+            {
+                "Attack" : 
+                {
+                    "Lighting Rod" : # requires cursed tool?
+                        Techniques(
+                            name="Lightning Rod",
+                            level=1,
+                            act_speed=1,
+                            act_dur=1,
+                            act_cost=150,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=1000,
+                            speed=1200,
+                            type="projectile",
+                            cooldown=3 # 3 turns between being able to use it from start of the fight or after each use
+                         ),
+                    
+                    "Lighting Dash" : # may or may not keep - enhanced melee attack
+                        Techniques(
+                            name="Lightning Dash",
+                            level=1,
+                            act_speed=1,
+                            act_cost=10,
+                            act_dur=1,
+                            act_body=("Full"),
+                            aoe=1,
+                            strength=800,
+                            speed=900,
+                            type="melee"
+                        ),
+
+                    "Corona Blast" : 
+                        Techniques(
+                            name="Corona Blast",
+                            level=2,
+                            act_speed=2,
+                            act_cost=80, 
+                            act_dur=1,
+                            act_body=("Head"),
+                            aoe=3,
+                            strength=600,
+                            speed=1200,
+                            type="projectile"
+                        )
+
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "Lighting Dash" : 
+                        Techniques(
+                            name="Lightning Dash",
+                            level=1,
+                            act_speed=1,
+                            act_cost=10,
+                            act_dur=1,
+                            act_body=("Full"),
+                            aoe=1,
+                            strength=800,
+                            speed=900,
+                            type="dodge"
+                        ),
+
+                    "Corona Discharge" : # localized electric discharge created by a strong electrical field ionizes the surrounding air
+                        Techniques(
+                            name="Corona Discharge",
+                            level=2,
+                            act_speed=2,
+                            act_cost=80,
+                            act_dur=1,
+                            act_body=("Full"),
+                            aoe=5,
+                            strength=600,
+                            speed=1200,
+                            type="counter"
+                        )
+                }
+            }
+        ],
+"Rarity" : 7
+}
+
+# endregion
+
+
+
+# region ### Projection Sorcery
+
+projection_sorcery={
+     
+"Projection Sorcery" :
+        [
+            {
+                "Attack" : 
+                {
+                    "Projection" : 
+                        Techniques(
+                            name="Projection",
+                            level=1,
+                            act_speed=1,
+                            act_dur=1,
+                            act_cost=50,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=400,
+                            speed=1200,
+                            type="melee",
+                            stun=True
+                         ),
+                    
+                    "Projection Stack" : # only if projection was used in the previous turn
+                        Techniques(
+                            name="Projection Stack",
+                            level=2,
+                            act_speed=1,
+                            act_cost=50,
+                            act_dur=1,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=800,
+                            speed=2400,
+                            type="melee",
+                            stun=True
+                        )
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "Projection Dodge" : 
+                        Techniques(
+                            name="Projection Dodge",
+                            level=1,
+                            act_speed=1,
+                            act_dur=1,
+                            act_cost=50,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=400,
+                            speed=1200,
+                            type="dodge"
+                        ),
+                    
+                    "Projection Stun" : 
+                        Techniques(
+                            name="Projection Stun",
+                            level=1,
+                            act_speed=1,
+                            act_dur=1,
+                            act_cost=50,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=400,
+                            speed=1200,
+                            type="counter",
+                            stun=True
+                        )
+                }
+            }
+        ],
+"Rarity" : 15
+}
+
+# endregion
