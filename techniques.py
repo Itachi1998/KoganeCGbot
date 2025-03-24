@@ -40,7 +40,6 @@ class Techniques():
             self.name = name
             self.level=level
             self.act_speed = act_speed
-            self.act_dur = act_dur
             self.act_cost = act_cost
             self.act_body= act_body
             self.aoe = aoe
