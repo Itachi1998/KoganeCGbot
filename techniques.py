@@ -450,217 +450,244 @@ blood_manip= {"Blood Manip" :[
 
 # region #### PLAYER TECH BOOGIE WOOGIE
 boogie_woogie = {
-     "Boogie Woogie" : [
-          "Attack" : {
-          "Rock Throw" : 
-          Techniques(
-               name="Boogie Woogie: Rock Throw",
-               level=1
-               act_speed=10,
-               act_cost=20,
-               act_dur=1,
-               act_body=("Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"),
-               aoe=1,
-               strength=200,
-               speed=900,
-               type="Melee",
-               buff=("strength", "speed"),
-            "Double Switch Fake" : 
-            Techniques(
-                 name="Boogie Woogie: Double Switch Fake",
-                 level=2,
-                 act_speed=0,
-                 act_cost=0,
-                 act_dur=1,
-                 act_body=("Head", "Torso", "Left Leg", "Right Leg", "Right Arm", "Left Arm"),
-                 strength=400,
-                 speed=400,
-                 type="Melee",
-                 stun=2),
-            "Over Here" : 
-            Techniques(
-                 name="Boogie Woogie: Over Here",
-                 level=2,
-                 act_speed=10,
-                 act_cost=50,
-                 act_dur=5,
-                 act_body=("Head", "Torso", "Right Arm", "Left Arm"),
-                 aoe=5,
-                 strength=800,
-                 speed=2000,
-                 type="Melee",
-                 stun=1
-            ),
-          )},
-          {"Defense" : {
-               "Clap Swap" : 
-               Techniques(
-                    name="Boogie Woogie: Clap Swap",
-                    level=1,
-                    act_speed=10,
-                    act_cost=50,
-                    act_dur=5,
-                    act_body=("Head", "Torso", "Left Arm", "Right Arm"),
-                    aoe=5,
-                    strength=10,
-                    speed=2000,
-                    type="Dodge"
-               ),
-               "Reverse Swap" : 
-               Techniques(
-                    name="Boogie Woogie: Reverse Swap",
-                    level=3,
-                    act_speed=10,
-                    act_cost=50,
-                    act_dur=4,
-                    act_body=("Head", "Torso", "Left Arm", "Right Arm"),
-                    aoe=1,
-                    strength=10,
-                    speed=2000,
-                    type="counter"
-               ),
-               "Vibra Swap" : 
-               Techniques(
-                    name="Boogie Woogie: Vibra Swap",
-                    level=4,
-                    act_speed=1,
-                    act_cost=100,
-                    act_dur=5,
-                    act_body=("Head", "Torso"),
-                    aoe=5,
-                    strength=10,
-                    speed=5000,
-                    type="dodge"
-               )
-          }}
-          ],
-        "Rarity" : 20 
-     }
+
+"Boogie Woogie" : 
+     [
+          {
+               "Attack" :
+                 {
+                    "Rock Throw" : 
+                         Techniques(
+                              name="Boogie Woogie: Rock Throw",
+                              level=1,
+                              act_speed=10,
+                              act_cost=20,
+                              act_dur=1,
+                              act_body=("Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"),
+                              aoe=1,
+                              strength=200,
+                              speed=900,
+                              type="Melee",
+                              buff=("strength", "speed")
+                              ),
+
+                    "Double Switch Fake" : 
+                         Techniques(
+                              name="Boogie Woogie: Double Switch Fake",
+                              level=2,
+                              act_speed=0,
+                              act_cost=0,
+                              act_dur=1,
+                              act_body=("Head", "Torso", "Left Leg", "Right Leg", "Right Arm", "Left Arm"),
+                              strength=400,
+                              speed=400,
+                              type="Melee",
+                              stun=2),
+                    "Over Here" : 
+                    Techniques(
+                         name="Boogie Woogie: Over Here",
+                         level=2,
+                         act_speed=10,
+                         act_cost=50,
+                         act_dur=5,
+                         act_body=("Head", "Torso", "Right Arm", "Left Arm"),
+                         aoe=5,
+                         strength=800,
+                         speed=2000,
+                         type="Melee",
+                         stun=1
+                         ),
+               }
+          },
+          {
+               "Defense" : 
+               {
+                    "Clap Swap" : 
+                         Techniques(
+                              name="Boogie Woogie: Clap Swap",
+                              level=1,
+                              act_speed=10,
+                              act_cost=50,
+                              act_dur=5,
+                              act_body=("Head", "Torso", "Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=10,
+                              speed=2000,
+                              type="Dodge"
+                         ),
+                    "Reverse Swap" : 
+                         Techniques(
+                              name="Boogie Woogie: Reverse Swap",
+                              level=3,
+                              act_speed=10,
+                              act_cost=50,
+                              act_dur=4,
+                              act_body=("Head", "Torso", "Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=10,
+                              speed=2000,
+                              type="counter"
+                         ),
+                    "Vibra Swap" : 
+                         Techniques(
+                              name="Boogie Woogie: Vibra Swap",
+                              level=4,
+                              act_speed=1,
+                              act_cost=100,
+                              act_dur=5,
+                              act_body=("Head", "Torso"),
+                              aoe=5,
+                              strength=10,
+                              speed=5000,
+                              type="dodge"
+                         )
+               }
+          }
+     ],
+
+"Rarity" : 20 
+}
 # endregion
 
 # region ### PLAYER TECH COMEDIAN
 
 comedian={
-     "Comedian" : [
-          {"Attack" : {
-               "Punchline" : 
-               Techniques(
-                    name="Comedian: Punchline",
-                    level=1,
-                    act_speed=1,
-                    act_dur=5,
-                    act_cost=10,
-                    act_body={"head", "torso", "arms", "legs"},
-                    aoe=1,
-                    strength=500,
-                    speed=900,
-                    type="Melee",
-                    buff=("strength", "speed")
-                    ),
-                "One Liner" :
-                Techniques(
-                     name="Comedian: One Liner",
-                     level=1,
-                     act_speed=1,
-                     act_dur=5,
-                     act_cost=10,
-                     act_body={"Head", "torso", "arms", "legs"},
-                     aoe=4,
-                     strength=700,
-                     speed=900,
-                     type="Melee",
-                     buff=("Strength", "speed")),
-                "Skit" : 
-                Techniques(
-                     name="Comedian: Skit",
-                     level=2,
-                     act_speed=1,
-                     act_dur=5,
-                     act_cost=10,
-                     act_body=("Head", "Torso", "Arms", "Legs"),
-                     strength=900,
-                     speed=1500,
-                     type="Melee",
-                     buff=("Strength", "Speed")
-                     ),
-                "Truck Kun" :
-                Techniques(
-                     name="Comedian: Truck Kun",
-                     level=3,
-                     act_speed=10,
-                     act_dur=1,
-                     act_cost=10,
-                     act_body=("Head", "Torso", "Arms", "Legs"),
-                     aoe=1,
-                     strength=1500,
-                     speed=2000,
-                     type="Projectile",
-                     stun=1,
-                     sure_hit=True
-                ),
-                "Wouldn't It Be Funny" :
-                Techniques(
-                     name="Comedian: Wouldn't it be funny",
-                     level=5,
-                     act_speed=1,
-                     act_dur=5,
-                     act_cost=20,
-                     act_body=("Head", "torso", "arms", "legs"),
-                     aoe=4,
-                     strength=2000,
-                     speed=1000,
-                     type="Projectile",
-                     sure_hit=True
-                )}},
-          {"Defense" : {
-               "Red is Taboo" : 
-            Techniques(name="Comedian: Red is Taboo",
-                       level=1,
-                       act_speed=10,
-                       act_dur=5,
-                       act_cost=10,
-                       act_body=("Head", "arms", "torso"),
-                       aoe=4,
-                       strength=200,
-                       speed=1000,
-                       type="counter",
-                       negates=True),
-                "Fanta Sea":
-                Techniques(name="Comedian: Fanta Sea",
-                           level=2,
-                           act_speed=10,
-                           act_dur=5,
-                           act_cost=10,
-                           act_body=("Head", "arm", "torso"),
-                           aoe=5,
-                           strength=1500,
-                           speed=1500,
-                           type="counter"),
-                "Slimed" :
-                Techniques(name="Comedian: Slimed",
-                           level=1,
-                           act_speed=10,
-                           act_dur=2,
-                           act_cost=10,
-                           act_body=("full"),
-                           aoe=2,
-                           strength=900,
-                           speed=900,
-                           type="dodge"),
-                "Ya Trying To Kill Me?" :
-                Techniques(name="Comedian: Ya Trying To Kill Me?",
-                           level=3,
-                           act_speed=10,
-                           act_dur=5,
-                           act_cost=10,
-                           act_body=("full"),
-                           aoe=1,
-                           strength=1000,
-                           speed=2000,
-                           type="tank",
-                           negate=True)
-          }}
-     ], "Rarity" : 5
+"Comedian" : 
+     [
+          {
+               "Attack" : 
+               {
+                    "Punchline" : 
+                         Techniques(
+                              name="Comedian: Punchline",
+                              level=1,
+                              act_speed=1,
+                              act_dur=5,
+                              act_cost=10,
+                              act_body={"head", "torso", "arms", "legs"},
+                              aoe=1,
+                              strength=500,
+                              speed=900,
+                              type="Melee",
+                              buff=("strength", "speed")
+                              ),
+                    "One Liner" :
+                         Techniques(
+                              name="Comedian: One Liner",
+                              level=1,
+                              act_speed=1,
+                              act_dur=5,
+                              act_cost=10,
+                              act_body={"Head", "torso", "arms", "legs"},
+                              aoe=4,
+                              strength=700,
+                              speed=900,
+                              type="Melee",
+                              buff=("Strength", "speed")),
+                    "Skit" : 
+                         Techniques(
+                              name="Comedian: Skit",
+                              level=2,
+                              act_speed=1,
+                              act_dur=5,
+                              act_cost=10,
+                              act_body=("Head", "Torso", "Arms", "Legs"),
+                              strength=900,
+                              speed=1500,
+                              type="Melee",
+                              buff=("Strength", "Speed")
+                              ),
+                    "Truck Kun" :
+                         Techniques(
+                              name="Comedian: Truck Kun",
+                              level=3,
+                              act_speed=10,
+                              act_dur=1,
+                              act_cost=10,
+                              act_body=("Head", "Torso", "Arms", "Legs"),
+                              aoe=1,
+                              strength=1500,
+                              speed=2000,
+                              type="Projectile",
+                              stun=1,
+                              sure_hit=True
+                         ),
+                    "Wouldn't It Be Funny" :
+                         Techniques(
+                              name="Comedian: Wouldn't it be funny",
+                              level=5,
+                              act_speed=1,
+                              act_dur=5,
+                              act_cost=20,
+                              act_body=("Head", "torso", "arms", "legs"),
+                              aoe=4,
+                              strength=2000,
+                              speed=1000,
+                              type="Projectile",
+                              sure_hit=True
+                              )
+                }
+                },
+          {
+               "Defense" :
+                 {
+                    "Red is Taboo" : 
+                    Techniques(name="Comedian: Red is Taboo",
+                              level=1,
+                              act_speed=10,
+                              act_dur=5,
+                              act_cost=10,
+                              act_body=("Head", "arms", "torso"),
+                              aoe=4,
+                              strength=200,
+                              speed=1000,
+                              type="counter",
+                              negates=True
+                              ),
+                    "Fanta Sea":
+                         Techniques(name="Comedian: Fanta Sea",
+                                   level=2,
+                                   act_speed=10,
+                                   act_dur=5,
+                                   act_cost=10,
+                                   act_body=("Head", "arm", "torso"),
+                                   aoe=5,
+                                   strength=1500,
+                                   speed=1500,
+                                   type="counter"
+                                   ),
+                    "Slimed" :
+                         Techniques(name="Comedian: Slimed",
+                                   level=1,
+                                   act_speed=10,
+                                   act_dur=2,
+                                   act_cost=10,
+                                   act_body=("full"),
+                                   aoe=2,
+                                   strength=900,
+                                   speed=900,
+                                   type="dodge"
+                                   ),
+                    "Ya Trying To Kill Me?" :
+                         Techniques(name="Comedian: Ya Trying To Kill Me?",
+                                   level=3,
+                                   act_speed=10,
+                                   act_dur=5,
+                                   act_cost=10,
+                                   act_body=("full"),
+                                   aoe=1,
+                                   strength=1000,
+                                   speed=2000,
+                                   type="tank",
+                                   negate=True
+                                   )
+                    }
+          }
+
+     ], 
+
+"Rarity" : 5
+
 }
 
 # endregion #### PLAYER TECH COMEDIAN
@@ -668,218 +695,235 @@ comedian={
 # region ### PLAYER TECH CONSTRUCTION
 
 construction={
-     "Construction":[
-          {"Attack" : {
-               "Blade" : 
-               Techniques(
-                    name="Construction: Blade",
-                    level=1,
-                    act_speed=40,
-                    act_dur=1,
-                    act_cost=400,
-                    act_body=("Full"),
-                    aoe=1,
-                    strength=850,
-                    speed=500,
-                    type="Melee",
-               ),
+"Construction":
+     [
+          {
+               "Attack" : 
+                    {
+                    "Blade" : 
+                         Techniques(
+                              name="Construction: Blade",
+                              level=1,
+                              act_speed=40,
+                              act_dur=1,
+                              act_cost=400,
+                              act_body=("Full"),
+                              aoe=1,
+                              strength=850,
+                              speed=500,
+                              type="Melee",
+                         ),
 
-               "Ammo" : 
-               Techniques(
-                    name="Construction: Ammo",
-                    level=1,
-                    act_speed=30,
-                    act_dur=1,
-                    act_cost=400,
-                    act_body=("Full"),
-                    aoe=1,
-                    strength=700,
-                    speed=600,
-                    type="Projectile"
-               ),
-               "Liquid Metal" : 
-               Techniques(
-                    name="Construction: Liquid Metal",
-                    level=3,
-                    act_speed=20,
-                    act_dur=5,
-                    act_cost=150,
-                    act_body=("Full"),
-                    aoe=5,
-                    strength=1000,
-                    speed=1000,
-                    type="Projectile",
-                    debuffs=("speed")),
-                "Air to Surface Missile" : 
-                Techniques(name="Six Eyes Construction: Air to Surface Missiles",
-                           level=3,
-                           act_speed=1,
-                           act_dur=5,
-                           act_cost=5,
-                           act_body=("Full"),
-                           aoe=5,
-                           strength=1500,
-                           speed=1500,
-                           type="Projectile"
-               ),
-               "Nuclear Warhead" : 
-               Techniques(name="Six Eyes Construction: Nuclear Warhead",
-                          level=5,
-                          act_speed=20,
-                          act_dur=1,
-                          act_cost=200,
-                          act_body=("full"),
-                          aoe=5,
-                          strength=5500,
-                          speed=2000,
-                          type="Projectile"),
-                "True Sphere Orbs" : 
-                Techniques(name="Six Eyes Construction: True Sphere Orbs",
-                           level=3,
-                           act_speed=10,
-                           act_dur=1,
-                           act_cost=20,
-                           act_body=("full"),
-                           aoe=4,
-                           strength=3500,
-                           speed=25000,
-                           type="Projectile") 
-          }},
-          {"Defense" : 
-           {
-                "Bug Armor": 
-                Techniques(name="Construction: Blood Armor",
-                           level=3,
-                           act_speed=20,
-                           act_dur=5,
-                           act_cost=150,
-                           act_body=("Full"),
-                           aoe=1,
-                           strength=2000,
-                           speed=2000,
-                           type="Counter",
-                           buffs=("strength", "speed")
-                           ),
-                "Armored Sentinels":
-                Techniques(name="Six Eyes Construction: Armored Sentinels",
-                           level=1,
-                           act_speed=1,
-                           act_dur=5,
-                           act_cost=50,
-                           act_body=("Full"),
-                           aoe=1,
-                           strength=10000,
-                           speed=1000,
-                           type="Summon",
-                           summon={"Sentinel" : {'dmg' : 1000, 'speed' : 1000, "max_hp" : 900, "tamed" : True}}
-                           ),
-                "Liquid Metal Shield" : 
-                Techniques(
-                     name="Construction: Liquid Metal Shield",
-                     act_speed=20,
-                     act_dur=2,
-                     act_cost=300,
-                     act_body=("full"),
-                     aoe=3,
-                     strength=600,
-                     speed=600,
-                     type="tank"
-                ),
-           }}
-     ],
-     "Rarity" : 15, "Six Eyes Rarity" : 5}
+                    "Ammo" : 
+                         Techniques(
+                              name="Construction: Ammo",
+                              level=1,
+                              act_speed=30,
+                              act_dur=1,
+                              act_cost=400,
+                              act_body=("Full"),
+                              aoe=1,
+                              strength=700,
+                              speed=600,
+                              type="Projectile"
+                         ),
+                    "Liquid Metal" : 
+                         Techniques(
+                              name="Construction: Liquid Metal",
+                              level=3,
+                              act_speed=20,
+                              act_dur=5,
+                              act_cost=150,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=1000,
+                              speed=1000,
+                              type="Projectile",
+                              debuffs=("speed")),
+                    "Air to Surface Missile" : 
+                         Techniques(name="Six Eyes Construction: Air to Surface Missiles",
+                                   level=3,
+                                   act_speed=1,
+                                   act_dur=5,
+                                   act_cost=5,
+                                   act_body=("Full"),
+                                   aoe=5,
+                                   strength=1500,
+                                   speed=1500,
+                                   type="Projectile"
+                         ),
+                    "Nuclear Warhead" : 
+                         Techniques(name="Six Eyes Construction: Nuclear Warhead",
+                                   level=5,
+                                   act_speed=20,
+                                   act_dur=1,
+                                   act_cost=200,
+                                   act_body=("full"),
+                                   aoe=5,
+                                   strength=5500,
+                                   speed=2000,
+                                   type="Projectile"),
+                    "True Sphere Orbs" : 
+                         Techniques(name="Six Eyes Construction: True Sphere Orbs",
+                                   level=3,
+                                   act_speed=10,
+                                   act_dur=1,
+                                   act_cost=20,
+                                   act_body=("full"),
+                                   aoe=4,
+                                   strength=3500,
+                                   speed=25000,
+                                   type="Projectile") 
+                    }
+          },
+          {
+               "Defense" : 
+                    {
+                    "Bug Armor": 
+                         Techniques(name="Construction: Blood Armor",
+                                   level=3,
+                                   act_speed=20,
+                                   act_dur=5,
+                                   act_cost=150,
+                                   act_body=("Full"),
+                                   aoe=1,
+                                   strength=2000,
+                                   speed=2000,
+                                   type="Counter",
+                                   buffs=("strength", "speed")
+                                   ),
+                    "Armored Sentinels":
+                         Techniques(name="Six Eyes Construction: Armored Sentinels",
+                                        level=1,
+                                        act_speed=1,
+                                        act_dur=5,
+                                        act_cost=50,
+                                        act_body=("Full"),
+                                        aoe=1,
+                                        strength=10000,
+                                        speed=1000,
+                                        type="Summon",
+                                        summon={"Sentinel" : {'dmg' : 1000, 'speed' : 1000, "max_hp" : 900, "tamed" : True}}
+                                   ),
+                    "Liquid Metal Shield" : 
+                         Techniques(
+                                   name="Construction: Liquid Metal Shield",
+                                   act_speed=20,
+                                   act_dur=2,
+                                   act_cost=300,
+                                   act_body=("full"),
+                                   aoe=3,
+                                   strength=600,
+                                   speed=600,
+                                   type="tank"
+                              ),
+                    }
+          }
+],
+"Rarity" : 15, 
+"Six Eyes Rarity" : 5
+}
 
 # endregion
 
 # region ### PLAYER COPY TECH
 
 copy={
-     "Copy" : [
-     {
-          "Attack" : 
-      {
-           "Freeze"  : Techniques(
-                name="Copied Technique: Freeze",
-                level=1,
-                act_speed=30,
-                act_dur=1,
-                act_cost=50,
-                act_body=("Head"),
-                aoe=5,
-                strength=10,
-                speed=800,
-                type="Projectile",
-                stun=4),
-                "Die" : Techniques(
-                     name="Copied Technique: Die",
-                     level=2,
-                     act_speed=30,
-                     act_dur=2,
-                     act_cost=500,
-                     act_body=("full"),
-                     aoe=4,
-                     strength=400,
-                     speed=1000,
-                     type="Projectile"
-                ),
-                "Sword Blast" : Techniques(
-                     name="Sword Reinforcement Discharge",
-                     level=3,
-                     act_speed=3,
-                     act_dur=3,
-                     act_cost=300,
-                     act_body=("Full", "sword"),
-                     aoe=5,
-                     strength=1000,
-                     speed=1000,
-                     type="Melee"
-                ),
-                "Authentic Love Beam" : Techniques(
-                     name="Authentic Love Beam",
-                     level=1,
-                     act_speed=20,
-                     act_dur=5,
-                     act_cost=500,
-                     act_body=("Full", "Rika"),
-                     aoe=5,
-                     strength=2000,
-                     speed=2000,
-                     type="Projectile"
-                ),
-                "Rika Summon" : Techniques(
-                     name="Come out, RIKA",
-                     level=1,
-                     act_speed=1,
-                     act_dur=10,
-                     act_cost=100,
-                     act_body=("Head"),
-                     aoe=1,
-                     strength=4000,
-                     speed=4000,
-                     type="summon",
-                     summon={"Rika" : {"Speed" : 4000, "Strength" : 4000, "Max CE" : 4000}}
-                )
-      }},
+"Copy" : 
+     [
+          {
+               "Attack" : 
+               {
+                    "Freeze"  : 
+                         Techniques(
+                         name="Copied Technique: Freeze",
+                         level=1,
+                         act_speed=30,
+                         act_dur=1,
+                         act_cost=50,
+                         act_body=("Head"),
+                         aoe=5,
+                         strength=10,
+                         speed=800,
+                         type="Projectile",
+                         stun=4),
+                    "Die" : 
+                         Techniques(
+                              name="Copied Technique: Die",
+                              level=2,
+                              act_speed=30,
+                              act_dur=2,
+                              act_cost=500,
+                              act_body=("full"),
+                              aoe=4,
+                              strength=400,
+                              speed=1000,
+                              type="Projectile"
+                         ),
+                    "Sword Blast" : 
+                         Techniques(
+                              name="Sword Reinforcement Discharge",
+                              level=3,
+                              act_speed=3,
+                              act_dur=3,
+                              act_cost=300,
+                              act_body=("Full", "sword"),
+                              aoe=5,
+                              strength=1000,
+                              speed=1000,
+                              type="Melee"
+                         ),
+                    "Authentic Love Beam" : 
+                         Techniques(
+                              name="Authentic Love Beam",
+                              level=1,
+                              act_speed=20,
+                              act_dur=5,
+                              act_cost=500,
+                              act_body=("Full", "Rika"),
+                              aoe=5,
+                              strength=2000,
+                              speed=2000,
+                              type="Projectile"
+                         ),
+                    "Rika Summon" : 
+                         Techniques(
+                              name="Come out, RIKA",
+                              level=1,
+                              act_speed=1,
+                              act_dur=10,
+                              act_cost=100,
+                              act_body=("Head"),
+                              aoe=1,
+                              strength=4000,
+                              speed=4000,
+                              type="summon",
+                              summon={"Rika" : {"Speed" : 4000, "Strength" : 4000, "Max CE" : 4000}}
+                         )
+          }
+     },
      {
           "Defend" :
-      {
-        "Don't Move" : Techniques(
-             name="Copied technique: Don't Move",
-             level=1,
-             act_speed=20,
-             act_dur=1,
-             act_cost=50,
-             act_body=("Head"),
-             aoe=3,
-             strength=50,
-             speed=800,
-             type="counter",
-             stun=2,
-             
-        )
-      }
-      }
-      ]
+               {
+               "Don't Move" : Techniques(
+                    name="Copied technique: Don't Move",
+                    level=1,
+                    act_speed=20,
+                    act_dur=1,
+                    act_cost=50,
+                    act_body=("Head"),
+                    aoe=3,
+                    strength=50,
+                    speed=800,
+                    type="counter",
+                    stun=2,
+                    
+                    )
+               }
+          }
+],
+"Rarity" : 5,
+"Six Eyes Rarity" : 2
 }
 
 
@@ -890,51 +934,65 @@ copy={
 # region #### CURSED SPEECH TECH
 
 cursed_speech={
-     "Cursed Speech" : [
-          {"Attack" : {
+     "Cursed Speech" :
+       [
+          {
+               "Attack" : 
+               {
                
-                "Blast Away" : Techniques(
-                     name="Blast Away!",
-                     level=1,
-                     act_speed=10,
-                     act_dur=1,
-                     act_cost=100,
-                     act_body=("Head", "Torso"),
-                     aoe=1,
-                     strength=800,
-                     speed=800,
-                     type="Projectile",
-                     stun=3
-                ),
-                "Plummet" : Techniques(
-                     name="Plummet!",
-                     level=3,
-                     act_speed=10,
-                     act_dur=3,
-                     act_cost=100,
-                     act_body=("Head", "torso"),
-                     aoe=2,
-                     strength=1000,
-                     speed=1000,
-                     type="Projectile",
-                     stun=5
-                )
-          }},
-          {"Defend" : {
-               "Freeze" : Techniques(name="Freeze!", 
-                                     level=1, 
-                                     act_speed=10, 
-                                     act_dur=1,
-                                     act_cost=100,
-                                     act_body=("Head", "Torso"),
-                                     aoe=2,
-                                     strength=600,
-                                     speed=900,
-                                     type="counter",
-                                     stun=3)
-               
-          }}
-     ]
+                    "Blast Away" :
+                         Techniques(
+                              name="Blast Away!",
+                              level=1,
+                              act_speed=10,
+                              act_dur=1,
+                              act_cost=100,
+                              act_body=("Head", "Torso"),
+                              aoe=1,
+                              strength=800,
+                              speed=800,
+                              type="Projectile",
+                              stun=3
+                         ),
+                    "Plummet" : 
+                         Techniques(
+                              name="Plummet!",
+                              level=3,
+                              act_speed=10,
+                              act_dur=3,
+                              act_cost=100,
+                              act_body=("Head", "torso"),
+                              aoe=2,
+                              strength=1000,
+                              speed=1000,
+                              type="Projectile",
+                              stun=5
+                         )
+          }
+          },
+          {
+               "Defend" :
+               {
+                         
+                    "Freeze" : 
+                         Techniques(
+                              name="Freeze!", 
+                              level=1, 
+                              act_speed=10, 
+                              act_dur=1,
+                              act_cost=100,
+                              act_body=("Head", "Torso"),
+                              aoe=2,
+                              Strength=600,
+                              speed=900,
+                              type="counter",
+                              stun=3
+                              )
+                    
+                }
+          }
+     ],
+     "Rarity" : 50
 }
 
 #endregion
@@ -944,37 +1002,46 @@ cursed_speech={
 # region #### Cursed Spirit Manipulation
 cursed_spirit_manip={
      "Cursed Spirit Manip" : [
-          {"Attack" : {
-            "Summon" : Techniques(
-                 name="Cursed Spirit Manipulation: Summoning",
-                 level=1,
-                 act_speed=20,
-                 act_cost=100,
-                 act_dur=1,
-                 act_body=("Full"),
-                 aoe=5,
-                 strength=1000,
-                 speed=1000,
-                 type="summon",
-                 summon={}
-            )
-          }},
-          {"Defend" :{
-               "Summon" : Techniques(
-                    name="Cursed Spirit Manipulation: Summoning",
-                    level=1,
-                    act_speed=10,
-                    act_dur=1,
-                    act_cost=50,
-                    act_body=("Full"),
-                    aoe=5,
-                    strength=1000,
-                    speed=1000,
-                    type="Summon",
-                    summon={}
-               )
-          }}
-     ]
+          {
+               "Attack" :
+                    {
+                         "Summon" : 
+                              Techniques(
+                                   name="Cursed Spirit Manipulation: Summoning",
+                                   level=1,
+                                   act_speed=20,
+                                   act_cost=100,
+                                   act_dur=1,
+                                   act_body=("Full"),
+                                   aoe=5,
+                                   strength=1000,
+                                   speed=1000,
+                                   type="summon",
+                                   summon={}
+                                   )
+                    }
+                 },
+          {
+               "Defend" :
+               {
+               "Summon" :
+                    Techniques(
+                         name="Cursed Spirit Manipulation: Summoning",
+                         level=1,
+                         act_speed=10,
+                         act_dur=1,
+                         act_cost=50,
+                         act_body=("Full"),
+                         aoe=5,
+                         strength=1000,
+                         speed=1000,
+                         type="Summon",
+                         summon={}
+                    )
+          }
+     }
+],
+"Rarity" : 10
 }
 
 
@@ -989,66 +1056,77 @@ cursed_spirit_manip={
 # region ### HR: Zero
 
 hr_zero={
-     "Heavenly Restriction: Zero" :
+     
+"Heavenly Restriction: Zero" :
      [
-          {"Attack" : 
-           {
-                "3 Piece" : 
-                Techniques(
-                     name="Three Piece Combo",
-                     level=1,
-                     act_speed=1,
-                     act_dur=1,
-                     act_cost=0,
-                     act_body=("Left Arm", "Right Arm"),
-                     aoe=3,
-                     strength=1000,
-                     speed=1000,
-                     type="Melee"
-                ),
-                "Spinning Back Kick":
-                Techniques(
-                     name="Spinning Back Kick",
-                     level=1,
-                     act_speed=3,
-                     act_cost=0, 
-                     act_dur=1,
-                     act_body=("Left Leg", "Right Leg"),
-                     aoe=1,
-                     strength=1200,
-                     speed=1200,
-                     type="Melee"
-                ),
-                "Yeet Car" : 
-                Techniques(
-                     name="Yeet Car",
-                     act_speed=10,
-                     acT_cost=0,
-                     act_dur=1,
-                     act_body=("arms", "legs"),
-                     aoe=1,
-                     strength=800,
-                     speed=800,
-                     type="Projectile"
-                )
-           }},
-          {"Defend": 
-           {
-                "Heavenly Body" : Techniques(
-                     name="Heavenly Body",
-                     level=1,
-                     act_speed=0,
-                     act_dur=1,
-                     act_body=("Full"),
-                     aoe=2,
-                     strength=2000,
-                     speed=2000,
-                     type="tank"
-                ),
-           }}
-     ]
+          {
+               "Attack" : 
+               {
+                    "3 Piece" : 
+                         Techniques(
+                              name="Three Piece Combo",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=1000,
+                              speed=1000,
+                              type="Melee"
+                         ),
+                    "Spinning Back Kick":
+                         Techniques(
+                              name="Spinning Back Kick",
+                              level=1,
+                              act_speed=3,
+                              act_cost=0, 
+                              act_dur=1,
+                              act_body=("Left Leg", "Right Leg"),
+                              aoe=1,
+                              strength=1200,
+                              speed=1200,
+                              type="Melee"
+                         ),
+                    "Yeet Car" : 
+                         Techniques(
+                              name="Yeet Car",
+                              act_speed=10,
+                              acT_cost=0,
+                              act_dur=1,
+                              act_body=("arms", "legs"),
+                              aoe=1,
+                              strength=800,
+                              speed=800,
+                              type="Projectile"
+                         )
+               }
+          },
 
+          {
+               "Defend": 
+           
+               {
+                    "Heavenly Body" : 
+                         Techniques(
+                              name="Heavenly Body",
+                              level=1,
+                              act_speed=0,
+                              act_dur=1,
+                              act_body=("Full"),
+                              aoe=2,
+                              strength=2000,
+                              speed=2000,
+                              type="tank"
+                         ),
+           
+               }
+          }
+     ],
+"Rarity" : 6
 }
 
-
 # endregion
+
+
+
