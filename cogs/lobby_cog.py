@@ -11,7 +11,7 @@ class Lobby():
                  invited: list, 
                  team1: list,
                   team2: list, ready: list, turn: int,
-                 created_at=datetime.now().astimezone().strftime("%c"), field: list=None, graveyard: list=None,
+                 created_at=datetime.now(), field: list=None, graveyard: list=None,
                    feed: list=None, spectators: list=None):
         self.name = name # name of lobby default to "<player name>'s Lobby"
         self.owner = owner # user_id of the owner of the lobby
