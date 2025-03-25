@@ -1,7 +1,7 @@
 import discord, os, random, techniques, db, game, techniques
 from game import Player
 from techniques import generate_tech
-from db import create_player, update_player, upate_colony
+from db import create_player, update_player, update_colony
 from discord.ext import commands
 from discord import app_commands
 
@@ -9,6 +9,7 @@ from discord import app_commands
 log_channel = int(os.getenv('LOGCHANNEL'))
 
 techlist=["techniques under construction", "test run"]
+
 
 class Character_cog(commands.Cog):
 
@@ -19,7 +20,7 @@ class Character_cog(commands.Cog):
         self.channel = bot.get_channel(log_channel)
 
     @commands.hybrid_command(name="create", description="Create your player in the culling games! (only one player per colony)")
-    async def create(self, ctx, name=str=None):
+    async def create(self, ctx, name: str=None):
         self.playerdict={}
         if not name:
             name=ctx.author.display_name
@@ -32,6 +33,7 @@ class Character_cog(commands.Cog):
         msg = await ctx.send(embed=embed) 
         await msg.edit(view=CreateButtons(msg, embed, self.bot, playerdict))
         return
+
 
 class CreateButtons(discord.ui.View):
    
@@ -49,17 +51,6 @@ class CreateButtons(discord.ui.View):
         tech_dict= generate_tech()
         ce = random.randrange(200, 2000)
         
-        
-            
-            
-
-                
-            
-            
-
-            
-
-
 
         async def on_timeout(self):
             for child in self.children:
