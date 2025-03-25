@@ -94,7 +94,7 @@ class Lobby_Cog(commands.Cog):
             if ctx.interaction:
                 await ctx.interaction.response.send_message("You are not in a thread, Create a thread to start a lobby."
                 "\n* All players must be in a thread to start a lobby to prevent spam."
-                "\n* If you start the lobby in a private thread, it will start a private lobby")
+                "\n* If you start the lobby in a private thread, it will start a private lobby\n* If you are in a private lobby and invite members to the thread, you must still invite them to the lobby")
             else:
                 await ctx.send("You are not in a thread, Create a thread to start a lobby."
                 "\n* All players must be in a thread to start a lobby to prevent spam."
