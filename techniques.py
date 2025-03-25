@@ -1542,3 +1542,527 @@ projection_sorcery={
 }
 
 # endregion
+
+
+
+# region ### Auspicious Beasts Summon
+
+auspicious_beasts_summon={
+     
+"Auspicious Beasts Summon" :
+        [
+            {
+                "Attack" : 
+                {
+                    "Auspicious Beasts Summon Kaichi" : # spinning cone horn projectile thing
+                        Techniques(
+                            name="Auspicious Beasts Summon Kaichi",
+                            level=1,
+                            act_speed=1,
+                            act_dur=1,
+                            act_cost=20,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=200,
+                            speed=600,
+                            type="projectile"
+                         ),
+                    
+                    "Auspicious Beasts Summon Ryu" : # dragon attack 
+                        Techniques(
+                            name="Auspicious Beasts Summon Reiki",
+                            level=3,
+                            act_speed=1,
+                            act_cost=100,
+                            act_dur=1,
+                            act_body=("Left Arm", "Right Arm"),
+                            aoe=1,
+                            strength=800,
+                            speed=800,
+                            type="projectile"
+                        )
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "Auspicious Beasts Summon Reiki" : # cursed water that increases speed and can cushion attacks
+                        Techniques(
+                            name="Auspicious Beasts Summon Reiki",
+                            level=1,
+                            act_speed=1,
+                            act_cost=30,
+                            act_dur=1,
+                            act_body=("Full"),
+                            aoe=1,
+                            strength=300,
+                            speed=700,
+                            type="dodge"
+                         ),
+                    
+                    "Auspicious Beasts Summon Kirin" : # nullifies pain (ig add def or overall stat boost?) - also stuns self after technique ends
+                        Techniques(
+                            name="Auspicious Beasts Summon Kirin",
+                            level=2,
+                            act_speed=1,
+                            act_cost=50,
+                            act_dur=1,
+                            act_body=("Full"),
+                            aoe=1,
+                            strength=500,
+                            speed=1000,
+                            type="tank"
+                        )
+                }
+            }
+        ],
+"Rarity" : 20
+}
+
+# endregion
+
+
+
+# region ### Shrine
+
+shrine={
+     
+"Shrine" :
+        [
+            {
+                "Attack" : 
+                {
+                    "Dismantle" : # need a visability attribute so it can't be seen by most sorcerers
+                         Techniques(
+                              name="Dismantle",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=1000,
+                              type="projectile"
+                         ),
+                    
+                    "Multi Dismantle" :
+                        Techniques(
+                              name="Multi Dismantle",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=60,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=500,
+                              speed=1000,
+                              type="projectile"
+                         ),
+
+                    "Cleave" :
+                         Techniques(
+                              name="Cleave",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=60, # should be based off opponent hp (ce output cap needed)
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1500, # should be based off opponent hp (ce output cap needed)
+                              speed=1000, # should be based of player stats
+                              type="melee"
+                         ),
+
+                    "Encanted Dismantle" :
+                         Techniques(
+                              name="Dismantle",
+                              level=2,
+                              act_speed=3,
+                              act_dur=1,
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1000,
+                              speed=1000,
+                              type="projectile"
+                         ),
+                    
+                    "Furnace" :
+                         Techniques(
+                              name="Furnace",
+                              level=3,
+                              act_speed=3,
+                              act_dur=1,
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=2000,
+                              speed=500,
+                              type="projectile"
+                         )
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "Dismantle Parry" :
+                         Techniques(
+                              name="Dismantle Parry",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=1000,
+                              type="tank"
+                         ),
+
+                    "Dismantle Shield" : # creating a forcefield out of slashes
+                         Techniques(
+                              name="Dismantle Shield",
+                              level=2,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=500,
+                              speed=1000,
+                              type="tank"
+                         ),
+                    
+                    "Cleave Spider Web" :
+                         Techniques(
+                              name="Cleave Spider Web",
+                              level=3,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1500,
+                              speed=1000, 
+                              type="counter"
+                         )
+                }
+            }
+        ],
+"Rarity" : 5
+}
+
+# endregion
+
+
+
+# region ### Star Rage
+
+star_rage={
+     
+"Star Rage" :
+        [
+            {
+                "Attack" : 
+                {
+                    "It's Mass" : 
+                         Techniques(
+                              name="It's Mass",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm", "Left Leg", "Right Leg"),
+                              aoe=1,
+                              strength=1500,
+                              speed=700,
+                              type="melee"
+                         ),
+                    
+                    "Garuda Cannon Ball" : # not give garuda with the technique?
+                        Techniques(
+                              name="Garuda Cannon Ball",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Leg", "Right Leg"),
+                              aoe=1,
+                              strength=1500,
+                              speed=1000,
+                              type="projectile"
+                         ),
+
+                    "Black Hole" : # kills self and the everyone unless stopped (this will have to be balanced lmaoo)
+                        Techniques(
+                              name="Black Hole",
+                              level=2,
+                              act_speed=3,
+                              act_dur=1,
+                              act_cost=200,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=2000,
+                              speed=2000,
+                              type="force" # NEW
+                         )
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "It's Mass" : 
+                         Techniques(
+                              name="It's Mass",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm", "Left Leg", "Right Leg"),
+                              aoe=1,
+                              strength=1500,
+                              speed=700,
+                              type="counter"
+                         )
+                }
+            }
+        ],
+"Rarity" : 5
+}
+
+# endregion
+
+
+
+# region ### Straw Doll
+
+straw_doll={
+     
+"Straw Doll" :
+        [
+            {
+                "Attack" : 
+                {
+                    "Nails" : 
+                         Techniques(
+                              name="Nails",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=800,
+                              type="projectile"
+                         ),
+                    
+                    "Reasonance" : 
+                         Techniques(
+                              name="Reasonance",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=800,
+                              speed=2000, # ???
+                              type="effigy", #melee on doll that links attack to target
+                              sure_hit=True
+                         )
+                         
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "Nail Storm" : 
+                         Techniques(
+                              name="Nail Storm",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=400,
+                              speed=800,
+                              type="projectile"
+                         ),
+                }
+            }
+        ],
+"Rarity" : 25
+}
+
+# endregion
+
+
+
+# region ### Ten Shadows
+
+ten_shadows={
+     
+"Ten Shadows" :
+        [
+            {
+                "Attack" : 
+                {
+                    "Divine Dog Claw" : 
+                         Techniques(
+                              name="Divine Dog Claw",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=600,
+                              type="summon",
+                              summon={"Divine Dogs" : {"Speed" : 600, "Strength" : 400, "Max CE" : 100}}
+                         ),
+                    
+                    "Nue Lightning" : 
+                         Techniques(
+                              name="Nue Lightning",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=25,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=700,
+                              type="summon",
+                              summon={"Nue" : {"Speed" : 700, "Strength" : 400, "Max CE" : 100}}
+                         ),
+
+                    "Great Serpent Choke" : 
+                         Techniques(
+                              name="Great Serpent Choke",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=30,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=600,
+                              type="summon",
+                              summon={"Great Serpent" : {"Speed" : 600, "Strength" : 500, "Max CE" : 100}}
+                         ),
+                    
+                    "Max Elephant Drop" : 
+                         Techniques(
+                              name="Max Elephant Drop",
+                              level=1,
+                              act_speed=3,
+                              act_dur=1,
+                              act_cost=35,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=800,
+                              speed=500,
+                              type="summon",
+                              summon={"Max Elephant" : {"Speed" : 500, "Strength" : 800, "Max CE" : 200}}
+                         ),
+
+                    "Piercing Ox" : 
+                         Techniques(
+                              name="Piercing Bull Charge",
+                              level=2,
+                              act_speed=3,
+                              act_dur=1,
+                              act_cost=50,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1200,
+                              speed=400,
+                              type="summon",
+                              summon={"Piercing Bull" : {"Speed" : 400, "Strength" : 1200, "Max CE" : 300}}
+                         ),
+
+                    "Mahoraga" : 
+                         Techniques(
+                              name="Mahoraga",
+                              level=1,
+                              act_speed=3,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1500,
+                              speed=1000,
+                              type="summon",
+                              summon={"Mahoraga" : {"Speed" : 1000, "Strength" : 1500, "Max CE" : 500}}
+                         )
+                         
+                }
+            },
+
+          {
+               "Defend": 
+           
+               {
+                    "Rabbit Escape" : 
+                         Techniques(
+                              name="Rabbit Escape",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=800,
+                              type="summon",
+                              summon={"Rabbit Escape" : {"Speed" : 800, "Strength" : 100, "Max CE" : 100}}
+                         ),
+                    
+                    "Toad Tongue" : 
+                         Techniques(
+                              name="Toad Tongue",
+                              level=1,
+                              act_speed=1,
+                              act_dur=1,
+                              act_cost=30,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=1000,
+                              type="summon",
+                              summon={"Toad" : {"Speed" : 1000, "Strength" : 100, "Max CE" : 100}}
+                         ),
+
+                    "Round Deer" :
+                         Techniques(
+                              name="Round Deer",
+                              level=1,
+                              act_speed=2,
+                              act_dur=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=600,
+                              speed=600,
+                              type="summon",
+                              summon={"Round Deer" : {"Speed" : 600, "Strength" : 600, "Max CE" : 400}}
+                         ),
+                }
+            }
+        ],
+"Rarity" : 5
+}
+
+# endregion
