@@ -65,7 +65,7 @@ class Techniques():
 # Decending order (special grade -> grade 4)
 enemy_techs = {
     
-    "Soul Manipulation" : # Femhito - special grade
+    "Femhito" : # Femhito - special grade
         [
             {"Attack" :
                 { "Callous Formation" : Techniques(
@@ -233,11 +233,11 @@ enemy_techs = {
             }
         ],
 
-    "Primal Curse" : 
+    "Primate" : 
         [ 
             {"Attack" :
-                {"Thought Manipulation Attack" : Techniques(
-                    name="MonkeyBrain : Thought Manipulation Attack",
+                {"Head Twirl" : Techniques(
+                    name="Primate: Head Twirl",
                     level=1,
                     act_speed=2,
                     act_cost=30,
@@ -250,7 +250,8 @@ enemy_techs = {
                 }
             },
             {"Defense" :
-                {"Thought Manipulation Defense" : Techniques(
+                {"" : 
+                 Techniques(
                     name="MonkeyBrain : Thought Manipulation Defense",
                     level=1,
                     act_speed=2,

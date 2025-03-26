@@ -21,7 +21,7 @@ def ce_bar(ce, max_ce):
     max_dashes = 4
     dash_ratio = max_ce / max_dashes
     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio)
-    dashes = "<a:blueflames:1279971716382326804>" * filled_dashes
+    dashes = "" * filled_dashes
     if filled_dashes % 1 != 0:
         dashes += "<a:blueflames:1279971716382326804>"
     percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
