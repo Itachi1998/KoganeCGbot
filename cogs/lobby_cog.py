@@ -33,8 +33,8 @@ class Lobby():
    def expire(self):
         timer = self.timer
         if time.time() == timer:
-            # delete lobby
-            pass
+           del self
+            
 
 
 
