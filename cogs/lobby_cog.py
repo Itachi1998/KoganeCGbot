@@ -11,8 +11,8 @@ class Lobby():
                  invited: list, 
                  team1: list,
                   team2: list, ready: list, turn: int,
-                 created_at=datetime.now().astimezone().strftime("%c"), field: list=None, graveyard: list=None,
-                   feed: list=None, spectators: list=None):
+                 created_at=time.time(), timer=time.time() + 500, field: list=None, graveyard: list=None,
+                   feed: list=None, spectators: list=None,):
         self.name = name # name of lobby default to "<player name>'s Lobby"
         self.owner = owner # user_id of the owner of the lobby
         self.colony_id = colony_id # id of colony lobby is created in
@@ -28,7 +28,14 @@ class Lobby():
         self.graveyard = graveyard # players killed in this battle
         self.feed = feed # battle feed 
         self.spectators=spectators
-        self.time_active=datetime.now()
+        self.timer=timer
+       
+   def expire(self):
+        timer = self.timer
+        if time.time() == timer:
+            # delete lobby
+            pass
+
 
 
 
@@ -94,7 +101,7 @@ class Lobby_Cog(commands.Cog):
             if ctx.interaction:
                 await ctx.interaction.response.send_message("You are not in a thread, Create a thread to start a lobby."
                 "\n* All players must be in a thread to start a lobby to prevent spam."
-                "\n* If you start the lobby in a private thread, it will start a private lobby")
+                "\n* If you start the lobby in a private thread, it will start a private lobby\n* If you are in a private lobby and invite members to the thread, you must still invite them to the lobby")
             else:
                 await ctx.send("You are not in a thread, Create a thread to start a lobby."
                 "\n* All players must be in a thread to start a lobby to prevent spam."
