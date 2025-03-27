@@ -2,6 +2,7 @@ import discord, datetime
 from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
+import time
 
 # MAIN CLASS FOR LOBBIES
 # Use this to instantiate lobby instances
@@ -11,7 +12,7 @@ class Lobby():
                  invited: list, 
                  team1: list,
                   team2: list, ready: list, turn: int,
-                 created_at=time.time(), timer=time.time() + 500, field: list=None, graveyard: list=None,
+                 created_at: float, timer: float, field: list=None, graveyard: list=None,
                    feed: list=None, spectators: list=None,):
         self.name = name # name of lobby default to "<player name>'s Lobby"
         self.owner = owner # user_id of the owner of the lobby
@@ -30,23 +31,14 @@ class Lobby():
         self.spectators=spectators
         self.timer=timer
        
-   def expire(self):
-        timer = self.timer
-        if time.time() == timer:
-           del self
+    def expire(self):
+        return time.time() >= self.timer
             
-
-
-
-
-
-def create_lobby(player, colony, name=None, private: bool=None):
-    lob = Lobby(name=name, owner=player, colony_id=colony, private=False, players=[player], invited=[], team1=[], team2=[], ready=[], turn=0)
-    return lob 
 
 class Lobby_Cog(commands.Cog):
     def __init__(self, bot): 
          self.bot = bot
+         
     @commands.hybrid_group(name="lobby", description="Use /lobby <option>")
     async def lobby(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -107,8 +99,6 @@ class Lobby_Cog(commands.Cog):
                 "\n* All players must be in a thread to start a lobby to prevent spam."
                 "\n* If you start the lobby in a private thread, it will start a private lobby")
             return
-
-       
 
 
     @lobby.command(name='private')
