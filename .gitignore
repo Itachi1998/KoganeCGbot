@@ -26,7 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 koganevenv/
-Codes Notes.txt
+codes_notes.txt
 loud_notes.txt
 
 # PyInstaller
