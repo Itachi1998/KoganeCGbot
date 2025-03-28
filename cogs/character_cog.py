@@ -36,8 +36,7 @@ class Character_cog(commands.Cog):
 
 
 class CreateButtons(discord.ui.View):
-   
-    def __init__(self, embed, bot, playerdict: dict, timeout=30):
+    def __init__(self, embed, bot, playerdict: dict, timeout=30,):
         super().__init__(timeout=timeout)
         self.bot = bot
         self.embed=embed
@@ -49,9 +48,7 @@ class CreateButtons(discord.ui.View):
     async def spin(self, interaction: discord.Interaction, button: discord.Button):
         pclass= random.choice(1, 2, 3)
         tech_dict= generate_tech()
-        ce = random.randrange(200, 2000)
-        
-
+        ce = random.randrange(200, 2000)  
         async def on_timeout(self):
             for child in self.children:
                 child.disabled = True

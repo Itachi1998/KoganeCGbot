@@ -1,25 +1,24 @@
 from techniques import bird_manip
 import random, traceback, game
 
-def bird_strike(self, player, target):
-          if player.ce < self.ce_cost:
+def bird_strike(player, target, tech):
+          if player.ce < techpce_cost:
               results = (0, 'NA ce', False, [])
               return results
     
     
-          if player.imbued < self.attack['Bird Strike']['imbue cost']:
+          if player.imbued < attack['Bird Strike']['imbue cost']:
               results = (0, 'NA imbue', False, [])
               return results
     
-          if player.ct_level < self.attack['Bird Strike']['ct lvl']:
+          if player.ct_level < attack['Bird Strike']['ct lvl']:
                 results = (0, 'NA lvl', False,[])
                 return results
     
-          player.ce -= self.ce_cost
+          player.ce -= ce_cost
           player.save_to_db()
-          results = attack_checks(self.attack['Bird Strike'], target, player, soul=self.attack['Bird Strike'])
+          results = attack_checks(attack['Bird Strike'], target, player, soul=attack['Bird Strike'])
           return results
-
 
 def murder(self, player, targets):
           if player.ce < self.ce_cost:

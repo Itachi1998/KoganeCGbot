@@ -2,13 +2,9 @@ from techniques import Techniques
 import random, traceback, game
 
 
-class Limitless(Techniques):
-
-    rarity = 3
-
-    def __init__(self):
-        super().__init__(
-          "Limitless",
+{
+     "Limitless":
+     Techniques(
           1,
           {
             "Blue": {'dmg': 300, 'speed': 300, 'ct lvl': 1, 'imbue cost': 2, 'stun' : 1, 'aoe' : 3},
@@ -18,15 +14,14 @@ class Limitless(Techniques):
             "Infinite Void": {'dmg': 50, 'speed': 800, 'ct lvl': 4, 'imbue cost': 10, 'domain': {'name' : 'Infinite Void', 'dmg' : 600, 'speed' : 999, 'stun': 30, 'negate' : True, 'aoe': 5, 'imbue cost' : 30}}},
         
           {
-            
             "Falling Blossom Emotion": {'def': 300, 'speed': 300, 'ct lvl': 2, 'negate':True,'imbue cost': 5},
             'CE': {'def': 10, 'speed': 10, 'ct lvl': 1, 'imbue cost': 0}, 
               'Infinite Void' : {'def' : 50, 'speed' : 999, 'ct lvl' : 4, 'imbue cost' : 10,' domain': { 'name' : "Infinite Void", 'stun': 5, 'aoe': 5, 'negate' : True, 'dmg' : 300, 'speed' : 999}}, 
               "Infinity" : {'def': 999, 'speed': 999, 'stun' : 30, 'negate': True, 'active' : 1, 'ct lvl': 1, 'imbue cost': 5}},
           0,
           2,
-          "<:limitless:1229451749497114805>"
-        )
+          "<:limitless:1229451749497114805>")
+}
 
 
     def falling_blossom_emotion(self, enemy, player, attack):

@@ -67,21 +67,4 @@ class Colony(Base):
     special_grades: Mapped[Optional[List]] = mapped_column(JSON)
     events: Mapped[Optional[List]] = mapped_column(JSON)
 
-
-class Lobby(Base):
-    __tablename__ = "lobby"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    lobname: Mapped[str] = mapped_column(String(255))
-    col_id: Mapped[int]
-    create_at: Mapped[str] = mapped_column(String(240))
-    owner: Mapped[int]
-    private: Mapped[bool]
-    turn: Mapped[int] = mapped_column(default=0)
-    rounds: Mapped[int] = mapped_column(default=0)
-    players: Mapped[Optional[List]] = mapped_column(JSON)
-    team1: Mapped[Optional[List]] = mapped_column(JSON)
-    team2: Mapped[Optional[List]] = mapped_column(JSON)
-    spectators: Mapped[Optional[List]] = mapped_column(JSON)
-
 Base.metadata.create_all(bind=engine)

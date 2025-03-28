@@ -1,36 +1,16 @@
-from techniques import Techniques
-import random, traceback, game
+from player_tech import construction
 
+# Get the attack and defense dictionaries for the technique
+attack = construction['Construction'][0]['Attack']
+defense = construction['Construction'][0]['Defense']
 
-class Construction(Techniques):
-
-  rarity = 10
-
-  def __init__(self):
-    super().__init__(
-      "Construction",
-      1,
-      {"Liquid Metal": {'dmg': 200, 'speed': 200, 'ct lvl': 1, 'imbue cost': 20, 'drain' : 5, 'aoe' : 4},
-       "Perfect Sphere": {'dmg': 999, 'speed': 150, 'ct lvl': 3, 'imbue cost': 50},    
-       "Threefold Affliction" : {'dmg' : 999, 'domain' : {'name': 'Perfect Sphere', 'dmg' : 999, 'speed' : 550, 'imbue cost' : 200}, 'speed' : 550,  'ct lvl' : 4, 'imbue cost' : 200}},
-      {"Metal Shield": {'def': 150, 'speed': 75, 'ct lvl': 1, 'imbue cost': 30},
-       "Butterfly Wings": {'def': 25, 'speed': 300, 'ct lvl': 2, 'imbue cost': 30},
-       "Bug Armor": {'def': 500, 'speed': 500, 'ct lvl': 5, 'imbue cost': 100}, 
-       'CE' : {'def' : 10, 'speed' : 10, 'ct lvl' : 1, 'imbue cost' : 1}},
-      0,
-      25,
-      "<:yorozu:1278279232363167744>")
-
-    
-    
-  def liquid_metal(self, player, targets):
-    if player.ce < self.ce_cost:
+def liquid_metal(cons, player, targets):
+    if player.ce < cons.ce_cost:
         results = (0, 'NA ce', False, [])
         targets = targets
         return results, targets
         
-        
-    if player.imbued < self.attack['Liquid Metal']['imbue cost']:
+    if player.imbued < attack['Liquid Metal']['imbue cost']:
         results = (0, 'NA imbue', False, [])
         targets = targets
         return results, targets
@@ -38,12 +18,12 @@ class Construction(Techniques):
     
     player.ce -= self.ce_cost
     player.save_to_db()
-    results, targets = aoe_check(targets, player, attack=self.attack['Liquid Metal'])
+    results, targets = aoe_check(targets, player, attack=attack['Liquid Metal'])
     print(f"results and targets for liquid metal \n{results}\n{targets}")
     return results, targets
       
 
-  def threefold_affliction(self, player, target):
+def threefold_affliction(self, player, target):
       if player.ce < self.ce_cost:
           results = (0, 'NA ce', False, [])
           return results
@@ -63,12 +43,11 @@ class Construction(Techniques):
       return results
 
     
-  def perfect_sphere(self, player, target):
+def perfect_sphere(self, player, target):
       if player.ce < self.ce_cost:
           results = (0, 'NA ce', False, [])
           return results
-
-
+      
       if player.imbued < self.attack['Perfect Sphere']['imbue cost']:
           results = (0, 'NA imbue', False, [])
           return results
@@ -83,7 +62,7 @@ class Construction(Techniques):
       return results
 
     
-  def metal_shield(self, enemy, player, attack):
+def metal_shield(self, enemy, player, attack):
     if player.ce < self.ce_cost:
             results = (0, 'NA ce', False, [])
 
@@ -100,7 +79,7 @@ class Construction(Techniques):
     return results
 
     
-  def butterfly_wings(self, enemy, player, attack):
+def butterfly_wings(self, enemy, player, attack):
       if player.ce < self.ce_cost:
               results = (0, 'NA ce', False, [])
               return results
@@ -115,7 +94,7 @@ class Construction(Techniques):
       return results
 
 
-  def bug_armor(self, enemy, player, attack):
+def bug_armor(self, enemy, player, attack):
       if player.ce < self.ce_cost:
               results = self.ce(enemy, player, attack)
               return results
@@ -130,7 +109,7 @@ class Construction(Techniques):
       return results
   
     
-  def ce(self, enemy, player, attack):                                       
+def ce(self, enemy, player, attack):                                       
     results = defense_checks(self.defense['CE'], enemy, player, attack, ce=player.ce)
     return results
 

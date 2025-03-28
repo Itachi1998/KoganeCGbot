@@ -46,7 +46,6 @@ bird_manip = {
                     )
                }
            },
-
            {"Defense": 
                {"Feather Screen" : 
                     Techniques(
@@ -60,7 +59,6 @@ bird_manip = {
                               speed=100,
                               type="dodge"
                               ),
-
                     "Birds Eye" : 
                          Techniques(
                               name="Bird Manip: Birds Eye",
@@ -178,14 +176,14 @@ boogie_woogie = {
                  {
                     "Rock Throw" : 
                          Techniques(
-                              ame="Boogie Woogie: Rock Throw",
+                              name="Boogie Woogie: Rock Throw",
                               level=1,
                               act_speed=10,
                               act_cost=20,
                               act_body=("Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"),
                               aoe=1,
                               strength=200,
-                              speed=900,
+                              speed=500,
                               type="Melee",
                               buff=("strength", "speed")
                               ),
@@ -407,7 +405,7 @@ comedian={
 construction={
      "Construction": [
           {
-               "Attack" : 
+            "Attack" : 
                     {
                     "Blade" : 
                          Techniques(
@@ -421,7 +419,6 @@ construction={
                               speed=500,
                               type="Melee",
                          ),
-
                     "Ammo" : 
                          Techniques(
                               name="Construction: Ammo",
@@ -437,17 +434,17 @@ construction={
                     "Liquid Metal" : 
                          Techniques(
                               name="Construction: Liquid Metal",
-                              level=3,
-                              act_speed=20,
+                              level=4,
+                              act_speed=40,
                               act_cost=150,
                               act_body=("Full"),
                               aoe=5,
                               strength=1000,
                               speed=1000,
                               type="Projectile",
-                              debuffs=("speed")
+                              posion=(10, 10)
                          ),
-                    "Air to Surface Missile" : 
+                    "Air To Surface Missile" : 
                          Techniques(name="Six Eyes Construction: Air to Surface Missiles",
                                    level=3,
                                    act_speed=1,
@@ -466,7 +463,8 @@ construction={
                                    aoe=5,
                                    strength=5500,
                                    speed=2000,
-                                   type="Projectile"),
+                                   type="Projectile"),\
+                                   
                     "True Sphere Orbs" : 
                          Techniques(name="Six Eyes Construction: True Sphere Orbs",
                                    level=3,
@@ -476,11 +474,12 @@ construction={
                                    aoe=4,
                                    strength=3500,
                                    speed=25000,
-                                   type="Projectile") 
+                                   type="Projectile"
+                                   ) 
                     }
           },
           {
-               "Defense" : 
+            "Defense" : 
                     {
                     "Bug Armor": 
                          Techniques(name="Construction: Blood Armor",

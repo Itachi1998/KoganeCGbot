@@ -234,16 +234,15 @@ class Actor:
     #     def domain(self, **kwargs):
     #          pass
      
-
-
-
+# region Enemy
 
 class Enemy(Actor):
-
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony,
-                 inventory: list, equipped: list, xp: int, cgp: int, stacked: tuple=None, poison: tuple=None, charged: tuple=None,
-                stunned: tuple=None, hi: bool=None, hr: str=None, prescience: int=None, debuffed: list=None, buffed: list=None,
-                  summons: list=None, healed: int=None, bodyparts: dict=None):
+                inventory: list, equipped: list, xp: int, cgp: int, 
+                stacked: tuple=None, poison: tuple=None,charged: tuple=None, stunned: tuple=None, 
+                hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
+                debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None):
+        
         try:   
             super().__init__(
                 name, 
@@ -255,7 +254,7 @@ class Enemy(Actor):
                 technique, 
                 playerclass, 
                 colony)
-         
+
             self.name = name
             self.ce = max_ce
             self.hp = max_hp
@@ -282,6 +281,7 @@ class Enemy(Actor):
             self.summons = summons
             self.poison= poison
             self.healed=healed
+
             self.humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
               "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce),
@@ -307,25 +307,36 @@ class Enemy(Actor):
 
     def __repr__(self):
         return f"Enemy: {self.name} - {self.level} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
+# endregion 
 
 
 
-
+# region Player
 class Player(Actor):
     level_cap = 200
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
-                  xp: int, cgp: int, skp: int, user_id: int=None, equipped: list=None, inventory: list=None, shikigami: list=None,
-                   summons: list=None, stacked: tuple=None, poisoned: tuple=None, stunned: tuple=None, hr: str=None, hi: str=None, 
-                     rct: tuple=None, healed: int=None, killcount: list=None, buffed: list=None, debuffed: list=None):
+                    xp: int, cgp: int, skp: int, user_id: int=None,
+                    equipped: list=None, inventory: list=None,
+                    summons: list=None, stacked: tuple=None, charged: tuple=None, 
+                    poisoned: tuple=None, stunned: tuple=None, 
+                    hr: str=None, # heavenley restriction ("max", "zero")
+                    hi: bool=None, # hidden inventory
+                    rct: tuple=None, #(1, 2, 3) 
+                    healed: int=None,
+                    killcount: list=None, buffed: list=None, 
+                    debuffed: list=None, status: str=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
           self.xp = xp
           self.cgp = cgp
           self.skp = skp
+          self.strength=strength
+          self.speed=speed
+          self.technique=technique
+          self.colony=colony
           self.userd_id=user_id
           self.equipped=equipped
           self.inventory=inventory
-          self.shikigami = shikigami
           self.summons=summons
           self.stacked=stacked
           self.poisoned=poisoned
@@ -337,6 +348,7 @@ class Player(Actor):
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
+          self.charged = charged
           
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
@@ -352,8 +364,8 @@ class Player(Actor):
         except:
              traceback.print_exc()
                                         
-          
-
+ # endregion
+ #          
     def __repr__(self):
         return f"Character: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - belonging to user_id: {self.user_id} - in colony: {self.colony}"
 
@@ -477,6 +489,7 @@ class Player(Actor):
 
             return (True, self.level, self.skp)
         return (False, self.level, self.xp)
+
         
     def ready_level_up(self): # Method that returns xp needed for next level up
         level_cap = self.level_cap
@@ -582,8 +595,6 @@ class Grade4_Flymouth(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
           
-
-
 class Grade3_Backhand(Enemy):
 
     def __init__(self):
