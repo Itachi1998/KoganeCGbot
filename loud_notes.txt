@@ -9,4 +9,6 @@ Max:
 
 Zero:
 - No cap on physical or strength upgrades
-- Can two cursed tools simultaneously
+- Can use two cursed tools
+- Can target multiple people with physical attacks
+

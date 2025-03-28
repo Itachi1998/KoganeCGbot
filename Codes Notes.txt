@@ -1,6 +1,0 @@
-1. adding new attributes for:
-	-visability of attacks
-	
-2. shikigami subclasses
-
-3. technique attack/def checks + update to new dictionary based data

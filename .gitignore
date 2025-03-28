@@ -26,6 +26,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 koganevenv/
+Codes Notes.txt
+loud_notes.txt
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
