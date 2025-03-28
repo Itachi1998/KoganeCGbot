@@ -1,5 +1,6 @@
 3/27/25:
 
+<<<<<<< HEAD
 
 1. scaling physical technique applications with character stats
 
@@ -24,3 +25,13 @@
 5. chance of HR tradeoffs like mechamaru (character based)
 
 6. better system for dealing with summons, their abilities and use in battle
+=======
+1. adding new attributes for:
+	-visability of attacks
+    
+2. chance of HR tradeoffs like mechamaru (character based)
+
+3. shikigami subclasses
+
+4. technique attack/def checks + update to new dictionary based data
+>>>>>>> 7f7bd459a9f37c8800020620b6b2de7d4f38156a
