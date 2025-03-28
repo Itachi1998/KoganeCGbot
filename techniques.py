@@ -22,6 +22,7 @@ class Techniques():
                  negates: bool =None,
                  duration: int=None,
                  cooldown: int=None,
+                 visability: int=None
                  ):
             
             self.name = name
@@ -45,4 +46,5 @@ class Techniques():
             self.target=target
             self.negates=negates
             self.duration=duration
-            self.cooldown=cooldown 
+            self.cooldown=cooldown
+            self.visability=visability
