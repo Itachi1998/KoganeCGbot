@@ -1,0 +1,12 @@
+1. Heavenley Restriction:
+Max:
+- Three different summons to choose from.
+- Every level up after grade 4 will add a low tier bot to inventory
+- Every level up after grade 2 will add a regular tier bot to inventory
+- Every level up after grade 1 will add a ultimate mecha bot to inventory
+- Ability to increase CE with skillpoints
+
+
+Zero:
+- No cap on physical or strength upgrades
+- Can two cursed tools simultaneously
