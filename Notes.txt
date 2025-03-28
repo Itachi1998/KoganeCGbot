@@ -1,17 +1,10 @@
 3/27/25:
 
-1. scaling physical technique applications with character stats
-2. adding new attributes for:
+1. adding new attributes for:
 	-visability of attacks
-	-imbuing?
-	-negative self affects (mba, abs)
-3. balancing techniques for having random ce, no tools or shikigami given by default 
-   (other than ten shadows for example) *and no anti domain techs by default
-4. additional types of defense and attack types such as:
-	-force
-	-wave
-	-transform (ISBODK)
-	-effigy (straw doll)
-	-healing
-5. chance of HR tradeoffs like mechamaru (character based)
-6. better system for dealing with summons, their abilities and use in battle
+    
+2. chance of HR tradeoffs like mechamaru (character based)
+
+3. shikigami subclasses
+
+4. technique attack/def checks + update to new dictionary based data
