@@ -1,6 +1,6 @@
 from techniques import Techniques
-
-# region ### PLAYER TECH BIRD MANIP
+from random import randint
+# region ### BIRD MANIP
 
 bird_manip = {
      "Bird Manipulation" : [
@@ -76,7 +76,7 @@ bird_manip = {
                }
           }
      ],
-     "Rarity" : 60
+     "Rarity" : 80
 }
 
 # endregion
@@ -161,9 +161,8 @@ blood_manip= {"Blood Manip" : [
         }
         }
         ], 
-        "Rarity" : 30
+        "Rarity" : 50
         }
-
 # endregion
 
 # region ### PLAYER TECH BOOGIE WOOGIE
@@ -195,6 +194,7 @@ boogie_woogie = {
                               act_speed=0,
                               act_cost=0,
                               act_body=("Head", "Torso", "Left Leg", "Right Leg", "Right Arm", "Left Arm"),
+                              aoe=5,
                               strength=400,
                               speed=400,
                               type="Melee",
@@ -258,7 +258,7 @@ boogie_woogie = {
           }
      ],
 
-"Rarity" : 20 
+"Rarity" : 50
 }
 # endregion
 
@@ -276,7 +276,7 @@ comedian={
                               level=1,
                               act_speed=1,
                               act_cost=10,
-                              act_body={"head", "torso", "arms", "legs"},
+                              act_body=("head", "torso", "arms", "legs"),
                               aoe=1,
                               strength=500,
                               speed=900,
@@ -289,12 +289,12 @@ comedian={
                               level=1,
                               act_speed=1,
                               act_cost=10,
-                              act_body={"Head", "torso", "arms", "legs"},
+                              act_body=("Head", "torso", "arms", "legs"),
                               aoe=4,
                               strength=700,
                               speed=900,
                               type="Melee",
-                              buff=("Strength", "speed")),
+                              buff=("strength", "speed")),
                     "Skit" : 
                          Techniques(
                               name="Comedian: Skit",
@@ -302,10 +302,11 @@ comedian={
                               act_speed=1,
                               act_cost=10,
                               act_body=("Head", "Torso", "Arms", "Legs"),
+                              aoe=4,
                               strength=900,
                               speed=1500,
                               type="Melee",
-                              buff=("Strength", "Speed")
+                              buff=("strength", "Speed")
                               ),
                     "Truck Kun" :
                          Techniques(
@@ -387,14 +388,14 @@ comedian={
                               strength=1000,
                               speed=2000,
                               type="tank",
-                              negate=True
+                              negates=True
                               )
                     }
           }
 
      ], 
 
-"Rarity" : 5
+"Rarity" : 15
 
 }
 
@@ -442,7 +443,7 @@ construction={
                               strength=1000,
                               speed=1000,
                               type="Projectile",
-                              posion=(10, 10)
+                              poison=(10, 10)
                          ),
                     "Air To Surface Missile" : 
                          Techniques(name="Six Eyes Construction: Air to Surface Missiles",
@@ -491,7 +492,7 @@ construction={
                                    strength=2000,
                                    speed=2000,
                                    type="Counter",
-                                   buffs=("strength", "speed")
+                                   buff=("strength", "speed")
                                    ),
                     "Armored Sentinels":
                          Techniques(name="Six Eyes Construction: Armored Sentinels",
@@ -508,6 +509,7 @@ construction={
                     "Liquid Metal Shield" : 
                          Techniques(
                                    name="Construction: Liquid Metal Shield",
+                                   level=1,
                                    act_speed=20,
                                    act_cost=300,
                                    act_body=("full"),
@@ -520,7 +522,7 @@ construction={
           }
 ],
 "Rarity" : 15, 
-"Six Eyes Rarity" : 5
+"Six Eyes" : False
 }
 
 # endregion
@@ -591,7 +593,7 @@ copy={
                               strength=4000,
                               speed=4000,
                               type="summon",
-                              summon={"Rika" : {"Speed" : 4000, "Strength" : 4000, "Max CE" : 4000}}
+                              summon={"Rika" : {"Speed" : 4000, "strength" : 4000, "Max CE" : 4000}}
                          )
           }
      },
@@ -614,8 +616,8 @@ copy={
                }
           }
 ],
-"Rarity" : 5,
-"Six Eyes Rarity" : 2
+"Rarity" : 15,
+"Six Eyes" : False,
 }
 
 
@@ -672,7 +674,7 @@ cursed_speech={
                               act_cost=100,
                               act_body=("Head", "Torso"),
                               aoe=2,
-                              Strength=600,
+                              strength=600,
                               speed=900,
                               type="counter",
                               stun=3
@@ -681,7 +683,7 @@ cursed_speech={
                 }
           }
      ],
-     "Rarity" : 50
+     "Rarity" : 80
 }
 
 #endregion
@@ -728,7 +730,7 @@ cursed_spirit_manip={
                     }
           }
      ],
-"Rarity" : 10
+"Rarity" : 5
 }
 
 # endregion
@@ -738,69 +740,71 @@ cursed_spirit_manip={
 # region ### HR: Zero
 
 hr_zero={
-     
+      
 "Heavenly Restriction: Zero" : [
-          {
-               "Attack" : 
-                    {
-                    "3 Piece" : 
-                         Techniques(
-                              name="Three Piece Combo",
-                              level=1,
-                              act_speed=1,
-                              act_cost=0,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=3,
-                              strength=1000,
-                              speed=1000,
-                              type="Melee"
-                         ),
-                    "Spinning Back Kick":
-                         Techniques(
-                              name="Spinning Back Kick",
-                              level=1,
-                              act_speed=3,
-                              act_cost=0,
-                              act_body=("Left Leg", "Right Leg"),
-                              aoe=1,
-                              strength=1200,
-                              speed=1200,
-                              type="Melee"
-                         ),
-                    "Yeet Car" : 
-                         Techniques(
-                              name="Yeet Car",
-                              act_speed=10,
-                              act_cost=0,
-                              act_body=("arms", "legs"),
-                              aoe=1,
-                              strength=800,
-                              speed=800,
-                              type="Projectile"
-                         )
-               }
-          },
+            {
+                  "Attack" : 
+                         {
+                         "3 Piece" : 
+                               Techniques(
+                                     name="Three Piece Combo",
+                                     level=1,
+                                     act_speed=1,
+                                     act_cost=1,  # Updated act_cost to 1
+                                     act_body=("Left Arm", "Right Arm"),
+                                     aoe=3,
+                                     strength=1000,
+                                     speed=1000,
+                                     type="Melee"
+                               ),
+                         "Spinning Back Kick":
+                               Techniques(
+                                     name="Spinning Back Kick",
+                                     level=1,
+                                     act_speed=3,
+                                     act_cost=1,  # Updated act_cost to 1
+                                     act_body=("Left Leg", "Right Leg"),
+                                     aoe=1,
+                                     strength=1200,
+                                     speed=1200,
+                                     type="Melee"
+                               ),
+                         "Yeet Car" : 
+                               Techniques(
+                                     name="Yeet Car",
+                                     level=1,
+                                     act_speed=10,
+                                     act_cost=1,  # Updated act_cost to 1
+                                     act_body=("arms", "legs"),
+                                     aoe=1,
+                                     strength=800,
+                                     speed=800,
+                                     type="Projectile"
+                               )
+                  }
+            },
 
-          {
-               "Defend": 
-           
-               {
-                    "Heavenly Body" : 
-                         Techniques(
-                              name="Heavenly Body",
-                              level=1,
-                              act_speed=0,
-                              act_body=("Full"),
-                              aoe=2,
-                              strength=2000,
-                              speed=2000,
-                              type="tank"
-                         )
-           
-               }
-          }
-     ],
-"Rarity" : 6
+            {
+                  "Defend": 
+             
+                  {
+                         "Heavenly Body" : 
+                               Techniques(
+                                     name="Heavenly Body",
+                                     level=1,
+                                     act_speed=0,
+                                     act_cost=0,
+                                     act_body=("Full"),
+                                     aoe=2,
+                                     strength=2000,
+                                     speed=2000,
+                                     type="tank"
+                               )
+             
+                  }
+            }
+      ],
+"Rarity" : 20
 }
 
 # endregion
@@ -840,7 +844,7 @@ soul_manipulation={
                               strength=300,
                               speed=400,
                               type="summon",
-                              summon={"Transfigured Humans" : {"Speed" : 400, "Strength" : 300, "Max CE" : 100}} 
+                              summon={"Transfigured Humans" : {"Speed" : 400, "strength" : 300, "Max CE" : 100}} 
                          ),
                     "Polymorphic Soul Isomer" : 
                          Techniques(
@@ -853,7 +857,7 @@ soul_manipulation={
                               strength=700,
                               speed=600,
                               type="summon",
-                              summon={"Polymorphic Soul Isomer" : {"Speed" : 600, "Strength" : 700, "Max CE" : 200}}
+                              summon={"Polymorphic Soul Isomer" : {"Speed" : 600, "strength" : 700, "Max CE" : 200}}
                          ),
 
                     "ISBODK Transform" : # make a general move like a domain?
@@ -876,18 +880,18 @@ soul_manipulation={
            
                {
                     "Soul Repel" : # always active
-                        Techniques(
-                            name="Soul Repel",
-                            level=1,
-                            act_speed=0,
-                            act_cost=0,
-                            act_body=("Full"),
-                            aoe=1,
-                            strength=500,
-                            speed=1000,
-                            type="tank",
-                            soul=True
-                            ),
+                    Techniques(
+                         name="Soul Repel",
+                         level=1,
+                         act_speed=0,
+                         act_cost=1,  # Added act_cost to fix the error
+                         act_body=("Full"),
+                         aoe=1,
+                         strength=500,
+                         speed=1000,
+                         type="tank",
+                         soul=True
+                       ),
 
                     "Soul Mulitiplicity" : 
                         Techniques(
@@ -905,7 +909,7 @@ soul_manipulation={
                }
           }
      ],
-"Rarity" : 8
+"Rarity" : 15
 }
 
 # endregion
@@ -927,7 +931,7 @@ limitless={
                             act_speed=1,
                             act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
-                            aoe=range(1, 5), ###
+                            aoe=randint(1, 5), ###
                             strength=800,
                             speed=1000,
                             type="projectile"
@@ -1020,7 +1024,7 @@ limitless={
             }
         ],
 "Rarity" : 3,
-"Six Eyes Rarity" : 100 # Lowkey useless without it
+"Six Eyes" : False # Lowkey useless without it
 }
 
 # endregion
@@ -1190,7 +1194,7 @@ projection_sorcery={
                 }
             }
         ],
-"Rarity" : 15
+"Rarity" : 25
 }
 
 # endregion
@@ -1266,7 +1270,7 @@ auspicious_beasts_summon={
                 }
             }
         ],
-"Rarity" : 20
+"Rarity" : 80
 }
 
 # endregion
@@ -1470,7 +1474,7 @@ star_rage={
                 }
             }
         ],
-"Rarity" : 5
+"Rarity" : 15
 }
 
 # endregion
@@ -1535,7 +1539,7 @@ straw_doll={
                 }
             }
         ],
-"Rarity" : 25
+"Rarity" : 40
 }
 
 # endregion
@@ -1561,7 +1565,7 @@ ten_shadows={
                               strength=400,
                               speed=600,
                               type="summon",
-                              summon={"Divine Dogs" : {"Speed" : 600, "Strength" : 400, "Max CE" : 100}}
+                              summon={"Divine Dogs" : {"Speed" : 600, "strength" : 400, "Max CE" : 100}}
                          ),
                     
                     "Nue Lightning" : 
@@ -1575,7 +1579,7 @@ ten_shadows={
                               strength=400,
                               speed=700,
                               type="summon",
-                              summon={"Nue" : {"Speed" : 700, "Strength" : 400, "Max CE" : 100}}
+                              summon={"Nue" : {"Speed" : 700, "strength" : 400, "Max CE" : 100}}
                          ),
 
                     "Great Serpent Choke" : 
@@ -1589,7 +1593,7 @@ ten_shadows={
                               strength=500,
                               speed=600,
                               type="summon",
-                              summon={"Great Serpent" : {"Speed" : 600, "Strength" : 500, "Max CE" : 100}}
+                              summon={"Great Serpent" : {"Speed" : 600, "strength" : 500, "Max CE" : 100}}
                          ),
                     
                     "Max Elephant Drop" : 
@@ -1603,7 +1607,7 @@ ten_shadows={
                               strength=800,
                               speed=500,
                               type="summon",
-                              summon={"Max Elephant" : {"Speed" : 500, "Strength" : 800, "Max CE" : 200}}
+                              summon={"Max Elephant" : {"Speed" : 500, "strength" : 800, "Max CE" : 200}}
                          ),
 
                     "Piercing Ox" : 
@@ -1617,7 +1621,7 @@ ten_shadows={
                               strength=1200,
                               speed=400,
                               type="summon",
-                              summon={"Piercing Bull" : {"Speed" : 400, "Strength" : 1200, "Max CE" : 300}}
+                              summon={"Piercing Bull" : {"Speed" : 400, "strength" : 1200, "Max CE" : 300}}
                          ),
 
                     "Mahoraga" : 
@@ -1631,7 +1635,7 @@ ten_shadows={
                               strength=1500,
                               speed=1000,
                               type="summon",
-                              summon={"Mahoraga" : {"Speed" : 1000, "Strength" : 1500, "Max CE" : 500}}
+                              summon={"Mahoraga" : {"Speed" : 1000, "strength" : 1500, "Max CE" : 500}}
                          )
                          
                 }
@@ -1652,7 +1656,7 @@ ten_shadows={
                               strength=100,
                               speed=800,
                               type="summon",
-                              summon={"Rabbit Escape" : {"Speed" : 800, "Strength" : 100, "Max CE" : 100}}
+                              summon={"Rabbit Escape" : {"Speed" : 800, "strength" : 100, "Max CE" : 100}}
                          ),
                     
                     "Toad Tongue" : 
@@ -1666,7 +1670,7 @@ ten_shadows={
                               strength=100,
                               speed=1000,
                               type="summon",
-                              summon={"Toad" : {"Speed" : 1000, "Strength" : 100, "Max CE" : 100}}
+                              summon={"Toad" : {"Speed" : 1000, "strength" : 100, "Max CE" : 100}}
                          ),
 
                     "Round Deer" :
@@ -1680,12 +1684,12 @@ ten_shadows={
                               strength=600,
                               speed=600,
                               type="summon",
-                              summon={"Round Deer" : {"Speed" : 600, "Strength" : 600, "Max CE" : 400}}
+                              summon={"Round Deer" : {"Speed" : 600, "strength" : 600, "Max CE" : 400}}
                          ),
                 }
             }
         ],
-"Rarity" : 5
+"Rarity" : 15
 }
 
 # endregion

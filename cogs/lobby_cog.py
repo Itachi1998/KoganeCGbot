@@ -53,10 +53,10 @@ class Lobby_Cog(commands.Cog):
                     self.lobbies.pop(lob.name, None)
                     # Notify the lobby owner or players if needed
                     break
+
                 else:
                     lob.timer += 500
                     print(f"Lobby {lob.name} timer extended by 500 seconds.")
-
         # Add the task to the bot's task queue
         self.bot.loop.create_task(lobby_expiration_task())
 
@@ -65,7 +65,6 @@ class Lobby_Cog(commands.Cog):
             await ctx.interaction.response.send_message(data, embed=embed, ephemeral=ephemeral)
         else:
             await ctx.send(data, embed=embed)
-
 
     @commands.hybrid_group(name="lobby", description="Use /lobby <option>")
     async def lobby(self, ctx):
@@ -83,8 +82,8 @@ class Lobby_Cog(commands.Cog):
             "\n### /lobby kick"
             "\n* Kick a player from lobby "
             "\n### /lobby disband\n* Disband a lobby in queue status if owner")
+            
             await ctx.send(embed=embed, ephemeral=True)
-    
 
     def thread_check(self, ctx):
         if isinstance(ctx.channel, discord.Thread):
@@ -94,7 +93,6 @@ class Lobby_Cog(commands.Cog):
                             return "public"
                         else:
                             return False
-    
                         
     @lobby.command(name='create')
     async def create(self, ctx, name: str=None):
@@ -141,125 +139,7 @@ class Lobby_Cog(commands.Cog):
             else:
                 await self.interaction_check(ctx=ctx, data=data, ephemeral=True)       
     
-    
-    @lobby.command(name='private')
-    async def private(self, ctx, name: str = None):
-        if self.thread_check(ctx):
-            await ctx.send("Already in a lobby", ephemeral=True)
-        else:
-            channel = ctx.channel
-            if name:
-                thread = await channel.create_thread(name=name, type=discord.ChannelType.private_thread)
-            else:
-                thread = await channel.create_thread(name=ctx.author.name + "'s Private Culling Game Lobby", type=discord.ChannelType.private_thread)
-            
-            await thread.edit(owner=ctx.author)
-            await ctx.send(f"`Created a private lobby:` {thread.mention}")
 
-
-    @lobby.command(name='lock')
-    async def lock(self, ctx):
-        thread= self.thread_check(ctx)
-        if thread:
-            if thread == "not owner":
-                if ctx.interaction:
-                    await ctx.interaction.response.send_message("You are not the owner of this lobby", ephemeral=True)
-                    return
-                else:
-                    await ctx.send("You are not the owner of this lobby", ephemeral=True)
-                    return
-            if thread == "private":
-                if ctx.interaction:
-                    await ctx.interaction.response.send_message("Already in a private lobby", ephemeral=True)
-                    return
-                else:
-                    await ctx.send("Already in a private lobby", ephemeral=True)
-                    return
-            if thread == "public":
-                realt = await ctx.channel
-                await realt.edit(type=discord.ChannelType.private_thread, invitable=False)
-                if ctx.interaction:
-                    await ctx.interaction.response.send_message("Private lobby enabled", ephemeral=True)
-                    return
-                else:
-                    await ctx.send("Private lobby enabled", ephemeral=True)
-                    return
-        else:
-            if ctx.interaction:
-                await ctx.interaction.response.send_message("You are not in a lobby", ephemeral=True)
-            await ctx.send("You are not in a lobby", ephemeral=True)
-   
-
-    @lobby.command(name='invite')
-    async def invite(self, ctx, member: discord.Member):
-        thread = self.thread_check(ctx)
-        if thread:
-            if thread == "not owner":
-                if ctx.interaction:
-                  await ctx.interaction.response.send_message("Only the lobby owner may invite people", ephemeral=True)
-                  return
-                else:
-                    ctx.send("Only the lobby owner may invite people", ephemeral=True)
-                    return
-            if thread == "private":
-                    realt = await ctx.channel
-                    await realt.add_user(member)
-                    if ctx.interaction:
-                     await ctx.interaction.response.send_message(member.mention + " has been invited to the private lobby", ephemeral=True)
-                     return
-                    else:
-                        await ctx.send(member.mention +  " has been invited to the private lobby", ephemeral=True)
-                        return
-
-            else:
-                if ctx.interaction:
-                    await ctx.interaction.response.send_message("You can only invite people to a private lobby ( if you are owner )", ephemeral=True)
-                    return
-                else:
-                  await ctx.send("You can only invite people to a private lobby ( if you are owner )", ephemeral=True)
-                  return
-        else:
-            if ctx.interaction:
-                await ctx.interaction.response.send_message("You are not in a lobby", ephemeral=True)
-                return
-            else:
-              await ctx.send("You are not in a lobby", ephemeral=True)
-              return
-
-
-    @lobby.command(name='leave')
-    async def leave(self, ctx):
-        thread = self.thread_check(ctx)
-        if thread:
-            if thread == "not owner":
-                await ctx.channel.remove_user(ctx.author)
-                if ctx.interaction:
-                 await ctx.interaction.response.send_message("You have left the lobby", ephemeral=True)
-                 return
-                else:
-                    await ctx.send("You have left the lobby", ephemeral=True)
-            else:
-                if ctx.interaction:
-                 await ctx.interaction.response.send_message("Lobby owner cannot leave the lobby. Use /lobby disband to disband the lobby.", ephemeral=True)
-                 return
-                else:
-                    await ctx.send("Lobby owner cannot leave the lobby. Use /lobby disband to disband the lobby.", ephemeral=True)
-                    return
-        else:
-            if ctx.interaction:
-             await ctx.interaction.response.send_message("You are not in a lobby", ephemeral=True)
-            else:
-                await ctx.send("You are not in a lobby", ephemeral=True)
-
-    @lobby.command(name='kick')
-    async def kick(self, ctx, user: discord.Member):
-        thread = self.thread_check(ctx)
-        if thread:
-            if thread == "not owner":
-                await ctx.send("you are not the owner of this lobby " + ctx.author.mention)
-            if thread == "private":
-                await ctx.channel.remove_user(user)
-                await ctx.interaction.response.send_message(user.mention + " `has been kicked by`" + ctx.author.mention)
                 
     @lobby.command(name='disband')
     async def disband(self, ctx):

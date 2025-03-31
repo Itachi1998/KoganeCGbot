@@ -1,6 +1,7 @@
 from game import Enemy, human_body_parts
 from techniques import Techniques
 
+
 class Mahoraga(Enemy):
     tech={
         "Attack" : 
@@ -35,6 +36,7 @@ class Mahoraga(Enemy):
                 )
 
             },
+            
         "Defense" : 
         {
             "Adapt" :

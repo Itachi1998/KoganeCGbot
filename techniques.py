@@ -46,3 +46,4 @@ class Techniques():
             self.negates=negates
             self.duration=duration
             self.cooldown=cooldown 
+
