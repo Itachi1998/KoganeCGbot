@@ -315,7 +315,7 @@ class Enemy(Actor):
 class Player(Actor):
     level_cap = 200
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
-                    xp: int, cgp: int, skp: int, user_id: int=None,
+                    xp: int, cgp: int, skp: int, user_id: int,
                     equipped: list=None, inventory: list=None,
                     summons: list=None, stacked: tuple=None, charged: tuple=None, 
                     poisoned: tuple=None, stunned: tuple=None, 

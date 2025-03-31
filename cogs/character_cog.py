@@ -143,35 +143,79 @@ class CreateButtons(discord.ui.View):
     @discord.ui.button(label="Spin", style=discord.ButtonStyle.primary)
     async def spin(self, interaction: discord.Interaction, button: discord.Button):
         pclass= randint(1,3)
+        tech = None
         if pclass== 1:
            tech= get_random_sorcerer_tech()
         if pclass == 2:
            tech =  get_random_reincarnate_tech()
         if pclass == 3:
             tech = get_random_curse_tech()
-        ce = random.randint(200, 2000)  
-        six_eyes="None"
+        ce = random.randint(200, 2000)
+        strength=random.randint(50, 200)
+        speed=random.randint(50, 200)
+        hp = random.randint(100, 300)
+        six_eyes=False
         print(tech)
         if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
             print("Added 6 eyes ce: 1000 to " + ce)
             ce += 1000
-            six_eyes="True"
+            hp += 300
+            six_eyes=True
 
         if any(keyword in next(iter(tech)).lower() for keyword in ['copy', 'shrine', 'limitless', 'star rage', 'cursed spirit']):
             print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
             ce += 1000
+            hp += 100
 
         if 'zero' in next(iter(tech)).lower():
+            strength += 200
+            speed += 200
+            hp += 300
             ce = 0
         if pclass==1:
+            strength += 50
+            speed += 50
+            hp += 50
             pclass = "Sorcerer"
         elif pclass ==2:
+            strength += 100
+            speed += 100
+            hp += 150
+            ce += 500
             pclass = "Reincarnate"
         elif pclass == 3:
+            strength+= 120
+            speed += 120
+            hp += 150
             pclass = "Curse"
         else:
             return await interaction.response.send_message("Error setting player class")
-        self.embed.description=f"* Name: {self.playerdict['name']}\n* Level: 0\n* Technique: {next(iter(tech))}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}"
+        
+        player = Player(
+            name=self.playerdict['name'],
+            level=0,
+            max_hp=hp,
+            max_ce=ce,
+            speed=speed,
+            strength=strength,
+            technique=tech,
+            playerclass=pclass,
+            colony=interaction.guild_id,
+            xp=0,
+            cgp=0,
+            skp=0,
+            user_id=interaction.user.id
+        )
+        create_player(
+            player.user_id,
+            player.colony,
+            player.name,
+            player.playerclass,
+            player.max_ce,
+            player.max_hp,
+            six_eyes
+        )
+        self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {next(iter(tech))}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}"
         await interaction.response.edit_message(embed=self.embed, view=None)
         return
 
