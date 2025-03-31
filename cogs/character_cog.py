@@ -48,10 +48,12 @@ def get_random_sorcerer_tech(techlist=sorcerer_techs):
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
     print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
+
     if "Six Eyes" in tech.keys():
         six_values = randint(0, 10)
         if six_values <= 5:
             tech['Six Eyes'] = True
+
     return tech
 
 def get_random_reincarnate_tech(techlist=reincarnated_techs):
@@ -147,14 +149,16 @@ class CreateButtons(discord.ui.View):
            tech =  get_random_reincarnate_tech()
         if pclass == 3:
             tech = get_random_curse_tech()
-        ce = random.randrange(200, 2000)  
+        ce = random.randint(200, 2000)  
         six_eyes="None"
         print(tech)
         if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
+            print("Added 6 eyes ce: 1000 to " + ce)
             ce += 1000
             six_eyes="True"
 
-        if 'copy' or 'shrine' or 'limitless' or 'star rage' or 'cursed spirit manip' in next(iter(tech)).lowered():
+        if any(keyword in next(iter(tech)).lower() for keyword in ['copy', 'shrine', 'limitless', 'star rage', 'cursed spirit']):
+            print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
             ce += 1000
 
         if 'zero' in next(iter(tech)).lower():

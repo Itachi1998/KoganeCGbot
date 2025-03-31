@@ -46,10 +46,6 @@ class Techniques():
             self.target=target
             self.negates=negates
             self.duration=duration
-<<<<<<< HEAD
-            self.cooldown=cooldown 
-
-=======
             self.cooldown=cooldown
             self.visability=visability
->>>>>>> 5120e3bbd7d3e9d8babe988a18233fd83e7937c1
+
