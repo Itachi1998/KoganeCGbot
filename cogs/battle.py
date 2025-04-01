@@ -16,7 +16,6 @@ def healthbar(health, max_health):
     bar = f"{dashes}{percent}"
     return bar
 
-
 def ce_bar(ce, max_ce):
     max_dashes = 4
     dash_ratio = max_ce / max_dashes

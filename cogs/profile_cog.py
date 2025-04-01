@@ -10,16 +10,13 @@ from discord.ext import commands
     
 #     embed.add_field(name="**Existing Stats**", value=f"**Strength:** {player.attack}\n**Speed:** {player.speed}\n**CE:** {player.ce}/{player.max_ce}\n**HP**: {player.hp}/{player.max_hp}\n**CT level**: {player.ct_level}\n**Player level**: {player.level}\n**XP**: {player.xp}/{xp_needed}")
 #     return embed
-    
-
 class Profile(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'{self.bot.user.name} is ready')
-   
+        print(f'{self.bot.user.name} is ready')   
     # @commands.hybrid_command(name="level", description = "Check your current level stats")
     # async def level(self, ctx, member: discord.Member=None):
     #     if member is None:

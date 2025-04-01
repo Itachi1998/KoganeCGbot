@@ -48,3 +48,4 @@ class Techniques():
             self.duration=duration
             self.cooldown=cooldown
             self.visability=visability
+

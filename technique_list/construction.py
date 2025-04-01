@@ -1,116 +1,164 @@
 from player_tech import construction
+from game import Player, Enemy
 
 # Get the attack and defense dictionaries for the technique
-attack = construction['Construction'][0]['Attack']
-defense = construction['Construction'][0]['Defense']
+attack_dict = construction['Construction'][0]['Attack'] # returns attack dictionary
+defense_dict = construction['Construction'][1]['Defense'] # returns defense ditionary
 
-def liquid_metal(cons, player, targets):
-    if player.ce < cons.ce_cost:
-        results = (0, 'NA ce', False, [])
+def total_dmg(attack_strength, defense_strength)
+     return (attack_strength - defense_strength)
+
+def attack_checks(player, target, technique):
+    attack = attack_dict[technique] 
+    defense = target.defense
+    if attack.level > player.grade:
+        return (0, 'NA grade', attack)
+    
+    if attack.buffs:
+        if 'strength' in attack.buffs:
+            player.strength += attack.strength
+        if 'speed' in attack.buffs:
+             player.speed += attack.speed
+        return (0, 'buff', attack)
+    if target.ce >= target.defense.ce:
+        defense = target.defense
+    else:
+         defense = None
+    if player.imbued:
+         attack.strength += player.imbued
+         attack.speed += player.imbued
+    if defense:
+        speed_diff = defense.speed - attack.speed
+            # 50               20
+        if defense.speed > attack.speed:
+            # 30            # 50 / 1 (grade 4)
+            if speed_diff < defense.speed // target.grade:
+                dmg = total_dmg(attack.strength, defense.strength)
+                return (dmg, 'hit', attack)
+            if defense.type == "dodge":
+                return (0, 'dodge', attack)
+            if defense.type == 'counter':
+                return (defense.strength, 'counter', attack)
+        else:
+            dmg = total_dmg(attack.strength + speed_diff, defense.strength)
+            return (dmg, 'hit', attack)
+    else:
+         return(attack.strength + attack.speed, 'hit', attack) 
+    
+
+def set_defense(player, defense):
+     player.defense = defense
+     return player.defense
+
+
+
+def create_item(stats, name, player):
+     
+
+# Domain
+# def threefold_affliction(player, target):
+#       if player.ce < self.ce_cost:
+#           results = (0, 'NA ce', False, [])
+#           return results
+
+#       if player.imbued < self.attack['Threefold Affliction']['imbue cost']:
+#           results = (0, 'NA imbue', False, [])
+#           return results
+
+#       if player.ct_level < self.attack['Threefold Affliction']['ct lvl']:
+#           results = (0, 'NA lvl', False,[])
+#           return results
+          
+#       player.ce -= self.ce_cost
+#       player.save_to_db()
+#       sure_hit = self.attack['Threefold Affliction']['domain']
+#       results = domain_check(self.attack[sure_hit], target, player)
+#       return results
+
+    
+def perfect_sphere(player, target):
+    attack = attack_dict['Perfect Sphere']
+              
+    if player.grade < attack.level:
+         results = (0, 'NA level', attack)
+
+    if player.ce < attack.ce_cost:
+        results = (0, 'NA ce', attack)
         targets = targets
         return results, targets
         
-    if player.imbued < attack['Liquid Metal']['imbue cost']:
-        results = (0, 'NA imbue', False, [])
+    if player.ce < attack.ce_cost:
+        results = (0, 'NA imbue', attack)
         targets = targets
         return results, targets
 
-    
-    player.ce -= self.ce_cost
-    player.save_to_db()
-    results, targets = aoe_check(targets, player, attack=attack['Liquid Metal'])
-    print(f"results and targets for liquid metal \n{results}\n{targets}")
-    return results, targets
-      
+    player.ce -= attack.ce_cost
 
-def threefold_affliction(self, player, target):
-      if player.ce < self.ce_cost:
-          results = (0, 'NA ce', False, [])
-          return results
-
-      if player.imbued < self.attack['Threefold Affliction']['imbue cost']:
-          results = (0, 'NA imbue', False, [])
-          return results
-
-      if player.ct_level < self.attack['Threefold Affliction']['ct lvl']:
-          results = (0, 'NA lvl', False,[])
-          return results
-          
-      player.ce -= self.ce_cost
-      player.save_to_db()
-      sure_hit = self.attack['Threefold Affliction']['domain']
-      results = domain_check(self.attack[sure_hit], target, player)
-      return results
+    if player.defense:
+        if player.defense.negate:
+             return (0, 'NA negated', attack)
+        if player.defense.speed > attack.speed:
+            if player.defense.type == "dodge":
+                 return(0, 'miss', attack)
+            if player.defense.type == 'counter':
+                 dmg = player.defense.strength
+                 return(dmg, 'counter', attack)
+            else:
+                 dmg = attack.strength // 2
+                 total_dmg = player.defense.strength - dmg
+                 return (total_dmg, 'hit slow', False)
+        
+        dmg = attack.strength + attack.speed
+        def_num = player.defense.strength + player.defense.speed
+        total_dmg = dmg - def_num
+        if total_dmg <= 0:
+                return (0, 'tank', attack)
+        else:
+            return (total_dmg, 'hit', attack)
 
     
-def perfect_sphere(self, player, target):
-      if player.ce < self.ce_cost:
-          results = (0, 'NA ce', False, [])
-          return results
-      
-      if player.imbued < self.attack['Perfect Sphere']['imbue cost']:
-          results = (0, 'NA imbue', False, [])
-          return results
-          
-      if player.ct_level < self.attack['Perfect Sphere']['ct lvl']:
-            results = (0, 'NA lvl', False,[])
-            return results
-      
-      player.ce -= self.ce_cost
-      player.save_to_db()
-      results = attack_checks(self.attack['Perfect Sphere'], target, player, soul=self.attack['Perfect Sphere'])
-      return results
-
-    
-def metal_shield(self, enemy, player, attack):
-    if player.ce < self.ce_cost:
-            results = (0, 'NA ce', False, [])
-
-    if player.imbued < self.defense['Metal Shield']['imbue cost']:
+def metal_shield(enemy, player, attack):
+    defense = defense_dict["Metal shield"]
+    if player.imbued < defense.ce_cost:
             results = (0, 'NA imbue', False, [])
             return results
-    if player.ct_level < self.defense['Metal Shield']['ct lvl']:
+    if player.ct_level < defense.level:
         results = (0, 'NA lvl', False, [])
         return results 
         
-    player.ce -= self.ce_cost
+    player.ce -= defense.ce_cost
     player.save_to_db()
-    results = defense_checks(self.defense['Metal Shield'], enemy, player, attack)
+    results = defense_checks(defense, enemy, player, attack)
     return results
 
     
-def butterfly_wings(self, enemy, player, attack):
-      if player.ce < self.ce_cost:
-              results = (0, 'NA ce', False, [])
-              return results
-
-      if player.imbued < self.defense['Butterfly Wings']['imbue cost']:
+def butterfly_wings(enemy, player, attack):
+      defense = defense_dict['Butterfly Wings']
+      if player.imbued < defense.ce_cost:
               results = (0, 'NA imbue', False, [])
               return results
 
-      player.ce -= self.ce_cost
+      player.ce -= defense.ce_cost
       player.save_to_db()
-      results = defense_checks(self.defense['Butterfly Wings'], enemy, player, attack)
+      results = defense_checks(defense, enemy, player, attack)
       return results
 
 
-def bug_armor(self, enemy, player, attack):
-      if player.ce < self.ce_cost:
-              results = self.ce(enemy, player, attack)
-              return results
+def bug_armor(enemy, player, attack):
+    defense = defense_dict["Bug Armor"]
 
-      if player.imbued < self.defense['Bug Armor']['imbue cost']:
-              results = self.ce(enemy, player, attack)
-              return results
+    if player.imbued < defense.ce_cost:
+              return (False, "NA ce")
 
-      player.ce -= self.ce_cost
-      player.save_to_db()
-      results = defense_checks(self.defense['Bug Armor'], enemy, player, attack)
-      return results
+    player.ce -= defense.ce_cost
+    player.save_to_db()
+    results = defense_checks(defense, enemy, player, attack)
+    return results
   
     
-def ce(self, enemy, player, attack):                                       
-    results = defense_checks(self.defense['CE'], enemy, player, attack, ce=player.ce)
+def ce( enemy, player, attack):         
+    defense = 'CE'                    
+    results = defense_checks(defense, enemy, player, attack, ce=player.ce)
     return results
 
 
@@ -403,7 +451,7 @@ def defense_checks(defense, enemy, player, attack, stack=None, charge=None, stre
       traceback.print_exc()
       
 
-def aoe_check(targets, player, attack = None, def_aoe = None, strength=None):
+def aoe_check(targets, player, attack = None, def_aoe = None):
     try:
         result_list = []
         if def_aoe:
@@ -416,7 +464,6 @@ def aoe_check(targets, player, attack = None, def_aoe = None, strength=None):
                     t.speed = def_speed  
                     t.save_to_db()
                     result_list.append({'target': t.name, 'defense': t.defense})
- 
 
         if attack:
             dmg = attack['dmg']

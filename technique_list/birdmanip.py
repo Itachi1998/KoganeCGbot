@@ -1,8 +1,9 @@
-from techniques import bird_manip
+from player_tech import bird_manip
 import random, traceback, game
-
+attack_dict = bird_manip["Bird Manipulation"][0]['Attack']
+defense_dict = bird_manip["Bird Manipulation"][1]['Defense']
 def bird_strike(player, target, tech):
-          if player.ce < techpce_cost:
+          if player.ce < attack.ce_cost:
               results = (0, 'NA ce', False, [])
               return results
     
