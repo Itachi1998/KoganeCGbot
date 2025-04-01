@@ -3,12 +3,12 @@ from player_tech import limitless
 
 
 # pull the currect attack/defense from the player/target and save its attributes to the attack/defense variable
-attack=limitless["Limitless"]["Attack"]["Blue"]  #'current player (technique)[attack][move]'
-defense=limitless["Limitless"]["Defense"]["Infinity"]  #'current target (technique)[defense][move]'
+attack = limitless["Attack"]["Blue"]  #'current player (technique)[attack][move]'
+defense = limitless["Defense"]["Infinity"]  #'current target (technique)[defense][move]'
 print(attack, defense)
 
 
-# check see if the player can use the attack before starting the checks
+# check if the player can use the attack before starting the checks
 def attack_verify(player, attack):
     
     if player.ce < attack.act_cost:
@@ -28,7 +28,7 @@ def attack_verify(player, attack):
         defense_verify()
 
 
-# check see if the target can use the defense before starting the checks
+# check if the target can use the defense before starting the checks
 def defense_verify(target, defense):
     
     if target.ce < defense.act_cost:
@@ -48,7 +48,7 @@ def defense_verify(target, defense):
         battle_checks()
 
 
-# the results of the attack/defense interaction are handled by this function
+# the battle interaction is handled by this function
 def battle_checks(attack, target, player, strength=None, stun=None, soul=None, stack=None, charge=None):
     try:
         print('Starting battle checks...')
