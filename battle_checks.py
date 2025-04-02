@@ -1,4 +1,4 @@
-import game
+import game, random
 from game import Player
 from player_tech import technique_list
 # check if the player can use the attack before starting the checks
@@ -95,6 +95,18 @@ def negate_check(attack, target, dmg):
                 target.max_hp -= attack.soul
             target.hp -= dmg
             return ("hit", dmg, target.hp<=0, target.max_hp <=0)
+    
+def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=None, attack=None):
+        if player.technique or target.technique == "Comedian":
+             if defense:
+                joke = defense.name
+                correct = random.choice([answer1, answer2, answer3])
+                if choice == correct:
+                     total_dmg = max(dmg - defense.strength, 0)
+                     target.hp -= total_dmg
+                     return("tank", total_dmg, target.hp <=0, target.max_hp <=0)
+                     
+                  
     
 def tank_check(target, attack, defense, dmg):
             defense.strength += defense.imbue
