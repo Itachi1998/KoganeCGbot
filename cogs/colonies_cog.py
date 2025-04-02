@@ -1,6 +1,6 @@
 import os, dotenv, datetime
 from datetime import datetime
-from db import create_colony, update_colony, create_player, update_player
+from db import create_colony,read_colony, update_colony
 from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
@@ -15,17 +15,21 @@ load_dotenv(dotenv)
 log_channel = os.getenv("LOGCHANNEL")
 
 
+
+# Update after postgres database is set up
+
 class Colonies(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+                self.bot = bot
 
-        @commands.command(name="colony", description="Sync colonies")
-        async def colony(self, ctx):
-            channel = await bot.fetch_channel(int(log_channel))
+    @commands.command(name="colony", description="Sync colonies")
+    async def colony(self, ctx):
             for guild in self.bot.guilds:
-                enemies = [enemy.name for enemy in game.Enemy.__subclasses__()]
+                enemies = [enemy() for enemy in game.Enemy.__subclasses__()]
+                for e in enemies:
+                      print(e)
                 colony_data = {
-                    'colony name': guild.name,
+                    'name': guild.name,
                     'colony id': guild.id,
                     'owner id': guild.owner_id,
                     'creation date': datetime.now().astimezone().strftime("%c"),
@@ -39,47 +43,22 @@ class Colonies(commands.Cog):
                     'shop': [],
                     'rules': [],
                     'graveyard': [],
-                    'leaderboard': []
+                    'leaderboard': [],
+                    'color' : "black"
                 }
-                create_colony(colony_data)
+                existing_col = read_colony(guild.id)
+                if existing_col:
+                     await ctx.send("colony already exists: " + guild.name)
+                     return False
+                if self.bot.is_owner(ctx.author.id):
+                    create_colony(colony_data)
+                    await ctx.send("colony added: " + guild.name)
             
-
+        
+       
 
 async def setup(bot):
     await bot.add_cog(Colonies(bot))
-
-# Update after postgres database is set up
-
-class Colonies(commands.Cog):
-    def __init__(self, bot):
-                self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        enemies = []
-        for enemy in game.Enemy.__subclasses__():
-            enemies.append(enemy.name)
-        colony_data = {
-            'colony name': guild.name,
-            'colony id': guild.id,
-            'owner id': guild.owner_id,
-            'creation date': datetime.now().astimezone().strftime("%c"),
-            'colony color': 'gray',
-            'districts': [],
-            'players': [],
-            'enemies': enemies,
-            'items': [],
-            'ce': 0,
-            'xp': 0,
-            'shop': [],
-            'rules': [],
-            'graveyard': [],
-            'leaderboard': []
-        }
-        
-        create_colony(colony_data)
-        
-       
 
 
 
@@ -153,105 +132,105 @@ class Colonies(commands.Cog):
     #         if player:
     #                         dynamo.delete_from_colony(ctx.guild.id, "members", ctx.author.id)
     #                         await ctx.send(f"{ctx.author.mention} has been removed from the colony.")
-    #                         return
+#     #                         return
             
-    #         else:
-    #                 await ctx.send(f"Player not found")
+#     #         else:
+#     #                 await ctx.send(f"Player not found")
 
                 
                 
             
 
 
-#____________VIEWS__________
+# #____________VIEWS__________
         
-# class UIEdit(discord.ui.View):
-#     def __init__(self, bot, ctx, col):
-#         super().__init__(timeout=None)
-#         self.ctx = ctx
-#         self.col = col
-#         self.bot = bot
-#         self.add_item(UISelect(self.bot, self.ctx, self.col))
+# # class UIEdit(discord.ui.View):
+# #     def __init__(self, bot, ctx, col):
+# #         super().__init__(timeout=None)
+# #         self.ctx = ctx
+# #         self.col = col
+# #         self.bot = bot
+# #         self.add_item(UISelect(self.bot, self.ctx, self.col))
         
         
         
     
-# class UISelect(discord.ui.Select):
+# # class UISelect(discord.ui.Select):
     
-#     def __init__(self, bot, ctx, col):
-#         super().__init__(
-#             placeholder="Select a color",
-#             options=[
-#                 discord.SelectOption(label="Pink", value="pink"),
-#                 discord.SelectOption(label="Blue", value="blue"),
-#                 discord.SelectOption(label="Gray", value="gray"),
-#                 discord.SelectOption(label="Black", value="black"),
-#                 discord.SelectOption(label="Green", value="green")
-#             ]
-#         )
-#         self.ctx = ctx
-#         self.col = col
-#         self.bot = bot
+# #     def __init__(self, bot, ctx, col):
+# #         super().__init__(
+# #             placeholder="Select a color",
+# #             options=[
+# #                 discord.SelectOption(label="Pink", value="pink"),
+# #                 discord.SelectOption(label="Blue", value="blue"),
+# #                 discord.SelectOption(label="Gray", value="gray"),
+# #                 discord.SelectOption(label="Black", value="black"),
+# #                 discord.SelectOption(label="Green", value="green")
+# #             ]
+# #         )
+# #         self.ctx = ctx
+# #         self.col = col
+# #         self.bot = bot
       
 
-    # async def callback(self, interaction: discord.Interaction):
-    #         if self.ctx.author.id != interaction.user.id:
-    #             await interaction.response.send_message("You dont have permissions to choose an option", ephemeral=True)
-    #             return
-    #         colony_data = dynamo.read_colony(self.col.id)
-    #         if colony_data:
-    #             value = self.values[0]
-    #             if value == "blue":
-    #                 colony_data['colony_color'] = value
-    #                 await interaction.response.edit_message(content="Blue", view=None)
-    #             elif value == "pink":
-    #                 colony_data['colony_color'] = value
-    #                 await interaction.response.edit_message(content="Pink", view=None)
-    #             elif value == "gray":
-    #                 colony_data['colony_color'] = value
-    #                 await interaction.response.edit_message(content="Gray", view=None)
-    #             elif value == "black":
-    #                 colony_data['colony_color'] = value
-    #                 await interaction.response.edit_message(content="Black", view=None)
-    #             elif value == "green":
-    #                 colony_data['colony_color'] = value
-    #                 await interaction.response.edit_message(content="Green", view=None)
-    #             colony = Colony(**colony_data)
-    #             dynamo.save_colony(colony)
-    #             await interaction.response.edit_message(content="Color changed", view=None)
+#     # async def callback(self, interaction: discord.Interaction):
+#     #         if self.ctx.author.id != interaction.user.id:
+#     #             await interaction.response.send_message("You dont have permissions to choose an option", ephemeral=True)
+#     #             return
+#     #         colony_data = dynamo.read_colony(self.col.id)
+#     #         if colony_data:
+#     #             value = self.values[0]
+#     #             if value == "blue":
+#     #                 colony_data['colony_color'] = value
+#     #                 await interaction.response.edit_message(content="Blue", view=None)
+#     #             elif value == "pink":
+#     #                 colony_data['colony_color'] = value
+#     #                 await interaction.response.edit_message(content="Pink", view=None)
+#     #             elif value == "gray":
+#     #                 colony_data['colony_color'] = value
+#     #                 await interaction.response.edit_message(content="Gray", view=None)
+#     #             elif value == "black":
+#     #                 colony_data['colony_color'] = value
+#     #                 await interaction.response.edit_message(content="Black", view=None)
+#     #             elif value == "green":
+#     #                 colony_data['colony_color'] = value
+#     #                 await interaction.response.edit_message(content="Green", view=None)
+#     #             colony = Colony(**colony_data)
+#     #             dynamo.save_colony(colony)
+#     #             await interaction.response.edit_message(content="Color changed", view=None)
             
 
-# async def setup(bot: commands.Bot):
-#             await bot.add_cog(Colonies(bot))
+# # async def setup(bot: commands.Bot):
+# #             await bot.add_cog(Colonies(bot))
 
 
-class Colony:
-    def __init__(self, colony_name: str, colony_id: int, owner_id: int, creation_date: str, color: str, 
-                 players: list, enemies: list, items: list, ce: int, xp: int, shop: list, rules: list, graveyard: list, leaderboard: list, events: list):
-        # 'colony_name': guild.name,
-        #     'colony_id': guild.id,
-        #     'owner_id': guild.owner_id,
-        #     'creation_date': datetime.now().astimezone().strftime("%c"),
-        #     'colony_color': 'gray',
-        #     'districts': [],
-        #     'players': [],
-        #     'enemies': enemies,
-        #     'items': [],
-        #     'ce': 0,
-        #     'xp': 0,
-        #     'shop': [],
-        #     'rules': [],
-        #     'graveyard': [],
-        #     'leaderboard': []
-        self.colony_name = colony_name
-        self.colony_id = colony_id
-        self.owner_id = owner_id
-        self.creation_date = creation_date
-        self.color = color
-        self.players = players
-        self.enemies=enemies
-        self.items=items
-        self.ce=ce
-        self.xp=xp
-        self.shop=shop
-        self.rules
+# class Colony:
+#     def __init__(self, colony_name: str, colony_id: int, owner_id: int, creation_date: str, color: str, 
+#                  players: list, enemies: list, items: list, ce: int, xp: int, shop: list, rules: list, graveyard: list, leaderboard: list, events: list):
+#         # 'colony_name': guild.name,
+#         #     'colony_id': guild.id,
+#         #     'owner_id': guild.owner_id,
+#         #     'creation_date': datetime.now().astimezone().strftime("%c"),
+#         #     'colony_color': 'gray',
+#         #     'districts': [],
+#         #     'players': [],
+#         #     'enemies': enemies,
+#         #     'items': [],
+#         #     'ce': 0,
+#         #     'xp': 0,
+#         #     'shop': [],
+#         #     'rules': [],
+#         #     'graveyard': [],
+#         # #     'leaderboard': []
+#         # self.colony_name = colony_name
+#         # self.colony_id = colony_id
+#         # self.owner_id = owner_id
+#         # self.creation_date = creation_date
+#         # self.color = color
+#         # self.players = players
+#         # self.enemies=enemies
+#         # self.items=items
+#         # self.ce=ce
+#         # self.xp=xp
+#         # self.shop=shop
+        # self.rules
