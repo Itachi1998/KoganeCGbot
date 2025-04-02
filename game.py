@@ -21,16 +21,11 @@ class GameMode(enum.IntEnum):
 
 
 # to be used for all human characters/enemies
-human_body_parts = [
-    {"head" : "BodyPart('Head', 0)"},
-    {"arm_left" : "BodyPart('Left Arm', 0)"},
-    {"arm_right" : "BodyPart('Right Arm', 0)"},
-    {"torso" : "BodyPart('Torso', 100)"}
-]
+
 
 
 class BodyPart:
-    def __init__(self, name, max_hp, max_ce):
+    def __init__(self, name, max_hp, max_ce=None, soul=None):
         self.max_ce=max_ce
         self.name = name
         self.max_hp = max_hp
@@ -48,7 +43,12 @@ class BodyPart:
          
     def is_destroyed(self):
         return self.hp <= 0
-
+human_body_parts = [
+    {"head" : BodyPart('Head', 0)},
+    {"arm_left" : BodyPart('Left Arm', 0)},
+    {"arm_right" : BodyPart('Right Arm', 0)},
+    {"torso" : BodyPart('Torso', 100)}
+]
 
 # class Character:
    # def __init__(self, name):
@@ -291,10 +291,7 @@ class Enemy(Actor):
               "Right Leg": BodyPart(name='Right Leg', max_hp=self.max_hp * 10 // 100)
           }
             self.grade4_curse = { "Head" : BodyPart(name="Head", max_hp=self.max_hp, max_ce=self.max_ce)}
-            self.grade3_Curse= {""
-            "Head" : BodyPart(name="Head", max_hp=self.max_hp, max_ce=self.max_ce * 50 % 100), 
-            "Torso" : BodyPart(name="Head", max_hp=self.max_hp, max_ce=self.max_ce * 50 % 100)
-            }
+          
             self.grade2_Curse= {""
             "Head" : BodyPart(name="Head", max_hp=self.max_hp * 25 % 100, max_ce=self.max_ce * 25 % 100), 
             "Torso" : BodyPart(name="Head", max_hp=self.max_hp * 50 % 100, max_ce=self.max_ce * 50 % 100),
@@ -528,13 +525,16 @@ class Player(Actor):
         
 ## ENEMY CLASSES 
 ## SUBCLASS OF ENEMY CLASS
-        
+
+
+
+
+
 class Grade4_Bugfly(Enemy):
     def __init__(self):
-        super().__init__(
-             name="Bugfly", 
+        
+        super().__init__(name="Bugfly", 
              level=1,
-             hp=15, 
              max_hp=15, 
              max_ce=20, 
              strength=20, 
@@ -544,7 +544,10 @@ class Grade4_Bugfly(Enemy):
              technique="Bugfly", 
              playerclass="curse4", 
              quantity=random.randrange(1, 8),
-             bodyparts=self.grade4_curse
+             bodyparts={
+            "Head" : BodyPart(name="Head", max_hp=15 * 50 % 100, max_ce=20 * 50 % 100), 
+            "Torso" : BodyPart(name="Head", max_hp=15 * 50 % 100, max_ce=20 * 50 % 100)
+            }
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -568,7 +571,7 @@ class  Grade4_Floatjelly(Enemy):
              playerclass="curse4", 
              quantity=random.randrange(1, 6), 
              stun=1,
-             bodyparts=self.Grade4_curse)
+             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)})
           self.hp = self.max_hp
           self.ce = self.max_ce
 
@@ -589,7 +592,7 @@ class Grade4_Flymouth(Enemy):
              playerclass="curse4", 
              quantity=random.randrange(1, 4),
              poison=(3, 1),
-             bodyparts=self.grade4_curse
+             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)}
              )
     
           self.hp = self.max_hp

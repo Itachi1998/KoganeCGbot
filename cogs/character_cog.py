@@ -122,7 +122,7 @@ class Character_cog(commands.Cog):
         if not name:
             name=ctx.author.display_name
         self.playerdict["name"] = name
-        embed= discord.Embed(title="Create a character", description=self.welcstr +
+        embed= discord.Embed(title="Create a character", description= self.welcstr +
         "\n## The first step in creating your character, here you can spin for your player Class, Technique, and Cursed Energy!"
         "\n* You may only spin once for each attribute!")
         embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
@@ -156,23 +156,24 @@ class CreateButtons(discord.ui.View):
         hp = random.randint(100, 300)
         six_eyes=False
         print(tech)
+        techname= next(iter(tech))
         if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
             print("Added 6 eyes ce: 1000 to " + ce)
             ce += 1000
             hp += 300
             six_eyes=True
 
-        if any(keyword in next(iter(tech)).lower() for keyword in ['copy', 'shrine', 'limitless', 'star rage', 'cursed spirit']):
+        if any(keyword in techname.lower() for keyword in ['copy', 'shrine', 'limitless', 'star rage', 'cursed spirit']):
             print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
             ce += 1000
             hp += 100
 
-        if 'zero' in next(iter(tech)).lower():
+        if 'zero' in techname.lower():
             strength += 200
             speed += 200
             hp += 300
             ce = 0
-        if pclass==1:
+        if pclass== 1:
             strength += 50
             speed += 50
             hp += 50
@@ -180,16 +181,17 @@ class CreateButtons(discord.ui.View):
         elif pclass ==2:
             strength += 100
             speed += 100
-            hp += 150
-            ce += 500
-            pclass = "Reincarnate"
-        elif pclass == 3:
+            hp += 150          
             strength+= 120
             speed += 120
             hp += 150
             pclass = "Curse"
-        else:
-            return await interaction.response.send_message("Error setting player class")
+        elif pclass==3:
+            strength +=80
+            speed += 80
+            hp += 100
+            pclass="Reincarnate"
+
         
         player = Player(
             name=self.playerdict['name'],
@@ -206,18 +208,24 @@ class CreateButtons(discord.ui.View):
             skp=0,
             user_id=interaction.user.id
         )
-        create_player(
-            player.user_id,
-            player.colony,
-            player.name,
-            player.playerclass,
-            player.max_ce,
-            player.max_hp,
-            six_eyes
-        )
-        self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {next(iter(tech))}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}"
-        await interaction.response.edit_message(embed=self.embed, view=None)
-        return
+
+        # created = create_player(
+        #     interaction.user.id,
+        #     player.colony,
+        #     player.name,
+        #     player.playerclass,
+        #     techname,
+        #     player.max_ce,
+        #     player.max_hp,
+        #     six_eyes
+        # )
+        created = True
+        if created:
+            self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {techname}\n* HP: {hp}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}"
+            await interaction.response.edit_message(embed=self.embed, view=None)
+            return
+        else:
+            await interaction.response.send_message("You cannot create more than one player per colony")
 
 
 
