@@ -1394,7 +1394,19 @@ shrine={
                               strength=1500,
                               speed=1000, 
                               type="counter"
-                         )
+                         ),
+                    "Air Hop" : 
+                    Techniques(
+                        name="Air Hop",
+                        level=3,
+                        act_speed=2,
+                        act_cost=100,
+                        act_body=("full"),
+                        aoe=1,
+                        strength=400,
+                        speed=500,
+                        type="dodge"
+                    )
                 }
             }
         ],

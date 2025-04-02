@@ -239,7 +239,7 @@ class Actor:
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony,
                 inventory: list, equipped: list, xp: int, cgp: int, 
-                stack: tuple=None, poison: tuple=None,charge: tuple=None, 
+                stack=0, poison: tuple=None,charge: tuple=None, 
                 stunned: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
                 debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None):
         try:   
@@ -312,15 +312,16 @@ class Player(Actor):
     level_cap = 200
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
                     xp: int, cgp: int, skp: int, user_id: int,
+                    stack=0,
                     equipped: list=None, inventory: list=None,
-                    summons: list=None, stack: tuple=None, charge: tuple=None, 
+                    summons: list=None, charge: tuple=None, 
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
                     rct: tuple=None, #(1, 2, 3) 
                     healed: int=None,
                     killcount: list=None, buffed: list=None, 
-                    debuffed: list=None, status: str=None):
+                    debuffed: list=None, status: str=None, grade=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
           self.xp = xp
@@ -334,7 +335,7 @@ class Player(Actor):
           self.equipped=equipped
           self.inventory=inventory
           self.summons=summons
-          self.stacked=stack
+          self.stack=stack
           self.poisoned=poisoned
           self.stunned=stunned
           self.hr=hr
@@ -344,8 +345,9 @@ class Player(Actor):
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
-          self.charged = charge
+          self.charge= charge
           self.status=status
+          self.grade=grade
           
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
@@ -862,9 +864,7 @@ class Toji(Enemy):
            def __init__(self):
             super.init(name="Toji",
                        level=100,
-                  
                        max_hp=1200,
-                   
                        max_ce=0,
                        strength=1200,
                        speed=1200,
@@ -919,9 +919,7 @@ class Uro(Enemy):
 class Ryu(Enemy): 
      def __init__(self):
           super.init(name="Ryu",
-                  
                      max_hp=1000,
-               
                      max_ce=1200,
                      strength=1000,
                      speed=1000,
@@ -939,9 +937,7 @@ class Ryu(Enemy):
 class Kashimo(Enemy):
      def __init__(self):
           super.init(name="Kashimo",
-                
                      max_hp=1500,
-           
                      max_ce=1600,
                      strength=1800,
                      speed=1800,
@@ -981,9 +977,7 @@ class Kenjaku(Enemy):
                 super.init(
                      name="Kenjaku", 
                      level=100, 
-
                      max_hp=3000, 
-               
                      max_ce=2000, 
                      strength=2000, 
                      speed=2000, 
@@ -992,7 +986,6 @@ class Kenjaku(Enemy):
                      technique="Kenjaku",
                      playerclass="reincarnated",
                      bodyparts=self.humanoid_body
-                     )
-                
+                     )                
                 self.hp = self.max_hp
                 self.ce = self.max_ce
