@@ -9,6 +9,7 @@ class Techniques():
                  strength: int, # strength of attack or defense (will be used in attack vs defense checks, can be changed with binding vows)
                  speed: int, # speed of attack or defense (will be used in attack vs defense checks, can be changed with binding vows) 
                  type: str,
+                 imbue: int=0,
                  soul: int=None,
                  buff: tuple=None,
                  debuff: tuple=None,
@@ -22,7 +23,8 @@ class Techniques():
                  negates: bool =None,
                  duration: int=None,
                  cooldown: int=None,
-                 visability: int=None
+                 visability: int=None,
+                 
                  ):
             
             self.name = name
@@ -48,4 +50,5 @@ class Techniques():
             self.duration=duration
             self.cooldown=cooldown
             self.visability=visability
+            self.imbue=imbue
 

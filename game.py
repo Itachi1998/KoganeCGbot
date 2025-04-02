@@ -239,10 +239,9 @@ class Actor:
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony,
                 inventory: list, equipped: list, xp: int, cgp: int, 
-                stacked: tuple=None, poison: tuple=None,charged: tuple=None, stunned: tuple=None, 
-                hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
+                stack: tuple=None, poison: tuple=None,charge: tuple=None, 
+                stunned: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
                 debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None):
-        
         try:   
             super().__init__(
                 name, 
@@ -270,8 +269,8 @@ class Enemy(Actor):
             self.equipped = equipped 
             self.xp = xp
             self.cgp = cgp
-            self.stacked = stacked
-            self.charged = charged
+            self.stacked = stack
+            self.charged = charge
             self.stunned = stunned
             self.hi = hi
             self.hr = hr
@@ -314,7 +313,7 @@ class Player(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
                     xp: int, cgp: int, skp: int, user_id: int,
                     equipped: list=None, inventory: list=None,
-                    summons: list=None, stacked: tuple=None, charged: tuple=None, 
+                    summons: list=None, stack: tuple=None, charge: tuple=None, 
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
@@ -335,7 +334,7 @@ class Player(Actor):
           self.equipped=equipped
           self.inventory=inventory
           self.summons=summons
-          self.stacked=stacked
+          self.stacked=stack
           self.poisoned=poisoned
           self.stunned=stunned
           self.hr=hr
@@ -345,7 +344,8 @@ class Player(Actor):
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
-          self.charged = charged
+          self.charged = charge
+          self.status=status
           
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),

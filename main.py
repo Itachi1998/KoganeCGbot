@@ -21,10 +21,6 @@ async def load():
             print(f'Cog loaded: {cog}')
         
                 
-         
-                
-
-
 @bot.event
 async def on_ready():
     await load()
@@ -45,8 +41,7 @@ async def main():
     for command in commands:
         print(command)
     print('Commands printed')
-
-
+    
 # @bot.command()
 # async def sync(ctx):
 #       channel = bot.get_channel(int(log_channel))

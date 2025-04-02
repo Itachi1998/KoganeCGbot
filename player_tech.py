@@ -1693,3 +1693,10 @@ ten_shadows={
 }
 
 # endregion
+
+
+technique_list = [star_rage, mba, blood_manip, ten_shadows, 
+                  cursed_speech, construction, copy, shrine, 
+                  limitless, straw_doll, boogie_woogie, 
+                  projection_sorcery, auspicious_beasts_summon, 
+                  soul_manipulation, hr_zero]
