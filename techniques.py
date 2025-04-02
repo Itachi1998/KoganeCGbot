@@ -52,3 +52,17 @@ class Techniques():
             self.visability=visability
             self.imbue=imbue
 
+
+class CursedTools():
+
+    def __init__(self, name: str, attack: int, pen: int, cost: int, emote,
+                 negate, broke, hp, max_hp):
+        self.name = name
+        self.attack = attack
+        self.pen = pen
+        self.cost = cost
+        self.emote = emote
+        self.broke = broke
+        self.negate = negate
+        self.hp = hp
+        self.max_hp = max_hp

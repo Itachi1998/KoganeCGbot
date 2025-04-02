@@ -2,6 +2,7 @@ import game
 from game import Player
 from player_tech import technique_list
 
+
 # check if the player can use the attack before starting the checks
 def get_move(player, attack=None, defense=None):
     tech = [tech for tech in technique_list if next(iter(tech)) == player.technique]
@@ -12,7 +13,6 @@ def get_move(player, attack=None, defense=None):
         new_defense= tech[0][player.technique][1]["Defend"][defense]
         return new_defense
     
-
 def attack_verify(player,attack ):
     attack = get_move(player, attack=attack)
 
@@ -151,8 +151,10 @@ def dodge_check(target, defense, attack, dmg):
         results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
         return
      
-          
-                
+
+
+
+           
 # the battle interaction is handled by this function
 def battle_checks(player, target, attack_str, defense_str):    
         attack = attack_verify(player, attack_str)
