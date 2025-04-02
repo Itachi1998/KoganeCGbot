@@ -1,4 +1,4 @@
-import discord, os, dotenv # Import general dependencies 
+import discord, os, dotenv, traceback # Import general dependencies 
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
 
@@ -17,16 +17,14 @@ async def load():
     for filename in os.listdir('cogs'):
         if filename.endswith('.py'):
             cog = filename[:-3]
-            try:
-                await bot.load_extension(f'cogs.{cog}')
-                print(f'Cog loaded: {cog}')
-            except Exception as e:
-                print(f'Failed to load cog {cog}: {e}')
-
-
+            await bot.load_extension(f'cogs.{cog}')
+            print(f'Cog loaded: {cog}')
+        
+                
 @bot.event
 async def on_ready():
-    #print(f'{bot.user.name} is ready') ALREADY PRINTS 'BOT IS READY'
+    await load()
+    print(f'{bot.user.name} is ready')
 
     await main()
 
@@ -43,8 +41,7 @@ async def main():
     for command in commands:
         print(command)
     print('Commands printed')
-
-
+    
 # @bot.command()
 # async def sync(ctx):
 #       channel = bot.get_channel(int(log_channel))
