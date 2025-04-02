@@ -1,44 +1,8 @@
 import game
 from game import Player
 from player_tech import technique_list
+
 # check if the player can use the attack before starting the checks
-
-
-test_player1 = Player(
-     name="Gojo",
-     level=10,
-     max_hp=2000,
-     max_ce=2000,
-     strength=500,
-     speed=500,
-     technique="Limitless",
-     playerclass="sorcerer",
-     colony=1,
-     xp=0,
-     cgp=0,
-     skp=0,
-     user_id=0,
-     grade=5     
-)
-test_player2= Player(
-     name="Sukuna",
-     level=10,
-     max_hp=2000,
-     max_ce=2000,
-     strength=500,
-     speed=500,
-     technique="Shrine",
-     playerclass="reincarnate",
-     colony=1,
-     xp=0,
-     cgp=0,
-     skp=0,
-     user_id=0,
-     grade=5
-)
-
-
-
 def get_move(player, attack=None, defense=None):
     tech = [tech for tech in technique_list if next(iter(tech)) == player.technique]
     if attack:
@@ -221,7 +185,7 @@ def battle_checks(player, target, attack_str, defense_str):
         
     # if fast enough, reduces damage or completely nullifies it
         if defense.negates:
-                print(f"{defense.name} negates any attacksf rom {attack.name}")
+                print(f"{defense.name} negates any attacks from {attack.name}")
                 return("negate", dmg, target.hp <= 0, target.max_hp <=0)
     
     # tank check
@@ -238,6 +202,40 @@ def battle_checks(player, target, attack_str, defense_str):
         if defense.type is 'dodge':
             results = dodge_check(target, defense, attack, dmg)
             return results            
+
+
+test_player1 = Player(
+     name="Gojo",
+     level=10,
+     max_hp=2000,
+     max_ce=2000,
+     strength=500,
+     speed=500,
+     technique="Limitless",
+     playerclass="sorcerer",
+     colony=1,
+     xp=0,
+     cgp=0,
+     skp=0,
+     user_id=0,
+     grade=5     
+)
+test_player2= Player(
+     name="Sukuna",
+     level=10,
+     max_hp=2000,
+     max_ce=2000,
+     strength=500,
+     speed=500,
+     technique="Shrine",
+     playerclass="reincarnate",
+     colony=1,
+     xp=0,
+     cgp=0,
+     skp=0,
+     user_id=0,
+     grade=5
+)
 
 
 results = battle_checks(test_player1, test_player2, "Hollow Purple", "Air Hop")
