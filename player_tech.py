@@ -464,7 +464,7 @@ construction={
                                    aoe=5,
                                    strength=5500,
                                    speed=2000,
-                                   type="Projectile"),\
+                                   type="Projectile"),
                                    
                     "True Sphere Orbs" : 
                          Techniques(name="Six Eyes Construction: True Sphere Orbs",
@@ -931,9 +931,9 @@ limitless={
                             act_speed=1,
                             act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
-                            aoe=randint(1, 5), ###
-                            strength=800,
-                            speed=1000,
+                            aoe=(1, 5),
+                            strength=1000,
+                            speed=1600,
                             type="projectile"
                          ),
                     
@@ -942,7 +942,7 @@ limitless={
                             name="Red",
                             level=2,
                             act_speed=2,
-                            act_cost=100,
+                            act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
                             strength=1600,
@@ -972,8 +972,9 @@ limitless={
                             act_body=("Left Arm", "Right Arm"),
                             aoe=10,
                             strength=2500,
-                            speed=1000,
-                            type="projectile"
+                            speed=2000,
+                            type="projectile",
+                            self_dmg=1250
                          )
                 }
             },
@@ -990,8 +991,8 @@ limitless={
                             act_cost=1,
                             act_body=("Full"),
                             aoe=1,
-                            strength=1000,
-                            speed=1000,
+                            strength=9999,
+                            speed=9999,
                             type="tank"
                         ),
 
@@ -1003,8 +1004,8 @@ limitless={
                             act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=(1, 5),
-                            strength=800,
-                            speed=1000,
+                            strength=1000,
+                            speed=1600,
                             type="dodge"
                         ),
                     
@@ -1013,7 +1014,7 @@ limitless={
                             name="Red",
                             level=2,
                             act_speed=2,
-                            act_cost=100,
+                            act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
                             strength=1600,
@@ -1141,20 +1142,6 @@ projection_sorcery={
                             aoe=1,
                             strength=400,
                             speed=1200,
-                            type="melee",
-                            stun=True
-                         ),
-                    
-                    "Projection Stack" : # only if projection was used in the previous turn
-                        Techniques(
-                            name="Projection Stack",
-                            level=2,
-                            act_speed=1,
-                            act_cost=50,
-                            act_body=("Left Arm", "Right Arm"),
-                            aoe=1,
-                            strength=800,
-                            speed=2400,
                             type="melee",
                             stun=True
                         )
@@ -1513,7 +1500,8 @@ straw_doll={
                               aoe=1,
                               strength=800,
                               speed=2000, # ???
-                              type="effigy", #melee on doll that links attack to target
+                              type="melee", #melee on doll that links attack to target (effigy)
+                              soul=True, 
                               sure_hit=True
                          )
                          
