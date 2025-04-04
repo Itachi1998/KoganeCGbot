@@ -55,3 +55,48 @@ class Techniques():
             self.self_dmg=self_dmg
             self.self_heal=self_heal
             self.heal=heal
+
+
+class CursedTools():
+    def __init__(self, 
+        name: str, 
+        cost: int, 
+        broken: bool, 
+        hp: int, 
+        max_hp: int,
+        act_body: tuple,
+        aoe: int,
+        damage: int,
+        strike_speed: int, # (1-3) lower is faster
+        type: str,
+        target=None,
+        
+        # optional abilities
+        soul: bool = None, # soul dmg will be based of dmg of attack in checks
+        buff: tuple = None,
+        debuff: tuple = None,
+        poison: tuple = None,
+        stun: int = None,
+        negates: bool = None,
+        duration: int = None,
+        self_dmg: int = None
+        ):
+
+        self.name=name
+        self.cost=cost
+        self.broken=broken
+        self.hp=hp
+        self.max_hp=max_hp
+        self.act_body=act_body
+        self.aoe=aoe
+        self.damage=damage
+        self.strike_speed=strike_speed
+        self.type=type
+        self.target=target
+        self.soul=soul
+        self.buff=buff
+        self.debuff=debuff
+        self.poison=poison
+        self.stun=stun
+        self.negates=negates
+        self.self_dmg=self_dmg
