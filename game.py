@@ -312,7 +312,7 @@ class Player(Actor):
     level_cap = 200
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
                     xp: int, cgp: int, skp: int, user_id: int,
-                    stack=0,
+                    stack=0, imbue=0,
                     equipped: list=None, inventory: list=None,
                     summons: list=None, charge: tuple=None, 
                     poisoned: tuple=None, stunned: tuple=None, 
@@ -336,6 +336,7 @@ class Player(Actor):
           self.inventory=inventory
           self.summons=summons
           self.stack=stack
+          self.imbue=imbue
           self.poisoned=poisoned
           self.stunned=stunned
           self.hr=hr

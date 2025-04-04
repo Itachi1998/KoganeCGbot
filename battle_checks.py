@@ -18,7 +18,8 @@ test_player1 = Player(
      cgp=0,
      skp=0,
      user_id=0,
-     grade=5     
+     grade=5,
+     imbue=0
 )
 test_player2= Player(
      name="Sukuna",
@@ -34,7 +35,8 @@ test_player2= Player(
      cgp=0,
      skp=0,
      user_id=0,
-     grade=5
+     grade=5,
+     imbue=0
 )
 
 
@@ -49,7 +51,7 @@ def get_move(player, attack=None, defense=None):
         return new_defense
     
 
-def attack_verify(player,attack ):
+def attack_verify(player, attack):
     attack = get_move(player, attack=attack)
 
     if player.ce < attack.act_cost:
@@ -61,7 +63,7 @@ def attack_verify(player,attack ):
         return "no lvl"
     
     else:
-        player.ce -= attack.act_cost + attack.imbue
+        player.ce -= attack.act_cost + player.imbue
         return attack
     
 
@@ -76,16 +78,16 @@ def defense_verify(target, defense):
         print('not a high enough level to use defense')
         return "no lvl"
     else:
-        target.ce -= defense.act_cost + defense.imbue
+        target.ce -= defense.act_cost + target.imbue
         return defense
 
 def type_multiply(player, attack):
-    if attack.type is 'melee':
-            dmg = attack.strength + attack.imbue + player.strength
-            speed = attack.speed + attack.imbue + player.speed
+    if attack.type == 'melee':
+            dmg = attack.strength + player.imbue + player.strength
+            speed = attack.speed + player.imbue + player.speed
     else:
-        dmg = attack.strength + attack.imbue
-        speed = attack.speed + attack.imbue
+        dmg = attack.strength + player.imbue
+        speed = attack.speed + player.imbue
 
     return dmg, speed
 
@@ -109,8 +111,8 @@ def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=N
                   
     
 def tank_check(target, attack, defense, dmg):
-            defense.strength += defense.imbue
-            defense.speed += defense.imbue
+            defense.strength += target.imbue
+            defense.speed += target.imbue
             if defense.act_speed > attack.act_speed:
                 target.hp -= dmg
                 if attack.soul:
@@ -237,17 +239,17 @@ def battle_checks(player, target, attack_str, defense_str):
                 return("negate", dmg, target.hp <= 0, target.max_hp <=0)
     
     # tank check
-        if defense.type is 'tank':
+        if defense.type == 'tank':
             print(f"{defense.name} tank check against {attack.name}")
             results = tank_check(target, attack, defense, dmg)
             return results
     # counter check
-        if defense.type is 'counter':
+        if defense.type == 'counter':
             results = counter_check(target, player, defense, attack, dmg)
             return results
                 
     # takes less damage the closer you are to dodging and none if dodged. reduction percentage ranges from (>0 - <1)
-        if defense.type is 'dodge':
+        if defense.type == 'dodge':
             results = dodge_check(target, defense, attack, dmg)
             return results            
 
