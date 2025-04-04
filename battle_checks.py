@@ -189,19 +189,25 @@ def dodge_check(target, defense, attack, dmg):
         attack_speed = speed_diff/target.grade         
         print(f"Final attack speed difference is {attack_speed}")
                                     # 2600 - 400 // 100
-        print(f"Reduced multiplier calc: {attack.strength} - {defense.strength} // {attack_speed}")
-        reduced_multiplier = (attack.strength - defense.strength) // attack_speed
-                         # 50 - 24
-        print(f"Multiplying reduced multiplier ({reduced_multiplier}) by attack level: {attack.level}")
-        
-        total_dmg = (reduced_multiplier * attack.level)
-        target.hp -= reduced_multiplier
+        if attack_speed != 0:
+            
+            print(f"Reduced multiplier calc: {attack.strength} - {defense.strength} // {attack_speed}")
+            reduced_multiplier = (attack.strength - defense.strength) // attack_speed
+                            # 50 - 24
+            print(f"Multiplying reduced multiplier ({reduced_multiplier}) by attack level: {attack.level}")
+            
+            total_dmg = (reduced_multiplier * attack.level)
+            target.hp -= reduced_multiplier
 
-        print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_diff} resulting in some damage of {total_dmg}")
-        results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
-        return
-     
-          
+            print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_diff} resulting in some damage of {total_dmg}")
+            results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+            return
+
+        else:
+            print(f"There is no difference in speed or the defense speed was faster. {defense.name} was able to dodge {attack.name}.")
+            results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+            return
+        
                 
 # the battle interaction is handled by this function
 def battle_checks(player, target, attack_str, defense_str):    
