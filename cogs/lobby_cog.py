@@ -126,18 +126,10 @@ class Lobby_Cog(commands.Cog):
             newbed.add_field(name="Team 2", value=lob.team2, inline=True)
             newbed.add_field(name="Ready", value="", inline=False)
             newbed.add_field(name="Spectators", value="", inline=False)
-            embed=newbed
-            if ctx.interaction:
-                await self.interaction_check(interaction=ctx.interaction, embed=newbed)
-                return
-            else:
-                await self.interaction_check(ctx=ctx, embed=newbed)
+            ctx.send(embed=newbed)
         else:
             data="You are not in a thread, Create a thread to start a lobby.""\n* All players must be in a thread to start a lobby to prevent spam.""\n* If you start the lobby in a private thread, it will start a private lobby""\n* If you are in a private lobby and invite members to the thread, you must still invite them to the lobby"
-            if ctx.interacton:
-                await self.interaction_check(interaction=ctx.interaction, data=data, ephemeral=True)
-            else:
-                await self.interaction_check(ctx=ctx, data=data, ephemeral=True)       
+            ctx.send(data, ephemeral=True)   
     
 
                 

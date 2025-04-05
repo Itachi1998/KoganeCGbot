@@ -22,11 +22,17 @@ sorcerer_techs = [
                   ]
 
 reincarnated_techs = [
-    player_tech.shrine, player_tech.mba, player_tech.construction, player_tech.blood_manip
+    player_tech.shrine, 
+    player_tech.mba, 
+    player_tech.construction, 
+    player_tech.blood_manip
+    #needs more techniques (cursed energy discharge, sky manipulation)
                       ]
 
 cursed_techs = [
-    player_tech.soul_manipulation, player_tech.projection_sorcery
+    player_tech.idle_transfig, 
+    player_tech.projection_sorcery
+    # needs more techniques (disaster curse techniques)
     ]
 
 def get_random_sorcerer_tech(techlist=sorcerer_techs):
