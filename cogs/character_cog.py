@@ -95,11 +95,6 @@ def get_random_reincarnate_tech(techlist=reincarnated_techs):
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
     print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
-
-    if "Six Eyes" in tech.keys():
-        six_values = randint(0, 10)
-        if six_values < 5:
-            tech['Six Eyes'] = True
     return tech
 
 def get_random_curse_tech(techlist=cursed_techs):
