@@ -237,7 +237,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         print('Starting battle checks...')
         stack=player.stack
         charge=player.charge # this check should take place in the verify func ?
-        inventory = player.inventory
         equipped = player.equipped
         defense_negate=False
         attack_negate=False
@@ -246,9 +245,8 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         dmg = 0
         speed = 0
 
-
         # check if the player can use the attack before starting the checks
-        if player.equipped:
+        if equipped:
             dmg, speed, items = type_multiply(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
             if len(items) > 1:
@@ -304,18 +302,18 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             dmg = attack.strength + (speed * 2.4) 
             stack -= 1
             player.stack = stack
+# negate check
+        if attack_negate:
+                print(f"{defense.name} negates any attacks from {attack.name}")
+                results = negate_check(attack, target, dmg, speed)
 
         if defense_negate:
             print(f"{attack.name} negates any defenses for {defense.name}")
-            results= negate_check(attack, target, dmg)
+            results= negate_check(attack, target, dmg, speed)
             return results
         
      
-    # negate check
-        if attack_negate:
-                print(f"{defense.name} negates any attacks from {attack.name}")
-                return("negate", dmg, target.hp <= 0, target.max_hp <=0)
-
+    
     # tank check
         if defense.type == 'tank':
             print(f"{defense.name} tank check against {attack.name}")
