@@ -17,6 +17,7 @@ class Base(DeclarativeBase):
     pass
 
 class Player(Base):
+
     __tablename__ = "player"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -25,8 +26,8 @@ class Player(Base):
     date_entered: Mapped[str]
     player_level: Mapped[int]
     player_name: Mapped[str] = mapped_column(String(200))
-    player_equipped: Mapped[List] = mapped_column(JSON)
-    player_inventory: Mapped[List]  = mapped_column(JSON)
+    player_equipped: Mapped[List]
+    player_inventory: Mapped[List]
     max_hp: Mapped[int]
     hp: Mapped[int]
     max_ce: Mapped[int]
