@@ -6,31 +6,37 @@ from discord.ext import commands
 from discord import app_commands
 
 sorcerer_techs = [
+                  player_tech.auspicious_beasts_summon, 
+                  player_tech.bird_manip, 
+                  player_tech.blood_manip, 
+                  player_tech.boogie_woogie,        
+                  player_tech.comedian, 
+                  player_tech.construction, 
+                  player_tech.copy, 
+                  player_tech.cursed_speech, 
+                  player_tech.cursed_spirit_manip, 
                   player_tech.hr_zero,
-                  player_tech.auspicious_beasts_summon,
-                  player_tech.bird_manip,
-                  player_tech.blood_manip,
-                  player_tech.comedian,
-                  player_tech.cursed_spirit_manip,
-                  player_tech.construction,
-                  player_tech.projection_sorcery,
-                  player_tech.ten_shadows,
-                  player_tech.straw_doll,
                   player_tech.limitless,
-                  player_tech.copy,
-                  player_tech.star_rage
+                  player_tech.projection_sorcery,
+                  player_tech.star_rage, 
+                  player_tech.straw_doll, 
+                  player_tech.ten_shadows
                   ]
 
 reincarnated_techs = [
-    player_tech.shrine, 
-    player_tech.mba, 
-    player_tech.construction, 
-    player_tech.blood_manip
-    #needs more techniques (cursed energy discharge, sky manipulation)
+    player_tech.blood_manip,
+    player_tech.ice_manip,
+    player_tech.ce_discharge,
+    player_tech.construction,
+    player_tech.cursed_speech,
+    player_tech.mba,
+    player_tech.shrine,
+    player_tech.sky_manip,
+    player_tech.ten_shadows
                       ]
 
 cursed_techs = [
-    player_tech.idle_transfig, 
+    player_tech.idle_transfig,
     player_tech.projection_sorcery
     # needs more techniques (disaster curse techniques)
     ]
