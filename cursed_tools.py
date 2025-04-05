@@ -66,7 +66,7 @@ cursed_tools={
                 damage=20,
                 strike_speed=2,
                 type="blade",
-                negate=True
+                negates=True
                 ),
     
     "Dragon Bone":
