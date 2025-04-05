@@ -126,16 +126,17 @@ class Lobby_Cog(commands.Cog):
             newbed.add_field(name="Team 2", value=lob.team2, inline=True)
             newbed.add_field(name="Ready", value="", inline=False)
             newbed.add_field(name="Spectators", value="", inline=False)
-            ctx.send(embed=newbed)
+            await ctx.send(embed=newbed)
         else:
             data="You are not in a thread, Create a thread to start a lobby.""\n* All players must be in a thread to start a lobby to prevent spam.""\n* If you start the lobby in a private thread, it will start a private lobby""\n* If you are in a private lobby and invite members to the thread, you must still invite them to the lobby"
-            ctx.send(data, ephemeral=True)   
+            await ctx.send(data, ephemeral=True)   
     
 
                 
     @lobby.command(name='disband')
     async def disband(self, ctx):
         await ctx.send("Disbanding the lobby...")
+        
 
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))
