@@ -66,8 +66,8 @@ class CursedTools():
         max_hp: int,
         act_body: tuple,
         aoe: int,
-        strength: int,
-        speed: int, # (1-3) lower is faster
+        damage: int,
+        strike_speed: int, # (1-3) lower is faster
         type: str,
         target=None,
         # optional abilities
@@ -78,8 +78,7 @@ class CursedTools():
         stun: int = None,
         negates: bool = None,
         duration: int = None,
-        self_dmg: int = None,
-        charge: int = None
+        self_dmg: int = None
         ):
 
         self.name=name
@@ -89,8 +88,8 @@ class CursedTools():
         self.max_hp=max_hp
         self.act_body=act_body
         self.aoe=aoe
-        self.strength=strength
-        self.speed=speed
+        self.damage=damage
+        self.strike_speed=strike_speed
         self.type=type
         self.target=target
         self.soul=soul
@@ -100,4 +99,3 @@ class CursedTools():
         self.stun=stun
         self.negates=negates
         self.self_dmg=self_dmg
-        self.charge=charge
