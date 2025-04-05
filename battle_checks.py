@@ -1,6 +1,7 @@
 import game, random
 from game import Player
 from player_tech import technique_list
+from cursed_tools import cursed_tools
 # check if the player can use the attack before starting the checks
 
 
@@ -19,8 +20,10 @@ test_player1 = Player(
      skp=0,
      user_id=0,
      grade=5,
-     imbue=0
+     imbue=0,
+     equipped="ISOH"
 )
+
 test_player2= Player(
      name="Toji",
      level=10,
@@ -41,14 +44,20 @@ test_player2= Player(
 
 
 
-def get_move(player, attack=None, defense=None):
+def get_move(player, attack=None, defense=None, tool=None): # Maybe this works?      
     tech = [tech for tech in technique_list if next(iter(tech)) == player.technique]
+    if tool:
+        return tool
+    
     if attack:
         new_attack = tech[0][player.technique][0]['Attack'][attack]
         return new_attack
     if defense:
         new_defense = tech[0][player.technique][1]["Defend"][defense]
         return new_defense
+    
+    
+    
     
 
 def attack_verify(player, attack):
@@ -221,7 +230,7 @@ def battle_checks(player, target, attack_str, defense_str):
             return False            
         print('Starting battle checks...')
         stack=player.stack
-        charge=player.charge # this check should take place in the verify func right?
+        charge=player.charge # this check should take place in the verify func ?
         inventory = player.inventory
         equipped = player.equipped
         dmg = 0
@@ -260,6 +269,6 @@ def battle_checks(player, target, attack_str, defense_str):
             return results            
 
 
-results = battle_checks(test_player1, test_player2, "Frostbite", "Heavenly Body")
+results = battle_checks(test_player1, test_player2, "ISOH", "Heavenly Body")
 
 print(results)
