@@ -7,6 +7,32 @@ class Mahoraga(Enemy):
         "Attack" : 
 
             { 
+                "Sword Swing" :
+                Techniques(
+                    name="Sword Swing",
+                    level=1,
+                    act_speed=1,
+                    act_cost=1,
+                    act_body=("Arms"),
+                    aoe=1,
+                    strength=1000,
+                    speed=1000,
+                    type="Melee",
+                    buff=("strength")
+                ),
+                "RCT Sword Swing" : 
+                Techniques(
+                    name="RCT Sword Swing",
+                    level=1,
+                    act_speed=1,
+                    act_cost=1,
+                    act_body=("Arms"),
+                    aoe=1,
+                    strength=1000,
+                    speed=1000,
+                    type="Melee",
+                    buff=("strength")
+                ),
                 "Adapt": 
                 Techniques(
                     name="Adaptation",
