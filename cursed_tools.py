@@ -11,9 +11,9 @@ cursed_tools={
                 max_hp=50,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=2,
-                type="melee"
+                damage=20,
+                strike_speed=2,
+                type="blade"
                 ),
 
     "9mm Pistol":
@@ -24,9 +24,9 @@ cursed_tools={
                 max_hp=50,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=1,
-                type="projectile" # won't factor in player stats other than speed/perception?
+                damage=20,
+                strike_speed=1,
+                type="gun" # won't factor in player stats other than speed/perception?
                 ),
 
     "Steel Arm":
@@ -37,22 +37,22 @@ cursed_tools={
                 max_hp=75,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=10,
-                speed=1,
-                type="melee"
+                damage=10,
+                strike_speed=1,
+                type="gauntlet"
                 ),
 
-    "Dull melee": # add a random bodypart system that will multiply strength if hitting the right bodypart (ratio technique)
-    CursedTools(name="Dull melee",
+    "Dull Blade": # add a random bodypart system that will multiply damage if hitting the right bodypart (ratio technique)
+    CursedTools(name="Dull Blade",
                 cost=175,
                 broken=False,
                 hp=150,
                 max_hp=150,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=2,
-                type="melee"
+                damage=20,
+                strike_speed=2,
+                type="blade"
                 ),
 
     "ISOH":
@@ -63,9 +63,9 @@ cursed_tools={
                 max_hp=300,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=2,
-                type="melee",
+                damage=20,
+                strike_speed=2,
+                type="blade",
                 negates=True
                 ),
     
@@ -77,9 +77,9 @@ cursed_tools={
                 max_hp=100,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=2,
-                type="melee"
+                damage=20,
+                strike_speed=2,
+                type="blade"
                 ),
 
     "Maichan":
@@ -90,9 +90,9 @@ cursed_tools={
                 max_hp=150,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=2,
-                type="melee",
+                damage=20,
+                strike_speed=2,
+                type="blade",
                 soul=True
                 ),
 
@@ -104,9 +104,9 @@ cursed_tools={
                 max_hp=200,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=3,
-                type="melee",
+                damage=20,
+                strike_speed=3,
+                type="nunchuck",
                 buff=("player.strength" * 20) # multiplier of player physical strength by its dmg - doesn't take in account imbue
                 ),
 
@@ -118,9 +118,9 @@ cursed_tools={
                 max_hp=150,
                 act_body=("Left Arm", "Right Arm"),
                 aoe=1,
-                strength=20,
-                speed=3,
-                type="melee",
+                damage=20,
+                strike_speed=3,
+                type="whip",
                 negates=True,
                 self_dmg=5 # not exactly sure how this works
                 )
