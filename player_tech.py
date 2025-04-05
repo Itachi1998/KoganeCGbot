@@ -68,7 +68,7 @@ auspicious_beasts_summon={
                }
           }
      ],
-"Rarity" : 80
+"Rarity" : 50
 }
 
 
@@ -153,7 +153,7 @@ bird_manip = {
                }
           }
      ],
-"Rarity" : 80
+"Rarity" : 50
 }
 
 
@@ -383,7 +383,7 @@ ce_discharge={
                }
           }
      ],
-"Rarity" : 20
+"Rarity" : 30
 }
 
 
@@ -833,7 +833,7 @@ cursed_speech={
                 }
           }
      ],
-     "Rarity" : 80
+     "Rarity" : 50
 }
 
 
@@ -949,7 +949,7 @@ hr_zero={
                }
           }
      ],
-"Rarity" : 20
+"Rarity" : 15
 }
 
 
@@ -1077,7 +1077,7 @@ ice_manip={
                }
           }
      ],
-"Rarity" : 10
+"Rarity" : 15
 }
 
 
@@ -1317,7 +1317,7 @@ limitless={
                }
           }
      ],
-"Rarity" : 3,
+"Rarity" : 5,
 "Six Eyes" : True # Lowkey useless without it
 }
 
@@ -1406,7 +1406,7 @@ mba={
                }
           }
      ],
-"Rarity" : 7
+"Rarity" : 5
 }
 
 
@@ -1468,7 +1468,7 @@ projection_sorcery={
                }
           }
      ],
-"Rarity" : 25
+"Rarity" : 30
 }
 
 
@@ -1860,7 +1860,7 @@ straw_doll={
                }
           }
      ],
-"Rarity" : 40
+"Rarity" : 30
 }
 
 
@@ -2008,7 +2008,7 @@ ten_shadows={
                 }
             }
         ],
-"Rarity" : 15
+"Rarity" : 5
 }
 
 

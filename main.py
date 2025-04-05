@@ -23,10 +23,7 @@ async def load():
                 
 @bot.event
 async def on_ready():
-    await load()
-    print(f'{bot.user.name} is ready')
-
-    await main()
+ print('Bot is ready')
 
 
 async def main():
@@ -42,18 +39,17 @@ async def main():
         print(command)
     print('Commands printed')
     
-# @bot.command()
-# async def sync(ctx):
-#       channel = bot.get_channel(int(log_channel))
-#       if await bot.is_owner(ctx.author):
-#         synced = await bot.tree.sync()
-#         await ctx.send("Commands synced")
-#         print(synced)
-#       else:
-#         await ctx.send("You are not the owner of this bot")
-#         fstring = f'User {ctx.author.id} ({ctx.author}) tried to sync commands but is not the owner in {ctx.guild.id} ({ctx.guild.name}) - {ctx.channel.id} ({ctx.channel.name}) '
-#         await channel.send(fstring)
-#         print(fstring)
+@bot.command()
+async def sync(ctx):
+      channel = bot.get_channel(int(log_channel))
+      if await bot.is_owner(ctx.author):
+        await main()
+        await ctx.send("Commands synced")
+      else:
+        await ctx.send("You are not the owner of this bot")
+        fstring = f'User {ctx.author.id} ({ctx.author}) tried to sync commands but is not the owner in {ctx.guild.id} ({ctx.guild.name}) - {ctx.channel.id} ({ctx.channel.name}) '
+        await channel.send(fstring)
+        print(fstring)
 
 bot.run(token)
 

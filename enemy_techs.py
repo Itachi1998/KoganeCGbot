@@ -188,7 +188,7 @@ enemy_techs = {
             {"Defense" :
                 {"" : 
                  Techniques(
-                    name="MonkeyBrain : Thought Manipulation Defense",
+                    name="Swing around",
                     level=1,
                     act_speed=2,
                     act_cost=50,
@@ -196,7 +196,7 @@ enemy_techs = {
                     aoe=5,
                     strength=300,
                     speed=400,
-                    type="counter"
+                    type="dodge"
                     )
                 }
             }
