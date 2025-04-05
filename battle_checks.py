@@ -1,51 +1,17 @@
 import game, random
 from game import Player
 from player_tech import technique_list
+from cursed_tools import cursed_tools
 # check if the player can use the attack before starting the checks
 
 
-test_player1 = Player(
-     name="Uraume",
-     level=10,
-     max_hp=2000,
-     max_ce=2000,
-     strength=500,
-     speed=500,
-     technique="Ice Manipulation",
-     playerclass="sorcerer",
-     colony=1,
-     xp=0,
-     cgp=0,
-     skp=0,
-     user_id=0,
-     grade=5,
-     imbue=0
-)
-test_player2= Player(
-     name="Toji",
-     level=10,
-     max_hp=2000,
-     max_ce=2000,
-     strength=500,
-     speed=500,
-     technique="Heavenly Restriction: Zero",
-     playerclass="sorcerer",
-     colony=1,
-     xp=0,
-     cgp=0,
-     skp=0,
-     user_id=0,
-     grade=5,
-     imbue=0
-)
+def get_move(player, attack=None, defense=None, tool=None):
 
-
-
-def get_move(player, attack=None, defense=None):
     tech = [tech for tech in technique_list if next(iter(tech)) == player.technique]
     if attack:
         new_attack = tech[0][player.technique][0]['Attack'][attack]
         return new_attack
+    
     if defense:
         new_defense = tech[0][player.technique][1]["Defend"][defense]
         return new_defense
@@ -207,8 +173,28 @@ def dodge_check(target, defense, attack, dmg):
             print(f"There is no difference in speed or the defense speed was faster. {defense.name} was able to dodge {attack.name}.")
             results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
             return
-        
-                
+
+def melee_checks(player, target, attack_str, defense_str):
+    # check if the player can use the attack before starting the checks
+    attack = attack_verify(player, attack_str)
+    defense = defense_verify(target, defense_str)
+    print(attack)
+    print(defense)
+    if not attack:
+        return False
+    if not defense:
+        return False            
+    print('Starting battle checks...')
+    stack=player.stack
+    charge=player.charge # this check should take place in the verify func right?
+    inventory = player.inventory
+    equipped = player.equipped
+    dmg = 0
+    speed = 0
+
+# adds physical speed and strength to attack if it is melee
+
+
 # the battle interaction is handled by this function
 def battle_checks(player, target, attack_str, defense_str):    
         attack = attack_verify(player, attack_str)
@@ -258,7 +244,47 @@ def battle_checks(player, target, attack_str, defense_str):
         if defense.type == 'dodge':
             results = dodge_check(target, defense, attack, dmg)
             return results            
+        
 
+
+
+test_player1 = Player(
+     name="Uraume",
+     level=10,
+     max_hp=2000,
+     max_ce=2000,
+     strength=500,
+     speed=500,
+     technique="Ice Manipulation",
+     playerclass="sorcerer",
+     colony=1,
+     xp=0,
+     cgp=0,
+     skp=0,
+     user_id=0,
+     grade=5,
+     imbue=0,
+)
+
+
+
+test_player2= Player(
+     name="Toji",
+     level=10,
+     max_hp=2000,
+     max_ce=2000,
+     strength=500,
+     speed=500,
+     technique="Heavenly Restriction: Zero",
+     playerclass="sorcerer",
+     colony=1,
+     xp=0,
+     cgp=0,
+     skp=0,
+     user_id=0,
+     grade=5,
+     imbue=0
+)
 
 results = battle_checks(test_player1, test_player2, "Frostbite", "Heavenly Body")
 

@@ -70,7 +70,6 @@ class CursedTools():
         strike_speed: int, # (1-3) lower is faster
         type: str,
         target=None,
-        
         # optional abilities
         soul: bool = None, # soul dmg will be based of dmg of attack in checks
         buff: tuple = None,
