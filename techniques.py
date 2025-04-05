@@ -81,7 +81,6 @@ class CursedTools():
         self_dmg: int = None,
         charge: int =None
         ):
-
         self.name=name
         self.cost=cost
         self.broken=broken

@@ -1,11 +1,8 @@
 from techniques import Techniques
 from random import randint
 
-
 # region ### Auspicious Beasts Summon
-
 auspicious_beasts_summon={
-     
 "Auspicious Beasts Summon" :
      [
           {
@@ -742,7 +739,8 @@ copy={ # change to be like cursed spirit manipulation?
           }
      ],
 "Rarity" : 15,
-"Six Eyes" : False,
+
+"Six Eyes" : False
 }
 
 
@@ -1103,7 +1101,7 @@ idle_transfig={
                               strength=1000,
                               speed=800,
                               type="melee",
-                              soul=True
+                              soul=400
                          ),
                     "Transmutated Souls":
                          Techniques(
@@ -1321,7 +1319,7 @@ limitless={
           }
      ],
 "Rarity" : 3,
-"Six Eyes" : False # Lowkey useless without it
+"Six Eyes" : True # Lowkey useless without it
 }
 
 

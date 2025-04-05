@@ -6,17 +6,24 @@ from cursed_tools import cursed_tools
 
 
 
-def get_move(player, attack=None, defense=None, tool=None): # Maybe this works?      
-    tech = [tech for tech in technique_list if next(iter(tech)) == player.technique]
-    if tool:
-        new_tool = cursed_tools[tool]
-        return new_tool
+def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?      
+    tech =[tech for tech in technique_list if next(iter(tech)) == player.technique]
+    if tools:
+        new_tools_dict = [(k, v) for k, v in cursed_tools.items() if k in tools]
+        new_tools = []
+        for name, item in new_tools_dict:
+             new_tools.append(item)
+             print(f"{player.name} has {name} equipped with a strength of {item.strength} and speed of {item.speed}")
+        return new_tools
 
     if attack:
+        print("Getting attack for " + player.technique + " " + attack)
+        print(tech)
         new_attack = tech[0][player.technique][0]['Attack'][attack]
         return new_attack
     
     if defense:
+
         new_defense = tech[0][player.technique][1]["Defend"][defense]
         return new_defense
     
@@ -52,34 +59,32 @@ def defense_verify(target, defense):
         target.ce -= defense.act_cost + target.imbue
         return defense
 
-def type_multiply(player, attack=None, defense=None):
+def type_multiply(player, attack=None, defense=None, tools=None):
     if attack:
         if attack.type == 'melee':
-                if player.equipped:
-                    items=[item for item in player.equipped ]
-                    for item in items:
+                if tools:
+                    for item in tools:
                         dmg = attack.strength + item.strength + player.strength + player.imbue
                         speed = attack.speed + item.speed + player.speed + player.imbue
-                    return dmg, speed, items
+                    return dmg, speed, tools
                 else:
                     dmg = attack.strength + player.imbue + player.strength
                     speed = attack.speed + player.imbue + player.speed
         else:
             dmg = attack.strength + player.imbue
             speed = attack.speed + player.imbue
+        print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
         return dmg, speed 
     
     if defense:
-        if defense.type == 'melee':
+        if defense.type == 'tank' or 'counter':
                 defense_strength = defense.strength + player.imbue + player.strength
                 speed = defense.speed + player.imbue + player.speed
-
-                if player.equipped:
-                    items=[item for item in player.equipped ]
-                    for item in items:
+                if tools:
+                    for item in tools:
                         defense_strength += item.strength
                         speed += item.speed
-                    return defense_strength, speed, items
+                    return defense_strength, speed, tools
 
         else:
             defense_strength = defense.strength + player.imbue
@@ -87,12 +92,17 @@ def type_multiply(player, attack=None, defense=None):
 
         return defense_strength, speed
 
-def negate_check(attack, target, dmg):
-    if attack.negate:
-            if attack.soul:
-                target.max_hp -= attack.soul
-            target.hp -= dmg
-            return ("hit", dmg, target.hp<=0, target.max_hp <=0)
+def negate_check(target, dmg, attack=None, defense=None):
+
+    if attack: 
+                if attack.soul:
+                    target.max_hp -= attack.soul
+                target.hp -= dmg
+                return ("hit", dmg, target.hp<=0, target.max_hp <=0)
+    
+    if defense:   
+                return ("negate", dmg, target.hp<=0, target.max_hp <=0)
+
     
 def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=None, attack=None):
         if player.technique or target.technique == "Comedian":
@@ -104,39 +114,54 @@ def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=N
                      target.hp -= total_dmg
                      return("tank", total_dmg, target.hp <=0, target.max_hp <=0)
 
-def tank_check(target, attack, defense, dmg):
-            defense.strength += target.imbue
-            defense.speed += target.imbue
+def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, soul_defense=0):
+    
             if defense.act_speed > attack.act_speed:
-                target.hp -= dmg
+                speed_diff = max(defense_speed - speed, 0)
+                                # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
+                attack_speed = speed/target.grade            
+                                    # 1200 / 20
+                reduced_multiplier = speed_diff//attack_speed
+                         # 50 - 24
+                total_dmg = dmg - reduced_multiplier
+                target.hp -= total_dmg
                 if attack.soul:
-                    target.max_hp -= attack.soul
+                    target.max_hp -= attack.soul - soul_defense
                 results = ("hit", dmg, target.hp <= 0, target.max_hp <=0)
                 print(f"{defense.name} was not able to activate in time to tank {attack.name}")
                 return results
             
             else:
-                print(f"dmg {dmg} defense {defense.strength}")
-                total_dmg = max(dmg - defense.strength, 0)
+                print(f"dmg {dmg} defense {defense_strength}")
+                total_dmg = max(dmg - defense_strength, 0)
+
                 target.hp -= total_dmg
                 if attack.soul:
-                    soul_dmg = max(attack.soul - defense.soul, 0)
+                    soul_dmg = max(attack.soul - soul_defense, 0)
+                    
                     target.max_hp -= soul_dmg
                 results = ("tank", total_dmg, target.hp <=0, target.max_hp <=0)
                 print(f"{defense.name} was able to activate in time to tank {attack.name}. {total_dmg} damage dealt, {dmg - total_dmg} damage tanked")
                 return results
             
 
-def counter_check(target, player, defense, attack, dmg):
+def counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed):
+            
             if defense.act_speed > attack.act_speed:
-                target.hp -= dmg
+                speed_diff = max(defense.speed - speed, 0)
+                                # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
+                attack_speed = speed/target.grade            
+                                    # 1200 / 20
+                reduced_multiplier = speed_diff//attack_speed
+                         # 50 - 24
+                total_dmg = dmg - reduced_multiplier
+                target.hp -= total_dmg
                 if attack.soul:
                     target.max_hp -= attack.soul
                 print(f"{defense.name} was too slow to counter {attack.name}")
                 return ("hit", dmg, target.hp <=0, target.max_hp <=0)
-            
             else:
-                
+            
                 if defense.soul:
                     player.max_hp -= defense.soul
                
@@ -148,20 +173,24 @@ def counter_check(target, player, defense, attack, dmg):
                 
                 if defense.charge:
                     target.charge = target.charge
-            
-                counter_dmg = defense.strength # subtract player.imbue
+                counter_dmg = defense.strength  # subtract player.imbue
+                if target.equipped:
+                    items=[item for item in target.equipped ]
+                    for item in items:
+                        counter_dmg += item.strength
+                        print(f"{item.name} adds {item.strength} to counter damage")        
                 player.hp -= counter_dmg
                 results = ("counter", counter_dmg, player.hp <=0, player.max_hp <=0)
                 print(f"{defense.name} was able to counter {attack.name} for {counter_dmg}")
                 return results
 
-def dodge_check(target, defense, attack, dmg):
+def dodge_check(target, defense, attack, dmg, speed):
        # 8                  6
     if defense.act_speed > attack.act_speed:
                 
-                speed_diff = max(defense.speed - attack.speed, 0)
+                speed_diff = max(defense.speed - speed, 0)
                                 # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
-                attack_speed = attack.speed/target.grade            
+                attack_speed = speed/target.grade            
                                     # 1200 / 20
                 reduced_multiplier = speed_diff//attack_speed
                          # 50 - 24
@@ -203,31 +232,12 @@ def dodge_check(target, defense, attack, dmg):
             results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
             return
 
-def melee_checks(player, target, attack_str, defense_str):
-    # check if the player can use the attack before starting the checks
-    attack = attack_verify(player, attack_str)
-    defense = defense_verify(target, defense_str)
-    print(attack)
-    print(defense)
-    if not attack:
-        return False
-    if not defense:
-        return False            
-    print('Starting battle checks...')
-    stack=player.stack
-    charge=player.charge # this check should take place in the verify func right?
-    inventory = player.inventory
-    equipped = player.equipped
-    dmg = 0
-    speed = 0
-
-# adds physical speed and strength to attack if it is melee
-
-
 # the battle interaction is handled by this function
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):    
         attack = attack_verify(player, attack_str)
         defense = defense_verify(target, defense_str)
+        tools = get_move(player, tools=player.equipped)
+        target_tools = get_move(target, tools=target.equipped)
         print(attack)
         print(defense)
         if not attack:
@@ -237,23 +247,19 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         print('Starting battle checks...')
         stack=player.stack
         charge=player.charge # this check should take place in the verify func ?
-        equipped = player.equipped
         defense_negate=False
         attack_negate=False
         soul_dmg=0
         soul_defense=0
         dmg = 0
         speed = 0
-
         # check if the player can use the attack before starting the checks
-        if equipped:
-            dmg, speed, items = type_multiply(player, attack=attack)
+        if tools:
+            dmg, speed, items = type_multiply(player, attack=attack, tools=tools)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
-            if len(items) > 1:
-                for item in items:
+            for item in items:
                     print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed} with item {item.name}")
                     if item.negates:
-
                         defense_negate=True
                         print(f"{item.name} negates any defenses for {defense.name}")
 
@@ -271,12 +277,11 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
              dmg, speed = type_multiply(player, attack=attack)
              print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
         
-
-        if target.equipped:
-            defense_strength, speed, items = type_multiply(target, defense=defense)
+        if target_tools:
+            defense_strength, defense_speed, items = type_multiply(target, defense=defense, tools=target_tools)
             print(f"Defense {defense.name} has a base damage of {defense_strength} and speed of {speed}")
-            if len(items) > 1:
-                for item in items:
+         
+            for item in items:
                     print(f"Defense {defense.name} has a base damage of {defense_strength} and speed of {speed} with item {item.name}")
                     if item.negates:
                         attack_negate=True
@@ -285,39 +290,38 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                         soul_defense += item.soul
                         print(f"{item.name} has a soul defense of {soul_defense}")
         else:
+            defense_strength, defense_speed = type_multiply(target, defense=defense)
+            print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {speed}")
 
-            defense_strength, speed = type_multiply(target, defense=defense)
-
-            print(f"Defense {defense.name} has a base damage of {defense_strength} and speed of {speed}")
-            if defense.negates:
+        if defense.negates:
                   attack_negate=True
                   print(f"{defense.name} negates any attacks from {attack.name}")
-            if defense.soul:
+        if defense.soul:
                 soul_defense += defense.soul
-                print(f"{defense.name} has a soul damage of {soul_defense}")    
-        
+                print(f"{defense.name} has a soul damage of {soul_defense}") 
         
         if stack > 0:
             print(f"{attack.name} has a stack of {stack}")
             dmg = attack.strength + (speed * 2.4) 
             stack -= 1
             player.stack = stack
-# negate check
-        if attack_negate:
-                print(f"{defense.name} negates any attacks from {attack.name}")
-                results = negate_check(attack, target, dmg, speed)
 
+        if attack_negate:
+                    print(f"{defense.name} negates {dmg} damage from {attack.name}")
+                    results = negate_check(target, dmg, defense=defense)
+                    return results
+            
         if defense_negate:
-            print(f"{attack.name} negates any defenses for {defense.name}")
-            results= negate_check(attack, target, dmg, speed)
-            return results
+                print(f"{attack.name} negates any defenses for {defense.name}")
+                results= negate_check(target, dmg, attack=attack)
+                return results
         
      
     
     # tank check
         if defense.type == 'tank':
             print(f"{defense.name} tank check against {attack.name}")
-            results = tank_check(target, attack, defense, dmg)
+            results = tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, soul_defense=soul_defense)
             return results
         
     # counter check
@@ -338,9 +342,9 @@ test_player1 = Player(
      level=10,
      max_hp=2000,
      max_ce=2000,
-     strength=500,
-     speed=500,
-     technique="Ice Manipulation",
+     strength=300,
+     speed=300,
+     technique="Idle Transfiguration",
      playerclass="sorcerer",
      colony=1,
      xp=0,
@@ -349,17 +353,16 @@ test_player1 = Player(
      user_id=0,
      grade=5,
      imbue=0,
+     equipped=["Maichan"]
 )
-
-
 
 test_player2= Player(
      name="Toji",
      level=10,
      max_hp=2000,
      max_ce=2000,
-     strength=500,
-     speed=500,
+     strength=100,
+     speed=100,
      technique="Heavenly Restriction: Zero",
      playerclass="sorcerer",
      colony=1,
@@ -369,8 +372,9 @@ test_player2= Player(
      user_id=0,
      grade=5,
      imbue=0
+
 )
 
-results = battle_checks(test_player1, test_player2, "Frostbite", "Heavenly Body")
+results = battle_checks(test_player1, test_player2, "Transmutate", "Heavenly Body")
 
 print(results)

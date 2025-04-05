@@ -50,9 +50,11 @@ def get_random_sorcerer_tech(techlist=sorcerer_techs):
     print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
 
     if "Six Eyes" in tech.keys():
-        six_values = randint(0, 10)
-        if six_values <= 5:
-            tech['Six Eyes'] = True
+        if tech['Six Eyes'] != True:
+            six_values = random.choice(1,2)
+            if six_values==1:
+                tech['Six Eyes'] = True
+                #cuz he not number 2
 
     return tech
 
@@ -150,13 +152,15 @@ class CreateButtons(discord.ui.View):
            tech =  get_random_reincarnate_tech()
         if pclass == 3:
             tech = get_random_curse_tech()
+        
         ce = random.randint(200, 2000)
         strength=random.randint(50, 200)
         speed=random.randint(50, 200)
         hp = random.randint(100, 300)
         six_eyes=False
-        print(tech)
         techname= next(iter(tech))
+        print(f"rolled {techname}")
+
         if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
             print("Added 6 eyes ce: 1000 to " + ce)
             ce += 1000
@@ -173,6 +177,7 @@ class CreateButtons(discord.ui.View):
             speed += 200
             hp += 300
             ce = 0
+
         if pclass== 1:
             strength += 50
             speed += 50

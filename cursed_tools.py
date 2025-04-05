@@ -93,7 +93,7 @@ cursed_tools={
                 strength=20,
                 speed=2,
                 type="melee",
-                soul=True
+                soul=250
                 ),
 
     "Playful Cloud":
