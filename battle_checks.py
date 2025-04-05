@@ -5,9 +5,55 @@ from cursed_tools import cursed_tools
 # check if the player can use the attack before starting the checks
 
 
+<<<<<<< HEAD
 def get_move(player, attack=None, defense=None, tool=None):
 
+=======
+test_player1 = Player(
+     name="Uraume",
+     level=10,
+     max_hp=2000,
+     max_ce=2000,
+     strength=500,
+     speed=500,
+     technique="Ice Manipulation",
+     playerclass="sorcerer",
+     colony=1,
+     xp=0,
+     cgp=0,
+     skp=0,
+     user_id=0,
+     grade=5,
+     imbue=0,
+     equipped="ISOH"
+)
+
+test_player2= Player(
+     name="Toji",
+     level=10,
+     max_hp=2000,
+     max_ce=2000,
+     strength=500,
+     speed=500,
+     technique="Heavenly Restriction: Zero",
+     playerclass="sorcerer",
+     colony=1,
+     xp=0,
+     cgp=0,
+     skp=0,
+     user_id=0,
+     grade=5,
+     imbue=0
+)
+
+
+
+def get_move(player, attack=None, defense=None, tool=None): # Maybe this works?      
+>>>>>>> bcd6af493730f2c439e7506d8788649df55a4b17
     tech = [tech for tech in technique_list if next(iter(tech)) == player.technique]
+    if tool:
+        return tool
+    
     if attack:
         new_attack = tech[0][player.technique][0]['Attack'][attack]
         return new_attack
@@ -15,6 +61,9 @@ def get_move(player, attack=None, defense=None, tool=None):
     if defense:
         new_defense = tech[0][player.technique][1]["Defend"][defense]
         return new_defense
+    
+    
+    
     
 
 def attack_verify(player, attack):
@@ -207,7 +256,7 @@ def battle_checks(player, target, attack_str, defense_str):
             return False            
         print('Starting battle checks...')
         stack=player.stack
-        charge=player.charge # this check should take place in the verify func right?
+        charge=player.charge # this check should take place in the verify func ?
         inventory = player.inventory
         equipped = player.equipped
         dmg = 0
@@ -247,6 +296,7 @@ def battle_checks(player, target, attack_str, defense_str):
         
 
 
+<<<<<<< HEAD
 
 test_player1 = Player(
      name="Uraume",
@@ -287,5 +337,8 @@ test_player2= Player(
 )
 
 results = battle_checks(test_player1, test_player2, "Frostbite", "Heavenly Body")
+=======
+results = battle_checks(test_player1, test_player2, "ISOH", "Heavenly Body")
+>>>>>>> bcd6af493730f2c439e7506d8788649df55a4b17
 
 print(results)
