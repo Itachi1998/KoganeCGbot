@@ -50,15 +50,21 @@ def get_random_sorcerer_tech(techlist=sorcerer_techs):
                 break
             choice -= rarity[r]
     print(f"Getting technique value: {value}")
-    ct_list = [t for t in techlist if t.get("Rarity", 0) >= value]
+    ct_list = []
+    for t in techlist: 
+        if t['Rarity'] >= value:
+            ct_list.append(t)
+        else:
+            value -= t["Rarity"]
+        
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
     print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
 
     if "Six Eyes" in tech.keys():
         if tech['Six Eyes'] != True:
-            six_values = random.choice(1,2)
-            if six_values==1:
+            six_values = random.randint(1, 2)
+            if six_values == 1:
                 tech['Six Eyes'] = True
                 #cuz he not number 2
 
@@ -80,14 +86,16 @@ def get_random_reincarnate_tech(techlist=reincarnated_techs):
             choice -= rarity[r]
         
         print(f"Getting technique value: {value}")
-        ct_list = [t for t in techlist if t.get("Rarity", 0) >= value]
-        if ct_list:  # Ensure the list is not empty
-            break
-        print("No techniques found for the selected rarity, retrying...")
-    
+    ct_list=[]
+    for t in techlist: 
+        if t['Rarity'] >= value:
+            ct_list.append(t)
+        else:
+            value -= t["Rarity"]
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
     print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
+
     if "Six Eyes" in tech.keys():
         six_values = randint(0, 10)
         if six_values < 5:
@@ -109,7 +117,12 @@ def get_random_curse_tech(techlist=cursed_techs):
             else:
                 choice -= rarity[r]
     print(f"Getting technique value: {value}")
-    ct_list = [t for t in techlist if t.get("Rarity", 0) >= value]
+    ct_list = []
+    for t in techlist: 
+        if t['Rarity'] >= value:
+            ct_list.append(t)
+        else:
+            value -= t["Rarity"]
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
     print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
@@ -168,7 +181,7 @@ class CreateButtons(discord.ui.View):
         print(f"rolled {techname}")
 
         if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
-            print("Added 6 eyes ce: 1000 to " + ce)
+            print("Added 6 eyes ce: 1000 to " +  str(ce))
             ce += 1000
             hp += 300
             six_eyes=True
@@ -196,12 +209,13 @@ class CreateButtons(discord.ui.View):
             strength+= 120
             speed += 120
             hp += 150
-            pclass = "Curse"
+            pclass = "Reincarnate"
         elif pclass==3:
+            ce += 200
             strength +=80
             speed += 80
             hp += 100
-            pclass="Reincarnate"
+            pclass="Curse"
 
         
         player = Player(
