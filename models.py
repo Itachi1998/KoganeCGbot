@@ -35,7 +35,7 @@ class Player(Base):
     cgp: Mapped[int]
     xp: Mapped[int]
     skp: Mapped[int]
-    technique: Mapped[List[str]] = mapped_column(JSON)
+    technique: Mapped[str]
     playerclass: Mapped[str] = mapped_column(String(100))
     six_eyes: Mapped[bool]
     __table_args__ = (
@@ -83,7 +83,7 @@ class Enemy(Base):
     ce: Mapped[int]
     strength: Mapped[int]
     speed: Mapped[int]
-    technique: Mapped[List[str]] = mapped_column(JSON)
+    technique: Mapped[str]
     colony_id: Mapped[int]
     playerclass: Mapped[str] = mapped_column(String(100))
     tamed: Mapped[Optional[int]]
@@ -102,7 +102,7 @@ class Technique(Base):
     colony_id: Mapped[int]
     user_id: Mapped[int]
     binding_vows: Mapped[Optional[List]] = mapped_column(JSON)
-    __table_args__ = UniqueConstraint('colony_id', 'user_id', 'name', name='uq_name_user_id')
+    __table_args__ = (UniqueConstraint('colony_id', 'user_id', 'name', name='uq_name_user_id')),
 
 
 Base.metadata.create_all(bind=engine)
