@@ -54,7 +54,7 @@ class Colony(Base):
     owner_id: Mapped[int]
     creation_date: Mapped[str]
     color: Mapped[str]
-    players: Mapped[Optional[List]] = mapped_column(JSON)
+    players: Mapped[Optional[str]] = mapped_column(JSON)  # Store player.user_id as a JSON string
     enemies: Mapped[Optional[List]] = mapped_column(JSON)
     items: Mapped[Optional[List]] = mapped_column(JSON)
     ce: Mapped[int]
