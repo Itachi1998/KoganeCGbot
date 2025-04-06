@@ -61,11 +61,11 @@ class Colony(Base):
     xp: Mapped[int]
     six_eyes: Mapped[bool]
     shop: Mapped[Optional[List]] = mapped_column(JSON)
-    rules: Mapped[Optional[List]] = mapped_column(JSON)
-    districts: Mapped[Optional[List]] = mapped_column(JSON)
-    graveyard: Mapped[Optional[List]] = mapped_column(JSON)
+    # rules: Mapped[Optional[List]] = mapped_column(JSON)
+    # districts: Mapped[Optional[List]] = mapped_column(JSON)
+    # graveyard: Mapped[Optional[List]] = mapped_column(JSON)
     leaderboard: Mapped[Optional[List]] = mapped_column(JSON)
     special_grades: Mapped[Optional[List]] = mapped_column(JSON)
-    events: Mapped[Optional[List]] = mapped_column(JSON)
+    # events: Mapped[Optional[List]] = mapped_column(JSON)
 
 Base.metadata.create_all(bind=engine)

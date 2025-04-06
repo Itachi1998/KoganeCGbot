@@ -231,7 +231,9 @@ class CreateButtons(discord.ui.View):
             print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
             ce += 1000
             hp += 100
-
+        if techname == "Shrine":
+            ce += 2000
+            hp += 200
         if 'zero' in techname.lower():
             strength += 200
             speed += 200

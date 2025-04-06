@@ -19,10 +19,6 @@ def create_player(user_id: int, colony_id: int, playername: str, playerclass:str
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if existing_player:
             return False
-        grade="Grade 4"
-        if six_eyes==True:
-            grade="Special Grade"
-
     # id: Mapped[int] = mapped_column(primary_key=True)
     # user_id: Mapped[int]
     # colony_id: Mapped[int]
@@ -69,49 +65,46 @@ def create_player(user_id: int, colony_id: int, playername: str, playerclass:str
 def create_colony(colony_data):
         
         with Session(engine) as session:
-             existing_colony = session.query(Colony).filter_by(colony_id=colony_data["colony id"]).first()
-             if existing_colony:
-                  raise ValueError("Colony already exists")
-             else:
-                colony = Colony(
+          existing_colony = session.query(Colony).filter_by(colony_id=colony_data["colony id"]).first()
+          if existing_colony:
+                 raise ValueError("Colony already exists")
+          else:
+               colony = Colony(
                     colony_name=colony_data['name'],
                     colony_id=colony_data['colony id'],
                     creation_date=colony_data['creation date'],
                     owner_id=colony_data['owner id'],
                     color=colony_data['color'],
-                    players=json.dumps(colony_data.get('players', [])),
-                    enemies=json.dumps(colony_data.get('enemies', [])),
-                    items=json.dumps(colony_data.get('items', [])),
+                    players=colony_data['players'],
+                    enemies=colony_data['enemies'],
+                    items=colony_data['items'],
                     ce=colony_data['ce'],
                     xp=colony_data['xp'],
                     six_eyes=colony_data['six eyes'],
-                    shop=json.dumps(colony_data.get('shop', [])),
-                    rules=json.dumps(colony_data.get('rules', [])),
-                    districts=json.dumps(colony_data.get('districts', [])),
-                    graveyard=json.dumps(colony_data.get('graveyard', [])),
-                    leaderboard=json.dumps(colony_data.get('leaderboard', [])),
-                    special_grades=json.dumps(colony_data.get('special_grades', [])),
-                    events=json.dumps(colony_data.get('events', []))
-                )
-                session.add(colony)
-                session.commit()
-                session.close()
-
-def read_colony(colony_id, value=None):
-     with Session(engine) as session:
-          existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
-          if not existing_colony:
-               return False
-          if value:
-               return {column.name: getattr(existing_colony, column.name) for column in existing_colony.__table__.columns} if existing_colony else None
-          else:
-               return existing_colony
+                    leaderboard=colony_data['leaderboard'],
+               )
+               session.add(colony)
+               session.commit()
+               session.close()
+               return colony
             
     
+def read_colony(colony_id: int, value=None):
+            with Session(engine) as session:
+                     existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
+                     if existing_colony:
+                         if value:
+                               session.close()
+                               return {column.name: getattr(existing_colony, column.name) for column in existing_colony.__table__.columns}
+                         else:
+                               session.close()
+                               return existing_colony
+                     else:
+                         session.close()
+                         return False
 
 def read_player(user_id: int, colony_id: int, value=None):
         with Session(engine) as session:
-                
                 existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
                 if existing_player:
                         if value:
