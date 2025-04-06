@@ -1,7 +1,7 @@
 import discord, os, random, techniques, db, game, player_tech
 from random import randint
 from game import Player
-from db import create_player, update_player, update_colony
+from db import create_player, update_player, update_colony, create_technique
 from discord.ext import commands
 from discord import app_commands
 
@@ -158,7 +158,6 @@ def get_random_curse_tech(techlist=cursed_techs):
 class Character_cog(commands.Cog):
 
     welcstr="# Welcome to Kogane Culling Games!"
-
     def __init__(self, bot):
         self.bot = bot
         self.playerdict={}
@@ -176,6 +175,20 @@ class Character_cog(commands.Cog):
         embed.set_thumbnail(url=self.bot.user.avatar)
         await ctx.send(embed= embed, view=CreateButtons(embed, self.bot, self.playerdict, user=ctx.author.id))
         return
+    
+    @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
+    async def delete(self, ctx):
+        existing_player = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
+        if existing_player:
+            playername = existing_player.player_name
+            db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
+            db.delete_technique(user_id=ctx.author.id, colony_id=ctx.guild.id)
+            embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
+            await ctx.send(embed=embed, ephemeral=True)
+
+
+
+
 
 
 class CreateButtons(discord.ui.View):
@@ -259,10 +272,26 @@ class CreateButtons(discord.ui.View):
         created = create_player(user_id=interaction.user.id, colony_id=interaction.guild_id, 
                     playername=self.playerdict['name'], playerclass=pclass, technique=techname,
                     max_ce=ce, max_hp=hp, six_eyes=six_eyes)
+        
+        tech_data = {
+            'name': techname,
+            'level': 1,
+            'rct': False,
+            'six eyes': six_eyes,
+            'innate': True,
+            'user id': interaction.user.id,
+            'colony id': interaction.guild_id,
+            'binding vows': []
+        }
+        
+
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
+
         tech_rarity = next((k for k in rarity.keys() if rarity[k] == tech['Rarity']), None)
         class_rarity = next((k for k in rarity.keys() if rarity[k] == classes[pclass]), None)
         if created:
+            create_technique(tech_data=tech_data)
+            print ("Created technique: " + techname)
             self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {techname}\n* HP: {hp}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}\n* Technique Rarity: {tech_rarity}\n* Class Rarity: {class_rarity}"
             await interaction.response.edit_message(embed=self.embed, view=None)
             return

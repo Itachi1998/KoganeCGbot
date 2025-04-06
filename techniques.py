@@ -26,7 +26,7 @@ class Techniques():
                  visable: bool=None,
                  self_dmg: int=None,
                  self_heal: int=None,
-                 heal: int=None
+                 heal: dict=None
                  ):
             
             self.name = name
@@ -55,7 +55,7 @@ class Techniques():
             self.self_dmg=self_dmg
             self.self_heal=self_heal
             self.heal=heal
-            
+
 class CursedTools():
     def __init__(self, 
         name: str, 

@@ -249,7 +249,7 @@ class Enemy(Actor):
                 stack=0, colony:int = None,
                 inventory: list = None, equipped: list = None, poison: tuple=None,charge: tuple=None, 
                 stun: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
-                debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None):
+                debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
         try:   
             super().__init__(
                 name, 
@@ -292,6 +292,9 @@ class Enemy(Actor):
             self.tamed=tamed
             self.quantity=quantity
             self.soul = soul
+            self.status=status
+            self.killed=killed
+            self.timer=timer
 
         except:
             traceback.print_exc()
@@ -314,9 +317,10 @@ class Player(Actor):
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
                     rct: tuple=None, #(1, 2, 3) 
-                    healed: int=None,
+                    heal: dict=None,
+                    self_heal: int=None,
                     killcount: list=None, buffed: list=None, 
-                    debuffed: list=None, status: str=None, grade=None, soul=None):
+                    debuffed: list=None, status: str=None, grade=None, soul: dict=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
           self.xp = xp
@@ -337,7 +341,8 @@ class Player(Actor):
           self.hr=hr
           self.hi =hi
           self.rct = rct
-          self.healed=healed
+          self.heal = heal
+          self.self_heal = self_heal
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
@@ -345,6 +350,7 @@ class Player(Actor):
           self.status=status
           self.grade=grade
           self.soul=soul
+          self.heal = heal
           
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
@@ -354,7 +360,7 @@ class Player(Actor):
               "Left Leg": BodyPart(name='Left Leg', max_hp=self.max_hp * 10 // 100),
               "Right Leg": BodyPart(name='Right Leg', max_hp=self.max_hp * 10 // 100)
           }
-          self.body_parts = humanoid_body
+          self.bodyparts = humanoid_body
           
           
         except:
@@ -547,7 +553,9 @@ class Grade4_Bugfly(Enemy):
              bodyparts={
             "Head" : BodyPart(name="Head", max_hp=15, max_ce=20), 
         
-            }
+            },
+            timer=0,
+            killed=False
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -571,7 +579,9 @@ class  Grade4_Floatjelly(Enemy):
              playerclass="Curse", 
              quantity=random.randrange(1, 6), 
              stun=1,
-             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)})
+             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
+             timer=0,
+             killed=False)
           self.hp = self.max_hp
           self.ce = self.max_ce
 
@@ -592,8 +602,9 @@ class Grade4_Flymouth(Enemy):
              playerclass="Curse", 
              quantity=random.randrange(1, 4),
              poison=(3, 1),
-             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)}
-             )
+             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
+             timer=0,
+             killed=False)
     
           self.hp = self.max_hp
           self.ce = self.max_ce
@@ -616,7 +627,9 @@ class Grade3_Barehand(Enemy):
              playerclass="Curse", 
              quantity=random.randrange(1, 3),
  bodyparts= {"Head" : BodyPart(name='Head', max_hp=150 * 20// 100, max_ce=100 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=150 * 50 // 100, max_ce=100 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=150 * 30 // 100, max_ce = 150 * 30 //100)}
- )
+ ,
+ timer=60,
+ killed=False)
   
 
 class Grade3_Furrpede(Enemy):
@@ -635,7 +648,9 @@ class Grade3_Furrpede(Enemy):
              quantity=random.randrange(1,3),
              bodyparts={"Head": BodyPart(name="Head", max_hp=200 * 20 // 100, max_ce=50 * 20 // 100), 
                         "Torso": BodyPart(name="Torso", max_hp=200 * 50 // 100, max_ce=50 * 50 // 100), 
-                        "Legs": BodyPart(name="Legs", max_hp=200 * 30 // 100, max_ce=50 * 30 // 100)}
+                        "Legs": BodyPart(name="Legs", max_hp=200 * 30 // 100, max_ce=50 * 30 // 100)},
+            timer=60,
+            killed=False
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -655,7 +670,8 @@ class Grade3_AnxiousEars(Enemy):
              playerclass="Curse", 
              quantity=random.randrange(1,3),
              bodyparts={"Head" : BodyPart(name='Head', max_hp=250 * 20// 100, max_ce=200 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=250 * 50 // 100, max_ce=200 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=250 * 30 // 100, max_ce = 200 * 30 //100)}
-             )
+             , timer=60,
+             killed=False)
 
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -676,7 +692,9 @@ class Grade2_Stinkaspor(Enemy):
              playerclass="Curse",
              quantity=random.randrange(1, 2),
              bodyparts={"Head" : BodyPart(name='Head', max_hp=350 * 20// 100, max_ce=350 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=350 * 50 // 100, max_ce=350 * 50 // 100), "Stingers" : BodyPart(name="Stingers", max_hp=350 * 30 // 100, max_ce = 350 * 30 //100)}
-             )
+             ,
+             timer=60,
+             killed=False)
  
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -699,7 +717,9 @@ class Grade2_Monkeybrain(Enemy):
              playerclass="Curse",
              quantity=random.randrange(1,2),
              bodyparts={"Head" : BodyPart(name='Head', max_hp=300 * 20// 100, max_ce=350 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=300 * 50 // 100, max_ce=350 * 50 // 100), "Arms" : BodyPart(name="Arms", max_hp=300 * 15 // 100, max_ce = 350 * 30 //100), "Legs" : BodyPart(name="Legs", max_hp=300*15//100, max_ce = 350 * 30 // 100)}
-              )
+              ,
+              timer=60,
+              killed=False)
         self.hp = self.max_hp
         self.ce = self.max_ce
         
@@ -720,7 +740,9 @@ class Grade1_Orbmaster(Enemy):
              cgp=1, 
              technique="Orbmaster", 
              playerclass="Curse",
-             bodyparts=human_body_parts)
+             bodyparts=human_body_parts,
+             timer=300,
+             killed=False)
         self.hp = self.max_hp
         self.ce = self.max_ce
 
@@ -740,7 +762,9 @@ class Grade1_Charger(Enemy):
                  cgp=1, 
                  technique="Charger", 
                  playerclass="Curse",
-                 bodyparts=human_body_parts
+                 bodyparts=human_body_parts,
+                 timer=300,
+                 killed=False
                  )
             self.hp = self.max_hp
             self.ce = self.max_ce
@@ -761,7 +785,9 @@ class SpecialGrade_FingerBearer(Enemy):
              cgp=1,
              technique="Fingerbearer",
              playerclass="Curse",
-             bodyparts=human_body_parts)
+             bodyparts=human_body_parts,
+             timer=300,
+             killed=False)
           self.hp = self.max_hp
           self.ce = self.max_ce
 
@@ -781,7 +807,9 @@ class SpecialGrade_DisasterFlames(Enemy):
                         cgp=1, 
                         technique="Disaster Flames", 
                         playerclass="Curse",
-                        bodyparts=human_body_parts
+                        bodyparts=human_body_parts,
+                        timer=300,
+                        killed=False
                         )
             self.hp = self.max_hp
             self.ce = self.max_ce
@@ -805,7 +833,9 @@ class SpecialGrade_NatureSpirit(Enemy):
                        cgp=1, 
                        technique="Nature Spirit", 
                        playerclass="curse",
-                       bodyparts=human_body_parts
+                       bodyparts=human_body_parts,
+                       timer=300,
+                       killed=False
                        )
    
             self.hp = self.max_hp
@@ -826,7 +856,9 @@ class SpecialGrade_TideCurse(Enemy):
                    cgp=1, 
                    technique="Disaster Tides", 
                    playerclass="Curse",
-                   bodyparts=human_body_parts
+                   bodyparts=human_body_parts,
+                   timer=300,
+                   killed=False
         )
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -847,7 +879,9 @@ class SpecialGrade_Soul_Curse(Enemy):
                    technique="Idle Transfiguration",
                    playerclass="Curse",
                    bodyparts=human_body_parts,
-                   soul=500
+                   soul=500,
+                   timer=300,
+                   killed=False
                    )
      
         self.hp = self.max_hp
@@ -867,7 +901,9 @@ class Toji(Enemy):
                        cgp=5,
                        technique="Toji", 
                        playerclass="Reincarnate",
-                       bodyparts=human_body_parts
+                       bodyparts=human_body_parts,
+                       timer=300,
+                       killed=False
                        )
             self.hp = self.max_hp
             self.ce = self.max_ce
@@ -888,7 +924,9 @@ class Reggie(Enemy):
                            cgp=5,
                            technique="Reggie",
                            playerclass="Reincarnate",
-                           bodyparts=human_body_parts
+                           bodyparts=human_body_parts,
+                           timer=300,
+                           killed=False
                 )
 
                 self.hp = self.max_hp
@@ -907,7 +945,9 @@ class Uro(Enemy):
                                    cgp=5,
                                    technique="Uro",
                                    playerclass="Reincarnate",
-                                   bodyparts=human_body_parts
+                                   bodyparts=human_body_parts,
+                                   timer=300,
+                                   killed=False
                                    )
                         self.hp = self.max_hp
                         self.ce = self.max_ce
@@ -924,7 +964,9 @@ class Ryu(Enemy):
                      cgp=5,
                      technique="Cursed Energy Discharge",
                      playerclass="Reincarnate",
-                     bodyparts=human_body_parts
+                     bodyparts=human_body_parts,
+                     timer=300,
+                     killed=False,
                      )
           self.hp = self.max_hp
           self.ce = self.max_ce
@@ -946,7 +988,9 @@ class Kashimo(Enemy):
                      playerclass="Reincarnate",
                      stun=2,
                      soul={"strength" : 100},
-                     bodyparts=human_body_parts
+                     bodyparts=human_body_parts,
+                     timer=500,
+                     killed=False
                      )
           self.hp = self.max_hp
           self.ce = self.max_ce
@@ -966,6 +1010,8 @@ class KingOfCurse(Enemy):
                            technique="Shrine",
                             playerclass="Reincarnate",
                            bodyparts=human_body_parts,
+                           timer=500,
+                           killed=False
                     
                            )
                 self.hp = self.max_hp
@@ -985,7 +1031,9 @@ class Kenjaku(Enemy):
                      cgp=5, 
                      technique="Body Hop: Anti Gravity Manipulation",
                      playerclass="Reincarnate",
-                     bodyparts=human_body_parts
+                     bodyparts=human_body_parts,
+                     timer=500,
+                     killed=False
                      )                
                 self.hp = self.max_hp
                 self.ce = self.max_ce

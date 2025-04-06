@@ -47,14 +47,11 @@ class Player(Base):
     # kills: Mapped[Optional[List]] = mapped_column(JSON)
     # bodyparts: Mapped[Optional[List]] = mapped_column(JSON)
 
-
 class Colony(Base):
     __tablename__ = "colony"
-    
     id: Mapped[int] = mapped_column(primary_key=True)
     colony_name: Mapped[str]
     colony_id: Mapped[int]
-    owner_id: Mapped[int]
     creation_date: Mapped[str]
     color: Mapped[str]
     players: Mapped[Optional[str]] = mapped_column(JSON)  # Store player.user_id as a JSON string
@@ -71,6 +68,7 @@ class Colony(Base):
     special_grades: Mapped[Optional[List]] = mapped_column(JSON)
     # events: Mapped[Optional[List]] = mapped_column(JSON)
 
+
 class Enemy(Base):
     __tablename__ = "enemy"
 
@@ -81,13 +79,19 @@ class Enemy(Base):
     hp: Mapped[int]
     max_ce: Mapped[int]
     ce: Mapped[int]
+    cgp: Mapped[int]
+    xp: Mapped[int]
     strength: Mapped[int]
     speed: Mapped[int]
     technique: Mapped[str]
     colony_id: Mapped[int]
     playerclass: Mapped[str] = mapped_column(String(100))
+    killed: Mapped[Optional[bool]]
     tamed: Mapped[Optional[int]]
     bodyparts: Mapped[Optional[List]] = mapped_column(JSON)
+    respawn: Mapped[Optional[int]]
+   
+
     
 
 class Technique(Base):

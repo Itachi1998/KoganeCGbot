@@ -1,6 +1,6 @@
 import os, dotenv, datetime
 from datetime import datetime
-from db import create_colony,read_colony, update_colony
+from db import create_colony,read_colony, update_colony, create_enemy
 from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
@@ -37,8 +37,6 @@ class Colonies(commands.Cog):
             'leaderboard': [],
             'color': "black",
             'six eyes': False,
-
-                
          }
         
         colony = create_colony(colony_data)
@@ -58,6 +56,7 @@ class Colonies(commands.Cog):
         for guild in self.bot.guilds:
             enemies = [enemy_class() for enemy_class in game.Enemy.__subclasses__()]
             enemy_dicts = [enemy.__dict__ for enemy in enemies]
+
             for e in enemy_dicts:
                 body_parts_dict = {}
                 for part in e['bodyparts']:
@@ -66,13 +65,34 @@ class Colonies(commands.Cog):
                 e['bodyparts'] = body_parts_dict
             for e in enemies:
                 print(e)
+            for e in enemies:
+                new_enemy_dict = {
+                        'name': e.name,
+                        'level': e.level,
+                        'ce': e.ce,
+                        'max hp': e.max_hp,
+                        'max ce': e.max_ce,
+                        'strength': e.strength,
+                        'speed': e.speed,
+                        'hp': e.hp,
+                        'xp': e.xp,
+                        'cgp' : e.cgp,
+                        'bodyparts': e.bodyparts,
+                        'technique': e.technique,
+                        'playerclass': e.playerclass,
+                        'tamed': e.tamed,
+                        'colony id': guild.id,
+                        'killed' : e.killed,
+                        'respawn' : e.timer
+                 }
+                create_enemy(new_enemy_dict)      
             colony_data = {
                 'name': guild.name,
                 'colony id': guild.id,
                 'creation date': datetime.now().astimezone().strftime("%c"),
                 'colony color': 'gray',
                 'players': [],
-                'enemies': enemy_dicts,
+                'enemies': [],
                 'items': [],
                 'ce': 0,
                 'xp': 0,
