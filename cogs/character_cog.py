@@ -148,7 +148,7 @@ def get_random_curse_tech(techlist=cursed_techs):
             value -= t['Rarity']
 
     if len(ct_list) == 0:
-        ct_list.append(k for k in techlist if techlist[k]['Rarity'] >= rarity['uncommon'])
+        ct_list = [t for t in techlist if t['Rarity'] >= rarity['uncommon']]
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
     print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")

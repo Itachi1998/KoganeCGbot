@@ -129,14 +129,28 @@ class Lobby_Cog(commands.Cog):
             await ctx.send(embed=newbed)
         else:
             data="You are not in a thread, Create a thread to start a lobby.""\n* All players must be in a thread to start a lobby to prevent spam.""\n* If you start the lobby in a private thread, it will start a private lobby""\n* If you are in a private lobby and invite members to the thread, you must still invite them to the lobby"
-            await ctx.send(data, ephemeral=True)   
+            await ctx.send(data, ephemeral=True)
+
+    @lobby.command(name="kick")
+    async def kick(self, ctx, member):
+        for lob in self.lobbies.values():
+            if lob.owner == ctx.author.id:
+                for player in lob.players:
+                    if player == member.id:
+                        lob.players.remove(player)
+                        await ctx.send(f"{member.mention} has been removed from the lobby.")
+                        break
+
+        else:
+                await ctx.send("You are not the owner of any lobby or the member is not in the lobby.")
+                
     
 
                 
     @lobby.command(name='disband')
     async def disband(self, ctx):
         await ctx.send("Disbanding the lobby...")
-        
+
 
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))
