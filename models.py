@@ -1,7 +1,7 @@
 import os, json
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import create_engine, String, JSON
+from sqlalchemy import create_engine, String, JSON, UniqueConstraint
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, Session
 
 from dotenv import find_dotenv, load_dotenv
@@ -22,7 +22,7 @@ class Player(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int]
-    colony_id: Mapped[int]
+    colony_id: Mapped[int] 
     date_entered: Mapped[str]
     player_level: Mapped[int]
     player_name: Mapped[str] = mapped_column(String(200))
@@ -38,6 +38,9 @@ class Player(Base):
     technique: Mapped[List[str]] = mapped_column(JSON)
     playerclass: Mapped[str] = mapped_column(String(100))
     six_eyes: Mapped[bool]
+    __table_args__ = (
+        UniqueConstraint('user_id', 'colony_id', name='uq_user_colony'),
+    )
     # buffs: Mapped[Optional[List]] = mapped_column(JSON)
     # debuffs: Mapped[Optional[List]] = mapped_column(JSON)
     # heals: Mapped[Optional[List]] = mapped_column(JSON)
@@ -67,5 +70,39 @@ class Colony(Base):
     leaderboard: Mapped[Optional[List]] = mapped_column(JSON)
     special_grades: Mapped[Optional[List]] = mapped_column(JSON)
     # events: Mapped[Optional[List]] = mapped_column(JSON)
+
+class Enemy(Base):
+    __tablename__ = "enemy"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    level: Mapped[int]
+    max_hp: Mapped[int]
+    hp: Mapped[int]
+    max_ce: Mapped[int]
+    ce: Mapped[int]
+    strength: Mapped[int]
+    speed: Mapped[int]
+    technique: Mapped[List[str]] = mapped_column(JSON)
+    colony_id: Mapped[int]
+    playerclass: Mapped[str] = mapped_column(String(100))
+    tamed: Mapped[Optional[int]]
+    bodyparts: Mapped[Optional[List]] = mapped_column(JSON)
+    
+
+class Technique(Base):
+    __tablename__ = "technique"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    level: Mapped[int]
+    rct: Mapped[bool]
+    six_eyes: Mapped[bool]
+    innate: Mapped[bool]
+    user_id: Mapped[int]
+    colony_id: Mapped[int]
+    user_id: Mapped[int]
+    binding_vows: Mapped[Optional[List]] = mapped_column(JSON)
+    __table_args__ = UniqueConstraint('colony_id', 'user_id', 'name', name='uq_name_user_id')
+
 
 Base.metadata.create_all(bind=engine)

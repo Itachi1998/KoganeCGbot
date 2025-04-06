@@ -55,37 +55,7 @@ class Techniques():
             self.self_dmg=self_dmg
             self.self_heal=self_heal
             self.heal=heal
-            __dict__ = {
-                "name": name,
-                "level": level,
-                "act_speed": act_speed,
-                "act_cost": act_cost,
-                "act_body": act_body,
-                "aoe": aoe,
-                "strength": strength,
-                "speed": speed,
-                "type": self.type,
-                "imbue": imbue,
-                "soul": soul,
-                "buff": buff,
-                "debuff": debuff,
-                "poison": poison,
-                "stun": stun,
-                "stack": stack,
-                "charge": charge,
-                "summon": summon,
-                "sure_hit": sure_hit,
-                "target": target,
-                "negates": negates,
-                "duration": duration,
-                "cooldown": cooldown,
-                "visable": visable,
-                "self_dmg": self_dmg,
-                "self_heal": self_heal,
-                "heal": heal
-                
-            }
-
+            
 class CursedTools():
     def __init__(self, 
         name: str, 

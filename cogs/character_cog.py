@@ -257,7 +257,7 @@ class CreateButtons(discord.ui.View):
             user_id=interaction.user.id
         )
         created = create_player(user_id=interaction.user.id, colony_id=interaction.guild_id, 
-                    playername=self.playerdict['name'], playerclass=pclass, technique=tech,
+                    playername=self.playerdict['name'], playerclass=pclass, technique=techname,
                     max_ce=ce, max_hp=hp, six_eyes=six_eyes)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
         tech_rarity = next((k for k in rarity.keys() if rarity[k] == tech['Rarity']), None)

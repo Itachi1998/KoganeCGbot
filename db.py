@@ -1,5 +1,5 @@
 import os, json, models
-from models import Player, Colony
+from models import Player, Colony, Technique, Summons, Items
 from datetime import datetime
 from typing import List, Optional
 from sqlalchemy import create_engine, String, JSON
@@ -38,6 +38,7 @@ def create_player(user_id: int, colony_id: int, playername: str,
     # technique: Mapped[List[str]] = mapped_column(JSON)
     # playerclass: Mapped[str] = mapped_column(String(100))
     # six_eyes: Mapped[bool]
+       
         new_player=   Player(
              user_id=user_id,
              colony_id=colony_id,
@@ -58,7 +59,17 @@ def create_player(user_id: int, colony_id: int, playername: str,
              six_eyes=six_eyes
              
         )
-        session.add(new_player)
+        new_tech = Technique(
+             name=technique,
+             level=1,
+             rct=False,
+             six_eyes=six_eyes,
+             innate=True,
+             user_id=user_id,
+            colony_id=colony_id,
+            binding_vows=[]
+        )
+        session.add(new_player, new_tech)
         session.commit()
         session.close()
         return True
