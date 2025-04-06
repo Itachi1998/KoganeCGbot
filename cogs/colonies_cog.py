@@ -21,6 +21,33 @@ log_channel = os.getenv("LOGCHANNEL")
 class Colonies(commands.Cog):
     def __init__(self, bot):
                 self.bot = bot
+   
+    @commands.Cog.listener()
+    async def on_join(self, guild):
+        colony_data = {
+            'name': guild.name,
+            'colony id': guild.id,
+            'create date': datetime.now().astimezone().strftime("%c"),
+            'colony color': 'gray',
+            'players': [],
+            'enemies': [],
+            'items': [],
+            'ce': 0,
+            'xp': 0,
+            'leaderboard': [],
+            'color': "black",
+            'six eyes': False,
+
+                
+         }
+        
+        colony = create_colony(colony_data)
+        channel = self.bot.get_channel(int(log_channel))
+        if channel:
+            await channel.send(f"New colony created: {guild.name}")
+        print("Colony added: " + guild.name)
+        print(colony)
+        return     
 
     @commands.command(name="colony", description="Sync colonies")
     async def colony(self, ctx):
@@ -42,7 +69,6 @@ class Colonies(commands.Cog):
             colony_data = {
                 'name': guild.name,
                 'colony id': guild.id,
-                'owner id': guild.owner_id,
                 'creation date': datetime.now().astimezone().strftime("%c"),
                 'colony color': 'gray',
                 'players': [],

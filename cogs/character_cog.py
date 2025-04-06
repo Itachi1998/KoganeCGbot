@@ -256,22 +256,12 @@ class CreateButtons(discord.ui.View):
             skp=0,
             user_id=interaction.user.id
         )
-
-        # created = create_player(
-        #     interaction.user.id,
-        #     player.colony,
-        #     player.name,
-        #     player.playerclass,
-        #     techname,
-        #     player.max_ce,
-        #     player.max_hp,
-        #     six_eyes
-        # )
-        
+        created = create_player(user_id=interaction.user.id, colony_id=interaction.guild_id, 
+                    playername=self.playerdict['name'], playerclass=pclass, technique=tech,
+                    max_ce=ce, max_hp=hp, six_eyes=six_eyes)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
         tech_rarity = next((k for k in rarity.keys() if rarity[k] == tech['Rarity']), None)
         class_rarity = next((k for k in rarity.keys() if rarity[k] == classes[pclass]), None)
-        created = True
         if created:
             self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {techname}\n* HP: {hp}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}\n* Technique Rarity: {tech_rarity}\n* Class Rarity: {class_rarity}"
             await interaction.response.edit_message(embed=self.embed, view=None)

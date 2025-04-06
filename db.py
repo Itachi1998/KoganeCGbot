@@ -14,7 +14,8 @@ db_url = "sqlite:///kogane.db"
 
 engine = create_engine(db_url)
 
-def create_player(user_id: int, colony_id: int, playername: str, playerclass:str, technique: str, max_ce: int, max_hp: int, six_eyes:bool):
+def create_player(user_id: int, colony_id: int, playername: str,
+                   playerclass:str, technique: str, max_ce: int, max_hp: int, six_eyes:bool):
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if existing_player:
