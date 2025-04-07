@@ -26,7 +26,9 @@ class Techniques():
                  visable: bool=None,
                  self_dmg: int=None,
                  self_heal: int=None,
-                 heal: dict=None
+                 heal: dict=None,
+                 extern_strength: int=None,
+                 intern_strength: int=None
                  ):
             
             self.name = name
@@ -55,6 +57,8 @@ class Techniques():
             self.self_dmg=self_dmg
             self.self_heal=self_heal
             self.heal=heal
+            self.intern_strength=intern_strength
+            self.extern_strength=extern_strength
 
 class CursedTools():
     def __init__(self, 
