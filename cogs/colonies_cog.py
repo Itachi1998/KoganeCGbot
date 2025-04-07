@@ -14,14 +14,12 @@ load_dotenv(dotenv)
 
 log_channel = os.getenv("LOGCHANNEL")
 
-
-
 # Update after postgres database is set up
 
 class Colonies(commands.Cog):
     def __init__(self, bot):
                 self.bot = bot
-   
+
     @commands.Cog.listener()
     async def on_join(self, guild):
         colony_data = {
@@ -42,7 +40,7 @@ class Colonies(commands.Cog):
         colony = create_colony(colony_data)
         channel = self.bot.get_channel(int(log_channel))
         if channel:
-            await channel.send(f"New colony created: {guild.name}")
+            await channel.send(f"Bot joined new server. New colony created: {guild.name}")
         print("Colony added: " + guild.name)
         print(colony)
         return     

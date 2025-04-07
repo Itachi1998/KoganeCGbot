@@ -1,7 +1,40 @@
 from techniques import Techniques
 
 enemy_techs = {
-    "Femhito" : # Femhito - special grade
+    "Anxious Ears" : 
+    [
+        {"Attack" : {
+            "Sound Clap" : Techniques(
+                name="Anxious Ears: Sound Clap",
+                level=1,
+                act_speed=1,
+                act_cost=50,
+                act_body=("head", "torso"),
+                aoe=1,
+                strength=300,
+                speed=300,
+                type="projectile",
+                stun=1
+            ),
+        }},
+        {"Defend" :
+         {
+             "Sound Reflection" : Techniques(
+                 "Anxious Ears: Sound Reflection",
+                 level=1,
+                    act_speed=1,
+                    act_cost=50,
+                    act_body=("head", "torso"),
+                    aoe=1,
+                    strength=300,
+                    speed=300,
+                    type="counter",
+                
+             )
+         } }
+    ],
+
+    "Soul Curse" : # Femhito - special grade
         [
             {"Attack" :
                 { "Callous Formation" : Techniques(
@@ -116,7 +149,7 @@ enemy_techs = {
                     act_cost=40,
                     act_body=("right arm"),
                     aoe=5,
-                    strength=400,
+                    strength=400, 
                     speed=500,
                     type="tank"
                     )
@@ -134,9 +167,9 @@ enemy_techs = {
                     act_cost=20,
                     act_body=("Head", "Torso"),
                     aoe=5,
-                    strength=50,
+                    strength=150,
                     speed=100,
-                    type="poison",
+                    type="pprojectile",
                     poison=(range(10, 20), 2)
                     ),
                 "Carbon Monoxide Disperse" : Techniques( # colorless odorless gas that can be fatal in high enough quantities
@@ -148,8 +181,9 @@ enemy_techs = {
                     aoe=5,
                     strength=100,
                     speed=100,
-                    type="poison"
-                    #sure_hit=True - Maybe
+                    type="projectile",
+                    poison=(range(10, 20), 2),
+                    sure_hit=True 
                     )
                 }
             },
@@ -161,9 +195,11 @@ enemy_techs = {
                     act_cost=60,
                     act_body=("Head", "Torso"),
                     aoe=5,
-                    strength=80,
+                    strength=180,
                     speed=150,
-                    type="counter"
+                    type="counter",
+                    poison=(range(10, 20), 2)
+
                     )
                 }
             }
@@ -181,10 +217,12 @@ enemy_techs = {
                     aoe=1,
                     strength=200,
                     speed=500,
-                    type="stun"
+                    type="projectile",
+                    stun=2
                     )
                 }
             },
+
             {"Defense" :
                 {"" : 
                  Techniques(
@@ -200,8 +238,125 @@ enemy_techs = {
                     )
                 }
             }
+        ],
+        "Finger Bearer" : 
+        [
+            {
+                "Atttack" : 
+                {
+                      "Energy Blast" : Techniques(
+                          name="Energy Blast",
+                          level=1,
+                          act_speed=5,
+                          act_cost=50,
+                        act_body=("hands"),
+                        aoe=2,
+                        strength=500,
+                        speed=500,
+                        type="projectile",
+                      ),
+                      "Claw Cleave": Techniques(
+                        name="Claw Cleave",
+                        level=1,
+                        act_speed=1,
+                        act_cost=100,
+                        act_body=("hands"),
+                        aoe=1,
+                        strength=700,
+                        speed=700,
+                        type="melee",
+                      
+                      )  
+                }
+            },
+            {
+                "Defense" : 
+                {
+                    "Energy Shield" : Techniques(
+                        name="Energy Shield",
+                        level=1,
+                        act_speed=5,
+                        act_cost=50,
+                        act_body=("hands"),
+                        aoe=2,
+                        strength=500,
+                        speed=500,
+                        type="tank",
+                    ),
+
+                    "Self Heal" : Techniques(
+                        name="Self Heal",
+                        level=1,
+                        act_speed=5,
+                        act_cost=50,
+                        act_body=("hands"),
+                        aoe=2,
+                        strength=500,
+                        speed=500,
+                        type="heal",
+                        
+                    ),
+                    "Body Flicker" : Techniques(
+                        name="Body Flicker",
+                        level=1,
+                        act_speed=5,
+                        act_cost=150,
+                        act_body=("hands"),
+                        aoe=2,
+                        strength=000,
+                        speed=200,
+                        type="dodge"
+                    )
+
+                }
+            }
+        ],
+        "Furrpede" : 
+        [
+            {"Attack" : {
+                    "Eye Beam" : Techniques(
+                        name="Eye Beam",
+                        level=1,
+                        act_speed=5,
+                        act_cost=50,
+                        act_body=("eyes"),
+                        aoe=2,
+                        strength=500,
+                        speed=500,
+                        type="projectile",
+                    ),
+                    "Underground Strike" : Techniques(
+                        name="Underground Strike",
+                        level=1,
+                        act_speed=5,
+                        act_cost=50,
+                        act_body=("hands"),
+                        aoe=2,
+                        strength=500,
+                        speed=500,
+                        type="melee",
+                    ),}},
+            {"Defend" : {
+                "Furr Spikes" : Techniques(
+                    name="Furr Spikes",
+                    level=1,
+                    act_speed=5,
+                    act_cost=50,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=100,
+                    speed=200,
+                    type="counter",
+                    poison=(range(10, 20), 2)
+                )
+
+            }}
         ]
 
-}    
+
+
+
+}
+
 for k, v in enemy_techs.items():
     print(k,v)

@@ -159,7 +159,7 @@ bird_manip = {
 
 # region ### BLOOD MANIP
 blood_manip= {
-    "Blood Manip" : 
+    "Blood Manipulation" : 
           [
                {
                     "Attack" : 

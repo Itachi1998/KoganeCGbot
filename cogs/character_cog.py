@@ -167,12 +167,16 @@ class Character_cog(commands.Cog):
     async def create(self, ctx, name: str=None):
         if not name:
             name=ctx.author.display_name
+        self.playerdict["colony"] = ctx.guild.id
         self.playerdict["name"] = name
         embed= discord.Embed(title="Create a character", description= self.welcstr +
         "\n## The first step in creating your character, here you can spin for your player Class, Technique, and Cursed Energy!"
         "\n* You may only spin once for each attribute!")
         embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
         embed.set_thumbnail(url=self.bot.user.avatar)
+        embed.set_footer(text="Click the button below to spin for your character!")
+        embed.color=discord.Color.from_rgb(255, 0, 0)
+
         await ctx.send(embed= embed, view=CreateButtons(embed, self.bot, self.playerdict, user=ctx.author.id))
         return
     
@@ -186,6 +190,38 @@ class Character_cog(commands.Cog):
             embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
             await ctx.send(embed=embed, ephemeral=True)
 
+
+    @commands.hybrid_command(name="profile", description="View your player profile, or someone else's!")
+    async def profile(self, ctx, user: discord.User=None):
+        if not user:
+            user = ctx.author
+        player = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
+        colony = db.read_colony(colony_id=ctx.guild.id)
+        if not colony:
+            await ctx.send("You are not in a colony")
+            return
+        
+        if player.colony_id != colony.colony_id:
+            await ctx.send("You are not in this colony")
+            return
+        
+        if player:
+            embed = discord.Embed(title=f"{player.player_name}'s Profile", description="# Player Profile\n## Colony: `" + colony.colony_name + "`\n## Player Info")
+            embed.add_field(name="Level", value=player.player_level, inline=True)
+            embed.add_field(name="HP", value=player.hp, inline=True)
+            embed.add_field(name="CE", value=player.ce, inline=True)
+            embed.add_field(name="XP", value=player.xp, inline=True)
+            embed.add_field(name="SKP", value=player.skp, inline=True)
+            embed.add_field(name="Class", value=player.playerclass, inline=True)
+            embed.add_field(name="Technique", value=player.technique, inline=True)
+            embed.add_field(name="Status", value="Active", inline=True)
+            embed.set_author(name=user.display_name, url=user.avatar, icon_url=user.avatar)
+            embed.set_thumbnail(url=self.bot.user.avatar)
+            await ctx.send(embed=embed)
+            return
+        else:
+            await ctx.send("Player does not exist in this colony")
+            return
 
 
 
@@ -203,8 +239,6 @@ class CreateButtons(discord.ui.View):
 
     @discord.ui.button(label="Spin", style=discord.ButtonStyle.primary)
     async def spin(self, interaction: discord.Interaction, button: discord.Button):
-        if interaction.user.id != self.user:
-            return await interaction.send_message("This is not your character", ephemeral=True)
         ce = random.randint(200, 2000)
         strength=random.randint(50, 200)
         speed=random.randint(50, 200)
@@ -263,7 +297,7 @@ class CreateButtons(discord.ui.View):
             strength=strength,
             technique=tech,
             playerclass=pclass,
-            colony=interaction.guild_id,
+            colony=self.playerdict['colony'],
             xp=0,
             cgp=0,
             skp=0,
@@ -297,7 +331,6 @@ class CreateButtons(discord.ui.View):
             return
         else:
             await interaction.response.send_message("You cannot create more than one player per colony")
-
 
 
 async def setup(bot):

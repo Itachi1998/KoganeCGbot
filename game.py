@@ -702,10 +702,10 @@ class Grade2_Stinkaspor(Enemy):
              
 
 
-class Grade2_Monkeybrain(Enemy):
+class Grade2_Primate(Enemy):
     def __init__(self):
         super().__init__(
-             name="Monkeybrain", 
+             name="Primate", 
              level=30, 
              max_hp=300,
              max_ce=350, 
@@ -713,7 +713,7 @@ class Grade2_Monkeybrain(Enemy):
              speed=150, 
              xp=200,
              cgp=1, 
-             technique="Monkeybrain",
+             technique="Primate",
              playerclass="Curse",
              quantity=random.randrange(1,2),
              bodyparts={"Head" : BodyPart(name='Head', max_hp=300 * 20// 100, max_ce=350 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=300 * 50 // 100, max_ce=350 * 50 // 100), "Arms" : BodyPart(name="Arms", max_hp=300 * 15 // 100, max_ce = 350 * 30 //100), "Legs" : BodyPart(name="Legs", max_hp=300*15//100, max_ce = 350 * 30 // 100)}

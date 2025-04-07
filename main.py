@@ -1,4 +1,5 @@
-import discord, os, dotenv, traceback # Import general dependencies 
+import discord, os, dotenv, traceback, db, enemy_techs
+from db import read_enemy # Import general dependencies 
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
 

@@ -17,6 +17,10 @@ engine = create_engine(db_url)
 def create_player(user_id: int, colony_id: int, playername: str,
                    playerclass:str, technique: str, max_ce: int, max_hp: int, six_eyes:bool):
     with Session(engine) as session:
+        exisiting_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
+        if not exisiting_colony:
+            raise False
+        existing_players = exisiting_colony.players
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if existing_player:
             return False
@@ -69,6 +73,11 @@ def create_player(user_id: int, colony_id: int, playername: str,
             colony_id=colony_id,
             binding_vows=[]
         )
+        existing_players.append(user_id)
+        updated_colony = update_colony(colony_id, {"players": existing_players})
+        if not updated_colony:
+            print("Failed to update colony with new player")
+            return False
         session.add(new_player, new_tech)
         session.commit()
         session.close()
@@ -176,8 +185,43 @@ def read_player(user_id: int, colony_id: int, value=None):
                             return existing_player
                 else:
                         session.close()
-                        raise ValueError("Error reading player. Player does not exist")
+                        return False
                 
+def read_enemy(colony_id: int, value=None):
+        with Session(engine) as session:
+                existing_enemy = session.query(Enemy).filter_by(colony_id=colony_id).first()
+                if existing_enemy:
+                        if value:
+                            enemy_data = {
+                                column.name: getattr(existing_enemy, column.name) for column in existing_enemy.__table__.columns
+                            }
+                            session.close()
+                            return enemy_data
+
+                        else:
+                            session.close()
+                            return True
+                else:
+                        session.close()
+                        return False
+
+def read_technique(techname: str, colony_id: int, user_id: int, value=None):
+        with Session(engine) as session:
+                existing_tech = session.query(Technique).filter_by(name=techname, colony_id=colony_id, user_id=user_id).first()
+                if existing_tech:
+                        if value:
+                            tech_data = {
+                                column.name: getattr(existing_tech, column.name) for column in existing_tech.__table__.columns
+                            }
+                            session.close()
+                            return tech_data
+
+                        else:
+                            session.close()
+                            return True
+                else:
+                        session.close()
+                        return False
                 
 def update_player(user_id, colony_id, value=None):
     with Session(engine) as session:
@@ -195,16 +239,15 @@ def update_player(user_id, colony_id, value=None):
 def update_colony(colony_id, value=None):
      with Session(engine) as session:
           existing_colony= session.query(Colony).filter_by(colony_id=colony_id).first()
-        
           if not existing_colony:
                return False
-
+          
           for key, val in value.items():
                setattr(existing_colony, key, val)
         
           session.commit()
           session.close()
-          return existing_colony
+          return True
      
 def update_technique(colony_id, user_id, value=None):
      with Session(engine) as session:
@@ -233,10 +276,15 @@ def update_enemy(colony_id, value=None):
 def delete_player(colony_id, user_id):
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(colony_id=colony_id, user_id=user_id).first()
-
+        existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
         if not existing_player:
             raise ValueError("Player does not exist")
-        
+        existing_players = existing_colony.players
+        if user_id in existing_players:
+            existing_players.remove(int(user_id))
+            update_colony(colony_id, {"players": existing_players})
+        else:
+            raise ValueError("User ID not found in the players list")
         session.delete(existing_player)
         session.commit()
         session.close()
@@ -263,6 +311,7 @@ def delete_colony(colony_id, user_id):
           session.commit()
           session.close()
           return True
+     
 def delete_technique(colony_id, user_id):
      with Session(engine) as session:
           existing_tech= session.query(Technique).filter_by(colony_id=colony_id, user_id=user_id).first()

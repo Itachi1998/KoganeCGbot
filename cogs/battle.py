@@ -1,7 +1,9 @@
-import discord, pagination
+import discord, pagination, game, db
+from game import Player, Enemy
+from db import read_player, read_colony, update_player,  update_colony, update_enemy, update_technique, read_technique, read_enemy, create_enemy
+
 from discord.ext import commands
 from discord import app_commands
-
 def healthbar(health, max_health):
     max_dashes = 4
     dash_ratio = max_health / max_dashes
@@ -38,6 +40,8 @@ class Battle(commands.Cog):
     async def on_ready(self):
         print("Battle cog is ready!")
 
+
+    
   
     # @app_commands.command(name="slash", description="Example of a slash command")
     # async def slash(self, interaction: discord.Interaction):
