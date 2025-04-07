@@ -169,7 +169,7 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
                 return results
             
 
-def counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed):
+def counter_check(target, player, defense, attack, dmg, speed, defense_strength):
             
             if defense.act_speed > attack.act_speed:
                 speed_diff = max(defense.speed - speed, 0)
@@ -185,7 +185,6 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
                 print(f"{defense.name} was too slow to counter {attack.name}")
                 return ("hit", dmg, target.hp <=0, target.max_hp <=0)
             else:
-            
                 if defense.soul:
                     player.max_hp -= defense.soul
                
@@ -197,13 +196,15 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
                 
                 if defense.charge:
                     target.charge = target.charge
-                counter_dmg = defense.strength  # subtract player.imbue
+                    
+                counter_dmg = defense_strength
+                 # subtract player.imbue
                 if target.equipped:
                     items=[item for item in target.equipped ]
                     for item in items:
                         counter_dmg += item.strength
                         print(f"{item.name} adds {item.strength} to counter damage")        
-                player.hp -= counter_dmg
+                player.hp -= counter_dmg 
                 results = ("counter", counter_dmg, player.hp <=0, player.max_hp <=0)
                 print(f"{defense.name} was able to counter {attack.name} for {counter_dmg}")
                 return results
@@ -340,8 +341,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 results= negate_check(target, dmg, attack=attack)
                 return results
         
-     
-    
     # tank check
         if defense.type == 'tank':
             print(f"{defense.name} tank check against {attack.name}")
@@ -358,8 +357,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             results = dodge_check(target, defense, attack, dmg)
             return results            
         
-
-
 
 test_player1 = Player(
      name="Uraume",

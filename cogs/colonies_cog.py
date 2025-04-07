@@ -1,6 +1,6 @@
 import os, dotenv, datetime
 from datetime import datetime
-from db import create_colony,read_colony, update_colony
+from db import create_colony,read_colony, update_colony, create_enemy
 from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
@@ -14,47 +14,99 @@ load_dotenv(dotenv)
 
 log_channel = os.getenv("LOGCHANNEL")
 
-
-
 # Update after postgres database is set up
 
 class Colonies(commands.Cog):
     def __init__(self, bot):
                 self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_join(self, guild):
+        colony_data = {
+            'name': guild.name,
+            'colony id': guild.id,
+            'create date': datetime.now().astimezone().strftime("%c"),
+            'colony color': 'gray',
+            'players': [],
+            'enemies': [],
+            'items': [],
+            'ce': 0,
+            'xp': 0,
+            'leaderboard': [],
+            'color': "black",
+            'six eyes': False,
+         }
+        
+        colony = create_colony(colony_data)
+        channel = self.bot.get_channel(int(log_channel))
+        if channel:
+            await channel.send(f"Bot joined new server. New colony created: {guild.name}")
+        print("Colony added: " + guild.name)
+        print(colony)
+        return     
+
     @commands.command(name="colony", description="Sync colonies")
     async def colony(self, ctx):
-            for guild in self.bot.guilds:
-                enemies = [enemy() for enemy in game.Enemy.__subclasses__()]
-                for e in enemies:
-                      print(e)
-                colony_data = {
-                    'name': guild.name,
-                    'colony id': guild.id,
-                    'owner id': guild.owner_id,
-                    'creation date': datetime.now().astimezone().strftime("%c"),
-                    'colony color': 'gray',
-                    'districts': [],
-                    'players': [],
-                    'enemies': enemies,
-                    'items': [],
-                    'ce': 0,
-                    'xp': 0,
-                    'shop': [],
-                    'rules': [],
-                    'graveyard': [],
-                    'leaderboard': [],
-                    'color' : "black"
-                }
-                existing_col = read_colony(guild.id)
-                if existing_col:
-                     await ctx.send("colony already exists: " + guild.name)
-                     return False
-                if self.bot.is_owner(ctx.author.id):
-                    create_colony(colony_data)
-                    await ctx.send("colony added: " + guild.name)
-            
-        
+        if ctx.author.id != self.bot.owner_id:
+            await ctx.send("You are not the owner of this bot.")
+            return
+
+        for guild in self.bot.guilds:
+            enemies = [enemy_class() for enemy_class in game.Enemy.__subclasses__()]
+            enemy_dicts = [enemy.__dict__ for enemy in enemies]
+
+            for e in enemy_dicts:
+                body_parts_dict = {}
+                for part in e['bodyparts']:
+                    body_parts_dict[part] = e['bodyparts'][part].__dict__
+
+                e['bodyparts'] = body_parts_dict
+            for e in enemies:
+                print(e)
+            for e in enemies:
+                new_enemy_dict = {
+                        'name': e.name,
+                        'level': e.level,
+                        'ce': e.ce,
+                        'max hp': e.max_hp,
+                        'max ce': e.max_ce,
+                        'strength': e.strength,
+                        'speed': e.speed,
+                        'hp': e.hp,
+                        'xp': e.xp,
+                        'cgp' : e.cgp,
+                        'bodyparts': e.bodyparts,
+                        'technique': e.technique,
+                        'playerclass': e.playerclass,
+                        'tamed': e.tamed,
+                        'colony id': guild.id,
+                        'killed' : e.killed,
+                        'respawn' : e.timer
+                 }
+                create_enemy(new_enemy_dict)      
+            colony_data = {
+                'name': guild.name,
+                'colony id': guild.id,
+                'creation date': datetime.now().astimezone().strftime("%c"),
+                'colony color': 'gray',
+                'players': [],
+                'enemies': [],
+                'items': [],
+                'ce': 0,
+                'xp': 0,
+                'leaderboard': [],
+                'color': "black",
+                'six eyes': False,
+            }
+            existing_col = read_colony(guild.id)
+            if existing_col:
+                await ctx.send("Colony already exists: " + guild.name)
+                continue
+
+            colony = create_colony(colony_data)
+            await ctx.send("Colony added: " + guild.name)
+            print("Colony added: " + guild.name)
+            print(colony)
        
 
 async def setup(bot):

@@ -68,7 +68,7 @@ auspicious_beasts_summon={
                }
           }
      ],
-"Rarity" : 80
+"Rarity" : 50
 }
 
 
@@ -153,13 +153,13 @@ bird_manip = {
                }
           }
      ],
-"Rarity" : 80
+"Rarity" : 50
 }
 
 
 # region ### BLOOD MANIP
 blood_manip= {
-    "Blood Manip" : 
+    "Blood Manipulation" : 
           [
                {
                     "Attack" : 
@@ -383,7 +383,7 @@ ce_discharge={
                }
           }
      ],
-"Rarity" : 20
+"Rarity" : 30
 }
 
 
@@ -833,7 +833,7 @@ cursed_speech={
                 }
           }
      ],
-     "Rarity" : 80
+     "Rarity" : 50
 }
 
 
@@ -949,7 +949,7 @@ hr_zero={
                }
           }
      ],
-"Rarity" : 20
+"Rarity" : 15
 }
 
 
@@ -1077,7 +1077,7 @@ ice_manip={
                }
           }
      ],
-"Rarity" : 10
+"Rarity" : 15
 }
 
 
@@ -1128,7 +1128,7 @@ idle_transfig={
                               speed=600,
                               type="summon",
                               summon={"Polymorphic Soul Isomer" : {"Speed" : 600, "strength" : 700, "Max CE" : 200}}
-                         )
+                         ),
 
                     "ISBODK Transform" :
                          Techniques(
@@ -1205,8 +1205,8 @@ idle_transfig={
                               strength=1000,
                               speed=9999,
                               type="closed",
-                              int_strength=30,
-                              ext_strength=30,
+                              intern_strength=30,
+                              extern_strength=30,
                               sure_hit=True
 
                          )
@@ -1302,7 +1302,7 @@ limitless={
                          name="Infinty",
                          level=1,
                          act_speed=0,
-                         act_cost=1,
+                         act_cost=100,
                          act_body=("Full"),
                          aoe=1,
                          strength=9999,
@@ -1315,7 +1315,7 @@ limitless={
                          name="Blue",
                          level=1,
                          act_speed=1,
-                         act_cost=50,
+                         act_cost=350,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=(1, 5),
                          strength=1000,
@@ -1328,7 +1328,7 @@ limitless={
                          name="Red",
                          level=2,
                          act_speed=2,
-                         act_cost=50,
+                         act_cost=350,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=1600,
@@ -1341,7 +1341,7 @@ limitless={
                          name="Void Punch",
                          level=4,
                          act_speed=1,
-                         act_cost=25,
+                         act_cost=325,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=500,
@@ -1358,15 +1358,15 @@ limitless={
                              name="Infinate Void",
                              level=5,
                              act_speed=2,
-                             act_cost=300,
+                             act_cost=600,
                              act_body=("Right Arm"),
                               aoe=10,
                               strength=2000,
                               speed=9999,
                               type="closed",
                               stun=99,
-                              int_strength=50,
-                              ext_strength=50,
+                              intern_strength=50,
+                              extern_strength=50,
                               sure_hit=True
 
                          )
@@ -1374,8 +1374,7 @@ limitless={
           }
      ],
 "Rarity" : 3,
-"Six Eyes" : True,
-"Activated" : False # Infinity
+"Six Eyes" : True
 }
 
 
@@ -1526,7 +1525,7 @@ projection_sorcery={
                }
           }
      ],
-"Rarity" : 25
+"Rarity" : 30
 }
 
 
@@ -1938,7 +1937,7 @@ straw_doll={
                }
           }
      ],
-"Rarity" : 40
+"Rarity" : 30
 }
 
 
@@ -2086,7 +2085,7 @@ ten_shadows={
                 }
             }
         ],
-"Rarity" : 15
+"Rarity" : 5
 }
 
 

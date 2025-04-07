@@ -26,11 +26,19 @@ class GameMode(enum.IntEnum):
 
 class BodyPart:
     def __init__(self, name, max_hp, max_ce=None, soul=None):
-        self.max_ce=max_ce
+        self.max_ce = max_ce
         self.name = name
         self.max_hp = max_hp
         self.hp = max_hp
-
+        self.soul = soul
+        __dict__ = {
+                "name": name,
+                "max_hp": max_hp,
+                "max_ce": max_ce,
+                "soul": soul,
+                "destroyed": self.is_destroyed(),
+                "stunned": self.is_stunned()
+         }
     def take_damage(self, damage):
         self.hp -= damage
         if self.hp < 0:
@@ -43,12 +51,13 @@ class BodyPart:
          
     def is_destroyed(self):
         return self.hp <= 0
-human_body_parts = [
-    {"head" : BodyPart('Head', 0)},
-    {"arm_left" : BodyPart('Left Arm', 0)},
-    {"arm_right" : BodyPart('Right Arm', 0)},
-    {"torso" : BodyPart('Torso', 100)}
-]
+    
+
+human_body_parts = {"Head" : BodyPart('Head', 0, 0),
+    "Left Arm" : BodyPart('Left Arm', 0,0),
+    "Right Arm" : BodyPart('Right Arm', 0, 0),
+    "Torso" : BodyPart('Torso', 0, 0)}
+
 
 # class Character:
    # def __init__(self, name):
@@ -235,13 +244,12 @@ class Actor:
     #          pass
      
 # region Enemy
-
 class Enemy(Actor):
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony,
-                inventory: list, equipped: list, xp: int, cgp: int, 
-                stack=0, poison: tuple=None,charge: tuple=None, 
-                stunned: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
-                debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None):
+    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass,  xp: int, cgp: int, 
+                stack=0, colony:int = None,
+                inventory: list = None, equipped: list = None, poison: tuple=None,charge: tuple=None, 
+                stun: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
+                debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
         try:   
             super().__init__(
                 name, 
@@ -271,7 +279,7 @@ class Enemy(Actor):
             self.cgp = cgp
             self.stacked = stack
             self.charged = charge
-            self.stunned = stunned
+            self.stun = stun
             self.hi = hi
             self.hr = hr
             self.prescience = prescience
@@ -282,6 +290,11 @@ class Enemy(Actor):
             self.healed=healed
             self.bodyparts=bodyparts
             self.tamed=tamed
+            self.quantity=quantity
+            self.soul = soul
+            self.status=status
+            self.killed=killed
+            self.timer=timer
 
         except:
             traceback.print_exc()
@@ -303,10 +316,11 @@ class Player(Actor):
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
-                    rct: tuple=None, #(0-2 , 0-1) # in first index sets if player has rct and if so what strength - second # is to set rct to active (1) or inactive (0)
-                    healed: int=None,
+                    rct: tuple=None, #(1, 2, 3) 
+                    heal: dict=None,
+                    self_heal: int=None,
                     killcount: list=None, buffed: list=None, 
-                    debuffed: list=None, status: str=None, grade=None):
+                    debuffed: list=None, status: str=None, grade=None, soul: dict=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
           self.xp = xp
@@ -327,13 +341,16 @@ class Player(Actor):
           self.hr=hr
           self.hi =hi
           self.rct = rct
-          self.healed=healed
+          self.heal = heal
+          self.self_heal = self_heal
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
           self.charge= charge
           self.status=status
           self.grade=grade
+          self.soul=soul
+          self.heal = heal
           
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
@@ -343,7 +360,7 @@ class Player(Actor):
               "Left Leg": BodyPart(name='Left Leg', max_hp=self.max_hp * 10 // 100),
               "Right Leg": BodyPart(name='Right Leg', max_hp=self.max_hp * 10 // 100)
           }
-          self.body_parts = humanoid_body
+          self.bodyparts = humanoid_body
           
           
         except:
@@ -521,7 +538,8 @@ class Player(Actor):
 class Grade4_Bugfly(Enemy):
     def __init__(self):
         
-        super().__init__(name="Bugfly", 
+        super().__init__(
+             name="Bugfly", 
              level=1,
              max_hp=15, 
              max_ce=20, 
@@ -530,12 +548,14 @@ class Grade4_Bugfly(Enemy):
              xp=10, 
              cgp=1, 
              technique="Bugfly", 
-             playerclass="curse4", 
+             playerclass="Curse", 
              quantity=random.randrange(1, 8),
              bodyparts={
-            "Head" : BodyPart(name="Head", max_hp=15 * 50 % 100, max_ce=20 * 50 % 100), 
-            "Torso" : BodyPart(name="Head", max_hp=15 * 50 % 100, max_ce=20 * 50 % 100)
-            }
+            "Head" : BodyPart(name="Head", max_hp=15, max_ce=20), 
+        
+            },
+            timer=0,
+            killed=False
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -544,7 +564,7 @@ class Grade4_Bugfly(Enemy):
             
 class  Grade4_Floatjelly(Enemy):
     def __init__(self):
-          super.init(
+          super().__init__(
              name="FloatJelly", 
              level=1, 
       
@@ -556,10 +576,12 @@ class  Grade4_Floatjelly(Enemy):
              xp=10, 
              cgp=1, 
              technique="Floatjelly", 
-             playerclass="curse4", 
+             playerclass="Curse", 
              quantity=random.randrange(1, 6), 
              stun=1,
-             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)})
+             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
+             timer=0,
+             killed=False)
           self.hp = self.max_hp
           self.ce = self.max_ce
 
@@ -567,7 +589,7 @@ class  Grade4_Floatjelly(Enemy):
 class Grade4_Flymouth(Enemy):
     min_level= 1
     def __init__(self):
-          super.init(
+          super().__init__(
              name="Flymouth", 
              level="1", 
              max_hp=30, 
@@ -577,44 +599,42 @@ class Grade4_Flymouth(Enemy):
              xp=10, 
              cgp=1, 
              technique="Flymouth", 
-             playerclass="curse4", 
+             playerclass="Curse", 
              quantity=random.randrange(1, 4),
              poison=(3, 1),
-             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)}
-             )
+             bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
+             timer=0,
+             killed=False)
     
           self.hp = self.max_hp
           self.ce = self.max_ce
           
-class Grade3_Backhand(Enemy):
+class Grade3_Barehand(Enemy):
 
     def __init__(self):
-          super.init(
-              name="Backhand", 
+          super().__init__(
+              name="Barehand Curse", 
              level=1, 
-             hp=150, 
+        
              max_hp=150, 
-             ce=100, 
+   
              max_ce=100, 
              strength=80, 
              speed=120, 
              xp=50, 
              cgp=1, 
              technique="Backhand", 
-             playerclass="curse3", 
+             playerclass="Curse", 
              quantity=random.randrange(1, 3),
-             bodyparts=self.grade3_Curse
-             )
-          self.head = BodyPart(name='Head', max_hp=self.max_hp * 10// 100, max_ce=self.max_ce * 10 // 100)
-          self.torso = BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce * 50// 100)
-          self.legs = BodyPart(name='Legs', max_hp = self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-          self.arms = BodyPart(name='Arms', max_hp= self.max_hp * 20 // 100, max_ce = self.max_ce * 20 // 100)
-          self.hp = self.max_hp
-          self.ce = self.max_ce
+ bodyparts= {"Head" : BodyPart(name='Head', max_hp=150 * 20// 100, max_ce=100 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=150 * 50 // 100, max_ce=100 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=150 * 30 // 100, max_ce = 150 * 30 //100)}
+ ,
+ timer=60,
+ killed=False)
+  
 
 class Grade3_Furrpede(Enemy):
     def __init__(self):
-        super.init(
+        super().__init__(
              name="Furrpede", 
              level=1,  
              max_hp=200, 
@@ -624,16 +644,20 @@ class Grade3_Furrpede(Enemy):
              xp=50, 
              cgp=1, 
              technique="Furrpede", 
-             playerclass="curse3", 
+             playerclass="Curse", 
              quantity=random.randrange(1,3),
-             bodyparts=self.grade3_Curse
+             bodyparts={"Head": BodyPart(name="Head", max_hp=200 * 20 // 100, max_ce=50 * 20 // 100), 
+                        "Torso": BodyPart(name="Torso", max_hp=200 * 50 // 100, max_ce=50 * 50 // 100), 
+                        "Legs": BodyPart(name="Legs", max_hp=200 * 30 // 100, max_ce=50 * 30 // 100)},
+            timer=60,
+            killed=False
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
 
 class Grade3_AnxiousEars(Enemy):
     def __init__(self):
-        super.init(
+        super().__init__(
              name="Anxious Ears", 
              level=15, 
              max_hp=250, 
@@ -643,10 +667,11 @@ class Grade3_AnxiousEars(Enemy):
              xp=100, 
              cgp=1, 
              technique="AnxiousEars", 
-             playerclass="curse3", 
+             playerclass="Curse", 
              quantity=random.randrange(1,3),
-             bodyparts=self.grade3_Curse
-             )
+             bodyparts={"Head" : BodyPart(name='Head', max_hp=250 * 20// 100, max_ce=200 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=250 * 50 // 100, max_ce=200 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=250 * 30 // 100, max_ce = 200 * 30 //100)}
+             , timer=60,
+             killed=False)
 
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -654,7 +679,7 @@ class Grade3_AnxiousEars(Enemy):
 
 class Grade2_Stinkaspor(Enemy):
     def __init__(self):
-        super.init(
+        super().__init__(
              name="Stinkaspor", 
              level=30,
              max_hp=350, 
@@ -664,10 +689,12 @@ class Grade2_Stinkaspor(Enemy):
              xp=200, 
              cgp=1, 
              technique="Stinkaspor", 
-             playerclass="curse2",
+             playerclass="Curse",
              quantity=random.randrange(1, 2),
-             bodyparts=self.grade2_Curse
-             )
+             bodyparts={"Head" : BodyPart(name='Head', max_hp=350 * 20// 100, max_ce=350 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=350 * 50 // 100, max_ce=350 * 50 // 100), "Stingers" : BodyPart(name="Stingers", max_hp=350 * 30 // 100, max_ce = 350 * 30 //100)}
+             ,
+             timer=60,
+             killed=False)
  
         self.hp = self.max_hp
         self.ce = self.max_ce
@@ -675,10 +702,10 @@ class Grade2_Stinkaspor(Enemy):
              
 
 
-class Grade2_Monkeybrain(Enemy):
+class Grade2_Primate(Enemy):
     def __init__(self):
-        super.init(
-             name="Monkeybrain", 
+        super().__init__(
+             name="Primate", 
              level=30, 
              max_hp=300,
              max_ce=350, 
@@ -686,11 +713,13 @@ class Grade2_Monkeybrain(Enemy):
              speed=150, 
              xp=200,
              cgp=1, 
-             technique="Monkeybrain",
-             playerclass="curse2",
+             technique="Primate",
+             playerclass="Curse",
              quantity=random.randrange(1,2),
-             bodyparts=self.grade2_Curse
-              )
+             bodyparts={"Head" : BodyPart(name='Head', max_hp=300 * 20// 100, max_ce=350 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=300 * 50 // 100, max_ce=350 * 50 // 100), "Arms" : BodyPart(name="Arms", max_hp=300 * 15 // 100, max_ce = 350 * 30 //100), "Legs" : BodyPart(name="Legs", max_hp=300*15//100, max_ce = 350 * 30 // 100)}
+              ,
+              timer=60,
+              killed=False)
         self.hp = self.max_hp
         self.ce = self.max_ce
         
@@ -700,27 +729,27 @@ class Grade2_Monkeybrain(Enemy):
 
 class Grade1_Orbmaster(Enemy):
     def __init__(self ):
-        super.init(
+        super().__init__(
              name="OrbMaster", 
              level=40, 
-    
              max_hp=400, 
- 
              max_ce=500, 
              strength=200, 
              speed=300, 
              xp=400, 
              cgp=1, 
              technique="Orbmaster", 
-             playerclass="curse1",
-             bodyparts=self.humanoid_body)
+             playerclass="Curse",
+             bodyparts=human_body_parts,
+             timer=300,
+             killed=False)
         self.hp = self.max_hp
         self.ce = self.max_ce
 
 
 class Grade1_Charger(Enemy):
     def __init__(self):
-            super.init(
+            super().__init__(
                  name="Charger", 
                  level=40, 
          
@@ -732,8 +761,10 @@ class Grade1_Charger(Enemy):
                  xp=400, 
                  cgp=1, 
                  technique="Charger", 
-                 playerclass="curse1",
-                 bodyparts=self.humanoid_body
+                 playerclass="Curse",
+                 bodyparts=human_body_parts,
+                 timer=300,
+                 killed=False
                  )
             self.hp = self.max_hp
             self.ce = self.max_ce
@@ -741,7 +772,7 @@ class Grade1_Charger(Enemy):
 
 class SpecialGrade_FingerBearer(Enemy):
     def __init__(self):
-          super.init(
+          super().__init__(
              name="Fingerbearer", 
              level=80, 
      
@@ -753,15 +784,17 @@ class SpecialGrade_FingerBearer(Enemy):
              xp=600,
              cgp=1,
              technique="Fingerbearer",
-             playerclass="curse0",
-             bodyparts=self.humanoid_body)
+             playerclass="Curse",
+             bodyparts=human_body_parts,
+             timer=300,
+             killed=False)
           self.hp = self.max_hp
           self.ce = self.max_ce
 
 
 class SpecialGrade_DisasterFlames(Enemy):
         def __init__(self):
-            super.init(
+            super().__init__(
                         name="Disaster Flames",
                         level=80, 
                    
@@ -773,8 +806,10 @@ class SpecialGrade_DisasterFlames(Enemy):
                         xp=1000, 
                         cgp=1, 
                         technique="Disaster Flames", 
-                        playerclass="curse0",
-                        bodyparts=self.humanoid_body
+                        playerclass="Curse",
+                        bodyparts=human_body_parts,
+                        timer=300,
+                        killed=False
                         )
             self.hp = self.max_hp
             self.ce = self.max_ce
@@ -786,7 +821,7 @@ class SpecialGrade_DisasterFlames(Enemy):
 
 class SpecialGrade_NatureSpirit(Enemy):
         def __init__(self):
-            super.init(name="Nature Spirit",
+            super().__init__(name="Nature Spirit",
                        level=80, 
                 
                        max_hp=1200, 
@@ -798,7 +833,9 @@ class SpecialGrade_NatureSpirit(Enemy):
                        cgp=1, 
                        technique="Nature Spirit", 
                        playerclass="curse",
-                       bodyparts=self.humanoid_body
+                       bodyparts=human_body_parts,
+                       timer=300,
+                       killed=False
                        )
    
             self.hp = self.max_hp
@@ -807,7 +844,7 @@ class SpecialGrade_NatureSpirit(Enemy):
 
 class SpecialGrade_TideCurse(Enemy):
        def __init__(self):
-        super.init(name="Tide Curse",
+        super().__init__(name="Tide Curse",
                    level=60,
                 
                    max_hp=800, 
@@ -817,16 +854,19 @@ class SpecialGrade_TideCurse(Enemy):
                    speed=800, 
                    xp=1000, 
                    cgp=1, 
-                   technique="Tide Curse", 
-                   playerclass="curses",
-                   bodyparts=self.humanoid_body
+                   technique="Disaster Tides", 
+                   playerclass="Curse",
+                   bodyparts=human_body_parts,
+                   timer=300,
+                   killed=False
         )
         self.hp = self.max_hp
         self.ce = self.max_ce
         
-class SpecialGrade_Satasha(Enemy):
+class SpecialGrade_Soul_Curse(Enemy):
        def __init__(self):
-        super.init(name="Satasha",
+        super().__init__(
+                    name="Soul Curse",
                    level=80, 
             
                    max_hp=1000,
@@ -836,9 +876,12 @@ class SpecialGrade_Satasha(Enemy):
                    speed=800,
                    xp=1000,
                    cgp=1,
-                   technique="Satasha",
-                   playerclass="curses",
-                   bodyparts=self.humanoid_body
+                   technique="Idle Transfiguration",
+                   playerclass="Curse",
+                   bodyparts=human_body_parts,
+                   soul=500,
+                   timer=300,
+                   killed=False
                    )
      
         self.hp = self.max_hp
@@ -848,7 +891,7 @@ class SpecialGrade_Satasha(Enemy):
 
 class Toji(Enemy):
            def __init__(self):
-            super.init(name="Toji",
+            super().__init__(name="Toji",
                        level=100,
                        max_hp=1200,
                        max_ce=0,
@@ -857,8 +900,10 @@ class Toji(Enemy):
                        xp=1200,
                        cgp=5,
                        technique="Toji", 
-                       playerclass="reincarnated",
-                       bodyparts=self.humanoid_body
+                       playerclass="Reincarnate",
+                       bodyparts=human_body_parts,
+                       timer=300,
+                       killed=False
                        )
             self.hp = self.max_hp
             self.ce = self.max_ce
@@ -867,7 +912,7 @@ class Toji(Enemy):
 
 class Reggie(Enemy):
         def __init__(self):
-                super.init(name="Reggie", 
+                super().__init__(name="Reggie", 
                            level=60,
                          
                            max_hp=600,
@@ -878,15 +923,17 @@ class Reggie(Enemy):
                            xp=1000,
                            cgp=5,
                            technique="Reggie",
-                           playerclass="reincarnated",
-                           bodyparts=self.humanoid_body
+                           playerclass="Reincarnate",
+                           bodyparts=human_body_parts,
+                           timer=300,
+                           killed=False
                 )
 
                 self.hp = self.max_hp
                 self.ce = self.max_ce
 class Uro(Enemy):
         def __init__(self):
-                        super.init(name="Uro",
+                        super().__init__(name="Uro",
                                    level=80,
                              
                                    max_hp=800,
@@ -897,23 +944,29 @@ class Uro(Enemy):
                                    xp=1000,
                                    cgp=5,
                                    technique="Uro",
-                                   playerclass="reincarnated",
-                                   bodyparts=self.humanoid_body
+                                   playerclass="Reincarnate",
+                                   bodyparts=human_body_parts,
+                                   timer=300,
+                                   killed=False
                                    )
                         self.hp = self.max_hp
                         self.ce = self.max_ce
 class Ryu(Enemy): 
      def __init__(self):
-          super.init(name="Ryu",
+          super().__init__(
+                    name="Ryu",
+                    level=100,
                      max_hp=1000,
                      max_ce=1200,
                      strength=1000,
                      speed=1000,
                      xp=1000,
                      cgp=5,
-                     technique="Ryu",
-                     playerclass="reincarnated",
-                     bodyparts=self.humanoid_body
+                     technique="Cursed Energy Discharge",
+                     playerclass="Reincarnate",
+                     bodyparts=human_body_parts,
+                     timer=300,
+                     killed=False,
                      )
           self.hp = self.max_hp
           self.ce = self.max_ce
@@ -922,7 +975,9 @@ class Ryu(Enemy):
 
 class Kashimo(Enemy):
      def __init__(self):
-          super.init(name="Kashimo",
+          super().__init__(
+                    name="Kashimo",
+                    level=150,
                      max_hp=1500,
                      max_ce=1600,
                      strength=1800,
@@ -930,18 +985,20 @@ class Kashimo(Enemy):
                      xp=1500,
                      cgp=5,
                      technique="Kashimo",
-                     playerclass="reincarnated",
+                     playerclass="Reincarnate",
                      stun=2,
                      soul={"strength" : 100},
-                     bodyparts=self.humanoid_body
+                     bodyparts=human_body_parts,
+                     timer=500,
+                     killed=False
                      )
           self.hp = self.max_hp
           self.ce = self.max_ce
 
-class KungOfCurses(Enemy):                  
+class KingOfCurse(Enemy):                  
         def __init__(self, **kwargs):
-                super.init(name="King of Curses", 
-                           level=100, 
+                super().__init__(name="King of Curse", 
+                           level=150, 
                       
                            max_hp=7000, 
                    
@@ -949,10 +1006,13 @@ class KungOfCurses(Enemy):
                            strength=5000, 
                            speed=5000, 
                            xp=2000, 
-                           cgp=5, 
-                           technique="King of Curses", 
-                           playerclass="reincarnated",
-                           bodyparts=self.humanoid_body
+                           cgp=5,
+                           technique="Shrine",
+                            playerclass="Reincarnate",
+                           bodyparts=human_body_parts,
+                           timer=500,
+                           killed=False
+                    
                            )
                 self.hp = self.max_hp
                 self.ce = self.max_ce
@@ -960,18 +1020,20 @@ class KungOfCurses(Enemy):
 
 class Kenjaku(Enemy):
         def __init__(self, ):
-                super.init(
+                super().__init__(
                      name="Kenjaku", 
-                     level=100, 
+                     level=150, 
                      max_hp=3000, 
                      max_ce=2000, 
                      strength=2000, 
                      speed=2000, 
                      xp=2000, 
-                     cgp=1, 
-                     technique="Kenjaku",
-                     playerclass="reincarnated",
-                     bodyparts=self.humanoid_body
+                     cgp=5, 
+                     technique="Body Hop: Anti Gravity Manipulation",
+                     playerclass="Reincarnate",
+                     bodyparts=human_body_parts,
+                     timer=500,
+                     killed=False
                      )                
                 self.hp = self.max_hp
                 self.ce = self.max_ce
