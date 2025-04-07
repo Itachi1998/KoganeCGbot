@@ -84,7 +84,7 @@ class Mahoraga(Enemy):
 
     }
     
-    def __init__(self):
+    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, inventory, equipped, xp, cgp, bodyparts):
         super().__init__(
             name="Mahoraga",
             level=1,
@@ -92,7 +92,7 @@ class Mahoraga(Enemy):
             max_ce=1000,
             strength=1000,
             speed=1000,
-            technique=tech,
+            technique=None,
             playerclass="summon",
             colony=0,
             inventory=["Dharma Chakra Wheel"],
@@ -101,3 +101,21 @@ class Mahoraga(Enemy):
             cgp=0,
             bodyparts=human_body_parts
         )
+
+
+mahoraga = Mahoraga(name="Mahoraga",
+            level=1,
+            max_hp=1000,
+            max_ce=1000,
+            strength=1000,
+            speed=1000,
+            technique=None,
+            playerclass="summon",
+            colony=0,
+            inventory=["Dharma Chakra Wheel"],
+            equipped=["Dharma Chakra Wheel"],
+            xp=10000,
+            cgp=0,
+            bodyparts=human_body_parts)
+
+summons_list=[mahoraga]
