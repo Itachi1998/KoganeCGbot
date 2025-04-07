@@ -1130,18 +1130,18 @@ idle_transfig={
                               summon={"Polymorphic Soul Isomer" : {"Speed" : 600, "strength" : 700, "Max CE" : 200}}
                          )
 
-                    # "ISBODK Transform" : # make a general move like a domain?
-                    #      Techniques(
-                    #           name="ISBODK Transform",
-                    #           level=3,
-                    #           act_speed=2,
-                    #           act_cost=150,
-                    #           act_body=("Full"),
-                    #           aoe=0,
-                    #           strength=1200,
-                    #           speed=1000,
-                    #           type="transform" ###
-                    #         )
+                    "ISBODK Transform" :
+                         Techniques(
+                              name="ISBODK Transform",
+                              level=3,
+                              act_speed=2,
+                              act_cost=150,
+                              act_body=("Full"),
+                              aoe=0,
+                              strength=1200,
+                              speed=1000,
+                              type="transform"
+                            )
                }
           },
 
@@ -1174,6 +1174,19 @@ idle_transfig={
                             strength=200,
                             speed=800,
                             type="dodge"
+                            ),
+                    
+                    "ISBODK Transform" :
+                         Techniques(
+                              name="ISBODK Transform",
+                              level=3,
+                              act_speed=2,
+                              act_cost=150,
+                              act_body=("Full"),
+                              aoe=0,
+                              strength=1200,
+                              speed=1000,
+                              type="transform"
                             )
            
                }
