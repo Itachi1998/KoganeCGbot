@@ -1,13 +1,32 @@
 import game, random
-from game import Player
+from summons import Mahoraga
+from game import Player, Enemy
 from player_tech import technique_list
+from enemy_techs import enemy_techs
 from cursed_tools import cursed_tools
 # check if the player can use the attack before starting the checks
 
 
+mahoraga = Mahoraga()
+print(mahoraga)
 
-def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?      
-    tech =[tech for tech in technique_list if next(iter(tech)) == player.technique]
+def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?     
+    tech = None 
+    enemy=False
+    player=False
+
+    if isinstance(player, Enemy):
+        if player.name in enemy_techs:
+            tech = enemy_techs[player.technique]
+            print(f"Technique for {player.name} : {tech}")
+            enemy=True
+
+    elif isinstance(player, Player):
+        if player.technique in technique_list:
+            tech = [t for t in technique_list if next(iter(t)) == player.name]
+            print(f"Technique for {player.name} : {tech}")
+            player = True
+
     if tools:
         new_tools_dict = [(k, v) for k, v in cursed_tools.items() if k in tools]
         new_tools = []
@@ -17,15 +36,21 @@ def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?
         return new_tools
 
     if attack:
-        print("Getting attack for " + player.technique + " " + attack)
-        print(tech)
-        new_attack = tech[0][player.technique][0]['Attack'][attack]
-        return new_attack
+
+        print("Getting attack for "  + attack + "for " + tech)
+        if player:
+            new_attack = tech[0][player.technique][0]['Attack'][attack]
+            return new_attack
+        if enemy:
+             new_attack = tech[0]['Attack'][attack]
+             return new_attack
     
     if defense:
-
-        new_defense = tech[0][player.technique][1]["Defend"][defense]
-        return new_defense
+        if player:
+            new_attack = tech[0][player.technique][0]['Defend'][defense]
+            return new_attack
+        if enemy:
+             new_attack = tech[0]['Defend'][defense]
     
 
 
@@ -396,6 +421,5 @@ test_player2= Player(
 
 )
 
-results = battle_checks(test_player1, test_player2, "Transmutate", "Heavenly Body")
-
+results = battle_checks(mahoraga, test_player2, "Sword Swing", "Heavenly Body")
 print(results)
