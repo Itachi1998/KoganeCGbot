@@ -21,3 +21,5 @@ class Mahoraga(Enemy):
             cgp=0,
             bodyparts=human_body_parts
         )
+
+        self.imbue=0

@@ -295,6 +295,7 @@ class Enemy(Actor):
             self.status=status
             self.killed=killed
             self.timer=timer
+            self.imbue=0
 
         except:
             traceback.print_exc()
@@ -997,7 +998,7 @@ class Kashimo(Enemy):
 
 class KingOfCurse(Enemy):                  
         def __init__(self, **kwargs):
-                super().__init__(name="King of Curse", 
+                super().__init__(name="King Of Curses", 
                            level=150, 
                       
                            max_hp=7000, 
@@ -1007,7 +1008,7 @@ class KingOfCurse(Enemy):
                            speed=5000, 
                            xp=2000, 
                            cgp=5,
-                           technique="Shrine",
+                           technique="King Of Curses",
                             playerclass="Reincarnate",
                            bodyparts=human_body_parts,
                            timer=500,
@@ -1016,6 +1017,7 @@ class KingOfCurse(Enemy):
                            )
                 self.hp = self.max_hp
                 self.ce = self.max_ce
+                
 
 
 class Kenjaku(Enemy):
@@ -1037,3 +1039,4 @@ class Kenjaku(Enemy):
                      )                
                 self.hp = self.max_hp
                 self.ce = self.max_ce
+             

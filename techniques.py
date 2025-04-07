@@ -9,7 +9,6 @@ class Techniques():
                  strength: int, # strength of attack or defense (will be used in attack vs defense checks, can be changed with binding vows)
                  speed: int, # speed of attack or defense (will be used in attack vs defense checks, can be changed with binding vows) 
                  type: str,
-                 imbue: int=0,
                  soul: int=None,
                  buff: tuple=None,
                  debuff: tuple=None,
