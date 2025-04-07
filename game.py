@@ -998,7 +998,7 @@ class Kashimo(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
 
-class KingOfCurse(Enemy):                  
+class KingOfCurses(Enemy):                  
         def __init__(self, **kwargs):
                 super().__init__(name="King Of Curses", 
                            level=150, 

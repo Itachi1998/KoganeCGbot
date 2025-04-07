@@ -22,7 +22,7 @@ class Techniques():
                  negates: bool =None,
                  duration: int=None,
                  cooldown: int=None,
-                 visable: bool=None,
+                 invisable: bool=None,
                  self_dmg: int=None,
                  self_heal: int=None,
                  heal: dict=None,
@@ -52,7 +52,7 @@ class Techniques():
             self.negates=negates
             self.duration=duration
             self.cooldown=cooldown
-            self.visable=visable
+            self.invisable=invisable
             self.self_dmg=self_dmg
             self.self_heal=self_heal
             self.heal=heal
