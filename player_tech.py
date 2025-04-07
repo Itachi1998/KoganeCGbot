@@ -244,6 +244,65 @@ blood_manip= {
 }
 
 
+# region ### Body Hop
+
+body_hop={
+     
+"Body Hop" :
+     [
+          {
+               "Attack" : # Need to make an option in the following turn after player or teammate defeats an opponent
+               {
+                    "Steal Body" :
+                         Techniques(
+                              name="Steal Body",
+                              level=1,
+                              act_speed=3,                              
+                              act_cost=1,
+                              act_body=("Head"),
+                              aoe=1,
+                              strength=0,
+                              speed=500,
+                              type="transform"
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Leave Body" :
+                         Techniques(
+                              name="Leave Body",
+                              level=1,
+                              act_speed=3,                              
+                              act_cost=1,
+                              act_body=("Head"),
+                              aoe=1,
+                              strength=0,
+                              speed=500,
+                              type="transform"
+                         ),
+                    
+                    "Rotate Head" : # ability to reduce dmg of attack to head by "spinning the top"
+                         Techniques(
+                              name="Rotate Head",
+                              level=5,
+                              act_speed=1,                              
+                              act_cost=1,
+                              act_body=("Head"),
+                              aoe=1,
+                              strength=100,
+                              speed=1000,
+                              type="dodge"
+                         )
+               }
+          }
+     ],
+"Rarity" : 5
+}
+
+
 # region ### BOOGIE WOOGIE
 boogie_woogie = {
 
@@ -2135,7 +2194,7 @@ ten_shadows={
 # }
 
 
-technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, boogie_woogie, 
+technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, body_hop, boogie_woogie, 
                   ce_discharge, comedian, construction, copy, cursed_speech, 
                   cursed_spirit_manip, hr_zero,ice_manip, idle_transfig, limitless, 
                   mba, projection_sorcery, shrine, sky_manip, star_rage, straw_doll, 
