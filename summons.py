@@ -1,9 +1,7 @@
 from game import Enemy, human_body_parts
-from techniques import Techniques
-
-
+ 
 class Mahoraga(Enemy):
-        
+
     def __init__(self):
         super().__init__(
             name="Mahoraga",

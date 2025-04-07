@@ -1003,6 +1003,19 @@ hr_zero={
                               strength=1200,
                               speed=9999,
                               type="tank"
+                         ),
+                         
+                    "Air Hop" : 
+                         Techniques(
+                              name="Air Hop",
+                              level=5,
+                              act_speed=2,
+                              act_cost=50,
+                              act_body=("full"),
+                              aoe=1,
+                              strength=0,
+                              speed=1500,
+                              type="dodge"
                          )
           
                }

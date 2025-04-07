@@ -1,35 +1,30 @@
 import game, random
 from summons import Mahoraga
-from game import Player, Enemy
+from game import Player, Enemy, KingOfCurse
 from player_tech import technique_list
 from enemy_techs import enemy_techs
 from cursed_tools import cursed_tools
-from summons import summons_list
 
+# check if the player can use the attack before starting the checks
 mahoraga = Mahoraga()
 print(mahoraga)
 
 def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?     
     tech = None 
-    enemy=False
-    player=False
-
+    is_player = False
+    is_enemy=False
+    print(f"Setting tech for {player.name}")
+    print(f"technique name: ")
     if isinstance(player, Enemy):
         if player.name in enemy_techs:
             tech = enemy_techs[player.technique]
-            print(f"Technique for {player.name} : {tech}")
-            enemy=True
+            print(f"Technique for {player.name} : {tech} set")
+            is_enemy=True
 
     elif isinstance(player, Player):
-        if player.technique in technique_list:
-            tech = [t for t in technique_list if next(iter(t)) == player.name]
-            print(f"Technique for {player.name} : {tech}")
-            player = True
-
-
-# check if the player can use the attack before starting the checks
-def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?      
-    tech =[tech for tech in technique_list if next(iter(tech)) == player.technique]
+            tech = [t for t in technique_list if next(iter(t)) == player.technique]
+            print(f"Technique for {player.name} : {tech} set")
+            is_player = True
 
     if tools:
         new_tools_dict = [(k, v) for k, v in cursed_tools.items() if k in tools]
@@ -41,24 +36,24 @@ def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?
 
     if attack:
 
-        print("Getting attack for "  + attack + "for " + tech)
-        if player:
+        print("Getting attack "  + attack + " for " + player.name)
+
+        if is_player:
             new_attack = tech[0][player.technique][0]['Attack'][attack]
             return new_attack
-        if enemy:
+        
+        if is_enemy:
              new_attack = tech[0]['Attack'][attack]
              return new_attack
     
     if defense:
-        if player:
-            new_attack = tech[0][player.technique][0]['Defend'][defense]
-            return new_attack
-        if enemy:
-             new_attack = tech[0]['Defend'][defense]
+        if is_player:
+            new_defense= tech[0][player.technique][1]['Defend'][defense]
+            return new_defense
+        if is_enemy:
+             new_defense = tech[1]['Defend'][defense]
+             return new_defense
 
-        new_defense = tech[0][player.technique][1]["Defend"][defense]
-        return new_defense
-    
 
 def attack_verify(player, attack):
     attack = get_move(player, attack=attack)
@@ -89,7 +84,6 @@ def defense_verify(target, defense):
     else:
         target.ce -= defense.act_cost + target.imbue
         return defense
-
 
 def type_multiply(player, attack=None, defense=None, tools=None):
     if attack:
@@ -124,7 +118,7 @@ def type_multiply(player, attack=None, defense=None, tools=None):
 
         return defense_strength, speed
 
-     
+
 # FINISH LATER
 def visability_check(target, dmg, attack=None, defense=None):
     rand = random.randint(1, 5)
@@ -244,19 +238,21 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength)
 def dodge_check(target, defense, attack, dmg, speed):
        # 8                  6
     if defense.act_speed > attack.act_speed:
-                
+                print(f"Unsuccessful defense activation calculating speed diff of {defense.name} and {attack.name}\nDefense speed: {defense.speed}\nAttack speed: {attack.speed}")
                 speed_diff = max(defense.speed - speed, 0)
                                 # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
+                print(f"Speed diff: {speed_diff}\nDividing by target grade")
                 attack_speed = speed/target.grade            
                                     # 1200 / 20
-                reduced_multiplier = speed_diff//attack_speed
+                print(f"Total attack speed divided by target grade: {attack_speed}")
+                print(f"Dividing speed diff: {speed_diff} by attack speed: {attack_speed}")
+                reduced_multiplier = speed_diff -attack_speed
                          # 50 - 24
-                total_dmg = dmg - reduced_multiplier
-
+                print(f"Reduced multiplier: {reduced_multiplier}")
+                total_dmg = dmg - reduced_multiplier 
                 target.hp -= total_dmg
-    
-                target.max_hp -= attack.soul
-    
+                if attack.soul:
+                    target.max_hp -= attack.soul
                 results = ("hit", total_dmg, target.hp<=0, target.max_hp <=0)
                 print(f"{defense.name} was not able to dodge {attack.name}\n{total_dmg} damage taken\nspeed diff reduction {reduced_multiplier}")
                 return results
@@ -289,7 +285,6 @@ def dodge_check(target, defense, attack, dmg, speed):
             results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
             return
 
-# region battle_checks 
 # the battle interaction is handled by this function
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):    
         attack = attack_verify(player, attack_str)
@@ -303,15 +298,15 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         if not defense:
             return False            
         print('Starting battle checks...')
-        stack=player.stack
-        charge=player.charge # this check should take place in the verify func ?
+        stack=player.stacked
+        charge=player.charged # this check should take place in the verify func ?
         defense_negate=False
         attack_negate=False
         soul_dmg=0
         soul_defense=0
         dmg = 0
         speed = 0
-
+        # check if the player can use the attack before starting the checks
         if tools:
             dmg, speed, items = type_multiply(player, attack=attack, tools=tools)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
@@ -387,18 +382,18 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 
     # dodge check
         if defense.type == 'dodge':
-            results = dodge_check(target, defense, attack, dmg)
+            results = dodge_check(target, defense, attack, dmg, speed)
             return results            
         
 
 test_player1 = Player(
-     name="Megumi",
+     name="Uraume",
      level=10,
      max_hp=2000,
      max_ce=2000,
      strength=300,
      speed=300,
-     technique="Ten Shadows",
+     technique="Idle Transfiguration",
      playerclass="sorcerer",
      colony=1,
      xp=0,
@@ -406,7 +401,8 @@ test_player1 = Player(
      skp=0,
      user_id=0,
      grade=5,
-     imbue=0
+     imbue=0,
+     equipped=["Maichan"]
 )
 
 test_player2= Player(
@@ -425,7 +421,8 @@ test_player2= Player(
      user_id=0,
      grade=5,
      imbue=0
-)
 
-results = battle_checks(mahoraga, test_player2, "Sword Swing", "Heavenly Body")
+)
+sukuna=KingOfCurse()
+results = battle_checks(sukuna, test_player2, "Multi Dismantle", "Air Hop")
 print(results)
