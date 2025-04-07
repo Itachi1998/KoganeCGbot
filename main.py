@@ -14,7 +14,6 @@ intents.guilds = True
 bot = commands.Bot(command_prefix=',', intents=intents)
 
 
-
 async def load():
     for filename in os.listdir('cogs'):
         if filename.endswith('.py'):
