@@ -1128,7 +1128,7 @@ idle_transfig={
                               speed=600,
                               type="summon",
                               summon={"Polymorphic Soul Isomer" : {"Speed" : 600, "strength" : 700, "Max CE" : 200}}
-                         )
+                         ),
 
                     "ISBODK Transform" :
                          Techniques(
