@@ -94,7 +94,7 @@ def type_multiply(player, attack=None, defense=None, tools=None):
 
 
 # FINISH LATER
-def visability_check(player, target, dmg, attack=None, defense=None):
+def visability_check(target, dmg, attack=None, defense=None):
     rand = random.randint(1, 5)
 
     if attack:
