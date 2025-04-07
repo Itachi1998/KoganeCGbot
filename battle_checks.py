@@ -246,7 +246,7 @@ def dodge_check(target, defense, attack, dmg, speed):
                                     # 1200 / 20
                 print(f"Total attack speed divided by target grade: {attack_speed}")
                 print(f"Dividing speed diff: {speed_diff} by attack speed: {attack_speed}")
-                reduced_multiplier = speed_diff - attack_speed
+                reduced_multiplier = speed_diff -attack_speed
                          # 50 - 24
                 print(f"Reduced multiplier: {reduced_multiplier}")
                 total_dmg = dmg - reduced_multiplier 
