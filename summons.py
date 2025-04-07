@@ -1,8 +1,7 @@
 from game import Enemy, human_body_parts
-
-
-
+ 
 class Mahoraga(Enemy):
+
     def __init__(self):
         super().__init__(
             name="Mahoraga",
@@ -21,4 +20,5 @@ class Mahoraga(Enemy):
             bodyparts=human_body_parts
         )
 
-        self.imbue=0
+
+mahoraga = Mahoraga()

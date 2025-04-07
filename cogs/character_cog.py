@@ -30,7 +30,8 @@ reincarnated_techs = [
     player_tech.blood_manip,
     player_tech.ce_discharge,
     player_tech.sky_manip,
-    player_tech.ice_manip
+    player_tech.ice_manip,
+    player_tech.body_hop
     #needs more techniques (cursed energy discharge, sky manipulation)
                       ]
 
