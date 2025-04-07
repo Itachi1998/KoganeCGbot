@@ -321,7 +321,8 @@ class Player(Actor):
                     heal: dict=None,
                     self_heal: int=None,
                     killcount: list=None, buffed: list=None, 
-                    debuffed: list=None, status: str=None, grade=None, soul: dict=None):
+                    debuffed: list=None, status: str=None, grade=None, soul: dict=None, six_eyes: bool=None,
+                    killed: str=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
           self.xp = xp
@@ -352,7 +353,8 @@ class Player(Actor):
           self.grade=grade
           self.soul=soul
           self.heal = heal
-          
+          self.six_eyes=six_eyes
+          self.killed=killed
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
               "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce),
