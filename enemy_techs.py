@@ -16,7 +16,7 @@ enemy_techs = { "King Of Curses" :
                               strength=500,
                               speed=1000,
                               type="projectile",
-                              visable=False
+                              invisable=True
                          ),
                     
                     "Multi Dismantle" :
@@ -30,7 +30,7 @@ enemy_techs = { "King Of Curses" :
                               strength=500,
                               speed=1000,
                               type="projectile",
-                              visable=False
+                              invisable=True
                          ),
 
                     "Cleave" :
@@ -57,7 +57,7 @@ enemy_techs = { "King Of Curses" :
                               strength=1000,
                               speed=1000,
                               type="projectile",
-                              visable=False
+                              invisable=True
                          ),
                     
                     "Furnace" :

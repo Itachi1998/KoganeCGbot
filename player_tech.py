@@ -245,7 +245,6 @@ blood_manip= {
 
 
 # region ### Body Hop
-
 body_hop={
      
 "Body Hop" :
@@ -253,16 +252,16 @@ body_hop={
           {
                "Attack" : # Need to make an option in the following turn after player or teammate defeats an opponent
                {
-                    "Steal Body" :
+                    "Body Hop" :
                          Techniques(
-                              name="Steal Body",
+                              name="Body Hop",
                               level=1,
                               act_speed=3,                              
                               act_cost=1,
                               act_body=("Head"),
                               aoe=1,
-                              strength=0,
-                              speed=500,
+                              strength=1,
+                              speed=1,
                               type="transform"
                          )
                }
@@ -271,19 +270,6 @@ body_hop={
           {
                "Defend": 
                {
-                    "Leave Body" :
-                         Techniques(
-                              name="Leave Body",
-                              level=1,
-                              act_speed=3,                              
-                              act_cost=1,
-                              act_body=("Head"),
-                              aoe=1,
-                              strength=0,
-                              speed=500,
-                              type="transform"
-                         ),
-                    
                     "Rotate Head" : # ability to reduce dmg of attack to head by "spinning the top"
                          Techniques(
                               name="Rotate Head",
@@ -823,7 +809,7 @@ cursed_speech={
                               speed=900,
                               type="projectile",
                               stun=3,
-                              visable=False
+                              invisable=True
                          ),
 
                     "Blast Away" :
@@ -837,7 +823,7 @@ cursed_speech={
                               strength=800,
                               speed=800,
                               type="projectile",
-                              visable=False
+                              invisable=True
                          ),
 
                     "Plummet" : 
@@ -852,7 +838,7 @@ cursed_speech={
                               speed=1000,
                               type="projectile",
                               stun=1,
-                              visable=False
+                              invisable=True
                          )
                }
           },
@@ -872,7 +858,7 @@ cursed_speech={
                               speed=900,
                               type="counter",
                               stun=3,
-                              visable=False
+                              invisable=True
                          ),
                     
                     "Blast Away" :
@@ -886,7 +872,7 @@ cursed_speech={
                               strength=800,
                               speed=800,
                               type="counter",
-                              visable=False
+                              invisable=True
                          )
                     
                 }
@@ -1004,13 +990,26 @@ hr_zero={
                               speed=9999,
                               type="tank"
                          ),
+
+                    "Procognition Dodge" : 
+                         Techniques(
+                              name="Procognition Dodge",
+                              level=1,
+                              act_speed=1,
+                              act_cost=1,
+                              act_body=("full"),
+                              aoe=1,
+                              strength=0,
+                              speed=1000,
+                              type="dodge"
+                         ),
                          
                     "Air Hop" : 
                          Techniques(
                               name="Air Hop",
                               level=5,
                               act_speed=2,
-                              act_cost=50,
+                              act_cost=1,
                               act_body=("full"),
                               aoe=1,
                               strength=0,
@@ -1621,7 +1620,7 @@ shrine={
                               strength=500,
                               speed=1000,
                               type="projectile",
-                              visable=False
+                              invisable=True
                          ),
                     
                     "Multi Dismantle" :
@@ -1635,7 +1634,7 @@ shrine={
                               strength=500,
                               speed=1000,
                               type="projectile",
-                              visable=False
+                              invisable=True
                          ),
 
                     "Cleave" :
@@ -1662,7 +1661,7 @@ shrine={
                               strength=1000,
                               speed=1000,
                               type="projectile",
-                              visable=False
+                              invisable=True
                          ),
                     
                     "Furnace" :
@@ -1682,7 +1681,6 @@ shrine={
 
           {
                "Defend": 
-           
                {
                     "Cleave Spider Web" :
                          Techniques(
@@ -1750,8 +1748,9 @@ shrine={
                          )
                }
           },
+          
           {
-          "Domain" :
+               "Domain" :
                {
                    "Malevolent Shrine" :
                          Techniques(
@@ -1808,7 +1807,7 @@ sky_manip={
                               strength=500,
                               speed=500,
                               type="melee",
-                              visable=False
+                              invisable=True
                          )
                }
           },
@@ -1841,7 +1840,7 @@ sky_manip={
                               strength=0, #?
                               speed=500,
                               type="dodge",
-                              visable=False
+                              invisable=True
                          )
                }
           }
