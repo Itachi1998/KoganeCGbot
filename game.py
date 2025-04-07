@@ -303,7 +303,7 @@ class Player(Actor):
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
-                    rct: tuple=None, #(1, 2, 3) 
+                    rct: tuple=None, #(0-2 , 0-1) # in first index sets if player has rct and if so what strength - second # is to set rct to active (1) or inactive (0)
                     healed: int=None,
                     killcount: list=None, buffed: list=None, 
                     debuffed: list=None, status: str=None, grade=None):
