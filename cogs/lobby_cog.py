@@ -1,4 +1,6 @@
-import discord, datetime
+import discord, datetime, re 
+from db import read_player
+from game import Player, Enemy
 from datetime import datetime
 from discord.ext import commands
 import time, asyncio
@@ -6,11 +8,16 @@ import time, asyncio
 # MAIN CLASS FOR LOBBIES
 # Use this to instantiate lobby instances
 
+
+def remove_name(text, name):
+    pattern = re.escape(name)
+    return re.sub(pattern, '', text)
+
 class Lobby():
     def __init__(self, name: str, owner: int, colony_id: int, private: bool, players: list, 
                 invited: list, 
-                team1: list,
-                team2: list, 
+                teamA: list,
+                teamB: list, 
                 ready: list, 
                 Round: int,
                 start_time=time.time(), 
@@ -25,8 +32,8 @@ class Lobby():
         self.private = private # if lobby is private = True
         self.players=players # list of total players in the lobby
         self.invited=invited # list of invited players 
-        self.team1=team1 # list of players who joined team1
-        self.team2=team2 # list of players who joined team2
+        self.teamA=teamA # list of players who joined team1
+        self.teamB=teamB # list of players who joined team2
         self.ready = ready # list of players ready 
         self.round = Round # int of the current turn
         self.start = start_time # date of creation EST
@@ -37,6 +44,69 @@ class Lobby():
         self.timer=timer
         self.status=status
        
+    def add_player(self, player):
+        if player in self.players:
+              return False
+        self.players.append(player)
+        return True
+        
+    def remove_player(self, player):
+        if player in self.spectators:
+                 self.spectators.remove(player)
+        if player in self.field:
+             self.field.remove(player)
+        if player in self.players:
+            if player in self.teamA:
+                   self.teamA.remove(player)
+            if player in self.teamB:
+                self.teamB.remove(player)
+            self.players.remove(player)
+        
+        else:
+              return False
+         
+    def add_spectator(self, player):
+        if player in self.spectators:
+              return False
+        self.spectators.append(player)
+        return True
+
+    def add_teamA(self, player):
+        if player in self.teamA:
+              return False
+        if player in self.teamB:
+              self.teamB.remove(player)
+        self.teamA.append(player)
+        return True
+    
+    def add_teamB(self, player):
+         if player in self.teamA:
+              self.teamA.remove(player)
+         if player in self.teamB:
+              return False
+         self.teamB.append(player)
+         return True
+         
+    def player_killed(self, player):
+        if player in self.players or self.field:
+            self.remove_player(player)
+            self.graveyard.append({"player" : player, "killed by" : player.killed})
+            return True
+        else:
+             return False
+        
+    def ready_up(self, player):
+        if player in self.players:
+            if player in self.ready:
+                self.ready.remove(player)
+                return False
+            else:
+                 self.ready.append(player)
+                 return True
+        else:
+             return False
+        
+
 class Lobby_Cog(commands.Cog):
     def __init__(self, bot): 
          self.bot = bot
@@ -109,9 +179,15 @@ class Lobby_Cog(commands.Cog):
                         
     @lobby.command(name='create')
     async def create(self, ctx, name: str=None, private: bool=False):
-        
         if name is None:
             name = f"{ctx.author.name}'s Lobby"
+        player_data = read_player(ctx.author.id, ctx.guild.id)
+        if player_data:
+             print(player_data)
+        else:
+             embed= discord.Embed(title="Error reading player", description="Player not found. Use /create or ,create to create a player in a colony!")
+             await ctx.send(embed=embed, ephemeral=True)
+             return False
         thread_embed = discord.Embed(title="Lobby created", description=f"Lobby name: {name}\nOwner: {ctx.author.mention}\nPrivate: {private}", color=0x00ff00)
         lob_embed = discord.Embed(title=name, description=name + " lobby created", color=0x00ff00)
         lob_embed.add_field(name="Players", value=f"{ctx.author.mention}", inline=False)
@@ -120,16 +196,20 @@ class Lobby_Cog(commands.Cog):
         lob_embed.add_field(name="Team 1", value="List of players in team 1", inline=False)
         lob_embed.add_field(name="Team 2", value="List of players in team 2", inline=False)
         lob_embed.add_field(name="Round", value="Round 0", inline=False)
-        lob_embed.set_footer(text="Lobby owner " + ctx.author.name + " created at " + datetime.now().astimezone().strftime("%c"), icon_url=ctx.author.avatar.url)
+        lob_embed.set_footer(text="Lobby owner " + ctx.author.name + " created at " +  datetime.now().astimezone().strftime("%c"), icon_url=ctx.author.avatar.url)
         if private:
             invited = [ctx.author.id]
-            thread = await ctx.channel.create_thread(name=name, type=discord.ChannelType.private_thread, auto_archive_duration=60, reason="## Lobby created " + name)
+            thread = await ctx.channel.create_thread(name=name, type=discord.ChannelType.private_thread,
+                                                      auto_archive_duration=60, reason="## Lobby created " + name)
             await thread.add_user(ctx.author)
         else:
             invited = []
-            thread = await ctx.channel.create_thread(name=name, type=discord.ChannelType.public_thread, auto_archive_duration=60, reason="## Lobby created " + name)
-        self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=0, private=False, players=[ctx.author.id], invited=[invited], team1=[], team2=[],status=1,  ready=[], Round=0, start_time=datetime.now(), timer=300, field=[], graveyard=[], feed=[], spectators = []), "embed" : lob_embed}
-
+            thread = await ctx.channel.create_thread(name=name, type=discord.ChannelType.public_thread, auto_archive_duration=60, 
+                                                     reason="## Lobby created " + name)
+        self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=0, private=False,
+                                                     players=[ctx.author.id], invited=[invited], teamA=[], teamB=[],
+                                                    status=1,  ready=[], Round=0, start_time=datetime.now(), timer=300, 
+                                                    field=[], graveyard=[], feed=[], spectators = []), "embed" : lob_embed}
         await thread.send(embed=thread_embed)
         await thread.send(embed=lob_embed)
         await ctx.send(f"Lobby created: {thread.mention}")
@@ -138,15 +218,60 @@ class Lobby_Cog(commands.Cog):
     async def kick(self, ctx, member: discord.Member):
         if ctx.channel.id in self.lobbies.keys():
             lobby = self.lobbies[ctx.channel.id]["Lobby"]
+            embed = self.lobbies[ctx.channel.id]['embed']
             thread = ctx.channel
-            if member.id in lobby.players:
-                    lobby.players.remove(member.id)
-            if member.id in lobby.spectators:
-                    lobby.spectators.remove(member.id)
-            if member.id in lobby.invited:
-                lobby.invited.remove(member.id)
+            user = self.bot.get_user(member.id)
+            print(user.mention)
+            players_data = lobby.players
+            for index, field in enumerate(embed.fields):
+                    if field.name == "Players":
+                        if member.id in lobby.players:
+                                players_data.remove(member.id)
+                                lobby.players = players_data
+                                if user.mention in field.value:
+                                    value = field.value
+                                    print(value)
+                                    new_value = remove_name(value, str(user.mention))
+                                    print(new_value)
+                                    embed.set_field_at(index, name=field.name, value=new_value)
+                    if field == "Team A":
+                        if member.id in lobby.teamA:
+                                players_data.remove(member.id)
+                                lobby.teamA=players_data
+                                if user.mention in field.value:
+                                    value = field.value
+                                    new_value = remove_name(value, str(user.mention))
+                                    embed.set_field_at(index, name=field.name, value=new_value)
+                    if field.name == "Team B":
+                        if member.id in lobby.teamB:
+                                players_data.remove(member.id)
+                                lobby.teamB=players_data
+                                if user.mention in field.value:
+                                    value = field.value
+                                    new_value = remove_name(value, user.mention)
+                                    embed.set_field_at(index, name=field.name, value=new_value)
+                    if field.name == "Spectators":
+                        if member.id in lobby.spectators:
+                                spectators_data = lobby.spectators
+                                spectators_data.remove(member.id)
+                                lobby.spectators=spectators_data
+                                if user.mention in field.value:
+                                    value = field.value
+                                    new_value = remove_name(value, user.mention)
+                                    embed.set_field_at(index, name=field.name, value=new_value)
+                    if field.name == "Invited":
+                        if member.id in lobby.invited:
+                            invited_data = lobby.invited
+                            invited_data.remove(member.id)
+                            lobby.invited=invited_data
+                            if user.mention in field.value:
+                                    value = field.value
+                                    new_value = remove_name(value, user.mention)
+                                    embed.set_field_at(index, name=field.name, value=new_value)
+            embed.description="Player kicked: " + user.mention
             await thread.remove_user(member)
             await thread.send(f"{member.id} removed from lobby")
+            await thread.send(embed=embed)
         else:
                 await ctx.send("You are not the owner of any lobby or the member is not in the lobby.")
                 

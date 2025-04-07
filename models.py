@@ -37,6 +37,7 @@ class Player(Base):
     skp: Mapped[int]
     technique: Mapped[str]
     playerclass: Mapped[str] = mapped_column(String(100))
+    killed: Mapped[Optional[List]] = mapped_column(JSON)
     six_eyes: Mapped[bool]
     __table_args__ = (
         UniqueConstraint('user_id', 'colony_id', name='uq_user_colony'),

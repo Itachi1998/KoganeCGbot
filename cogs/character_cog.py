@@ -175,9 +175,8 @@ class Character_cog(commands.Cog):
         "\n* You may only spin once for each attribute!")
         embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
         embed.set_thumbnail(url=self.bot.user.avatar)
-        embed.set_footer(text="Click the button below to spin for your character!")
+        embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
         embed.color=discord.Color.from_rgb(255, 0, 0)
-
         await ctx.send(embed= embed, view=CreateButtons(embed, self.bot, self.playerdict, user=ctx.author.id))
         return
     
@@ -209,13 +208,13 @@ class Character_cog(commands.Cog):
         if player:
             embed = discord.Embed(title=f"{player.player_name}'s Profile", description="# Player Profile\n## Colony: `" + colony.colony_name + "`\n## Player Info")
             embed.add_field(name="Level", value=player.player_level, inline=True)
-            embed.add_field(name="HP", value=player.hp, inline=True)
-            embed.add_field(name="CE", value=player.ce, inline=True)
-            embed.add_field(name="XP", value=player.xp, inline=True)
-            embed.add_field(name="SKP", value=player.skp, inline=True)
-            embed.add_field(name="Class", value=player.playerclass, inline=True)
-            embed.add_field(name="Technique", value=player.technique, inline=True)
-            embed.add_field(name="Status", value="Active", inline=True)
+            embed.add_field(name="HP", value="`" + str(player.hp) + "`", inline=True)
+            embed.add_field(name="CE", value="`" + str(player.ce) + "`", inline=True)
+            embed.add_field(name="XP", value="`" + str(player.xp) + "`", inline=True)
+            embed.add_field(name="SKP", value="`" + str(player.skp) + "`", inline=True)
+            embed.add_field(name="Class", value="`" + player.playerclass + "`", inline=True)
+            embed.add_field(name="Technique", value="`" + player.technique + "`", inline=True)
+            embed.add_field(name="Status", value="`Active`", inline=True)
             embed.set_author(name=user.display_name, url=user.avatar, icon_url=user.avatar)
             embed.set_thumbnail(url=self.bot.user.avatar)
             await ctx.send(embed=embed)
@@ -302,7 +301,8 @@ class CreateButtons(discord.ui.View):
             xp=0,
             cgp=0,
             skp=0,
-            user_id=interaction.user.id
+            user_id=interaction.user.id,
+            six_eyes=six_eyes
         )
         created = create_player(user_id=interaction.user.id, colony_id=interaction.guild_id, 
                     playername=self.playerdict['name'], playerclass=pclass, technique=techname,
@@ -328,6 +328,7 @@ class CreateButtons(discord.ui.View):
             create_technique(tech_data=tech_data)
             print ("Created technique: " + techname)
             self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {techname}\n* HP: {hp}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}\n* Technique Rarity: {tech_rarity}\n* Class Rarity: {class_rarity}"
+            self.embed.set_footer(text="Use /profile to view your character!", icon_url=self.bot.user.avatar)
             await interaction.response.edit_message(embed=self.embed, view=None)
             return
         else:
