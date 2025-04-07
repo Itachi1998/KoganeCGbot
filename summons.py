@@ -3,6 +3,9 @@ from techniques import Techniques
 
 
 class Mahoraga(Enemy):
+        
+    def __init__(self):
+
     tech={
         "Attack" : 
 
@@ -84,7 +87,7 @@ class Mahoraga(Enemy):
 
     }
     
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, inventory, equipped, xp, cgp, bodyparts):
+    def __init__(self):
         super().__init__(
             name="Mahoraga",
             level=1,
@@ -92,7 +95,7 @@ class Mahoraga(Enemy):
             max_ce=1000,
             strength=1000,
             speed=1000,
-            technique=None,
+            technique="Mahoraga",
             playerclass="summon",
             colony=0,
             inventory=["Dharma Chakra Wheel"],
@@ -101,7 +104,6 @@ class Mahoraga(Enemy):
             cgp=0,
             bodyparts=human_body_parts
         )
-
 
 mahoraga = Mahoraga(name="Mahoraga",
             level=1,
@@ -118,4 +120,3 @@ mahoraga = Mahoraga(name="Mahoraga",
             cgp=0,
             bodyparts=human_body_parts)
 
-summons_list=[mahoraga]
