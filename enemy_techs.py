@@ -1,6 +1,238 @@
 from techniques import Techniques
 
-enemy_techs = {
+enemy_techs = { "King Of Curses" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Dismantle" : # need a visability attribute so it can't be seen by most sorcerers
+                         Techniques(
+                              name="Dismantle",
+                              level=1,
+                              act_speed=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=1000,
+                              type="projectile",
+                              visable=False
+                         ),
+                    
+                    "Multi Dismantle" :
+                        Techniques(
+                              name="Multi Dismantle",
+                              level=2,
+                              act_speed=1,
+                              act_cost=60,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=500,
+                              speed=1000,
+                              type="projectile",
+                              visable=False
+                         ),
+
+                    "Cleave" :
+                         Techniques(
+                              name="Cleave",
+                              level=1,
+                              act_speed=1,
+                              act_cost=60, # should be based off opponent hp - special case in battlechecks
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1500, # should be based off opponent hp - special case in battlechecks
+                              speed=1000,
+                              type="melee"
+                         ),
+
+                    "Encanted Dismantle" :
+                         Techniques(
+                              name="Dismantle",
+                              level=4,
+                              act_speed=2,
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1000,
+                              speed=1000,
+                              type="projectile",
+                              visable=False
+                         ),
+                    
+                    "Furnace" :
+                         Techniques(
+                              name="Furnace",
+                              level=4,
+                              act_speed=3,
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=2000,
+                              speed=500,
+                              type="projectile"
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+           
+               {
+                    "Cleave Spider Web" :
+                         Techniques(
+                              name="Cleave Spider Web",
+                              level=1,
+                              act_speed=2,
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1500,
+                              speed=1000, 
+                              type="counter"
+                         ),
+
+                    "Dismantle Parry" :
+                         Techniques(
+                              name="Dismantle Parry",
+                              level=2,
+                              act_speed=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=1000,
+                              type="counter"
+                         ),
+
+                    "Dismantle Glove" : # like parry but strong since it envelopes the hand
+                         Techniques(
+                              name="Dismantle Glove",
+                              level=2,
+                              act_speed=1,
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1000,
+                              speed=1000,
+                              type="tank"
+                         ),
+
+                    "Dismantle Shield" : # creating a forcefield out of slashes
+                         Techniques(
+                              name="Dismantle Shield",
+                              level=4,
+                              act_speed=1,
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=1000,
+                              speed=1000,
+                              type="tank"
+                         ),
+                    
+                    "Air Hop" : 
+                         Techniques(
+                              name="Air Hop",
+                              level=5,
+                              act_speed=2,
+                              act_cost=50,
+                              act_body=("full"),
+                              aoe=1,
+                              strength=0,
+                              speed=1500,
+                              type="dodge"
+                         )
+               }
+          },
+          {
+          "Domain" :
+               {
+                   "Malevolent Shrine" :
+                         Techniques(
+                              name="Malevolent Shrine",
+                              level=5,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=2000,
+                              speed=9999,
+                              type="open",
+                              sure_hit=True
+
+                         )
+               }
+          }
+     ],
+    "Mahoraga" : 
+    [
+        {"Attack" : 
+
+            {
+                "Sword Swing" :
+                Techniques(
+                    name="Sword Swing",
+                    level=1,
+                    act_speed=1,
+                    act_cost=1,
+                    act_body=("Arms"),
+                    aoe=1,
+                    strength=800,
+                    speed=800,
+                    type="melee",
+                    buff=("strength")
+                ),
+                "Adapt": 
+                Techniques(
+                    name="Adaptation",
+                    level=1,
+                    act_speed=1,
+                    act_cost=1,
+                    act_body=("Full Body"),
+                    aoe=1,
+                    strength=1500,
+                    speed=1500,
+                    type="melee",
+                    buff=("strength", "speed"),
+                    negates=True,
+                ),
+
+                "Extermination Sword" : 
+                Techniques(
+                    name="Extermination Sword",
+                    level=1,
+                    act_speed=1,
+                    act_cost=1,
+                    act_body=("Arms"),
+                    aoe=1,
+                    strength=1000,
+                    speed=1000,
+                    type="melee",
+                    buff=("strength")
+                )
+
+            }},
+            {
+        "Defend" : 
+        {
+            "Adapt" :
+            Techniques(
+                name="Technique Adaptation",
+                level=1,
+                act_speed=1,
+                act_cost=1,
+                act_body=("Head"),
+                aoe=1,
+                strength=2000,
+                speed=2000,
+                type="tank",
+                buff=("strength", "speed"),
+                negates=True,
+                duration=5
+                )
+            } }
+    ],
     "Anxious Ears" : 
     [
         {"Attack" : {
@@ -357,6 +589,3 @@ enemy_techs = {
 
 
 }
-
-for k, v in enemy_techs.items():
-    print(k,v)
