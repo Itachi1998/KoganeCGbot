@@ -5,11 +5,8 @@ from player_tech import technique_list
 from enemy_techs import enemy_techs
 from cursed_tools import cursed_tools
 
-# check if the player can use the attack before starting the checks
-mahoraga = Mahoraga()
-print(mahoraga)
 
-def get_move(player, attack=None, defense=None, tools=None): # Maybe this works?     
+def get_move(player, attack=None, defense=None, tools=None):
     tech = None 
     is_player = False
     is_enemy=False
@@ -84,6 +81,7 @@ def defense_verify(target, defense):
     else:
         target.ce -= defense.act_cost + target.imbue
         return defense
+
 
 def type_multiply(player, attack=None, defense=None, tools=None):
     if attack:
@@ -164,6 +162,7 @@ def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=N
                      target.hp -= total_dmg
                      return("tank", total_dmg, target.hp <=0, target.max_hp <=0)
 
+
 def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, soul_defense=0):
     
             if defense.act_speed > attack.act_speed:
@@ -235,6 +234,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength)
                 print(f"{defense.name} was able to counter {attack.name} for {counter_dmg}")
                 return results
 
+
 def dodge_check(target, defense, attack, dmg, speed):
        # 8                  6
     if defense.act_speed > attack.act_speed:
@@ -285,7 +285,8 @@ def dodge_check(target, defense, attack, dmg, speed):
             results = ("dodge", dmg, target.hp<=0, target.max_hp<=0)
             return
 
-# the battle interaction is handled by this function
+
+# region battle_checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):    
         attack = attack_verify(player, attack_str)
         defense = defense_verify(target, defense_str)
@@ -306,7 +307,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         soul_defense=0
         dmg = 0
         speed = 0
-        # check if the player can use the attack before starting the checks
+     
         if tools:
             dmg, speed, items = type_multiply(player, attack=attack, tools=tools)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
@@ -421,8 +422,8 @@ test_player2= Player(
      user_id=0,
      grade=5,
      imbue=0
-
 )
+
 sukuna=KingOfCurse()
 results = battle_checks(sukuna, test_player2, "Multi Dismantle", "Air Hop")
 print(results)
