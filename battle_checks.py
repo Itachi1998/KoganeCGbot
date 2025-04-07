@@ -92,6 +92,30 @@ def type_multiply(player, attack=None, defense=None, tools=None):
 
         return defense_strength, speed
 
+
+# FINISH LATER
+def visability_check(player, target, dmg, attack=None, defense=None):
+    rand = random.randint(1, 5)
+
+    if attack:
+        if attack == "Heavenly Restriction: Zero":
+            return("hit", dmg, target.hp<=0, target.max_hp<=0)
+        elif defense.visable == False:     
+            if rand == 1:
+                return("hit", dmg, target.hp<=0, target.max_hp<=0)
+        else:
+            return("miss", dmg, target.hp<=0, target.max_hp<=0)
+            
+    if defense:
+        if defense == "Heavenly Restriction: Zero":
+                return("miss", dmg, target.hp<=0, target.max_hp<=0)
+        if attack.visable == False and rand == 1:
+            if rand == 1:
+                return("miss", dmg, target.hp<=0, target.max_hp<=0)
+        else:
+            return("hit", dmg, target.hp<=0, target.max_hp<=0)         
+            
+
 def negate_check(target, dmg, attack=None, defense=None):
 
     if attack: 

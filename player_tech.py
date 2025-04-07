@@ -1128,20 +1128,20 @@ idle_transfig={
                               speed=600,
                               type="summon",
                               summon={"Polymorphic Soul Isomer" : {"Speed" : 600, "strength" : 700, "Max CE" : 200}}
-                         )
+                         ),
 
-                    # "ISBODK Transform" : # make a general move like a domain?
-                    #      Techniques(
-                    #           name="ISBODK Transform",
-                    #           level=3,
-                    #           act_speed=2,
-                    #           act_cost=150,
-                    #           act_body=("Full"),
-                    #           aoe=0,
-                    #           strength=1200,
-                    #           speed=1000,
-                    #           type="transform" ###
-                    #         )
+                    "ISBODK Transform" :
+                         Techniques(
+                              name="ISBODK Transform",
+                              level=3,
+                              act_speed=2,
+                              act_cost=150,
+                              act_body=("Full"),
+                              aoe=0,
+                              strength=1200,
+                              speed=1000,
+                              type="transform"
+                            )
                }
           },
 
@@ -1174,8 +1174,42 @@ idle_transfig={
                             strength=200,
                             speed=800,
                             type="dodge"
+                            ),
+                    
+                    "ISBODK Transform" :
+                         Techniques(
+                              name="ISBODK Transform",
+                              level=3,
+                              act_speed=2,
+                              act_cost=150,
+                              act_body=("Full"),
+                              aoe=0,
+                              strength=1200,
+                              speed=1000,
+                              type="transform"
                             )
            
+               }
+          },
+          {
+          "Domain" :
+               {
+                   "Self-Embodiment of Perfection" :
+                         Techniques(
+                              name="Self-Embodiment of Perfection",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=9999,
+                              type="closed",
+                              int_strength=30,
+                              ext_strength=30,
+                              sure_hit=True
+
+                         )
                }
           }
      ],
@@ -1315,10 +1349,33 @@ limitless={
                          type="counter"
                     )
                }
+          },
+          {
+          "Domain" :
+               {
+                   "Infinate Void" :
+                         Techniques(
+                             name="Infinate Void",
+                             level=5,
+                             act_speed=2,
+                             act_cost=300,
+                             act_body=("Right Arm"),
+                              aoe=10,
+                              strength=2000,
+                              speed=9999,
+                              type="closed",
+                              stun=99,
+                              int_strength=50,
+                              ext_strength=50,
+                              sure_hit=True
+
+                         )
+               }
           }
      ],
-"Rarity" : 5,
-"Six Eyes" : True # Lowkey useless without it
+"Rarity" : 3,
+"Six Eyes" : True,
+"Activated" : False # Infinity
 }
 
 
@@ -1406,7 +1463,8 @@ mba={
                }
           }
      ],
-"Rarity" : 5
+"Rarity" : 7,
+"Activated" : False
 }
 
 
@@ -1620,9 +1678,29 @@ shrine={
                               type="dodge"
                          )
                }
+          },
+          {
+          "Domain" :
+               {
+                   "Malevolent Shrine" :
+                         Techniques(
+                              name="Malevolent Shrine",
+                              level=5,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=2000,
+                              speed=9999,
+                              type="open",
+                              sure_hit=True
+
+                         )
+               }
           }
      ],
-"Rarity" : 5
+"Rarity" : 5,
+"Friction" : 0
 }
 
 
