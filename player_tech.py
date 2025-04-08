@@ -48,7 +48,7 @@ auspicious_beasts_summon={
                             act_cost=30,
                             act_body=("Full"),
                             aoe=1,
-                            strength=300,
+                            strength=0,
                             speed=700,
                             type="dodge"
                          ),
@@ -132,7 +132,7 @@ bird_manip = {
                          act_cost=50,
                          act_body=("Head", "left arm", "right arm"),
                          aoe=3,
-                         strength=50,
+                         strength=0,
                          speed=100,
                          type="dodge"
                          ),
@@ -144,7 +144,7 @@ bird_manip = {
                          act_cost=10,
                          act_body=("head"),
                          aoe=5,
-                         strength=150,
+                         strength=0,
                          speed=500,
                          buff=("speed", 550),
                          type="dodge"
@@ -301,7 +301,7 @@ boogie_woogie = {
                          Techniques(
                               name="Rock Throw",
                               level=1,
-                              act_speed=10,
+                              act_speed=5,
                               act_cost=20,
                               act_body=("Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"),
                               aoe=1,
@@ -315,7 +315,7 @@ boogie_woogie = {
                          Techniques(
                               name="Double Switch Fake",
                               level=2,
-                              act_speed=0,
+                              act_speed=1,
                               act_cost=0,
                               act_body=("Head", "Torso", "Left Leg", "Right Leg", "Right Arm", "Left Arm"),
                               aoe=5,
@@ -327,7 +327,7 @@ boogie_woogie = {
                          Techniques(
                               name="Over Here",
                               level=2,
-                              act_speed=10,
+                              act_speed=3,
                               act_cost=50,
                               act_body=("Head", "Torso", "Right Arm", "Left Arm"),
                               aoe=5,
@@ -346,11 +346,11 @@ boogie_woogie = {
                          Techniques(
                               name="Clap Swap",
                               level=1,
-                              act_speed=10,
+                              act_speed=3,
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=5,
-                              strength=10,
+                              strength=0,
                               speed=2000,
                               type="dodge"
                               ),
@@ -358,11 +358,11 @@ boogie_woogie = {
                          Techniques(
                               name="Reverse Swap",
                               level=3,
-                              act_speed=10,
+                              act_speed=3,
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=10,
+                              strength=0,
                               speed=2000,
                               type="counter"
                               ),
@@ -374,7 +374,7 @@ boogie_woogie = {
                               act_cost=100,
                               act_body=("Head", "Torso"),
                               aoe=5,
-                              strength=10,
+                              strength=0,
                               speed=5000,
                               type="dodge"
                               )
@@ -421,7 +421,7 @@ ce_discharge={
                               act_cost=1,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=500,
+                              strength=1000,
                               speed=1000,
                               type="tank"
                          )
@@ -543,7 +543,7 @@ comedian={
                               act_cost=10,
                               act_body=("full"),
                               aoe=2,
-                              strength=900,
+                              strength=0,
                               speed=900,
                               type="dodge"
                               ),
@@ -889,17 +889,17 @@ cursed_spirit_manip={
                "Attack" :
                     {
                          "Summon" : 
-                              Techniques(
-                                   name="Cursed Spirit Manipulation: Summoning",
-                                   level=1,
-                                   act_speed=20,
-                                   act_cost=100,
-                                   act_body=("Full"),
-                                   aoe=5,
-                                   strength=1000,
-                                   speed=1000,
-                                   type="summon",
-                                   summon={}
+                         Techniques(
+                              name="Cursed Spirit Manipulation: Summoning",
+                              level=1,
+                              act_speed=20,
+                              act_cost=100,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=1000,
+                              speed=1000,
+                              type="summon",
+                              summon={}
                               )
                     }
                  },
@@ -935,7 +935,7 @@ hr_zero={
           {
                "Attack" : 
                {
-                    "3 Piece" : 
+                    "Three Piece Combo" : 
                          Techniques(
                               name="Three Piece Combo",
                               level=1,
@@ -943,8 +943,8 @@ hr_zero={
                               act_cost=1,  # Updated act_cost to 1
                               act_body=("Left Arm", "Right Arm"),
                               aoe=3,
-                              strength=1000,
-                              speed=1000,
+                              strength=0,
+                              speed=1200,
                               type="melee"
                          ),
                     "Spinning Back Kick":
@@ -955,8 +955,8 @@ hr_zero={
                               act_cost=1,  # Updated act_cost to 1
                               act_body=("Left Leg", "Right Leg"),
                               aoe=1,
-                              strength=1200,
-                              speed=1200,
+                              strength=200,
+                              speed=1000,
                               type="melee"
                          ),
                     "Yeet Car" : 
@@ -968,7 +968,7 @@ hr_zero={
                               act_body=("arms", "legs"),
                               aoe=1,
                               strength=800,
-                              speed=800,
+                              speed=600,
                               type="projectile"
                          )
                }
@@ -987,28 +987,41 @@ hr_zero={
                               act_body=("Full"),
                               aoe=1,
                               strength=1200,
-                              speed=9999,
+                              speed=9000,
                               type="tank"
                          ),
 
-                    "Procognition Dodge" : 
+                    "Precognition" : 
                          Techniques(
-                              name="Procognition Dodge",
-                              level=1,
+                              name="Precognition",
+                              level=3,
                               act_speed=1,
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
                               strength=0,
-                              speed=1000,
+                              speed=1200,
                               type="dodge"
+                         ),
+
+                    "Read Like a Book" : 
+                         Techniques(
+                              name="Read Like a Book",
+                              level=3,
+                              act_speed=1,
+                              act_cost=1,
+                              act_body=("full"),
+                              aoe=1,
+                              strength=0,
+                              speed=1200,
+                              type="counter"
                          ),
                          
                     "Air Hop" : 
                          Techniques(
                               name="Air Hop",
                               level=5,
-                              act_speed=2,
+                              act_speed=1,
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
@@ -1242,7 +1255,7 @@ idle_transfig={
                             act_cost=80,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=200,
+                            strength=0,
                             speed=800,
                             type="dodge"
                             ),
@@ -1274,7 +1287,7 @@ idle_transfig={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=20,
                               strength=1000,
-                              speed=9999,
+                              speed=9000,
                               type="closed",
                               intern_strength=30,
                               extern_strength=30,
@@ -1376,8 +1389,8 @@ limitless={
                          act_cost=100,
                          act_body=("Full"),
                          aoe=1,
-                         strength=9999,
-                         speed=9999,
+                         strength=9000,
+                         speed=9000,
                          type="tank"
                     ),
 
@@ -1389,7 +1402,7 @@ limitless={
                          act_cost=350,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=(1, 5),
-                         strength=1000,
+                         strength=0,
                          speed=1600,
                          type="dodge"
                     ),
@@ -1433,7 +1446,7 @@ limitless={
                              act_body=("Right Arm"),
                               aoe=10,
                               strength=2000,
-                              speed=9999,
+                              speed=9000,
                               type="closed",
                               stun=99,
                               intern_strength=50,
@@ -1505,7 +1518,7 @@ mba={
                "Defend": 
            
                {
-                    "Lighting Dash" : 
+                    "Lightning Dash" : 
                         Techniques(
                             name="Lightning Dash",
                             level=1,
@@ -1513,7 +1526,7 @@ mba={
                             act_cost=10,
                             act_body=("Full"),
                             aoe=1,
-                            strength=500,
+                            strength=0,
                             speed=900,
                             type="dodge"
                         ),
@@ -1575,7 +1588,7 @@ projection_sorcery={
                             act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=400,
+                            strength=0,
                             speed=1200,
                             type="dodge"
                         ),
@@ -1652,9 +1665,9 @@ shrine={
 
                     "Encanted Dismantle" :
                          Techniques(
-                              name="Dismantle",
+                              name="Encanted Dismantle",
                               level=4,
-                              act_speed=2,
+                              act_speed=3,
                               act_cost=40,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
@@ -1668,13 +1681,28 @@ shrine={
                          Techniques(
                               name="Furnace",
                               level=4,
-                              act_speed=3,
+                              act_speed=5,
                               act_cost=100,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=2000,
                               speed=500,
                               type="projectile"
+                         ),
+
+                    "World Cutting Slash" : # requires mahoraga
+                         Techniques(
+                              name="World Cutting Slash",
+                              level=5,
+                              act_speed=3,
+                              act_cost=80,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=9000,
+                              speed=1000,
+                              type="projectile",
+                              invisable=True,
+                              negates=True
                          )
                }
           },
@@ -1705,7 +1733,7 @@ shrine={
                               aoe=1,
                               strength=500,
                               speed=1000,
-                              type="counter"
+                              type="tank"
                          ),
 
                     "Dismantle Glove" : # like parry but strong since it envelopes the hand
@@ -1761,7 +1789,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=20,
                               strength=2000,
-                              speed=9999,
+                              speed=9000,
                               type="open",
                               sure_hit=True
 
@@ -1837,7 +1865,7 @@ sky_manip={
                               act_cost=50,
                               act_body=("Full"),
                               aoe=1,
-                              strength=0, #?
+                              strength=0,
                               speed=500,
                               type="dodge",
                               invisable=True
@@ -1892,10 +1920,10 @@ star_rage={
                               act_cost=500,
                               act_body=("Full"),
                               aoe=10,
-                              strength=9999,
+                              strength=9000,
                               speed=2000,
                               type="projectile",
-                              self_dmg=9999
+                              self_dmg=9000
                          )
                 }
             },
