@@ -1,2 +1,3 @@
 # KOGANE CULLING GAMES
 ## THE DISCORD CULLING GAMES BOT
+### created by Loud and Codes
