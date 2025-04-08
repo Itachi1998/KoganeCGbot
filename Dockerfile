@@ -1,11 +1,16 @@
-# Use an official Python runtime as the base image
+# Use the Python image as the base image
 FROM python:3.9-slim
 
 # Set the working directory in the container
 WORKDIR /kogane
 
-# Copy requirements.txt to the working directory
+# Copy the requirements file into the container
 COPY requirements.txt ./
+
+# Install system dependencies required for psycopg2
+RUN apt-get update && \
+    apt-get install -y libpq-dev gcc && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -13,5 +18,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code to the container
 COPY . .
 
-# Command to run your app
-CMD ["python3", "main.py"]
+# Define the command to run the application
+CMD ["python", "app.py"]
