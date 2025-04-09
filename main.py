@@ -1,6 +1,6 @@
 import discord, os, dotenv, traceback, db, enemy_techs
-from db import read_player # Import general dependencies 
-from game import Player
+from db import read_player, read_enemy, read_colony # Import general dependencies 
+from game import Player, Enemy
 from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
 
@@ -39,6 +39,15 @@ def get_player(colony_id, user_id):
         return player
     else:
         return False
+    
+def get_enemy(name, colony_id):
+    enemy_data = read_enemy(name, colony_id)
+    enemy = Enemy(**enemy_data)
+    if enemy:
+        return enemy
+    
+
+
 
 bot.get_player = get_player
 
