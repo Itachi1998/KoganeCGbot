@@ -15,7 +15,7 @@ RUN apt-get update && \
 
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-    python models.py
+    python3 models.py
 
 # Copy the rest of the application code to the container
 COPY . .
