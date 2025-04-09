@@ -8,21 +8,19 @@ from cursed_tools import cursed_tools
 
 # region get move
 def get_move(player, attack=None, defense=None, tools=None):
-    tech = None 
-    is_player = False
+    tech=None 
+    is_player=False
     is_enemy=False
 
     if isinstance(player, Enemy):
         if player.name in enemy_techs:
             tech = enemy_techs[player.technique]
-            print(f"Technique for {player.name} set: \n {tech}")
             is_enemy=True
 
     elif isinstance(player, Player):
             tech = [t for t in technique_list if next(iter(t)) == player.technique]
-            print(f"Technique for {player.name} set: \n {tech}")
-            is_player = True
-
+            is_player=True
+    
     if tools:
         new_tools_dict = [(k, v) for k, v in cursed_tools.items() if k in tools]
         new_tools = []
@@ -30,7 +28,7 @@ def get_move(player, attack=None, defense=None, tools=None):
              new_tools.append(item)
              print(f"{player.name} has {name} equipped with a strength of {item.strength} and speed of {item.speed}")
         return new_tools
-
+    
     if attack:
         print(f"Setting attack '{attack}' for {player.name}")
 
@@ -39,8 +37,8 @@ def get_move(player, attack=None, defense=None, tools=None):
             return new_attack
         
         if is_enemy:
-             new_attack = tech[0]['Attack'][attack]
-             return new_attack
+            new_attack = tech[0]['Attack'][attack]
+            return new_attack
     
     if defense:
         print(f"Setting defense '{defense}' for {player.name}")
@@ -49,11 +47,11 @@ def get_move(player, attack=None, defense=None, tools=None):
             new_defense= tech[0][player.technique][1]['Defend'][defense]
             return new_defense
         if is_enemy:
-             new_defense = tech[1]['Defend'][defense]
-             return new_defense
+            new_defense = tech[1]['Defend'][defense]
+            return new_defense
 
 
-# region verify
+# region verify checks
 def attack_verify(player, attack):
     attack = get_move(player, attack=attack)
 
@@ -124,7 +122,7 @@ def type_increment(player, attack=None, defense=None, tools=None):
         return defense_strength, defense_speed
 
 
-# region other checks
+# region visability checks
 def attack_visability(player, target, attack, defense):
     
     if attack:
@@ -159,6 +157,7 @@ def defense_visability(player, target, attack, defense):
                 return True
             
 
+# region negate check
 def negate_check(target, dmg, defense_strength, attack=None, defense=None):
     print("Checking for negation...")
 
@@ -189,9 +188,18 @@ def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=N
 def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=0):
     if targ_invis:
         dmg = 0
-        print(f"{defense.name} (invisable) was able to dodge {attack.name}")
-        return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+        print(f"{defense.name} negated {attack.name} dealing {dmg} dmg")
+        return ("hit", dmg, target.hp<=0, target.max_hp<=0)
     
+    if defense_negated:
+        defense_strength = 0
+        print(f"Attack negated {defense.name} dealing {dmg} dmg")
+        return ("hit", dmg, target.hp <= 0, target.max_hp <=0)
+    
+    if attack_negated:
+        dmg = 0
+        print(f"{defense.name} negates {attack.name}")
+
     if defense.act_speed > attack.act_speed:
         speed_diff = max(defense_speed - speed, 0)
                         # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
@@ -203,9 +211,8 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
         target.hp -= total_dmg
         if attack.soul:
             target.max_hp -= attack.soul - soul_defense
-        results = ("hit", dmg, target.hp <= 0, target.max_hp <=0)
         print(f"{defense.name} was not able to activate in time to tank {attack.name}")
-        return results
+        return ("hit", dmg, target.hp <= 0, target.max_hp <=0)
     
     else:
         print(f"dmg {dmg} defense {defense_strength}")
@@ -216,9 +223,8 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
             soul_dmg = max(attack.soul - soul_defense, 0)
             
             target.max_hp -= soul_dmg
-        results = ("tank", total_dmg, target.hp <=0, target.max_hp <=0)
         print(f"{defense.name} was able to activate in time to tank {attack.name}. {total_dmg} damage dealt, {dmg - total_dmg} damage tanked")
-        return results
+        return ("tank", total_dmg, target.hp <=0, target.max_hp <=0)
     
 
 # region counter check
@@ -233,7 +239,11 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
         print(f"{defense.name} (invisable) was able to dodge {attack.name}")
         return ("counter", dmg, target.hp<=0, target.max_hp<=0)
 
-    if defense.act_speed > attack.act_speed:
+    if attack_negated:
+            dmg = 0
+            print(f"{defense.name} negates {attack.name}")
+
+    if defense.act_speed > attack.act_speed and dmg !=0:
         speed_diff = max(defense_speed - speed, 0)
                 # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
         attack_speed = speed/target.grade            
@@ -244,8 +254,15 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
         target.hp -= total_dmg
         if attack.soul:
             target.max_hp -= attack.soul
+        
         print(f"{defense.name} was too slow to counter {attack.name}")
         return ("hit", dmg, target.hp <=0, target.max_hp <=0)
+    
+    if defense_negated:
+        defense_strength = 0
+        print(f"Attack negated {defense.name} dealing {dmg} dmg")
+        return ("hit", dmg, target.hp <= 0, target.max_hp <=0)
+    
     else:
         if defense.soul:
             player.max_hp -= defense.soul
@@ -290,8 +307,9 @@ def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, 
     if defense.act_speed >= attack.act_speed:
         print(f"Attack activated before or at the same time as defense\nCalculating speed diff between {attack.name} and {defense.name}...")
                     # change num to balance
-        act_diff = 1.2 + defense.act_speed - attack.act_speed
-        speed_diff = round(defense_speed/act_diff, 0)
+        act_diff = defense.act_speed - attack.act_speed
+        diff_multiplier = act_diff-target.grade
+        speed_diff = round(defense_speed/diff_multiplier, 0)
         print("Speed difference:", speed_diff)
         
         if speed_diff < speed:
@@ -338,20 +356,16 @@ def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, 
     return results
 
 
-# GET MOVE IS RUNNING TWICE IF PLAYER HAS TOOL, HOW DOES IT EVEN GET CALLED FOR GETTING THE PLAYER MOVE ANYWAY?
-
 # region battle_checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):    
-        tools=False
-        target_tools=False
+        tools=None
+        target_tools=None
         attack = attack_verify(player, attack_str)
         defense = defense_verify(target, defense_str)
         if player.equipped:
             tools = get_move(player, tools=player.equipped)
         elif target.equipped:
             target_tools = get_move(target, tools=target.equipped)
-        print(attack)
-        print(defense)
         if not attack:
             return False
         if not defense:
@@ -395,7 +409,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             defense_strength, defense_speed, items = type_increment(defense=defense, tools=target_tools)
          
             for item in items:
-                print(f"Defense {defense.name} has a base damage of {defense_strength} and speed of {speed} with item {item.name}")
+                print(f"Defense {defense.name} has a base damage of {defense_strength} and speed of {defense_speed} with item {item.name}")
                 if item.negates:
                     attack_negated=True
                     print(f"{item.name} negates any attacks from {attack.name}")
@@ -464,13 +478,13 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
 
 # region test players
 test_player1 = Player(
-    name="Sukuna",
+    name="Toji",
     level=10,
     max_hp=4000,
     max_ce=4000,
-    strength=100,
-    speed=100,
-    technique="Shrine",
+    strength=300,
+    speed=300,
+    technique="Heavenly Restriction: Zero",
     playerclass="sorcerer",
     colony=1,
     xp=0,
@@ -478,7 +492,8 @@ test_player1 = Player(
     skp=0,
     user_id=0,
     grade=5,
-    imbue=200
+    imbue=0,
+    equipped="ISOH"
 )
 
 test_player2= Player(
@@ -501,5 +516,5 @@ test_player2= Player(
 
 
 sukuna=KingOfCurses()     #player1       player2        attack        defense
-results = battle_checks(test_player1, test_player2, "World Cutting Slash", "Infinity")
+results = battle_checks(test_player1, test_player2, "Three Piece Combo", "Red")
 print(results)
