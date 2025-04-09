@@ -5,7 +5,8 @@ FROM python:3.9-slim
 WORKDIR /kogane
 
 # Copy the requirements file into the container
-COPY requirements.txt ./
+COPY requirements.txt ./ \
+     entrypoint.sh
 
 # Install system dependencies required for psycopg2
 RUN apt-get update && \
@@ -15,11 +16,9 @@ RUN apt-get update && \
 
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-    
-RUN python3 models.py
 
 # Copy the rest of the application code to the container
 COPY . .
 
 # Define the command to run the application
-CMD ["python", "main.py"]
+CMD ["/entrypoint.sh"]
