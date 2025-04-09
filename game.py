@@ -1015,7 +1015,6 @@ class KingOfCurse(Enemy):
                            bodyparts=human_body_parts,
                            timer=500,
                            killed=False
-                    
                            )
                 self.hp = self.max_hp
                 self.ce = self.max_ce
