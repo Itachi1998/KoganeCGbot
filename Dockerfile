@@ -6,7 +6,7 @@ WORKDIR /kogane
 
 # Copy the requirements file into the container
 COPY requirements.txt ./ \
-     entrypoint.sh
+     entrypoint.sh ./
 
 # Install system dependencies required for psycopg2
 RUN apt-get update && \
