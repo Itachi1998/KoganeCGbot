@@ -364,7 +364,7 @@ boogie_woogie = {
                               aoe=1,
                               strength=0,
                               speed=2000,
-                              type="counter"
+                              type="reflect"
                               ),
                     "Vibra Swap" : 
                          Techniques(
@@ -1327,7 +1327,7 @@ limitless={
                     Techniques(
                          name="Red",
                          level=2,
-                         act_speed=2,
+                         act_speed=1,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
@@ -1366,7 +1366,7 @@ limitless={
                     Techniques(
                          name="Unlimited Hollow Purple",
                          level=5,
-                         act_speed=3,
+                         act_speed=5,
                          act_cost=150,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=10,
@@ -1400,9 +1400,9 @@ limitless={
                          name="Blue",
                          level=1,
                          act_speed=1,
-                         act_cost=350,
+                         act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
-                         aoe=(1, 5),
+                         aoe=1,
                          strength=0,
                          speed=1600,
                          type="dodge"
@@ -1412,8 +1412,8 @@ limitless={
                     Techniques(
                          name="Red",
                          level=2,
-                         act_speed=2,
-                         act_cost=350,
+                         act_speed=1,
+                         act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=1600,
@@ -1426,7 +1426,7 @@ limitless={
                          name="Void Punch",
                          level=4,
                          act_speed=1,
-                         act_cost=325,
+                         act_cost=25,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=500,
@@ -1853,9 +1853,9 @@ sky_manip={
                               act_cost=50,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=0, # pull attack dmg in checks?
+                              strength=500, # pull attack dmg in checks?
                               speed=1000,
-                              type="counter"
+                              type="reflect"
                          ),
 
                     "Cloaked Dodge" :
