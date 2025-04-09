@@ -148,9 +148,10 @@ def generate_lobby_embed(lobby: Lobby, bot) -> discord.Embed:
 
 class Lobby_Cog(commands.Cog):
     def __init__(self, bot): 
-         self.bot = bot
-         self.lobbies = {}  # Dictionary to store active lobbies
-
+        self.bot = bot
+        self.lobbies = {}  # Dictionary to store active lobbies
+        # Reference to the battle cog for starting battles
+        self.battle_cog = bot.get_cog('battle')
     @commands.Cog.listener()
     async def on_thread_member_join(self, member):
         thread = member.thread
@@ -347,6 +348,22 @@ class Lobby_Cog(commands.Cog):
             await thread.send(embed=embed)
         else:
              await thread.send("`Error: lobby doesn't exist`")
+
+
+    @lobby.command(name="start")
+    async def start(self, ctx, pve: bool=False, pvp: bool=False):
+        if pve:
+            lobby = self.lobbies[ctx.channel.id]['Lobby']
+            if lobby:
+                if len(lobby.teamA) and len(lobby.teamB) == 0:
+                    if lobby.players:
+                        lobby.teamA = lobby.players
+                    else:
+                        return 
+            
+
+        if pvp:
+            pass
 
                    
 

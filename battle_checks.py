@@ -101,6 +101,7 @@ def type_increment(player, attack=None, defense=None, tools=None):
             else:
                 dmg = attack.strength + player.imbue + player.strength
                 speed = attack.speed + player.imbue + player.speed
+                
         else:
             dmg = attack.strength + player.imbue
             speed = attack.speed + player.imbue
@@ -313,7 +314,7 @@ def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, 
         print(f"Successfull defense dodge.\nCalculating speed diff between {attack.name} and {defense.name}")
                         #1000           500        
         speed_diff = max(speed - defense_speed, 0)
-        
+
         print(f"Speed difference of {attack.name} - {defense.name} is {speed_diff}")
                         #500//5
         attack_speed = speed_diff/target.grade         
@@ -479,7 +480,8 @@ test_player1 = Player(
     cgp=0,
     skp=0,
     user_id=0,
-    grade=5
+    grade=5,
+    equipped="ISOH"
 )
 
 test_player2= Player(
