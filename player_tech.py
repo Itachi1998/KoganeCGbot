@@ -84,7 +84,7 @@ bird_manip = {
                     Techniques(
                          name="Talon Attack",
                          level=1,
-                         act_speed=100,
+                         act_speed=1,
                          act_cost=100,
                          act_body=("Head", "Right Arm", "Left Arm"),
                          aoe=3,
@@ -97,7 +97,7 @@ bird_manip = {
                     Techniques(
                          name="Bird Flock",
                          level=2,
-                         act_speed=50,
+                         act_speed=5,
                          act_cost=300,
                          act_body=("head", "left arm", "right arm"),
                          aoe=3,
@@ -110,7 +110,7 @@ bird_manip = {
                     Techniques(
                          name="Bird Sacrifice",
                          level=3,
-                         act_speed=20,
+                         act_speed=2,
                          act_cost=400,
                          act_body=("Head", "left arm", "right arm"),
                          aoe=2,
@@ -453,6 +453,7 @@ comedian={
                               type="melee",
                               buff=("strength", "speed")
                               ),
+                              
                     "One Liner" :
                          Techniques(
                               name="One Liner",
