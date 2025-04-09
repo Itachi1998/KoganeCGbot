@@ -1,6 +1,6 @@
 # KOGANE CULLING GAMES
 ## THE DISCORD CULLING GAMES BOT
-* How to run:
+### How to run:
 * create a python virtual environment with `python -m venv venv`
 * do a `pip install -r requirements.txt`
 * run `python models.py` to create the database with tables
