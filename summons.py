@@ -1,5 +1,6 @@
 from game import Enemy, human_body_parts
  
+ 
 class Mahoraga(Enemy):
 
     def __init__(self):

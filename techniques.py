@@ -13,7 +13,7 @@ class Techniques():
                  buff: tuple=None,
                  debuff: tuple=None,
                  poison: tuple = None,
-                 stun: int = None, # St
+                 stun: int = None,
                  stack: int = None, # Projection Techniques
                  charge: list=None, # Kashimo or Nobara techniques
                  summon: dict=None,
@@ -69,11 +69,10 @@ class CursedTools():
         act_body: tuple,
         aoe: int,
         strength: int,
-        speed: int, # (1-3) lower is faster
+        speed: int,
         type: str,
         target=None,
-        # optional abilities
-        soul: bool = None, # soul dmg will be based of dmg of attack in checks
+        soul: bool = None,
         buff: tuple = None,
         debuff: tuple = None,
         poison: tuple = None,
