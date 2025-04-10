@@ -404,32 +404,42 @@ def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, 
 
 
 # region domain clash
-def domain_clash(target, player, defense, attack):
+def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
     domain_type = attack.type
     targ_domain_type = defense.type
     
     if domain_type or targ_domain_type == 'open':
         print(f"{domain_type} vs {targ_domain_type} domain battle!")
-        return
+        results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
+        return results
     
     if attack.act_speed < defense.act_speed:
         print(f"{attack.name} broke {target.name}'s domain!")
-        return
+        return 'defense broke'
     
     if attack.act_speed > defense.act_speed:
         print(f"{defense.name} broke {player.name}'s domain!")
-        return
+        return 'attack broke'
     
     else:
         print(f"{player.name} vs {target.name} closed domain battle!")
-        return
+        results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
+        return results
 
     
 # region barrier checks
 def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
-    # refinement = (speed + dmg) / attack.act_speed
-    # targ_refinement = (defense_speed + defense_strength) / defense.act_speed
-    print("Barrier checks")
+    # refinement will be used to calculate what barrier breaks first
+    refinement = speed + dmg
+    targ_refinement = defense_speed + defense_strength
+    print(f"Barrier checks:\n{player.name}'s barrier refinement: {refinement}\n{target.name}'s barrier refinement: {targ_refinement}")
+    
+    if refinement > targ_refinement:
+        print(f"{player.name}'s domain won the battle!")
+    if refinement < targ_refinement:
+        print(f"{target.name}'s domain won the battle!")
+    else:
+        print("domains tied!")
     return
 
 
@@ -452,6 +462,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         if not defense:
             return False
 
+# WE COULD GET RID OF SETTING AND CHECKING THESE IF INCREMENTS WERE DONE IN THE CHECKS
     # barrier vars
         domain=None
         targ_domain=None
@@ -462,7 +473,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         wicker_basket=None
         targ_wicker_basket=None   
 
-    # set player barrier techs    
+    # set player barrier   
         if "Domain Expansion:" in attack.name:
             domain = True
         if "Simple Domain" in attack.name:
@@ -472,7 +483,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         if "Hollow Wicker Basket" in attack.name:
             wicker_basket = True
 
-    # set target barrier techs
+    # set target barrier
         if "Domain Expansion:" in defense.name:
             targ_domain = True
         if "Simple Domain" in defense.name:
@@ -480,7 +491,8 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         if "Falling Blossom" in defense.name:
             targ_falling_blossom = True
         if "Hollow Wicker Basket" in attack.name:
-            targ_wicker_basket = True  
+            targ_wicker_basket = True
+#############################################################
               
         print('Starting battle checks...')
         stack=player.stack
@@ -590,13 +602,12 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
 
         print(f"{attack.name}'s type is {attack.type}\n{defense.name}'s type is {defense.type}")
 
-    # domain clash check
+    # domain clash/attack check
         if attack.type == 'open' or 'closed':
             if defense.type == 'open' or 'closed':
                 print(f"{defense.name} 'domain clash' against {attack.name}...")    
-                results = domain_clash(target, player, defense, attack)
-
-    # domain attack check        
+                results = domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
+                          
             else:
                 print(f"{attack.name} 'barrier check' with defense {defense.name}...")    
                 results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
