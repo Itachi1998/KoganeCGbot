@@ -247,7 +247,7 @@ class Actor:
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass,  xp: int, cgp: int, 
                 stack=0, colony:int = None,
-                inventory: list = None, equipped: list = None, poison: tuple=None,charge: tuple=None, 
+                inventory: list = None, equipped: list = None, poison: tuple=None,charge: int=None, 
                 stun: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
                 debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
         try:   
@@ -313,7 +313,7 @@ class Player(Actor):
                     xp: int, cgp: int, skp: int, user_id: int,
                     stack=0, imbue=0,
                     equipped: list=None, inventory: list=None,
-                    summons: list=None, charge: tuple=None, 
+                    summons: list=None, charge: int=None, 
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory

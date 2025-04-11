@@ -1377,9 +1377,9 @@ limitless={
                          act_speed=1,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
-                         aoe=(1, 5),
-                         strength=1000,
-                         speed=1600,
+                         aoe=1,
+                         strength=800,
+                         speed=1200,
                          type="projectile"
                     ),
                
@@ -1387,12 +1387,12 @@ limitless={
                     Techniques(
                          name="Red",
                          level=2,
-                         act_speed=1,
+                         act_speed=2,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=1600,
-                         speed=1000,
+                         strength=1200,
+                         speed=800,
                          type="projectile"
                     ),
                
@@ -1401,11 +1401,11 @@ limitless={
                          name="Void Punch",
                          level=4,
                          act_speed=1,
-                         act_cost=25,
+                         act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=500,
-                         speed=1600,
+                         strength=800,
+                         speed=1200,
                          type="melee"
                     ),
 
@@ -1417,8 +1417,8 @@ limitless={
                          act_cost=150,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=2500,
-                         speed=1000,
+                         strength=2000,
+                         speed=2000,
                          type="projectile"
                     ),
                
@@ -1427,13 +1427,13 @@ limitless={
                          name="Unlimited Hollow Purple",
                          level=5,
                          act_speed=5,
-                         act_cost=150,
+                         act_cost=300,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=10,
-                         strength=2500,
+                         strength=2000,
                          speed=2000,
                          type="projectile",
-                         self_dmg=1250
+                         self_dmg=500
                     )
                }
           },
@@ -1447,7 +1447,7 @@ limitless={
                          name="Infinty",
                          level=1,
                          act_speed=0,
-                         act_cost=100,
+                         act_cost=10,
                          act_body=("Full"),
                          aoe=1,
                          strength=9000,
@@ -1464,7 +1464,7 @@ limitless={
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=0,
-                         speed=1600,
+                         speed=1200,
                          type="dodge"
                     ),
                
@@ -1472,12 +1472,12 @@ limitless={
                     Techniques(
                          name="Red",
                          level=2,
-                         act_speed=1,
+                         act_speed=2,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=1600,
-                         speed=1000,
+                         strength=1200,
+                         speed=800,
                          type="counter"
                     ),
 
@@ -1489,8 +1489,8 @@ limitless={
                          act_cost=25,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=500,
-                         speed=1600,
+                         strength=800,
+                         speed=1200,
                          type="counter"
                     )
                }
@@ -1556,7 +1556,7 @@ mba={
                             strength=1000,
                             speed=1200,
                             type="projectile",
-                            cooldown=3
+                            charge=3 # once the player.charge is set to 3 (3 rounds from start or use of tech) it is available to use
                          ),
 
                     "Corona Blast" : 
@@ -1713,7 +1713,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=500,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True
                          ),
@@ -1727,7 +1727,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=3,
                               strength=500,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True
                          ),
@@ -1741,7 +1741,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=1500, # should be based off opponent hp - special case in battlechecks
-                              speed=1000,
+                              speed=0,
                               type="melee"
                          ),
 
@@ -1754,7 +1754,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=1000,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True
                          ),
@@ -1781,7 +1781,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=9000,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True,
                               negates=True
@@ -2104,9 +2104,9 @@ straw_doll={
                               type="projectile"
                          ),
                     
-                    "Reasonance" : 
+                    "Resonance" : 
                          Techniques(
-                              name="Reasonance",
+                              name="Resonance",
                               level=3,
                               act_speed=2,                              
                               act_cost=40,
@@ -2115,8 +2115,9 @@ straw_doll={
                               strength=800,
                               speed=2000, # ???
                               type="melee", #melee on doll that links attack to target (effigy)
-                              soul=True, 
-                              sure_hit=True
+                              soul=400, 
+                              sure_hit=True,
+                              charge=1 # once the player.charge is set to 1, the technique is available
                          )
                          
                }
