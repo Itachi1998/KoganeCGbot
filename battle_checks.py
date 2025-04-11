@@ -133,14 +133,13 @@ def type_increment(player, attack=None, defense=None, tools=None):
                 dmg = attack.strength + player.imbue + player.strength
                 speed = attack.speed + player.imbue + player.speed
         
-        else:
+        if attack.type == 'projectile':
             dmg = attack.strength + player.imbue
             speed = attack.speed + player.imbue
 
-        # if attack.type == 'open' or 'closed':
-        #     print("mulitplying stats by 1.2 - domain boost")
-        #     dmg = dmg*1.2
-        #     speed = speed*1.2
+        else:
+            dmg = attack.strength
+            speed = attack.speed
 
         return dmg, speed
     
@@ -156,14 +155,13 @@ def type_increment(player, attack=None, defense=None, tools=None):
                     defense_speed += item.speed
                 return defense_strength, defense_speed, tools
 
-        else:
+        if defense.type == 'dodge':
             defense_strength = player.imbue + player.strength
             defense_speed = player.imbue + player.speed
 
-        # if defense.type == 'open' or 'closed':
-        #     print("mulitplying stats by 1.2 - domain boost")
-        #     defense_strength = defense_strength*1.2
-        #     defense_speed = defense_speed*1.2
+        else:
+            defense_strength = defense.strength
+            defense_speed = defense.speed
 
         return defense_strength, defense_speed
 
@@ -422,28 +420,61 @@ def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, 
         return 'attack broke'
     
     else:
-        print(f"{player.name} vs {target.name} closed domain battle!")
+        print(f"{player.name} vs {target.name} closed domain battle!") # is this possible? 
         results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
         return results
 
     
 # region barrier checks
 def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
-    # refinement will be used to calculate what barrier breaks first
-    refinement = speed + dmg
-    targ_refinement = defense_speed + defense_strength
-    print(f"Barrier checks:\n{player.name}'s barrier refinement: {refinement}\n{target.name}'s barrier refinement: {targ_refinement}")
-    
-    if refinement > targ_refinement:
-        print(f"{player.name}'s domain won the battle!")
-    if refinement < targ_refinement:
-        print(f"{target.name}'s domain won the battle!")
-    else:
-        print("domains tied!")
-    return
+
+    # barrier vars
+        domain=None
+        targ_domain=None
+        simple_domain=None
+        targ_simple_domain=None
+        falling_blossom=None
+        targ_falling_blossom=None
+        wicker_basket=None
+        targ_wicker_basket=None   
+
+    # set player barrier   
+        if "Domain Expansion" in attack.name:
+            domain = True
+        if "Simple Domain" in attack.name:
+            simple_domain = True
+        if "Falling Blossom" in attack.name:
+            falling_blossom = True
+        if "Hollow Wicker Basket" in attack.name:
+            wicker_basket = True
+
+    # set target barrier
+        if "Domain Expansion" in defense.name:
+            targ_domain = True
+        if "Simple Domain" in defense.name:
+            targ_simple_domain = True
+        if "Falling Blossom" in defense.name:
+            targ_falling_blossom = True
+        if "Hollow Wicker Basket" in attack.name:
+            targ_wicker_basket = True
+        
+    # domain battle checks
+        if domain and targ_domain:
+            # refinement will be used to calculate what barrier breaks first
+            refinement = speed + dmg
+            targ_refinement = defense_speed + defense_strength
+            print(f"Barrier checks:\n{player.name}'s barrier refinement: {refinement}\n{target.name}'s barrier refinement: {targ_refinement}")
+            
+            if refinement > targ_refinement:
+                print(f"{player.name}'s domain won the battle!")
+            if refinement < targ_refinement:
+                print(f"{target.name}'s domain won the battle!")
+            else:
+                print("domains tied!")
+            return
 
 
-# region battle_checks
+# region battle checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):      
         tools=None
         target_tools=None
@@ -461,38 +492,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             return False
         if not defense:
             return False
-
-# WE COULD GET RID OF SETTING AND CHECKING THESE IF INCREMENTS WERE DONE IN THE CHECKS
-    # barrier vars
-        domain=None
-        targ_domain=None
-        simple_domain=None
-        targ_simple_domain=None
-        falling_blossom=None
-        targ_falling_blossom=None
-        wicker_basket=None
-        targ_wicker_basket=None   
-
-    # set player barrier   
-        if "Domain Expansion:" in attack.name:
-            domain = True
-        if "Simple Domain" in attack.name:
-            simple_domain = True
-        if "Falling Blossom" in attack.name:
-            falling_blossom = True
-        if "Hollow Wicker Basket" in attack.name:
-            wicker_basket = True
-
-    # set target barrier
-        if "Domain Expansion:" in defense.name:
-            targ_domain = True
-        if "Simple Domain" in defense.name:
-            targ_simple_domain = True
-        if "Falling Blossom" in defense.name:
-            targ_falling_blossom = True
-        if "Hollow Wicker Basket" in attack.name:
-            targ_wicker_basket = True
-#############################################################
               
         print('Starting battle checks...')
         stack=player.stack
@@ -504,7 +503,9 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         dmg = 0
         speed = 0
     
-    # region conditional increments
+# region conditional increments
+
+    # tool/no tool increment
         if tools:
             dmg, speed, items = type_increment(player, attack=attack, tools=tools)  
             for item in items:
@@ -524,20 +525,12 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 if item.poison:
                     player.poison = item.poison
                     print(f"{item.name} has a poison of {item.poison}")
-        
-        if domain:
-            # print(f"{player.name} is amped by their domain\nBase strength: {attack.dmg}\nBase speed: {attack.speed}")
-            # dmg, speed = type_increment(player, attack=attack)
-            # print(f"Amped strength {dmg}\nAmped speed: {speed}")
-            dmg = attack.strength
-            speed = attack.speed
-            print(f"{attack.name}'s damage {dmg}\n{attack.name}'s speed: {speed}")
-
 
         else:
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
-        
+    
+    # target tool/no tool increment
         if target_tools:
             defense_strength, defense_speed, items = type_increment(defense=defense, tools=target_tools)
          
@@ -549,14 +542,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 if item.soul:
                     soul_defense += item.soul
                     print(f"{item.name} has a soul defense of {soul_defense}")
-        
-        if targ_domain:
-            # print(f"{target.name} is amped by their domain\nBase strength: {defense.strength}\nBase speed: {defense.speed}")
-            # defense_strength, defense_speed = type_increment(target, defense=defense)
-            # print(f"Amped strength {defense_strength}\nAmped speed: {defense_speed}")
-            defense_speed = defense.speed
-            defense_strength = defense.strength
-            print(f"{defense.name}'s strength {defense_strength}\n{defense.name}'s speed: {defense_speed}")
 
         else:
             defense_strength, defense_speed = type_increment(target, defense=defense)
