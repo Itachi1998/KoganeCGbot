@@ -21,4 +21,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Define the command to run the application
-CMD ["/entrypoint.sh"]
+CMD ["entrypoint.sh"]
