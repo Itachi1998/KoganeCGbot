@@ -26,11 +26,11 @@ def get_move(player, attack=None, defense=None, tools=None):
         new_tools = []
         for name, item in new_tools_dict:
             new_tools.append(item)
-            #print(f"{player.name} has {name} equipped with a strength of {item.strength} and speed of {item.speed}")
+            print(f"{player.name} has {name} equipped with a strength of {item.strength} and speed of {item.speed}")
         return new_tools
     
     if attack:
-        if "Domain Expansion:" in attack:
+        if "Domain" or "Falling Blossom" or "Hollow Wicker" in attack:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, attack=attack)
             return new_barrier
         
@@ -45,7 +45,7 @@ def get_move(player, attack=None, defense=None, tools=None):
             return new_attack
     
     if defense:
-        if "Domain Expansion:" in defense:
+        if "Domain" or "Falling Blossom" or "Hollow Wicker" in defense:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, defense=defense)
             return new_barrier
         
@@ -431,6 +431,8 @@ def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength
     # barrier vars
         domain=None
         targ_domain=None
+        domain_amp=None
+        targ_domain_amp=None
         simple_domain=None
         targ_simple_domain=None
         falling_blossom=None
@@ -439,27 +441,31 @@ def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength
         targ_wicker_basket=None   
 
     # set player barrier   
-        if "Domain Expansion" in attack.name:
+        if 'open' in attack.type or 'closed' in attack.type:
             domain = True
-        if "Simple Domain" in attack.name:
+        if 'envelope' in attack.type:
+            domain_amp = True
+        if "simple" in attack.type:
             simple_domain = True
-        if "Falling Blossom" in attack.name:
+        if "blossom" in attack.type:
             falling_blossom = True
-        if "Hollow Wicker Basket" in attack.name:
+        if "basket" in attack.type:
             wicker_basket = True
 
     # set target barrier
-        if "Domain Expansion" in defense.name:
+        if 'open' in defense.type or 'closed' in defense.type:
             targ_domain = True
-        if "Simple Domain" in defense.name:
+        if 'envelope' in defense.type:
+            targ_domain_amp = True
+        if "simple" in defense.type:
             targ_simple_domain = True
-        if "Falling Blossom" in defense.name:
+        if "blossom" in defense.type:
             targ_falling_blossom = True
-        if "Hollow Wicker Basket" in attack.name:
+        if "basket" in defense.type:
             targ_wicker_basket = True
         
     # domain battle checks
-        if domain and targ_domain:
+        if domain==True and targ_domain==True:
             # refinement will be used to calculate what barrier breaks first
             refinement = speed + dmg
             targ_refinement = defense_speed + defense_strength
@@ -472,7 +478,31 @@ def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength
             else:
                 print("domains tied!")
             return
+        
+        if domain==True and targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
+            print(f"{player.name}'s domain vs {target.name}'s domain counter!")
+            return
 
+        if targ_domain==True and domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
+            print(f"{target.name}'s domain vs {player.name}'s domain counter!")
+            return
+
+        if domain==True:
+            print(f"{player.name}'s domain vs {target.name}'s defense!")
+            return
+        
+        if targ_domain==True:
+            print(f"{target.name}'s domain vs {player.name}'s attack!")
+            return
+        
+        if domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
+            print(f"{player.name} domain counter vs {target.name} defense!")
+            return
+        
+        if targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
+            print(f"{target.name}'s domain counter vs {player.name}'s attack!")
+            return
+        
 
 # region battle checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):      
@@ -526,6 +556,10 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                     player.poison = item.poison
                     print(f"{item.name} has a poison of {item.poison}")
 
+        if attack.type == 'envelope':
+            dmg, speed = type_increment(player, attack=attack)
+            print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
+
         else:
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
@@ -542,6 +576,10 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 if item.soul:
                     soul_defense += item.soul
                     print(f"{item.name} has a soul defense of {soul_defense}")
+
+        if defense.type == 'envelope':
+            defense_strength, defense_speed = type_increment(target, defense=defense)
+            print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}")
 
         else:
             defense_strength, defense_speed = type_increment(target, defense=defense)
@@ -565,14 +603,14 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         
             if attack_negated:
                 results = negate_check(target, dmg, defense_strength, defense=defense)
-                return results
+            #     return results
         
         if attack.negates:
             defense_negated=True
         
             if defense_negated:
                 results = negate_check(target, dmg, defense_strength, attack=attack)
-                return results
+            #     return results
 
     # soul/stack checks
         if defense.soul:
@@ -587,17 +625,17 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
 
         print(f"{attack.name}'s type is {attack.type}\n{defense.name}'s type is {defense.type}")
 
-    # domain clash/attack check
-        if attack.type == 'open' or 'closed':
-            if defense.type == 'open' or 'closed':
+    # domain clash/attack check - if we don't have a separate domain clash func we can check for just tank/counter/dodge and melee/projectile then have an else for barrier checks
+        if attack.type == 'open' or attack.type == 'closed':
+            if defense.type == 'open' or defense.type == 'closed':
                 print(f"{defense.name} 'domain clash' against {attack.name}...")    
                 results = domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
-                          
+                return results
+                      
             else:
                 print(f"{attack.name} 'barrier check' with defense {defense.name}...")    
                 results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
-        
-            return results
+                return results
         
     # tank check
         if defense.type == 'tank':
@@ -662,5 +700,5 @@ test_player2= Player(
 )
 
 sukuna=KingOfCurses()     #player1       player2        attack        defense
-results = battle_checks(test_player1, test_player2, "Domain Expansion: Malevolent Shrine", "Domain Expansion: Infinate Void")
+results = battle_checks(test_player1, test_player2, "Domain Amplification", "Domain Expansion: Infinate Void")
 print(results)

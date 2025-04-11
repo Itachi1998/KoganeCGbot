@@ -297,7 +297,7 @@ body_hop={
                               aoe=20,
                               strength=1000,
                               speed=9000,
-                              type="open",
+                              type="open", 
                               sure_hit=True
                          )
                }
@@ -1875,6 +1875,21 @@ shrine={
                               type="open",
                               sure_hit=True
 
+                         ),
+                    
+                    "Domain Amplification" :
+                         Techniques(
+                              name="Domain Amplification",
+                              level=5,
+                              act_speed=0,
+                              act_cost=50,
+                              act_body=("Full"),
+                              aoe=1,
+                              strength=0,
+                              speed=0,
+                              type="envelope",
+                              negates=True
+
                          )
                }
           }
@@ -2046,27 +2061,6 @@ star_rage={
                               strength=1500,
                               speed=700,
                               type="counter"
-                         )
-               }
-          },
-          {
-          "Barrier" :
-               {
-                   "Domain Expansion: " :
-                         Techniques(
-                              name="Domain Expansion: ",
-                              level=4,
-                              act_speed=2,
-                              act_cost=300,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=20,
-                              strength=1000,
-                              speed=9000,
-                              type="closed",
-                              intern_strength=30,
-                              extern_strength=30,
-                              sure_hit=True
-
                          )
                }
           }
