@@ -89,7 +89,7 @@ def get_random_sorcerer_tech(techlist=sorcerer_techs):
             ct_list.append(t)
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
-    print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
+    print(f"Getting technique: {tech_name}, rarity level: {tech['Rarity']}")
 
     if "Six Eyes" in tech.keys():
         if tech['Six Eyes'] != True:
