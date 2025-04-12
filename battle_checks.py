@@ -384,6 +384,61 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
     
     print(f"Defense activaton speed: {defense.act_speed}\nAttack activation speed: {attack.act_speed}")
 
+    if defense.act_speed > attack.act_speed:
+
+        print(f"Attack activated before defense\nCalculating speed diff of {defense.name} and {attack.name}\nDefense speed: {defense.speed}\nAttack speed: {attack.speed}")
+        speed_diff = max(defense_speed - speed, 0)
+                        # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
+        print(f"Speed diff: {speed_diff}\nDividing by target grade")
+        act_diff = defense.act_speed - attack.act_speed
+        divider = act_diff + target.grade
+        attack_speed = speed/divider     
+                            # 1200 / 20
+        print(f"Total attack speed divided by target grade: {attack_speed}")
+        print(f"Dividing speed diff: {speed_diff} by attack speed: {attack_speed}")
+        reduced_multiplier = speed_diff/attack_speed
+                 # 50 - 24
+        print(f"Reduced multiplier: {reduced_multiplier}")
+        total_dmg = dmg - reduced_multiplier 
+        target.hp -= total_dmg
+        if attack.soul:
+            target.max_hp -= attack.soul
+        print(f"{defense.name} was not able to dodge {attack.name}\n{total_dmg} damage taken\nspeed diff reduction {reduced_multiplier}")
+        return ("hit", total_dmg, target.hp<=0, target.max_hp <=0)
+
+    else: 
+        print(f"Defense activated before attack\nCalculating speed diff between {attack.name} and {defense.name}")
+                        #1000           500        
+        speed_diff = max(defense_speed - speed, 0)
+        
+        print(f"Speed difference between {attack.name} and {defense.name} is {speed_diff}")
+                        #500//5
+        attack_speed = speed_diff/target.grade         
+
+        print(f"Final attack speed difference is {attack_speed}")
+                                    # 2600 - 400 // 100
+        if attack_speed != 0:
+            
+            print(f"Reduced multiplier calc: {attack.strength} - {defense.strength} // {attack_speed}")
+
+            reduced_multiplier = (attack.strength - defense.strength) // attack_speed
+                            # 50 - 24
+            print(f"Multiplying reduced multiplier ({reduced_multiplier}) by attack level: {attack.level}")
+
+            total_dmg = (reduced_multiplier * attack.level)
+
+            target.hp -= total_dmg
+
+            print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_diff} resulting in some damage of {total_dmg}")
+            return ("dodge", total_dmg, target.hp<=0, target.max_hp<=0)
+
+        else:
+            dmg = 0
+            print(f"There is no difference in speed or the defense speed was faster. {defense.name} was able to dodge {attack.name}.")
+            return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+
+
+# region new dodge checks
 # # def act slower
 #     if defense.act_speed > attack.act_speed:
 #         print(f"Attack activated before defense. Calculating dodge results...")
@@ -446,67 +501,10 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
 #     dmg_percent = round(quotient*100, 1)
 #     return quotient, dmg_multiplier, dmg, dmg_percent
 
-
-# region old dodge checks
-    # if attack.soul:
-    #     target.max_hp -= attack.soul
-    # print(f"{defense.name} was not able to dodge {attack.name}\n{total_dmg} damage taken\nspeed diff reduction {reduced_multiplier}")
-    # return ("hit", total_dmg, target.hp<=0, target.max_hp <=0)
-
-    
-    if defense.act_speed > attack.act_speed:
-
-        print(f"Attack activated before defense\nCalculating speed diff of {defense.name} and {attack.name}\nDefense speed: {defense.speed}\nAttack speed: {attack.speed}")
-        speed_diff = max(defense_speed - speed, 0)
-                        # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
-        print(f"Speed diff: {speed_diff}\nDividing by target grade")
-        act_diff = defense.act_speed - attack.act_speed
-        divider = act_diff + target.grade
-        attack_speed = speed/divider     
-                            # 1200 / 20
-        print(f"Total attack speed divided by target grade: {attack_speed}")
-        print(f"Dividing speed diff: {speed_diff} by attack speed: {attack_speed}")
-        reduced_multiplier = speed_diff/attack_speed
-                 # 50 - 24
-        print(f"Reduced multiplier: {reduced_multiplier}")
-        total_dmg = dmg - reduced_multiplier 
-        target.hp -= total_dmg
-        if attack.soul:
-            target.max_hp -= attack.soul
-        print(f"{defense.name} was not able to dodge {attack.name}\n{total_dmg} damage taken\nspeed diff reduction {reduced_multiplier}")
-        return ("hit", total_dmg, target.hp<=0, target.max_hp <=0)
-
-
-    else: 
-        print(f"Defense activated before attack\nCalculating speed diff between {attack.name} and {defense.name}")
-                        #1000           500        
-        speed_diff = max(speed - defense_speed, 0)
-        
-        print(f"Speed difference between {attack.name} and {defense.name} is {speed_diff}")
-                        #500//5
-        attack_speed = speed_diff/target.grade         
-
-        print(f"Final attack speed difference is {attack_speed}")
-                                    # 2600 - 400 // 100
-        if attack_speed != 0:
-            
-            print(f"Reduced multiplier calc: {attack.strength} - {defense.strength} // {attack_speed}")
-
-            reduced_multiplier = (attack.strength - defense.strength) // attack_speed
-                            # 50 - 24
-            print(f"Multiplying reduced multiplier ({reduced_multiplier}) by attack level: {attack.level}")
-
-            total_dmg = (reduced_multiplier * attack.level)
-
-            target.hp -= total_dmg
-
-            print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_diff} resulting in some damage of {total_dmg}")
-            return ("dodge", total_dmg, target.hp<=0, target.max_hp<=0)
-
-        else:
-            dmg = 0
-            print(f"There is no difference in speed or the defense speed was faster. {defense.name} was able to dodge {attack.name}.")
-            return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+# if attack.soul:
+#     target.max_hp -= attack.soul
+# print(f"{defense.name} was not able to dodge {attack.name}\n{total_dmg} damage taken\nspeed diff reduction {reduced_multiplier}")
+# return ("hit", total_dmg, target.hp<=0, target.max_hp <=0)
 
 
 # region domain clash
@@ -792,19 +790,19 @@ test_player1 = Player(
     cgp=0,
     skp=0,
     user_id=0,
-    charge=1,
+    charge=0,
     grade=5,
-    imbue=500
+    imbue=100
 )
 
 test_player2= Player(
-    name="Toji",
+    name="Gojo",
     level=10,
     max_hp=4000,
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Heavenly Restriction: Zero",
+    technique="Limitless",
     playerclass="sorcerer",
     colony=1,
     xp=0,
@@ -816,5 +814,5 @@ test_player2= Player(
 )
 
 sukuna=KingOfCurses()     #player1       player2        attack        defense
-results = battle_checks(test_player1, test_player2, "Dismantle", "Precognition")
+results = battle_checks(test_player1, test_player2, "Dismantle", "Blue")
 print(results)
