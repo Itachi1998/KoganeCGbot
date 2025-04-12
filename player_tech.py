@@ -287,7 +287,7 @@ body_hop={
           {
           "Barrier" :
                {
-                   "Domain Expansion: Womb Profusion" :
+                   "Domain Expansion" :
                          Techniques(
                               name="Domain Expansion: Womb Profusion",
                               level=4,
@@ -710,7 +710,7 @@ construction={
           {
           "Barrier" :
                {
-                   "Domain Expansion: Three-fold Affliction" :
+                   "Domain Expansion" :
                          Techniques(
                               name="Domain Expansion: Three-fold Affliction",
                               level=4,
@@ -825,7 +825,7 @@ copy={ # change to be like cursed spirit manipulation?
           {
           "Barrier" :
                {
-                   "Domain Expansion: Authentic Mutual Love" :
+                   "Domain Expansion" :
                          Techniques(
                               name="Domain Expansion: Authentic Mutual Love",
                               level=4,
@@ -1339,7 +1339,7 @@ idle_transfig={
           {
           "Barrier" :
                {
-                   "Domain Expansion: Self-Embodiment of Perfection" :
+                   "Domain Expansion" :
                          Techniques(
                               name="Domain Expansion: Self-Embodiment of Perfection",
                               level=4,
@@ -1463,15 +1463,11 @@ limitless={
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=0,
-<<<<<<< HEAD
+                         strength=100,
                          speed=0,
-=======
-                         speed=1200,
->>>>>>> 95ef254c2be1c78d56f4c63aafaf1d72078a7a9c
                          type="dodge"
                     ),
-               
+
                "Red": # RCT required
                     Techniques(
                          name="Red",
@@ -1481,7 +1477,7 @@ limitless={
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=1200,
-                         speed=800,
+                         speed=0,
                          type="counter"
                     ),
 
@@ -1502,9 +1498,9 @@ limitless={
           {
           "Barrier" :
                {
-                   "Domain Expansion: Infinate Void" :
+                   "Domain Expansion" :
                          Techniques(
-                              name="Domain Expansion: Infinate Void",
+                              name="Domain Expansion: Infinite Void",
                               level=5,
                               act_speed=2,
                               act_cost=600,
@@ -1676,7 +1672,7 @@ projection_sorcery={
           {
                "Barrier" :
                {
-                   "Domain Expansion: Time Cell Moon Pallace" :
+                   "Domain Expansion" :
                          Techniques(
                               name="Domain Expansion: Time Cell Moon Pallace",
                               level=4,
@@ -1702,13 +1698,14 @@ projection_sorcery={
 # region ### Shrine
 
 shrine={
-     
+
 "Shrine" :
      [
           {
                "Attack" : 
                {
                     "Dismantle" : # need a visability attribute so it can't be seen by most sorcerers
+
                          Techniques(
                               name="Dismantle",
                               level=1,
@@ -1721,7 +1718,7 @@ shrine={
                               type="projectile",
                               invisable=True
                          ),
-                    
+
                     "Multi Dismantle" :
                         Techniques(
                               name="Multi Dismantle",
@@ -1864,9 +1861,10 @@ shrine={
           },
           
           {
+              
                "Barrier" :
                {
-                   "Domain Expansion: Malevolent Shrine" :
+                   "Domain Expansion" :
                          Techniques(
                               name="Domain Expansion: Malevolent Shrine",
                               level=5,
@@ -1973,27 +1971,27 @@ sky_manip={
                          )
                }
           },
-          {
-          "Barrier" :
-               {
-                   "Domain Expansion: " :
-                         Techniques(
-                              name="Domain Expansion: ",
-                              level=4,
-                              act_speed=2,
-                              act_cost=300,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=20,
-                              strength=1000,
-                              speed=9000,
-                              type="closed",
-                              intern_strength=30,
-                              extern_strength=30,
-                              sure_hit=True
+          # {
+          # "Barrier" :
+          #      {
+          #          "Domain Expansion: " :
+          #                Techniques(
+          #                     name="Domain Expansion: ",
+          #                     level=4,
+          #                     act_speed=2,
+          #                     act_cost=300,
+          #                     act_body=("Left Arm", "Right Arm"),
+          #                     aoe=20,
+          #                     strength=1000,
+          #                     speed=9000,
+          #                     type="closed",
+          #                     intern_strength=30,
+          #                     extern_strength=30,
+          #                     sure_hit=True
 
-                         )
-               }
-          }
+          #                )
+          #      }
+          # }
      ],
 "Rarity" : 15
 }
@@ -2309,7 +2307,7 @@ ten_shadows={
           {
           "Barrier" :
                {
-                   "Domain Expansion: Chimera Shadow Garden" :
+                   "Domain Expansion" :
                          Techniques(
                               name="Domain Expansion: Chimera Shadow Garden",
                               level=4,
