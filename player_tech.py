@@ -140,7 +140,7 @@ bird_manip = {
                     Techniques(
                          name="Birds Eye",
                          level=2,
-                         act_speed=20,
+                         act_speed=5,
                          act_cost=10,
                          act_body=("head"),
                          aoe=5,
@@ -1463,8 +1463,8 @@ limitless={
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=100,
-                         speed=0,
+                         strength=0,
+                         speed=1200,
                          type="dodge"
                     ),
 
@@ -1481,7 +1481,7 @@ limitless={
                          type="counter"
                     ),
 
-               "Void Punch" : 
+               "Void Punch" : # add a sneaky red move to combo lol
                     Techniques(
                          name="Void Punch",
                          level=4,
@@ -1545,7 +1545,7 @@ mba={
                             type="melee"
                         ),
 
-                    "Lighting Rod" : # requires cursed tool - add in checks
+                    "Lightning Rod" : # requires cursed tool - add in checks
                         Techniques(
                             name="Lightning Rod",
                             level=3,
