@@ -26,11 +26,11 @@ def get_move(player, attack=None, defense=None, tools=None):
         new_tools = []
         for name, item in new_tools_dict:
             new_tools.append(item)
-            #print(f"{player.name} has {name} equipped with a strength of {item.strength} and speed of {item.speed}")
+            print(f"{player.name} has {name} equipped with a strength of {item.strength} and speed of {item.speed}")
         return new_tools
     
     if attack:
-        if "Domain Expansion:" in attack:
+        if "Domain" in attack or "Falling Blossom" in attack or "Hollow Wicker" in attack:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, attack=attack)
             return new_barrier
         
@@ -45,7 +45,7 @@ def get_move(player, attack=None, defense=None, tools=None):
             return new_attack
     
     if defense:
-        if "Domain Expansion:" in defense:
+        if "Domain" in defense or "Falling Blossom" in defense or "Hollow Wicker" in defense:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, defense=defense)
             return new_barrier
         
@@ -96,6 +96,15 @@ def attack_verify(player, attack):
         print('not a high enough level to use attack')
         return "no lvl"
     
+    # if type(attack.charge) is not None: # broken
+    #     print(f"{attack.name} has a charge attribute")
+    #     try:
+    #         if player.charge < attack.charge:
+    #             print('defense is not charged')
+    #             return "no charge"
+    #     except Exception as e:
+    #         return e
+
     else:
         print("Attack verified!")
         player.ce -= attack.act_cost + player.imbue
@@ -111,6 +120,13 @@ def defense_verify(target, defense):
     if target.level < defense.level:
         print('not a high enough level to use defense')
         return "no lvl"
+    
+    # if type(defense.charge) is int:
+    #     print(f"{defense.name} has a charge attribute")
+    #     if target.charge < defense.charge:
+    #         print('defense is not charged')
+    #         return "no charge"
+
     else:
         print("Defense verified!")
         target.ce -= defense.act_cost + target.imbue
@@ -133,20 +149,19 @@ def type_increment(player, attack=None, defense=None, tools=None):
                 dmg = attack.strength + player.imbue + player.strength
                 speed = attack.speed + player.imbue + player.speed
         
-        else:
+        if attack.type == 'projectile':
             dmg = attack.strength + player.imbue
             speed = attack.speed + player.imbue
 
-        # if attack.type == 'open' or 'closed':
-        #     print("mulitplying stats by 1.2 - domain boost")
-        #     dmg = dmg*1.2
-        #     speed = speed*1.2
+        else:
+            dmg = attack.strength
+            speed = attack.speed
 
         return dmg, speed
     
     if defense:
         print(f"Incrementing {defense.name} stats...")
-        if defense.type == 'tank' or 'counter':
+        if defense.type == 'tank' or defense.type == 'counter' or defense.type == 'dodge':
             defense_strength = defense.strength + player.imbue + player.strength
             defense_speed = defense.speed + player.imbue + player.speed
             
@@ -157,13 +172,8 @@ def type_increment(player, attack=None, defense=None, tools=None):
                 return defense_strength, defense_speed, tools
 
         else:
-            defense_strength = player.imbue + player.strength
-            defense_speed = player.imbue + player.speed
-
-        # if defense.type == 'open' or 'closed':
-        #     print("mulitplying stats by 1.2 - domain boost")
-        #     defense_strength = defense_strength*1.2
-        #     defense_speed = defense_speed*1.2
+            defense_strength = defense.strength
+            defense_speed = defense.speed
 
         return defense_strength, defense_speed
 
@@ -186,6 +196,11 @@ def defense_visability(player, target, attack, defense):
         if player.technique == "Heavenly Restriction: Zero":
             print(f"{player.name} can see {target.name}")
             return False
+        
+        if attack.sure_hit:
+            print(f"{player.name} can't see but will still hit {target.name}")
+            return False
+        
         if defense.invisible:
             aoe = attack.aoe
             if aoe > 10:
@@ -203,11 +218,8 @@ def defense_visability(player, target, attack, defense):
 # region negate checks
 def negate_check(target, dmg, defense_strength, attack=None, defense=None):
     print("Checking for negation...")
-
+    # needs rework
     if attack: 
-        if attack.soul:
-            target.max_hp -= attack.soul
-        target.hp -= dmg
         print(f"{attack.name} negates {defense_strength} defense from {target.name}")
         return ("hit", dmg, target.hp<=0, target.max_hp <=0)
     
@@ -273,6 +285,15 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
 
 # region counter check
 def counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
+    
+    if attack.sure_hit:
+        if attack_negated:
+            dmg = 0
+            print(f"{defense.name} negated {attack.name}")
+        else:
+            print(f"{defense.name} was hit by sure hit {attack.name}")
+            return ("hit", dmg, target.hp<=0, target.max_hp<=0)
+    
     if atk_invis:
         target.hp -= dmg
         print(f"{defense.name} couldn't counter because {attack.name} was invisable")
@@ -317,8 +338,8 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
         if defense.poison:
             player.poison= defense.poison
         
-        if defense.charge:
-            target.charge = target.charge
+        if defense.charge: # ?
+            target.charge = target.charge 
             
         counter_dmg = defense_strength
             # subtract player.imbue ?
@@ -333,8 +354,17 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
         
 
 # region dodge check
-def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, attack_negated, defense_negated):
-
+def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated):
+    defense_strength=defense_strength
+    
+    if attack.sure_hit: # need to improve this
+        if attack_negated:
+            dmg = 0
+            print(f"{defense.name} negated {attack.name}")
+        else:
+            print(f"{defense.name} was hit by sure hit {attack.name}")
+            return ("hit", dmg, target.hp<=0, target.max_hp<=0)
+        
     if targ_invis:
         dmg = 0
         print(f"{defense.name} (invisable) was able to dodge {attack.name}")
@@ -345,9 +375,85 @@ def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, 
         print(f"{defense.name} negated {attack.name}")
 
     if defense_negated:
-        target.strength=0
+        defense_strength=0
         print(f"{attack.name} negated {defense.name}")
 
+    if defense_speed == 0:
+        print(f"{defense.name} is 0 and was not able to dodge {attack.name}\n{dmg} damage taken")
+        return ("hit", dmg, target.hp<=0, target.max_hp <=0)
+    
+    print(f"Defense activaton speed: {defense.act_speed}\nAttack activation speed: {attack.act_speed}")
+
+# # def act slower
+#     if defense.act_speed > attack.act_speed:
+#         print(f"Attack activated before defense. Calculating dodge results...")
+#         act_diff = defense.act_speed - attack.act_speed
+#         reduction_multiplier = act_diff - (act_diff*.1) # for every 1 act_speed higher there is a 10% reduction in dodge speed
+#         defense_speed = defense_speed * reduction_multiplier
+#         print(f"Activation diff: {act_diff}\nDefense speed reduction multiplier: {reduction_multiplier}\nNew defense speed: {defense_speed}")
+
+#         if defense_speed < speed: 
+#             quotient, dmg_multiplier, dmg, dmg_percent = dodge_calc(defense_speed, speed, dmg)
+#             print(f"Quotient: {quotient}\nDamage multiplier: {dmg_multiplier}\nDefense strength: {defense_strength}")
+#             print(f"{defense.name} was not able to dodge {attack.name}\n{dmg} damage taken\nspeed diff reduction {dmg_percent}%")
+#             return ("hit", dmg, target.hp<=0, target.max_hp <=0)
+        
+#         else:
+#             dmg = 0
+#             print(f"There is no difference in speed or the defense speed was faster. {defense.name} was able to dodge {attack.name}.")
+#             return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+
+# # def act equal
+#     if defense.act_speed == attack.act_speed:
+#         print("Defense and attack activated at the same time. Calculating dodge results...")
+        
+#         if defense_speed < speed: 
+#             quotient, dmg_multiplier, dmg, dmg_percent = dodge_calc(defense_speed, speed, dmg)
+#             print(f"Quotient: {quotient}\nDamage multiplier: {dmg_multiplier}\nDefense strength: {defense_strength}")
+#             print(f"{defense.name} was not able to dodge {attack.name}\n{dmg} damage taken\nspeed diff reduction {dmg_percent}%")
+#             return ("hit", dmg, target.hp<=0, target.max_hp <=0)
+        
+#         else:
+#             dmg = 0
+#             print(f"There is no difference in speed or the defense speed was faster. {defense.name} was able to dodge {attack.name}.")
+#             return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+
+# # def act faster    
+#     else:
+#         print(f"Defense activated before attack. Calculating dodge results...")
+#         act_diff = attack.act_speed - defense.act_speed
+#         reduction_multiplier = act_diff - (act_diff*.1) # for every 1 act_speed higher on the attack there is a 10% reduction in attack speed
+#         speed = speed * reduction_multiplier
+#         print(f"Activation diff: {act_diff}\nSpeed reduction multiplier: {reduction_multiplier}\nNew attack speed: {speed}")
+
+#         if defense_speed < speed: 
+#             quotient, dmg_multiplier, dmg, dmg_percent = dodge_calc(defense_speed, speed, dmg)
+#             print(f"Quotient: {quotient}\nDamage multiplier: {dmg_multiplier}\nDefense strength: {defense_strength}")
+#             print(f"{defense.name} was not able to dodge {attack.name}\n{dmg} damage taken\nspeed diff reduction {dmg_percent}%")
+#             return ("hit", dmg, target.hp<=0, target.max_hp <=0)
+        
+#         else:
+#             dmg = 0
+#             print(f"There is no difference in speed or the defense speed was faster. {defense.name} was able to dodge {attack.name}.")
+#             return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+        
+
+# # region dodge calc
+# def dodge_calc(defense_speed, speed, dmg):
+#     quotient = round(defense_speed/speed, 3)
+#     dmg_multiplier = round(1 - quotient, 3)
+#     dmg = round(dmg*dmg_multiplier, 3)
+#     dmg_percent = round(quotient*100, 1)
+#     return quotient, dmg_multiplier, dmg, dmg_percent
+
+
+# region old dodge checks
+    # if attack.soul:
+    #     target.max_hp -= attack.soul
+    # print(f"{defense.name} was not able to dodge {attack.name}\n{total_dmg} damage taken\nspeed diff reduction {reduced_multiplier}")
+    # return ("hit", total_dmg, target.hp<=0, target.max_hp <=0)
+
+    
     if defense.act_speed > attack.act_speed:
 
         print(f"Attack activated before defense\nCalculating speed diff of {defense.name} and {attack.name}\nDefense speed: {defense.speed}\nAttack speed: {attack.speed}")
@@ -395,7 +501,7 @@ def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, 
             target.hp -= total_dmg
 
             print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_diff} resulting in some damage of {total_dmg}")
-            return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
+            return ("dodge", total_dmg, target.hp<=0, target.max_hp<=0)
 
         else:
             dmg = 0
@@ -404,36 +510,109 @@ def dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, 
 
 
 # region domain clash
-def domain_clash(target, player, defense, attack):
+def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
     domain_type = attack.type
     targ_domain_type = defense.type
     
     if domain_type or targ_domain_type == 'open':
         print(f"{domain_type} vs {targ_domain_type} domain battle!")
-        return
+        results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
+        return results
     
     if attack.act_speed < defense.act_speed:
         print(f"{attack.name} broke {target.name}'s domain!")
-        return
+        return 'defense broke'
     
     if attack.act_speed > defense.act_speed:
         print(f"{defense.name} broke {player.name}'s domain!")
-        return
+        return 'attack broke'
     
     else:
-        print(f"{player.name} vs {target.name} closed domain battle!")
-        return
+        print(f"{player.name} vs {target.name} closed domain battle!") # is this possible? 
+        results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
+        return results
 
     
 # region barrier checks
 def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
-    # refinement = (speed + dmg) / attack.act_speed
-    # targ_refinement = (defense_speed + defense_strength) / defense.act_speed
-    print("Barrier checks")
-    return
 
+    # barrier vars
+        domain=None
+        targ_domain=None
+        domain_amp=None
+        targ_domain_amp=None
+        simple_domain=None
+        targ_simple_domain=None
+        falling_blossom=None
+        targ_falling_blossom=None
+        wicker_basket=None
+        targ_wicker_basket=None   
 
-# region battle_checks
+    # set player barrier   
+        if 'open' in attack.type or 'closed' in attack.type:
+            domain = True
+        if 'envelope' in attack.type:
+            domain_amp = True
+        if "simple" in attack.type:
+            simple_domain = True
+        if "blossom" in attack.type:
+            falling_blossom = True
+        if "basket" in attack.type:
+            wicker_basket = True
+
+    # set target barrier
+        if 'open' in defense.type or 'closed' in defense.type:
+            targ_domain = True
+        if 'envelope' in defense.type:
+            targ_domain_amp = True
+        if "simple" in defense.type:
+            targ_simple_domain = True
+        if "blossom" in defense.type:
+            targ_falling_blossom = True
+        if "basket" in defense.type:
+            targ_wicker_basket = True
+        
+    # domain battle checks
+        if domain==True and targ_domain==True:
+            # refinement will be used to calculate what barrier breaks first
+            refinement = speed + dmg
+            targ_refinement = defense_speed + defense_strength
+            print(f"Barrier checks:\n{player.name}'s barrier refinement: {refinement}\n{target.name}'s barrier refinement: {targ_refinement}")
+            
+            if refinement > targ_refinement:
+                print(f"{player.name}'s domain won the battle!")
+            if refinement < targ_refinement:
+                print(f"{target.name}'s domain won the battle!")
+            else:
+                print("domains tied!")
+            return
+        
+        if domain==True and targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
+            print(f"{player.name}'s domain vs {target.name}'s domain counter!")
+            return
+
+        if targ_domain==True and domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
+            print(f"{target.name}'s domain vs {player.name}'s domain counter!")
+            return
+
+        if domain==True:
+            print(f"{player.name}'s domain vs {target.name}'s defense!")
+            return
+        
+        if targ_domain==True:
+            print(f"{target.name}'s domain vs {player.name}'s attack!")
+            return
+        
+        if domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
+            print(f"{player.name} domain counter vs {target.name} defense!")
+            return
+        
+        if targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
+            print(f"{target.name}'s domain counter vs {player.name}'s attack!")
+            return
+        
+
+# region battle checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):      
         tools=None
         target_tools=None
@@ -451,40 +630,10 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             return False
         if not defense:
             return False
-
-    # barrier vars
-        domain=None
-        targ_domain=None
-        simple_domain=None
-        targ_simple_domain=None
-        falling_blossom=None
-        targ_falling_blossom=None
-        wicker_basket=None
-        targ_wicker_basket=None   
-
-    # set player barrier techs    
-        if "Domain Expansion:" in attack.name:
-            domain = True
-        if "Simple Domain" in attack.name:
-            simple_domain = True
-        if "Falling Blossom" in attack.name:
-            falling_blossom = True
-        if "Hollow Wicker Basket" in attack.name:
-            wicker_basket = True
-
-    # set target barrier techs
-        if "Domain Expansion:" in defense.name:
-            targ_domain = True
-        if "Simple Domain" in defense.name:
-            targ_simple_domain = True
-        if "Falling Blossom" in defense.name:
-            targ_falling_blossom = True
-        if "Hollow Wicker Basket" in attack.name:
-            targ_wicker_basket = True  
               
         print('Starting battle checks...')
         stack=player.stack
-        charge=player.charge # this check should take place in the verify func
+        charge=player.charge
         defense_negated=False
         attack_negated=False
         soul_dmg=0
@@ -492,7 +641,9 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         dmg = 0
         speed = 0
     
-    # region conditional increments
+# region conditional increments
+
+    # tool/no tool increment
         if tools:
             dmg, speed, items = type_increment(player, attack=attack, tools=tools)  
             for item in items:
@@ -512,20 +663,16 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 if item.poison:
                     player.poison = item.poison
                     print(f"{item.name} has a poison of {item.poison}")
-        
-        if domain:
-            # print(f"{player.name} is amped by their domain\nBase strength: {attack.dmg}\nBase speed: {attack.speed}")
-            # dmg, speed = type_increment(player, attack=attack)
-            # print(f"Amped strength {dmg}\nAmped speed: {speed}")
-            dmg = attack.strength
-            speed = attack.speed
-            print(f"{attack.name}'s damage {dmg}\n{attack.name}'s speed: {speed}")
 
+        if attack.type == 'envelope':
+            dmg, speed = type_increment(player, attack=attack)
+            print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
 
         else:
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
-        
+    
+    # target tool/no tool increment
         if target_tools:
             defense_strength, defense_speed, items = type_increment(defense=defense, tools=target_tools)
          
@@ -537,20 +684,23 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 if item.soul:
                     soul_defense += item.soul
                     print(f"{item.name} has a soul defense of {soul_defense}")
-        
-        if targ_domain:
-            # print(f"{target.name} is amped by their domain\nBase strength: {defense.strength}\nBase speed: {defense.speed}")
-            # defense_strength, defense_speed = type_increment(target, defense=defense)
-            # print(f"Amped strength {defense_strength}\nAmped speed: {defense_speed}")
-            defense_speed = defense.speed
-            defense_strength = defense.strength
-            print(f"{defense.name}'s strength {defense_strength}\n{defense.name}'s speed: {defense_speed}")
+
+        if defense.type == 'envelope':
+            defense_strength, defense_speed = type_increment(target, defense=defense)
+            print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}")
 
         else:
             defense_strength, defense_speed = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}") 
 
 # region conditional checks
+
+    # sure hit checks
+        if attack.sure_hit:
+            print(f"{attack.name} is a sure hit")
+
+        if defense.sure_hit:
+            print(f"{defense.name} is a sure hit")
 
     # visability checks
         atk_invis=None
@@ -562,20 +712,20 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         if defense.invisable:
             targ_invis = defense_visability(target, attack)
 
-    # negate checks
+    # negate checks - needs to be improved
         if defense.negates:
             attack_negated=True
         
             if attack_negated:
                 results = negate_check(target, dmg, defense_strength, defense=defense)
-                return results
+            #     return results
         
         if attack.negates:
             defense_negated=True
         
             if defense_negated:
                 results = negate_check(target, dmg, defense_strength, attack=attack)
-                return results
+            #     return results
 
     # soul/stack checks
         if defense.soul:
@@ -590,18 +740,17 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
 
         print(f"{attack.name}'s type is {attack.type}\n{defense.name}'s type is {defense.type}")
 
-    # domain clash check
-        if attack.type == 'open' or 'closed':
-            if defense.type == 'open' or 'closed':
+    # domain clash/attack check - if we don't have a separate domain clash func we can check for just tank/counter/dodge and melee/projectile then have an else for barrier checks
+        if attack.type == 'open' or attack.type == 'closed':
+            if defense.type == 'open' or defense.type == 'closed':
                 print(f"{defense.name} 'domain clash' against {attack.name}...")    
-                results = domain_clash(target, player, defense, attack)
-
-    # domain attack check        
+                results = domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
+                return results
+                      
             else:
                 print(f"{attack.name} 'barrier check' with defense {defense.name}...")    
                 results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
-        
-            return results
+                return results
         
     # tank check
         if defense.type == 'tank':
@@ -618,7 +767,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
     # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
-            results = dodge_check(target, defense, attack, dmg, speed, defense_speed, targ_invis, attack_negated, defense_negated)
+            results = dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
             return results   
 
     # domain defense check
@@ -643,18 +792,19 @@ test_player1 = Player(
     cgp=0,
     skp=0,
     user_id=0,
+    charge=1,
     grade=5,
-    imbue=100
+    imbue=500
 )
 
 test_player2= Player(
-    name="Gojo",
+    name="Toji",
     level=10,
     max_hp=4000,
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Limitless",
+    technique="Heavenly Restriction: Zero",
     playerclass="sorcerer",
     colony=1,
     xp=0,
@@ -666,5 +816,5 @@ test_player2= Player(
 )
 
 sukuna=KingOfCurses()     #player1       player2        attack        defense
-results = battle_checks(test_player1, test_player2, "Domain Expansion: Malevolent Shrine", "Domain Expansion: Infinate Void")
+results = battle_checks(test_player1, test_player2, "Dismantle", "Precognition")
 print(results)
