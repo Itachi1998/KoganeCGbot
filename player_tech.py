@@ -1404,7 +1404,7 @@ limitless={
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=0,
-                         speed=1600,
+                         speed=0,
                          type="dodge"
                     ),
                
@@ -1987,16 +1987,16 @@ straw_doll={
                               type="projectile"
                          ),
                     
-                    "Reasonance" : 
+                    "Resonance" : 
                          Techniques(
-                              name="Reasonance",
+                              name="Resonance",
                               level=3,
                               act_speed=2,                              
                               act_cost=40,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=800,
-                              speed=2000, # ???
+                              speed=0, # ???
                               type="melee", #melee on doll that links attack to target (effigy)
                               soul=True, 
                               sure_hit=True

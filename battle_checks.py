@@ -463,11 +463,13 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             stack -= 1
             player.stack = stack
 
+
     # tank check
         if defense.type == 'tank':
             print(f"{defense.name} 'tank check' against {attack.name}...")
             results = tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=soul_defense)
             return results
+        
         
     # counter check
         if defense.type == 'counter':
@@ -475,6 +477,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
             return results
                 
+
     # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
@@ -490,7 +493,7 @@ test_player1 = Player(
     max_ce=4000,
     strength=300,
     speed=300,
-    technique="Heavenly Restriction: Zero",
+    technique="Straw Doll",
     playerclass="sorcerer",
     colony=1,
     xp=0,
@@ -498,8 +501,7 @@ test_player1 = Player(
     skp=0,
     user_id=0,
     grade=5,
-    imbue=0,
-    equipped="ISOH"
+    imbue=0
 )
 
 test_player2= Player(
@@ -509,7 +511,7 @@ test_player2= Player(
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Body Hop",
+    technique="Limitless",
     playerclass="sorcerer",
     colony=1,
     xp=0,
@@ -520,6 +522,7 @@ test_player2= Player(
     imbue=200
 )
 
+
 sukuna=KingOfCurses()     #player1       player2        attack        defense
-results = battle_checks(test_player1, test_player2, "Three Piece Combo", "Red")
+results = battle_checks(test_player1, test_player2, "Resonance", "Blue")
 print(results)

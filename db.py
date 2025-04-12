@@ -197,13 +197,10 @@ def read_enemy(colony_id: int, value=None):
         with Session(engine) as session:
                 existing_enemy = session.query(Enemy).filter_by(colony_id=colony_id).first()
                 if existing_enemy:
-                        if value:
-                            e = {
-                                column.name: getattr(existing_enemy, column.name) for column in existing_enemy.__table__.columns
-                            }
-                            session.close()
-                            return e
-
+                        for e in Enemy.__subclasses__:
+                             if e.name == existing_enemy.name:
+                                  enemy=Enemy(**existing_enemy)
+                                  return enemy
                         else:
                             session.close()
                             return True
