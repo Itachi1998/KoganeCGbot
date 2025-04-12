@@ -15,10 +15,10 @@ class Techniques():
                 poison: tuple = None,
                 stun: int = None,
                 stack: int = None, # Projection Techniques
-                charge: int=None, # Kashimo or Nobara techniques
+                charge: bool=None, # Kashimo or Nobara techniques
                 summon: dict=None,
                 sure_hit=None,
-                target=None,
+                target: str=None,
                 negates: bool =None,
                 duration: int=None,
                 cooldown: int=None,

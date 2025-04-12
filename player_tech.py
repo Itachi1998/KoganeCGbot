@@ -1819,7 +1819,7 @@ shrine={
                               type="tank"
                          ),
 
-                    "Dismantle Glove" : # like parry but strong since it envelopes the hand
+                    "Dismantle Glove" : # like parry but strong since it envelops the hand
                          Techniques(
                               name="Dismantle Glove",
                               level=2,
@@ -1889,7 +1889,7 @@ shrine={
                               aoe=1,
                               strength=0,
                               speed=0,
-                              type="envelope",
+                              type="envelop",
                               negates=True
 
                          )

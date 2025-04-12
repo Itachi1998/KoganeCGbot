@@ -84,7 +84,7 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
         
 
 # region verify checks
-def attack_verify(player, attack):
+def attack_verify(player, target, attack):
     attack = get_move(player, attack=attack)
 
     if player.ce < attack.act_cost:
@@ -95,14 +95,17 @@ def attack_verify(player, attack):
         print('not a high enough level to use attack')
         return "no lvl"
     
-    # if type(attack.charge) is not None: # broken
-    #     print(f"{attack.name} has a charge attribute")
-    #     try:
-    #         if player.charge < attack.charge:
-    #             print('defense is not charged')
-    #             return "no charge"
-    #     except Exception as e:
-    #         return e
+    if attack.charge:
+        print(f"{attack.name} has a charge attribute")
+        if target.name == attack.target:
+            if target.id in player.inventory.keys():
+                print("Attack verified!")
+                player.ce -= attack.act_cost + player.imbue
+                return attack
+            
+            else:
+                print('attack is not charged')
+                return "no charge"
 
     else:
         print("Attack verified!")
@@ -120,11 +123,15 @@ def defense_verify(target, defense):
         print('not a high enough level to use defense')
         return "no lvl"
     
-    # if type(defense.charge) is int:
-    #     print(f"{defense.name} has a charge attribute")
-    #     if target.charge < defense.charge:
-    #         print('defense is not charged')
-    #         return "no charge"
+    if defense.charge:
+        print(f"{defense.name} has a charge attribute")
+        if target.charge < defense.charge:
+            print('defense is not charged')
+            return "no charge"
+        else:
+            print("Defense verified!")
+            target.ce -= defense.act_cost + target.imbue
+            return defense
 
     else:
         print("Defense verified!")
@@ -577,7 +584,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                     player.poison = item.poison
                     print(f"{item.name} has a poison of {item.poison}")
             
-        if attack.type == 'envelope':
+        if attack.type == 'envelop':
 
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
@@ -602,7 +609,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                     print(f"{item.name} has a soul defense of {soul_defense}")
 
 
-        if defense.type == 'envelope':
+        if defense.type == 'envelop':
             defense_strength, defense_speed = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}")
 
@@ -706,15 +713,16 @@ test_player1 = Player(
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Shrine",
+    technique="Straw Doll",
     playerclass="sorcerer",
     colony=1,
     xp=0,
     cgp=0,
     skp=0,
     user_id=0,
-    charge=0,
     grade=5,
+    charge=True,
+    target="Gojo"
 )
 
 
@@ -735,5 +743,5 @@ test_player2= Player(
     grade=5
 )
 
-results = battle_checks(test_player1, test_player2, "Domain Expansion", "Domain Expansion")
+results = battle_checks(test_player1, test_player2, "Resonance", "Domain Expansion")
 print(results)

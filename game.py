@@ -312,7 +312,7 @@ class Player(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
                     xp: int, cgp: int, skp: int, user_id: int,
                     stack=0, imbue=0,
-                    equipped: list=None, inventory: list=None,
+                    equipped: dict=None, inventory: dict=None,
                     summons: list=None, charge: int=None, 
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
@@ -320,7 +320,7 @@ class Player(Actor):
                     rct: tuple=None, #(1, 2, 3) 
                     heal: dict=None,
                     self_heal: int=None,
-                    killcount: list=None, buffed: list=None, 
+                    killcount: int=None, buffed: list=None, 
                     debuffed: list=None, status: str=None, grade=None, soul: dict=None, six_eyes: bool=None,
                     killed: str=None):
         try:          
