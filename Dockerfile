@@ -5,12 +5,15 @@ FROM python:3.9-slim
 WORKDIR /kogane
 
 # Copy the requirements file into the container
-COPY requirements.txt ./
+COPY requirements.txt ./ 
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Install system dependencies required for psycopg2
 RUN apt-get update && \
     apt-get install -y libpq-dev gcc && \
     rm -rf /var/lib/apt/lists/*
+
 
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -19,4 +22,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Define the command to run the application
-CMD ["python", "main.py"]
+CMD ["entrypoint.sh"]

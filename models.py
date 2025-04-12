@@ -1,15 +1,15 @@
 import os, json
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import create_engine, String, JSON, UniqueConstraint
-from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, Session
+from sqlalchemy import create_engine, String, JSON, UniqueConstraint, ForeignKey
+from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, Session, relationship
 
 from dotenv import find_dotenv, load_dotenv
 dotfile = find_dotenv('.env')
 loaded = load_dotenv(dotfile)
 passw = os.getenv('PASS')
 
-db_url = "sqlite:///kogane.db"
+db_url = "sqlite:///database.db"
 
 engine = create_engine(db_url)
 
@@ -42,21 +42,20 @@ class Player(Base):
     __table_args__ = (
         UniqueConstraint('user_id', 'colony_id', name='uq_user_colony'),
     )
-    # buffs: Mapped[Optional[List]] = mapped_column(JSON)
-    # debuffs: Mapped[Optional[List]] = mapped_column(JSON)
-    # heals: Mapped[Optional[List]] = mapped_column(JSON)
-    # kills: Mapped[Optional[List]] = mapped_column(JSON)
-    # bodyparts: Mapped[Optional[List]] = mapped_column(JSON)
 
 class Colony(Base):
     __tablename__ = "colony"
     id: Mapped[int] = mapped_column(primary_key=True)
     colony_name: Mapped[str]
-    colony_id: Mapped[int]
+    colony_id: Mapped[int]  = mapped_column(unique=True)
     creation_date: Mapped[str]
     color: Mapped[str]
     players: Mapped[Optional[int]] = mapped_column(JSON)  # Store player.user_id as a JSON string
-    enemies: Mapped[Optional[List]] = mapped_column(JSON)
+    enemies: Mapped[Optional[List["Enemy"]]] = relationship(
+        "Enemy", 
+        back_populates="colony",
+        cascade="all, delete-orphan"
+    )
     items: Mapped[Optional[List]] = mapped_column(JSON)
     ce: Mapped[int]
     xp: Mapped[int]
@@ -85,7 +84,8 @@ class Enemy(Base):
     strength: Mapped[int]
     speed: Mapped[int]
     technique: Mapped[str]
-    colony_id: Mapped[int]
+    colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
+    colony: Mapped["Colony"] = relationship("Colony", back_populates="enemies")
     playerclass: Mapped[str] = mapped_column(String(100))
     killed: Mapped[Optional[bool]]
     tamed: Mapped[Optional[int]]
@@ -110,4 +110,8 @@ class Technique(Base):
     __table_args__ = (UniqueConstraint('colony_id', 'user_id', 'name', name='uq_name_user_id')),
 
 
+
+
 Base.metadata.create_all(bind=engine)
+
+
