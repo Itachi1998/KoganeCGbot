@@ -107,11 +107,12 @@ cursed_tools={
                 strength=20,
                 speed=3,
                 type="melee",
-                buff=("player.strength" * 20) # multiplier of player physical strength by its dmg - doesn't take in account imbue
+                buff={"strength" : 2, "speed" : 2} # multiplier of player physical strength by its dmg - doesn't take in account imbue
                 ),
 
     "Black Rope":
-    CursedTools(name="Black Rope",
+    CursedTools(
+                name="Black Rope",
                 cost=250,
                 broken=False,
                 hp=150,
@@ -124,5 +125,4 @@ cursed_tools={
                 negates=True,
                 self_dmg=5 # not exactly sure how this works
                 )
-
 }

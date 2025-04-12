@@ -247,10 +247,13 @@ class Actor:
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass,  xp: int, cgp: int, 
                 stack=0, colony:int = None,
-                inventory: list = None, equipped: list = None, poison: tuple=None,charge: int=None, 
-                stun: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
-                debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
-        try:   
+                inventory: list = None, equipped: list = None,
+                poison: tuple=None,charge: int=None, 
+                stun: tuple=None,  hi: bool=None, hr: str=None,
+                prescience: int=None, tamed: bool=None,
+                debuffed: list=None, buffed: list=None, summons: list=None, 
+                healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
+    
             super().__init__(
                 name, 
                 level, 
@@ -261,7 +264,7 @@ class Enemy(Actor):
                 technique, 
                 playerclass, 
                 colony)
-
+            inventory = {"Tools" : {}, "Technique Inv" : {}, "Summon" : {}}
             self.name = name
             self.ce = max_ce
             self.hp = max_hp
@@ -297,9 +300,6 @@ class Enemy(Actor):
             self.timer=timer
             self.imbue=0
 
-        except:
-            traceback.print_exc()
-
     def __repr__(self):
         return f"Enemy: {self.name} - {self.level} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
 # endregion 
@@ -311,20 +311,23 @@ class Player(Actor):
     level_cap = 200
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
                     xp: int, cgp: int, skp: int, user_id: int,
-                    stack=0, imbue=0,
-                    equipped: list=None, inventory: list=None,
-                    summons: list=None, charge: int=None, 
+                    stack=0, imbue=0, inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
+                    equipped: list=None,
+                    summons: list=None,
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
                     rct: tuple=None, #(1, 2, 3) 
                     heal: dict=None,
                     self_heal: int=None,
-                    killcount: list=None, buffed: list=None, 
-                    debuffed: list=None, status: str=None, grade=None, soul: dict=None, six_eyes: bool=None,
+                    killcount: list=None, 
+                    buffed: list=None, 
+                    debuffed: list=None, status: str=None, grade=None, 
+                    soul: dict=None, six_eyes: bool=None,
                     killed: str=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
+    
           self.xp = xp
           self.cgp = cgp
           self.skp = skp
@@ -348,7 +351,6 @@ class Player(Actor):
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
-          self.charge= charge
           self.status=status
           self.grade=grade
           self.soul=soul
@@ -364,6 +366,7 @@ class Player(Actor):
               "Right Leg": BodyPart(name='Right Leg', max_hp=self.max_hp * 10 // 100)
           }
           self.bodyparts = humanoid_body
+
           
           
         except:
