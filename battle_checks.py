@@ -5,6 +5,16 @@ from player_tech import technique_list
 from enemy_techs import enemy_techs
 from cursed_tools import cursed_tools
 
+
+# region damage_target
+def damage_target(target, dmg, soul, defense):
+    if soul:
+        if defense.soul:
+            target.max_hp -= max(soul - defense.soul, 0)
+    target.hp -= dmg
+    return target.hp, target.max_hp
+
+
 # region get move
 def get_move(player, attack=None, defense=None, tools=None):
     tech=None 
@@ -97,15 +107,15 @@ def attack_verify(player, target, attack):
     
     if attack.charge:
         print(f"{attack.name} has a charge attribute")
-        if target.name == attack.target:
-            if target.id in player.inventory.keys():
-                print("Attack verified!")
-                player.ce -= attack.act_cost + player.imbue
+        if target.name in player.inventory['Technique Inv']['Charges'].keys():
+                charge = player.inventory['Technique Inv']['Charges'][target.name]
+                if charge > 0:
+                    charge -= 1
+                if charge <= 0:
+                   del player.inventory['Technique Inv']['Charges'][target.name]
                 return attack
-            
-            else:
-                print('attack is not charged')
-                return "no charge"
+        else:
+                return False
 
     else:
         print("Attack verified!")
@@ -287,6 +297,7 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
         print(f"{defense.name} was able to activate in time to tank {attack.name}. {total_dmg} damage dealt, {dmg - total_dmg} damage tanked")
         return ("tank", total_dmg, target.hp <=0, target.max_hp <=0)
         
+
 # region counter check
 def counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
     
@@ -341,9 +352,6 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
 
         if defense.poison:
             player.poison= defense.poison
-        
-        if defense.charge: # ?
-            target.charge = target.charge 
             
         counter_dmg = defense_strength
             # subtract player.imbue ?
@@ -356,6 +364,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
         print(f"{defense.name} was able to counter {attack.name} for {counter_dmg} damage")
         return ("counter", counter_dmg, player.hp <=0, player.max_hp <=0)
     
+
 # region dodge check
 def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated):
     defense_strength=defense_strength
@@ -419,16 +428,14 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
                             # 50 - 24
             total_dmg = (reduced_dmg * attack.level)
 
-            target.hp -= total_dmg
+            target_hp, target_maxhp= damage_target(target=target, dmg=total_dmg, soul=attack.soul)
             # print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_diff} resulting in some damage of {total_dmg}")
-            return ("dodge", total_dmg, target.hp<=0, target.max_hp<=0)
+            return ("dodge", total_dmg, target_hp<=0, target_maxhp<=0)
 
         else:
             reduced_dmg= dmg - defense_strength
-            target.hp -= reduced_dmg
-            if attack.soul:
-                target.max_hp -= attack.soul
-            return ("dodge", reduced_dmg, target.hp<=0, target.max_hp<=0)
+            target_hp, target_maxhp = damage_target(target=target, dmg=reduced_dmg, soul=attack.soul)
+            return ("dodge", reduced_dmg, target_hp<=0, target_maxhp<=0)
 
 
 # region domain clash
@@ -456,90 +463,136 @@ def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, 
    
 
 # region barrier checks
-def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
-    # barrier vars
-        domain=None
-        targ_domain=None
-        domain_amp=None
-        targ_domain_amp=None
-        simple_domain=None
-        targ_simple_domain=None
-        falling_blossom=None
-        targ_falling_blossom=None
-        wicker_basket=None
-        targ_wicker_basket=None   
-
-    # set player barrier   
-        if 'open' in attack.type or 'closed' in attack.type:
-            domain = True
-        if 'envelop' in attack.type:
-            domain_amp = True
-        if "simple" in attack.type:
-            simple_domain = True
-        if "blossom" in attack.type:
-            falling_blossom = True
-        if "basket" in attack.type:
-            wicker_basket = True
-
-    # set target barrier
-        if 'open' in defense.type or 'closed' in defense.type:
-            targ_domain = True
-        if 'envelop' in defense.type:
-            targ_domain_amp = True
-        if "simple" in defense.type:
-            targ_simple_domain = True
-        if "blossom" in defense.type:
-            targ_falling_blossom = True
-        if "basket" in defense.type:
-            targ_wicker_basket = True
+def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength,):
         
-    # domain battle checks
-        if domain==True and targ_domain==True:
-            # refinement will be used to calculate what barrier breaks first
-            refinement = speed + dmg
-            targ_refinement = defense_speed + defense_strength
-            print(f"Barrier checks:\n{player.name}'s barrier refinement: {refinement}\n{target.name}'s barrier refinement: {targ_refinement}")
+        t_amp = False
+        t_simple = False
+        t_blossom = False
+        t_basket = False
+        t_domain = False
+
+        if defense.type == "amp":
+            t_amp = True
+        if defense.type == "simple":
+            t_simple = True
+        if defense.type == "blossom":
+            t_blossom = True
+        if defense.type == "basket":
+            t_basket = True
+        if defense.type == "open" or "close":
+            t_domain = True
             
-            if refinement > targ_refinement:
-                print(f"{player.name}'s domain won the battle!")
-            if refinement < targ_refinement:
-                print(f"{target.name}'s domain won the battle!")
-            else:
-                print("domains tied!")
-            return
+        if attack.type == "amp":
+            dmg -= defense_strength
+            target_hp, target_maxhp= damage_target(target=target, dmg=dmg, soul=attack.soul)
+            return ("hit", dmg, target_hp <=0, target_maxhp <=0)
         
-        if domain==True and targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
-            print(f"{player.name}'s domain vs {target.name}'s domain counter!")
-            return
+        if attack.type == "close" or "open":
+            if t_domain:
+                pass #domain clash
+            if t_basket:
+                return("negate", dmg, target.hp<=0, target.max_hp <=0)
+            if t_amp:
+                return ("negate", dmg, target.hp <=0, target.max_hp <=0)
+            if t_blossom:
+                dmg-= defense_strength + defense.speed
+                target_hp, target_maxhp = damage_target(target, dmg, attack.soul)
+            if t_simple:
+                return ("negate", dmg, target.hp<=0, target.max_hp <=0)
+            target_hp, target_maxhp = damage_target(target, dmg, attack.soul)
+            return ("hit", dmg, target_hp <=0, target_maxhp <=0)
+        
+        if attack.type == "simple":
+            target_hp, target_maxhp = damage_target(target, dmg, attack.soul)
+            return ("hit", dmg, target_hp <=0, target_maxhp <=0)
 
-        if targ_domain==True and domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
-            print(f"{target.name}'s domain vs {player.name}'s domain counter!")
-            return
 
-        if domain==True:
-            print(f"{player.name}'s domain vs {target.name}'s defense!")
-            return
+# region old barrier checks
+# # def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed):
+# #     # barrier vars
+# #         domain=None
+# #         targ_domain=None
+# #         domain_amp=None
+# #         targ_domain_amp=None
+# #         simple_domain=None
+# #         targ_simple_domain=None
+# #         falling_blossom=None
+# #         targ_falling_blossom=None
+# #         wicker_basket=None
+# #         targ_wicker_basket=None   
+
+# #     # set player barrier   
+# #         if 'open' in attack.type or 'closed' in attack.type:
+# #             domain = True
+# #         if 'amp' in attack.type:
+# #             domain_amp = True
+# #         if "simple" in attack.type:
+# #             simple_domain = True
+# #         if "blossom" in attack.type:
+# #             falling_blossom = True
+# #         if "basket" in attack.type:
+# #             wicker_basket = True
+
+# #     # set target barrier
+# #         if 'open' in defense.type or 'closed' in defense.type:
+# #             targ_domain = True
+# #         if 'envelop' in defense.type:
+# #             targ_domain_amp = True
+# #         if "simple" in defense.type:
+# #             targ_simple_domain = True
+# #         if "blossom" in defense.type:
+# #             targ_falling_blossom = True
+# #         if "basket" in defense.type:
+# #             targ_wicker_basket = True
         
-        if targ_domain==True:
-            print(f"{target.name}'s domain vs {player.name}'s attack!")
-            return
+# #     # domain battle checks
+# #         if domain==True and targ_domain==True:
+# #             # refinement will be used to calculate what barrier breaks first
+# #             refinement = speed + dmg
+# #             targ_refinement = defense_speed + defense_strength
+# #             print(f"Barrier checks:\n{player.name}'s barrier refinement: {refinement}\n{target.name}'s barrier refinement: {targ_refinement}")
+            
+# #             if refinement > targ_refinement:
+# #                 print(f"{player.name}'s domain won the battle!")
+# #             if refinement < targ_refinement:
+# #                 print(f"{target.name}'s domain won the battle!")
+# #             else:
+# #                 print("domains tied!")
+# #             return
         
-        if domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
-            print(f"{player.name} domain counter vs {target.name} defense!")
-            return
+# #         if domain==True and targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
+# #             print(f"{player.name}'s domain vs {target.name}'s domain counter!")
+# #             return
+
+# #         if targ_domain==True and domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
+# #             print(f"{target.name}'s domain vs {player.name}'s domain counter!")
+# #             return
+
+# #         if domain==True:
+# #             print(f"{player.name}'s domain vs {target.name}'s defense!")
+# #             return
         
-        if targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
-            print(f"{target.name}'s domain counter vs {player.name}'s attack!")
-            return
+# #         if targ_domain==True:
+# #             print(f"{target.name}'s domain vs {player.name}'s attack!")
+# #             return
+        
+# #         if domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
+# #             print(f"{player.name} domain counter vs {target.name} defense!")
+# #             return
+        
+# #         if targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
+# #             print(f"{target.name}'s domain counter vs {player.name}'s attack!")
+# #             return
         
 
 # region battle checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):      
+        
         tools=None
         target_tools=None
 
     # verify and get move/tools
-        attack = attack_verify(player, attack_str)
+        attack = attack_verify(player, target, attack_str)
         defense = defense_verify(target, defense_str)
         
         if player.equipped:
@@ -554,7 +607,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
               
         print('Starting battle checks...')
         stack=player.stack
-        charge=player.charge
         defense_negated=False
         attack_negated=False
         soul_dmg=0
@@ -563,6 +615,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         speed = 0
 
 # region conditional increments
+
     # tool/no tool increment
         if tools:
             dmg, speed, items = type_increment(player, attack=attack, tools=tools)  
@@ -576,21 +629,20 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                     soul_dmg += item.soul
                     print(f"{item.name} has a soul damage of {soul_dmg}")
 
-                if item.charge:
-                    charge += item.charge
-                    print(f"{item.name} has a charge of {item.charge}")
+                # if item.charge:
+                #     charge += item.charge
+                #     print(f"{item.name} has a charge of {item.charge}")
 
                 if item.poison:
                     player.poison = item.poison
                     print(f"{item.name} has a poison of {item.poison}")
             
-        if attack.type == 'envelop':
-
+        if attack.type == 'amp':
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
-
+            results = barrier_checks(player, target, defense, attack, dmg)
+        
         else:
-
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
     
@@ -608,11 +660,11 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                     soul_defense += item.soul
                     print(f"{item.name} has a soul defense of {soul_defense}")
 
-
-        if defense.type == 'envelop':
+        if defense.type == 'amp':
             defense_strength, defense_speed = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}")
-
+            results = barrier_checks(target, player, defense, defense_strength, defense_speed)
+        
         else:
             defense_strength, defense_speed = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}") 
@@ -676,14 +728,11 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
                 return results
         
-
-
     # tank check
         if defense.type == 'tank':
             print(f"{defense.name} 'tank check' against {attack.name}...")
             results = tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=soul_defense)
             return results
-        
         
     # counter check
         if defense.type == 'counter':
@@ -691,7 +740,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
             return results
                 
-
     # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
@@ -707,7 +755,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
 
 # region test players
 test_player1 = Player(
-    name="Sukuna",
+    name="Nobara",
     level=10,
     max_hp=4000,
     max_ce=4000,
@@ -722,9 +770,10 @@ test_player1 = Player(
     user_id=0,
     grade=5,
     charge=True,
-    target="Gojo"
+    grade=5
 )
 
+test_player1.inventory['Technique Inv']['Charges'] = {"Toji" : 1}
 
 test_player2= Player(
     name="Gojo",
