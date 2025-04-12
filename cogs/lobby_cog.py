@@ -9,6 +9,39 @@ import time, asyncio
 # Use this to instantiate lobby instances
 
 
+def healthbar(health, max_health):
+    max_dashes = 4
+    dash_ratio = max_health / max_dashes
+    filled_dashes = 0 if health <= 0 else int(health / dash_ratio)
+    
+    # Full heart emoji
+    dashes = "<:1000001328:1354469784724570172>" * filled_dashes
+    
+    # Add half heart if there's a decimal portion
+    if health > 0 and health % dash_ratio > 0:
+        dashes += "<:1000001329:1354469791724736745>"
+    
+    percent = f"`{0 if health <= 0 else round((health / max_health) * 100)}%`"
+    if '-' in percent:
+        percent = "`0%`"
+    bar = f"{dashes}{percent}"
+    return bar
+
+def ce_bar(ce, max_ce):
+    max_dashes = 4
+    dash_ratio = max_ce / max_dashes
+    filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio)
+     # Full heart emoji
+    dashes = "<:1000001330:1354469798230102258>" * filled_dashes
+    # Add half heart if there's a decimal portion
+    if ce > 0 and ce % dash_ratio > 0:
+        dashes += "<:1000001331:1354469803112403078>"
+    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
+    if '-' in percent:
+        percent = "`0%`"
+    bar = f"{dashes}{percent}"
+    return bar
+
 
 def remove_name(text, name):
     pattern = re.escape(name)
@@ -16,36 +49,39 @@ def remove_name(text, name):
 
 
 def start_pve_embed(lobby):
+            #create pve embed
             embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
             colony = read_colony(lobby.colony_id)
             max_level=0
-            teamA_list = []
-            teamB_list = []
+            #populate the teamA and teamB list with players
             for p in lobby.players:
+                
                 player_from_db = read_player(p)
                 real_player = Player(**player_from_db.__dict__)
-                if real_player:
-                    if real_player.user_id in lobby.teamA['players']:
-                        lobby.teamA['players'].remove(real_player.user_id)
-                        lobby.add_teamA(real_player)
-                    elif real_player.user_id in lobby.teamB:
-                        lobby.teamB['players'].remove(real_player.user_id)
-                        lobby.teamB.add_player(real_player)
+
+                if p in lobby.ready:
+                    if real_player:
+                        if real_player.user_id in lobby.teamA['players']:
+                            lobby.teamA['players'].remove(real_player.user_id)
+                            lobby.add_teamA(real_player)
+
+                        elif real_player.user_id in lobby.teamB:
+                            lobby.teamB['players'].remove(real_player.user_id)
+                            lobby.add_teamB(real_player)
+
+                    else:
+                        lobby.add_spectator(p)
+                else:
+                    lobby.add_spectator(p)
+                        
+            
                     
             enemies = [e for e in colony.enemies if e.level <= max_level]
             e_choice = random.choice(enemies)
             enemy = Enemy(**e_choice.__dict__)
             enemy_list = []
-            teamA_list = []
-            teamB_list = []
-            # Add players to team A list
-            for player_id in lobby.teamA:
-                player_from_db = read_player(player_id)
-                real_player = Player(**player_from_db.__dict__)
-                if real_player:
-                    teamA_list.append(real_player)
-            
-                    # Handle multiple enemy spawns if quantity is set
+           
+            # Handle multiple enemy spawns if quantity is set
             if hasattr(enemy, "quantity") and enemy.quantity > 1:
                 for i in range(enemy.quantity):
                     enemy_clone = Enemy(**e_choice.__dict__)
@@ -58,7 +94,8 @@ def start_pve_embed(lobby):
             else:
                 lobby.field = enemy_list
 
-            embed.add_field(name="Team A", value="\n".join() if players_list else "No players")
+            embed.add_field(name="Team A", value="\n".join() if teamA_list else "No players")
+
         
             return embed, lobby
 

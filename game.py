@@ -18,27 +18,18 @@ class GameMode(enum.IntEnum):
     PVE = 2 #Pve status for when player begins a PvE fight
     PVP = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points
     Q = 4 # for when the player is in a queue
-
-
 # to be used for all human characters/enemies
 
 
-
+# region BodyParts
 class BodyPart:
-    def __init__(self, name, max_hp, max_ce=None, soul=None):
-        self.max_ce = max_ce
+    def __init__(self, name, max_hp, max_ce=None):
         self.name = name
+        self.max_ce = max_ce
+        self.ce=max_ce
         self.max_hp = max_hp
         self.hp = max_hp
-        self.soul = soul
-        __dict__ = {
-                "name": name,
-                "max_hp": max_hp,
-                "max_ce": max_ce,
-                "soul": soul,
-                "destroyed": self.is_destroyed(),
-                "stunned": self.is_stunned()
-         }
+
     def take_damage(self, damage):
         self.hp -= damage
         if self.hp < 0:
@@ -52,12 +43,13 @@ class BodyPart:
     def is_destroyed(self):
         return self.hp <= 0
     
-
 human_body_parts = {"Head" : BodyPart('Head', 0, 0),
     "Left Arm" : BodyPart('Left Arm', 0,0),
     "Right Arm" : BodyPart('Right Arm', 0, 0),
     "Torso" : BodyPart('Torso', 0, 0)}
 
+
+#endregion
 
 # class Character:
    # def __init__(self, name):
@@ -94,7 +86,7 @@ human_body_parts = {"Head" : BodyPart('Head', 0, 0),
 # player.take_damage("Legs", 40) # Body part not found
 # Parent class for the Player and Enemy Subclasses
 
-
+#region Actor class
 class Actor:
     def __init__(self,
             name: str, 
@@ -122,6 +114,7 @@ class Actor:
     def __repr__(self):
         return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
 
+#endregion
 
     # sukuna.physical_attack_checks(gojo, gojo.defense)
     # def physical_attack_checks(self, target, attack, defense, **kwargs):
@@ -246,14 +239,14 @@ class Actor:
 # region Enemy
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass,  xp: int, cgp: int, 
-                stack=0, colony:int = None,
+                stack=0, colony:int = None, defense: dict=None,
                 inventory: list = None, equipped: list = None,
                 poison: tuple=None,charge: int=None, 
                 stun: tuple=None,  hi: bool=None, hr: str=None,
                 prescience: int=None, tamed: bool=None,
                 debuffed: list=None, buffed: list=None, summons: list=None, 
                 healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
-    
+            
             super().__init__(
                 name, 
                 level, 
@@ -299,6 +292,7 @@ class Enemy(Actor):
             self.killed=killed
             self.timer=timer
             self.imbue=0
+            self.defense = defense
 
     def __repr__(self):
         return f"Enemy: {self.name} - {self.level} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
@@ -311,7 +305,7 @@ class Player(Actor):
     level_cap = 200
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
                     xp: int, cgp: int, skp: int, user_id: int,
-                    stack=0, imbue=0, inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
+                    stack=0, imbue=0,defense: dict={"Default" : "ce"}, inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
                     equipped: list=None,
                     summons: list=None,
                     poisoned: tuple=None, stunned: tuple=None, 
@@ -327,7 +321,7 @@ class Player(Actor):
                     killed: str=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
-    
+          self.defense = defense
           self.xp = xp
           self.cgp = cgp
           self.skp = skp
@@ -371,9 +365,7 @@ class Player(Actor):
           
         except:
              traceback.print_exc()
-                                        
- # endregion
- #          
+     
     def __repr__(self):
         return f"Character: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - belonging to user_id: {self.user_id} - in colony: {self.colony}"
 
@@ -533,8 +525,9 @@ class Player(Actor):
 #     def save_to_db(self):
 #      save_player(self) #the imported save_player method from the database file
 
-        
-## ENEMY CLASSES 
+#endregion
+#         
+#region ENEMY CLASSES 
 ## SUBCLASS OF ENEMY CLASS
 
 
@@ -1044,3 +1037,4 @@ class Kenjaku(Enemy):
                 self.hp = self.max_hp
                 self.ce = self.max_ce
              
+#endregion

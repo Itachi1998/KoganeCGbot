@@ -2,15 +2,159 @@ import game, random
 from summons import Mahoraga
 from game import Player, Enemy, KingOfCurses
 from player_tech import technique_list
-from enemy_techs import enemy_techs
+from enemy_techs import enemy_tech
 from cursed_tools import cursed_tools
 
-def damage_target(target, dmg, soul, defense):
-    if soul:
-        if defense.soul:
-            target.max_hp -= max(soul - defense.soul, 0)
-    target.hp -= dmg
+#region damage target
+def damage_target(target, dmg, soul, defense, vow=None):
+    hp = target.hp
+    max_hp = target.max_hp
+
+    if vow:
+        for k in vow.keys():
+
+            imbued = vow[k]
+
+            if k == "Left Arm":
+               if target.ce >= imbued:
+                bodypart = target.bodyparts["Left Arm"]
+                bodypart.ce += imbued
+                target.ce -= imbued
+
+            if k == "Right Arm":
+                if target.ce >= imbued:
+                    bodypart=target.bodyparts['Right Arm']
+                    bodypart.max_ce += imbued
+                    target.ce -= imbued
+
+            if k == "Left Leg":
+                if target.ce >= imbued:
+                    bodypart = target.bodyparts["Left Leg"]
+                    bodypart.ce += imbued
+                    target.ce -= imbued
+
+            if k == "Right Leg":
+                if target.ce >= imbued:
+                    bodypart = target.bodyparts["Right Leg"]
+                    bodypart.ce += imbued
+                    target.ce -= imbued
+
+            if k == "Head":
+                if target.ce >= imbued:
+                    bodypart = target.bodyparts["Head"]
+                    bodypart.ce += imbued
+                    target.ce -= imbued
+
+            if k == "Torso":
+                if target.ce >= imbued:
+                    bodypart = target.bodyparts["Torso"]
+                    bodypart.ce += imbued
+                    target.ce -= imbued
+
+    bp_10_dmg = dmg * 10 // 100
+    print("Incoming limb or head damage " + str(bp_10_dmg) )
+    bp_50_dmg = dmg * 50 // 100
+    print("Incoming torso damage " + str(bp_50_dmg) )
+    bp_soul_10 = soul * 10 // 100 if soul else 0
+    print("Incoming limb or head soul damage " + str(bp_soul_10))
+    defense_soul_10 = defense.soul * 10 // 100 if defense.soul else 0
+    print("Target limb or head defense soul strength " + str(defense_soul_10))
+    bp_soul_50 = soul * 50//100 if soul else 0
+    print("Incoming torso soul damage " + str(bp_soul_50))
+    defense_soul_50 = defense.soul * 50 // 100 if defense.soul else 0
+    print("Target torso defense soul strength " + str(defense_soul_50))
+        
+    for bodypart in target.bodyparts.keys():
+        print("Pre damage check body: " + str(target.bodyparts[bodypart].__dict__))
+        bp = target.bodyparts[bodypart]
+        bod_damage = 0
+
+        if bp.name == "Torso":
+            if bp.hp <= 0:
+              bp_10_dmg += bp_50_dmg
+              if bp_soul_10 > 0:
+                    bp_soul_10 += bp_soul_10
+            
+            elif bp.ce and bp.ce > 0:
+                print("Bodypart ce enforcement reducing damage by " + str(bp.ce))
+                print("Pre ce check damage " + str(bp_50_dmg))
+
+                reduced_dmg = max(bp_50_dmg - bp.ce, 0)
+                reduced_ce = max(bp.ce - bp_50_dmg, 0)
+
+                print("Post ce check damage " + str(bp_50_dmg))
+                bp.ce = reduced_ce
+                bp.hp -= reduced_dmg
+                if soul:
+                    bp.max_hp -= max(bp_soul_50 - defense_soul_50, 0)
+                    print(f"{bp.name} took {max(bp_soul_50 - defense_soul_50, 0)} soul damage reducing their max hp to {bp.max_hp}")
+                    if bp.max_hp < bp.hp:
+                        bp.hp = bp.max_hp
+                print(bp.name + " taking " + str(reduced_dmg) + " damage")
+                bod_damage += reduced_dmg
+                print("Remaining ce "  + str(bp.ce))
+    
+                
+
+                
+
+            else:
+                    # If bodypart has no CE or CE is not > 0, just apply damage directly
+                    print("No CE on bodypart to absorb damage")
+                    bp.hp -= bp_50_dmg
+                    bod_damage += bp_50_dmg
+                    if soul:
+                        bp.max_hp -= max(bp_soul_50 - defense_soul_50, 0)
+                        print(f"{bp.name} took {max(bp_soul_50 - defense_soul_50, 0)} soul damage reducing their max hp to {bp.max_hp}")
+                        if bp.max_hp < bp.hp:
+                            bp.hp = bp.max_hp
+                    print(f"{bp.name} took {bp_50_dmg} damage")
+
+        elif bp.name == "Right Leg" or bp.name == "Left Leg" or bp.name == "Right Arm" or bp.name == "Left Arm" or bp.name == "Head":
+            if bp.hp <= 0:
+                bp_10_dmg += bp_10_dmg
+                if bp_soul_10 > 0:
+                    bp_soul_10 += bp_soul_10
+
+            elif bp.ce and bp.ce > 0:
+                print("Bodypart ce enforcement reducing damage by " + str(bp.ce))
+                print("Pre ce check damage " + str(bp_10_dmg))
+
+                reduced_dmg = max(bp_10_dmg - bp.ce, 0)
+                reduced_ce = max(bp.ce - bp_50_dmg, 0)
+
+                print("Post ce check damage " + str(bp_10_dmg))
+                print(bp.name + " taking " + str(reduced_dmg) + " damage")
+                bp.ce = reduced_ce
+                bp.hp -= reduced_dmg
+
+                if soul:
+                    bp.max_hp -= max(bp_soul_10 - defense_soul_10, 0)
+                    print(f"{bp.name} took {max(bp_soul_10 - defense_soul_10, 0)} soul damage reducing their max hp to {bp.max_hp}")
+                    if bp.max_hp < bp.hp:
+                            bp.hp = bp.max_hp
+
+                bod_damage += reduced_dmg   
+                print("Remaining ce "  + str(bp.ce))
+
+
+            else:
+                bp.hp -=  bp_10_dmg
+                bod_damage += bp_10_dmg
+                if soul:
+                    bp.max_hp -= max(bp_soul_10 - defense_soul_10, 0)
+                    print(f"{bp.name} took {max(bp_soul_10 - defense_soul_10, 0)} soul damage reducing their max hp to {bp.max_hp}")
+                    if bp.max_hp < bp.hp:
+                            bp.hp = bp.max_hp
+                print(f"{bp.name} took {bp_10_dmg} damage")
+        print("Post damage check body: " + str(target.bodyparts[bodypart].__dict__))
+        
+
     return target.hp, target.max_hp
+
+#endregion
+
+
 # region get move
 def get_move(player, attack=None, defense=None, tools=None):
     tech=None 
@@ -18,8 +162,8 @@ def get_move(player, attack=None, defense=None, tools=None):
     is_enemy=False
 
     if isinstance(player, Enemy):
-        if player.name in enemy_techs:
-            tech = enemy_techs[player.technique]
+        if player.name in enemy_tech:
+            tech = enemy_tech[player.technique]
             is_enemy=True
 
     elif isinstance(player, Player):
@@ -302,12 +446,12 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
     
     if atk_invis:
         target.hp -= dmg
-        print(f"{defense.name} couldn't counter because {attack.name} was invisable")
+        print(f"{defense.name} couldn't counter because {attack.name} was invisible")
         return ("hit", dmg, target.hp<=0, target.max_hp<=0)
     
     if targ_invis:
         dmg = 0
-        print(f"{defense.name} (invisable) was able to dodge {attack.name}")
+        print(f"{defense.name} (invisible) was able to dodge {attack.name}")
         return ("counter", dmg, target.hp<=0, target.max_hp<=0)
 
     if attack_negated:
@@ -418,13 +562,13 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
                             # 50 - 24
             total_dmg = (reduced_dmg * attack.level)
 
-            target_hp, target_maxhp= damage_target(target=target, dmg=total_dmg, soul=attack.soul)
+            target_hp, target_maxhp= damage_target(target=target,defense=defense, dmg=total_dmg, soul=attack.soul)
             # print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_diff} resulting in some damage of {total_dmg}")
             return ("dodge", total_dmg, target_hp<=0, target_maxhp<=0)
 
         else:
             reduced_dmg= dmg - defense_strength
-            target_hp, target_maxhp = damage_target(target=target, dmg=reduced_dmg, soul=attack.soul)
+            target_hp, target_maxhp = damage_target(target=target,defense=defense, dmg=reduced_dmg, soul=attack.soul)
             return ("dodge", reduced_dmg, target_hp<=0, target_maxhp<=0)
 
 
@@ -452,8 +596,8 @@ def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, 
         return results
    
 
-
-def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength,):
+# region Barrier Check
+def barrier_checks(target, attack, dmg, defense, defense_strength,):
         
         t_amp = False
         t_simple = False
@@ -471,110 +615,36 @@ def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength
             t_basket = True
         if defense.type == "open" or "close":
             t_domain = True
-            
+
         if attack.type == "amp":
             dmg -= defense_strength
-            target_hp, target_maxhp= damage_target(target=target, dmg=dmg, soul=attack.soul)
+            target_hp, target_maxhp= damage_target(target=target, dmg=dmg, soul=attack.soul, defense=defense)
             return ("hit", dmg, target_hp <=0, target_maxhp <=0)
         
         if attack.type == "close" or "open":
             if t_domain:
                 pass #domain clash
+
             if t_basket:
                 return("negate", dmg, target.hp<=0, target.max_hp <=0)
+            
             if t_amp:
                 return ("negate", dmg, target.hp <=0, target.max_hp <=0)
+            
             if t_blossom:
                 dmg-= defense_strength + defense.speed
-                target_hp, target_maxhp = damage_target(target, dmg, attack.soul)
+                target_hp, target_maxhp = damage_target(target, dmg, attack.soul, defense)
+
             if t_simple:
                 return ("negate", dmg, target.hp<=0, target.max_hp <=0)
-            target_hp, target_maxhp = damage_target(target, dmg, attack.soul)
+            
+            target_hp, target_maxhp = damage_target(target, dmg, attack.soul, defense)
             return ("hit", dmg, target_hp <=0, target_maxhp <=0)
         
         if attack.type == "simple":
-            target_hp, target_maxhp = damage_target(target, dmg, attack.soul)
+            target_hp, target_maxhp = damage_target(target, dmg, attack.soul, defense)
             return ("hit", dmg, target_hp <=0, target_maxhp <=0)
 
-# # # region barrier checks
-# # def barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed):
-# #     # barrier vars
-# #         domain=None
-# #         targ_domain=None
-# #         domain_amp=None
-# #         targ_domain_amp=None
-# #         simple_domain=None
-# #         targ_simple_domain=None
-# #         falling_blossom=None
-# #         targ_falling_blossom=None
-# #         wicker_basket=None
-# #         targ_wicker_basket=None   
-
-# #     # set player barrier   
-# #         if 'open' in attack.type or 'closed' in attack.type:
-# #             domain = True
-# #         if 'amp' in attack.type:
-# #             domain_amp = True
-# #         if "simple" in attack.type:
-# #             simple_domain = True
-# #         if "blossom" in attack.type:
-# #             falling_blossom = True
-# #         if "basket" in attack.type:
-# #             wicker_basket = True
-
-# #     # set target barrier
-# #         if 'open' in defense.type or 'closed' in defense.type:
-# #             targ_domain = True
-# #         if 'envelop' in defense.type:
-# #             targ_domain_amp = True
-# #         if "simple" in defense.type:
-# #             targ_simple_domain = True
-# #         if "blossom" in defense.type:
-# #             targ_falling_blossom = True
-# #         if "basket" in defense.type:
-# #             targ_wicker_basket = True
-        
-# #     # domain battle checks
-# #         if domain==True and targ_domain==True:
-# #             # refinement will be used to calculate what barrier breaks first
-# #             refinement = speed + dmg
-# #             targ_refinement = defense_speed + defense_strength
-# #             print(f"Barrier checks:\n{player.name}'s barrier refinement: {refinement}\n{target.name}'s barrier refinement: {targ_refinement}")
-            
-# #             if refinement > targ_refinement:
-# #                 print(f"{player.name}'s domain won the battle!")
-# #             if refinement < targ_refinement:
-# #                 print(f"{target.name}'s domain won the battle!")
-# #             else:
-# #                 print("domains tied!")
-# #             return
-        
-# #         if domain==True and targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
-# #             print(f"{player.name}'s domain vs {target.name}'s domain counter!")
-# #             return
-
-# #         if targ_domain==True and domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
-# #             print(f"{target.name}'s domain vs {player.name}'s domain counter!")
-# #             return
-
-# #         if domain==True:
-# #             print(f"{player.name}'s domain vs {target.name}'s defense!")
-# #             return
-        
-# #         if targ_domain==True:
-# #             print(f"{target.name}'s domain vs {player.name}'s attack!")
-# #             return
-        
-# #         if domain_amp==True or simple_domain==True or falling_blossom==True or wicker_basket==True:
-# #             print(f"{player.name} domain counter vs {target.name} defense!")
-# #             return
-        
-# #         if targ_domain_amp==True or targ_simple_domain==True or targ_falling_blossom==True or targ_wicker_basket==True:
-# #             print(f"{target.name}'s domain counter vs {player.name}'s attack!")
-# #             return
-        
-
-# region battle checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):      
         
         tools=None
@@ -671,10 +741,10 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         atk_invis=None
         targ_invis=None
 
-        if attack.invisable:
+        if attack.invisible:
             atk_invis = attack_visability(target, attack)
 
-        if defense.invisable:
+        if defense.invisible:
             targ_invis = defense_visability(target, attack)
 
     # negate checks - needs to be improved
@@ -716,9 +786,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 print(f"{attack.name} 'barrier check' with defense {defense.name}...")    
                 results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
                 return results
-        
-
-
     # tank check
         if defense.type == 'tank':
             print(f"{defense.name} 'tank check' against {attack.name}...")
@@ -742,7 +809,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
     # domain defense check
         else:
             print(f"{defense.name} 'barrier check' with attack {attack.name}...")    
-            results = barrier_checks(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
+            results = barrier_checks(target, attack, dmg, defense, defense_strength, )
             return results
         
 
