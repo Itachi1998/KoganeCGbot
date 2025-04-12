@@ -89,7 +89,7 @@ def get_random_sorcerer_tech(techlist=sorcerer_techs):
             ct_list.append(t)
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
-    print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
+    print(f"Getting technique: {tech_name}, rarity level: {tech['Rarity']}")
 
     if "Six Eyes" in tech.keys():
         if tech['Six Eyes'] != True:
@@ -123,7 +123,7 @@ def get_random_reincarnate_tech(techlist=reincarnated_techs):
     tech = random.choice(ct_list)
     print(f"value: {value} technique list with greater rarity values: {ct_list}")
     tech_name = next(iter(tech))
-    print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
+    print(f"Getting technique: {tech_name}, rarity level: {tech['Rarity']}")
     return tech
 
 def get_random_curse_tech(techlist=cursed_techs):
@@ -152,7 +152,7 @@ def get_random_curse_tech(techlist=cursed_techs):
         ct_list = [t for t in techlist if t['Rarity'] >= rarity['uncommon']]
     tech = random.choice(ct_list)
     tech_name = next(iter(tech))
-    print(f"Getting technique: {tech_name}, rarity level: {tech["Rarity"]}")
+    print(f"Getting technique: {tech_name}, rarity level: {tech['Rarity']}")
     return tech
 
 

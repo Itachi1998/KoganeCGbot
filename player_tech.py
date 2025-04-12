@@ -283,6 +283,24 @@ body_hop={
                               type="dodge"
                          )
                }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion: Womb Profusion" :
+                         Techniques(
+                              name="Domain Expansion: Womb Profusion",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=9000,
+                              type="open", 
+                              sure_hit=True
+                         )
+               }
           }
      ],
 "Rarity" : 5
@@ -688,6 +706,27 @@ construction={
                                    type="tank"
                               )
                     }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion: Three-fold Affliction" :
+                         Techniques(
+                              name="Domain Expansion: Three-fold Affliction",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="closed",
+                              intern_strength=30,
+                              extern_strength=30,
+                              sure_hit=True
+
+                         )
+               }
           }
 ],
 "Rarity" : 15, 
@@ -780,6 +819,27 @@ copy={ # change to be like cursed spirit manipulation?
                               speed=800,
                               type="counter",
                               stun=2,
+                         )
+               }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion: Authentic Mutual Love" :
+                         Techniques(
+                              name="Domain Expansion: Authentic Mutual Love",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="closed",
+                              intern_strength=30,
+                              extern_strength=30,
+                              sure_hit=True
+
                          )
                }
           }
@@ -1277,18 +1337,18 @@ idle_transfig={
                }
           },
           {
-          "Domain" :
+          "Barrier" :
                {
-                   "Self-Embodiment of Perfection" :
+                   "Domain Expansion: Self-Embodiment of Perfection" :
                          Techniques(
-                              name="Self-Embodiment of Perfection",
+                              name="Domain Expansion: Self-Embodiment of Perfection",
                               level=4,
                               act_speed=2,
                               act_cost=300,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=20,
                               strength=1000,
-                              speed=9000,
+                              speed=8000,
                               type="closed",
                               intern_strength=30,
                               extern_strength=30,
@@ -1308,7 +1368,7 @@ limitless={
 "Limitless" :
      [
           {
-               "Attack" : 
+          "Attack" : 
                {
                "Blue" : 
                     Techniques(
@@ -1317,9 +1377,9 @@ limitless={
                          act_speed=1,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
-                         aoe=(1, 5),
-                         strength=1000,
-                         speed=1600,
+                         aoe=1,
+                         strength=800,
+                         speed=1200,
                          type="projectile"
                     ),
                
@@ -1327,12 +1387,12 @@ limitless={
                     Techniques(
                          name="Red",
                          level=2,
-                         act_speed=1,
+                         act_speed=2,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=1600,
-                         speed=1000,
+                         strength=1200,
+                         speed=800,
                          type="projectile"
                     ),
                
@@ -1341,11 +1401,11 @@ limitless={
                          name="Void Punch",
                          level=4,
                          act_speed=1,
-                         act_cost=25,
+                         act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=500,
-                         speed=1600,
+                         strength=800,
+                         speed=1200,
                          type="melee"
                     ),
 
@@ -1357,8 +1417,8 @@ limitless={
                          act_cost=150,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=2500,
-                         speed=1000,
+                         strength=2000,
+                         speed=2000,
                          type="projectile"
                     ),
                
@@ -1367,13 +1427,13 @@ limitless={
                          name="Unlimited Hollow Purple",
                          level=5,
                          act_speed=5,
-                         act_cost=150,
+                         act_cost=300,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=10,
-                         strength=2500,
+                         strength=2000,
                          speed=2000,
                          type="projectile",
-                         self_dmg=1250
+                         self_dmg=500
                     )
                }
           },
@@ -1387,7 +1447,7 @@ limitless={
                          name="Infinty",
                          level=1,
                          act_speed=0,
-                         act_cost=100,
+                         act_cost=10,
                          act_body=("Full"),
                          aoe=1,
                          strength=9000,
@@ -1404,7 +1464,11 @@ limitless={
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=0,
+<<<<<<< HEAD
                          speed=0,
+=======
+                         speed=1200,
+>>>>>>> 95ef254c2be1c78d56f4c63aafaf1d72078a7a9c
                          type="dodge"
                     ),
                
@@ -1412,12 +1476,12 @@ limitless={
                     Techniques(
                          name="Red",
                          level=2,
-                         act_speed=1,
+                         act_speed=2,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=1600,
-                         speed=1000,
+                         strength=1200,
+                         speed=800,
                          type="counter"
                     ),
 
@@ -1429,24 +1493,24 @@ limitless={
                          act_cost=25,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=500,
-                         speed=1600,
+                         strength=800,
+                         speed=1200,
                          type="counter"
                     )
                }
           },
           {
-          "Domain" :
+          "Barrier" :
                {
-                   "Infinate Void" :
+                   "Domain Expansion: Infinate Void" :
                          Techniques(
-                             name="Infinate Void",
-                             level=5,
-                             act_speed=2,
-                             act_cost=600,
-                             act_body=("Right Arm"),
+                              name="Domain Expansion: Infinate Void",
+                              level=5,
+                              act_speed=2,
+                              act_cost=600,
+                              act_body=("Right Arm"),
                               aoe=10,
-                              strength=2000,
+                              strength=1000,
                               speed=9000,
                               type="closed",
                               stun=99,
@@ -1496,7 +1560,7 @@ mba={
                             strength=1000,
                             speed=1200,
                             type="projectile",
-                            cooldown=3
+                            charge=3 # once the player.charge is set to 3 (3 rounds from start or use of tech) it is available to use
                          ),
 
                     "Corona Blast" : 
@@ -1608,6 +1672,27 @@ projection_sorcery={
                             stun=True
                         )
                }
+          },
+          {
+               "Barrier" :
+               {
+                   "Domain Expansion: Time Cell Moon Pallace" :
+                         Techniques(
+                              name="Domain Expansion: Time Cell Moon Pallace",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="closed",
+                              intern_strength=30,
+                              extern_strength=30,
+                              sure_hit=True
+
+                         )
+               }
           }
      ],
 "Rarity" : 30
@@ -1632,7 +1717,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=500,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True
                          ),
@@ -1646,7 +1731,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=3,
                               strength=500,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True
                          ),
@@ -1660,7 +1745,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=1500, # should be based off opponent hp - special case in battlechecks
-                              speed=1000,
+                              speed=0,
                               type="melee"
                          ),
 
@@ -1673,7 +1758,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=1000,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True
                          ),
@@ -1700,7 +1785,7 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=9000,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
                               invisable=True,
                               negates=True
@@ -1779,20 +1864,35 @@ shrine={
           },
           
           {
-               "Domain" :
+               "Barrier" :
                {
-                   "Malevolent Shrine" :
+                   "Domain Expansion: Malevolent Shrine" :
                          Techniques(
-                              name="Malevolent Shrine",
+                              name="Domain Expansion: Malevolent Shrine",
                               level=5,
                               act_speed=2,
                               act_cost=300,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=20,
-                              strength=2000,
+                              strength=1000,
                               speed=9000,
                               type="open",
                               sure_hit=True
+
+                         ),
+                    
+                    "Domain Amplification" :
+                         Techniques(
+                              name="Domain Amplification",
+                              level=5,
+                              act_speed=0,
+                              act_cost=50,
+                              act_body=("Full"),
+                              aoe=1,
+                              strength=0,
+                              speed=0,
+                              type="envelope",
+                              negates=True
 
                          )
                }
@@ -1870,6 +1970,27 @@ sky_manip={
                               speed=500,
                               type="dodge",
                               invisable=True
+                         )
+               }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion: " :
+                         Techniques(
+                              name="Domain Expansion: ",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=9000,
+                              type="closed",
+                              intern_strength=30,
+                              extern_strength=30,
+                              sure_hit=True
+
                          )
                }
           }
@@ -1998,8 +2119,9 @@ straw_doll={
                               strength=800,
                               speed=0, # ???
                               type="melee", #melee on doll that links attack to target (effigy)
-                              soul=True, 
-                              sure_hit=True
+                              soul=400, 
+                              sure_hit=True,
+                              charge=1 # once the player.charge is set to 1, the technique is available
                          )
                          
                }
@@ -2182,9 +2304,28 @@ ten_shadows={
                               type="summon",
                               summon={"Round Deer" : {"Speed" : 600, "strength" : 600, "Max CE" : 400}}
                          ),
-                }
-            }
-        ],
+               }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion: Chimera Shadow Garden" :
+                         Techniques(
+                              name="Domain Expansion: Chimera Shadow Garden",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="open",
+                              sure_hit=True
+
+                         )
+               }
+          }
+     ],
 "Rarity" : 5
 }
 
