@@ -40,11 +40,8 @@ def get_player(colony_id, user_id):
     else:
         return False
     
-def get_enemy(name, colony_id):
-    enemy_data = read_enemy(name, colony_id)
-    enemy = Enemy(**enemy_data)
-    if enemy:
-        return enemy
+def random_pve_enemy(colony_id, lobby):
+    colony = read_colony(colony_id)
     
 
 

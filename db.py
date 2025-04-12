@@ -83,14 +83,13 @@ def create_player(user_id: int, colony_id: int, playername: str,
         session.close()
         return True
         
-def create_colony(colony_data):
-        
+def create_colony(colony_data, enemies):
         with Session(engine) as session:
           existing_colony = session.query(Colony).filter_by(colony_id=colony_data["colony id"]).first()
           if existing_colony:
                  raise ValueError("Colony already exists")
-          else:
-               colony = Colony(
+          with Session(engine) as session:
+                colony = Colony(
                     colony_name=colony_data['name'],
                     colony_id=colony_data['colony id'],
                     creation_date=colony_data['creation date'],
@@ -103,10 +102,35 @@ def create_colony(colony_data):
                     six_eyes=colony_data['six eyes'],
                     leaderboard=colony_data['leaderboard'],
                )
-               session.add(colony)
-               session.commit()
-               session.close()
-               return colony
+                session.add(colony)
+                for e in enemies:
+                    existing_enemy = session.query(Enemy).filter_by(colony_id=colony_data['colony id'], name=e.name).first()
+                    if existing_enemy:
+                        raise ValueError("Enemy already exists")
+                    else:
+                        enemy = Enemy(
+                                name=e.name,
+                                level=e.level,
+                                max_hp=e.max_hp,
+                                hp=e.hp,
+                                max_ce=e.max_ce,
+                                ce=e.ce,
+                                strength=e.strength,
+                                speed=e.speed,
+                                technique=e.technique,
+                                colony_id=colony.colony_id,
+                                colony=colony,
+                                playerclass=e.playerclass,
+                                tamed=e.tamed,
+                                bodyparts=e.bodyparts,
+                                cgp=e.cgp,
+                                xp=e.xp
+                            )
+                        session.add(enemy)
+               
+                session.commit()
+                session.close()
+                return colony
 
 def create_technique(tech_data):
         with Session(engine) as session:
@@ -128,37 +152,19 @@ def create_technique(tech_data):
                 session.commit()
                 session.close()
                 return technique 
+            
+def check_relationship():
+    with Session(engine) as session:
+        colonies = session.query(Colony).all()
+        for colony in colonies:
+            print(f"Colony: {colony.colony_name} (ID: {colony.colony_id})")
+            print(colony.enemies)
+        enemies = session.query(Enemy).all()
+        for enemy in enemies:
+            print(f"Enemy: {enemy.name} - colony_id: {enemy.colony_id}")
 
-def create_enemy(enemy_data):
-        with Session(engine) as session:
-            existing_enemy = session.query(Colony).filter_by(colony_id=enemy_data["colony id"]).first()
-            if existing_enemy:
-                raise ValueError("Enemy already exists")
-            else:
-                enemy = Enemy(
-                    name=enemy_data['name'],
-                    level=enemy_data['level'],
-                    max_hp=enemy_data['max hp'],
-                    hp=enemy_data['hp'],
-                    max_ce=enemy_data['max ce'],
-                    ce=enemy_data['ce'],
-                    strength=enemy_data['strength'],
-                    speed=enemy_data['speed'],
-                    technique=enemy_data['technique'],
-                    colony_id=enemy_data['colony id'],
-                    playerclass=enemy_data['playerclass'],
-                    tamed=enemy_data['tamed'],
-                    bodyparts=enemy_data['bodyparts'],
-                    respawn=enemy_data['respawn'],
-                    cgp=enemy_data['cgp'],
-                    xp=enemy_data['xp']
 
-                )
-                session.add(enemy)
-                session.commit()
-                session.close()
-                return enemy
-    
+check_relationship()
 def read_colony(colony_id: int, value=None):
             with Session(engine) as session:
                      existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
@@ -191,13 +197,10 @@ def read_enemy(colony_id: int, value=None):
         with Session(engine) as session:
                 existing_enemy = session.query(Enemy).filter_by(colony_id=colony_id).first()
                 if existing_enemy:
-                        if value:
-                            enemy_data = {
-                                column.name: getattr(existing_enemy, column.name) for column in existing_enemy.__table__.columns
-                            }
-                            session.close()
-                            return enemy_data
-
+                        for e in Enemy.__subclasses__:
+                             if e.name == existing_enemy.name:
+                                  enemy=Enemy(**existing_enemy)
+                                  return enemy
                         else:
                             session.close()
                             return True

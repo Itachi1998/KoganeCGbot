@@ -1,6 +1,6 @@
-import discord, datetime, re, random 
-from db import read_player
-
+import discord, datetime, re, random
+from game import Enemy, Player
+from db import read_player, read_enemy, read_colony
 from datetime import datetime
 from discord.ext import commands
 import time, asyncio
@@ -14,19 +14,73 @@ def remove_name(text, name):
     pattern = re.escape(name)
     return re.sub(pattern, '', text)
 
+
+def start_pve_embed(lobby):
+            embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
+            colony = read_colony(lobby.colony_id)
+            max_level=0
+            teamA_list = []
+            teamB_list = []
+            for p in lobby.players:
+                player_from_db = read_player(p)
+                real_player = Player(**player_from_db.__dict__)
+                if real_player:
+                    if real_player.user_id in lobby.teamA['players']:
+                        lobby.teamA['players'].remove(real_player.user_id)
+                        lobby.add_teamA(real_player)
+                    elif real_player.user_id in lobby.teamB:
+                        lobby.teamB['players'].remove(real_player.user_id)
+                        lobby.teamB.add_player(real_player)
+                    
+            enemies = [e for e in colony.enemies if e.level <= max_level]
+            e_choice = random.choice(enemies)
+            enemy = Enemy(**e_choice.__dict__)
+            enemy_list = []
+            teamA_list = []
+            teamB_list = []
+            # Add players to team A list
+            for player_id in lobby.teamA:
+                player_from_db = read_player(player_id)
+                real_player = Player(**player_from_db.__dict__)
+                if real_player:
+                    teamA_list.append(real_player)
+            
+                    # Handle multiple enemy spawns if quantity is set
+            if hasattr(enemy, "quantity") and enemy.quantity > 1:
+                for i in range(enemy.quantity):
+                    enemy_clone = Enemy(**e_choice.__dict__)
+                    enemy_clone.name = f"{enemy_clone.name} {i+1}"
+                    enemy_list.append(f"{enemy_clone.name}: {healthbar(enemy_clone.hp, enemy_clone.max_hp)}")
+            else:
+                enemy_list.append(f"{enemy.name}: {healthbar(enemy.hp, enemy.max_hp)}")
+            if lobby.field:
+                lobby.field.append(e for e in enemy_list)
+            else:
+                lobby.field = enemy_list
+
+            embed.add_field(name="Team A", value="\n".join() if players_list else "No players")
+        
+            return embed, lobby
+
 class Lobby():
-    def __init__(self, name: str, owner: int, colony_id: int, private: bool, players: list, 
+    def __init__(self, 
+                name: str, 
+                owner: int, 
+                colony_id: int,
+                private: bool, 
+                players: list, 
                 invited: list, 
-                teamA: list,
-                teamB: list, 
+                teamA: dict,
+                teamB:  dict, 
                 ready: list, 
                 Round: int,
-                start_time=time.time(), 
-                timer=time.time() + 500, 
-                field: list=None, 
-                graveyard: list=None,
+                start_time=time.time(),
+                field: dict=None, 
+                graveyard: dict=None,
                 feed: list=None, 
-                spectators: list=None, status: int=None,):
+                spectators: list=None, 
+                status: int=None):
+        
         self.name = name # name of lobby default to "<player name>'s Lobby"
         self.owner = owner # user_id of the owner of the lobby
         self.colony_id = colony_id # id of colony lobby is created in
@@ -42,7 +96,6 @@ class Lobby():
         self.graveyard = graveyard # players killed in this battle
         self.feed = feed # battle feed 
         self.spectators=spectators
-        self.timer=timer
         self.status=status
        
     def add_player(self, player):
@@ -66,8 +119,6 @@ class Lobby():
                 self.invited.remove(player)
             if player in self.ready:
                 self.ready.remove(player)
-            if player in self.graveyard:
-                self.graveyard.remove(player)
             if player in self.field:
                 self.field.remove(player)
             # Check if the player is the owner
@@ -75,7 +126,7 @@ class Lobby():
                 if self.players:  # If there are more players left
                     self.owner = random.choice(self.players)  # Set a new owner
                 else:  # If no players are left
-                    return "delete_lobby"  # Indicate that the lobby should be deleted
+                    return False  # Indicate that the lobby should be deleted
             return True
                 
         else:
@@ -87,26 +138,41 @@ class Lobby():
         self.spectators.append(player)
         return True
 
+    def set_teamA_name(self, name):
+        self.teamA['name'] = name
+        return True
+    
     def add_teamA(self, player):
-        if player in self.teamA:
-              return False
-        if player in self.teamB:
+        if player in self.teamA['players']:
+           return False
+        if player in self.teamB['players']:
               self.teamB.remove(player)
-        self.teamA.append(player)
+        player_list = [p for p in self.teamA['players']]
+        player_list.append(player)
+        self.teamA['players'] = player_list 
+        return True
+    
+
+    def set_teamB_name(self, name):
+        self.teamB['name'] = name
         return True
     
     def add_teamB(self, player):
-         if player in self.teamA:
-              self.teamA.remove(player)
-         if player in self.teamB:
+         if player in self.teamA['players']:
+              self.teamA['players'].remove(player)
+         if player in self.teamB['players']:
               return False
-         self.teamB.append(player)
+         player_list = [p for p in self.teamB['players']]
+         player_list.append(player)
+         self.teamB['players'] = player_list 
          return True
-         
+    
     def player_killed(self, player):
-        if player in self.players or self.field:
+        if player in self.teamB or self.teamA or self.field:
+
             self.remove_player(player)
-            self.graveyard.append({"player" : player, "killed by" : player.killed})
+
+            self.graveyard.append({"player" : player.__dict__, "killed by" : player.killed})
             return True
         else:
              return False
@@ -148,9 +214,10 @@ def generate_lobby_embed(lobby: Lobby, bot) -> discord.Embed:
 
 class Lobby_Cog(commands.Cog):
     def __init__(self, bot): 
-         self.bot = bot
-         self.lobbies = {}  # Dictionary to store active lobbies
-
+        self.bot = bot
+        self.lobbies = {}  # Dictionary to store active lobbies
+        # Reference to the battle cog for starting battles
+        self.battle_cog = bot.get_cog('battle')
     @commands.Cog.listener()
     async def on_thread_member_join(self, member):
         thread = member.thread
@@ -347,6 +414,22 @@ class Lobby_Cog(commands.Cog):
             await thread.send(embed=embed)
         else:
              await thread.send("`Error: lobby doesn't exist`")
+
+
+    @lobby.command(name="start")
+    async def start(self, ctx, pve: bool=False, pvp: bool=False):
+        if pve:
+            lobby = self.lobbies[ctx.channel.id]['Lobby']
+            if lobby:
+                if len(lobby.teamA) and len(lobby.teamB) == 0:
+                    if lobby.players:
+                        lobby.teamA = lobby.players
+                    else:
+                        return 
+            
+
+        if pvp:
+            pass
 
                    
 
