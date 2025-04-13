@@ -1956,9 +1956,9 @@ sky_manip={
                               type="reflect"
                          ),
 
-                    "Cloaked Dodge" :
+                    "Cloak Dodge" :
                          Techniques(
-                              name="Cloaked dodge",
+                              name="Cloak Dodge",
                               level=3,
                               act_speed=1,                              
                               act_cost=50,

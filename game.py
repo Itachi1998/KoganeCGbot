@@ -16,8 +16,7 @@ import old_techniques
 class GameMode(enum.IntEnum):
     ROAM = 1 #Roam status for when player does nothing
     PVE = 2 #Pve status for when player begins a PvE fight
-    PVP = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points
-    Q = 4 # for when the player is in a queue
+    PVP = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points # for when the player is in a queue
 # to be used for all human characters/enemies
 
 

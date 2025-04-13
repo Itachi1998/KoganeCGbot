@@ -6,150 +6,150 @@ from enemy_techs import enemy_tech
 from cursed_tools import cursed_tools
 
 #region damage target
-def damage_target(target, dmg, soul, defense, vow=None):
-    hp = target.hp
-    max_hp = target.max_hp
-
-    if vow:
+def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
+    # Handle defense vows (CE distribution for protection)
+    if def_vow:
+        vow = def_vow
         for k in vow.keys():
-
             imbued = vow[k]
-
-            if k == "Left Arm":
-               if target.ce >= imbued:
-                bodypart = target.bodyparts["Left Arm"]
-                bodypart.ce += imbued
-                target.ce -= imbued
-
-            if k == "Right Arm":
-                if target.ce >= imbued:
-                    bodypart=target.bodyparts['Right Arm']
+            if k in target.bodyparts and target.ce >= imbued:
+                bodypart = target.bodyparts[k]
+                if bodypart.ce:
+                    bodypart.ce += imbued
                     bodypart.max_ce += imbued
                     target.ce -= imbued
+                else:
+                    bodypart.ce = imbued
+                    bodypart.max_ce = imbued
+                    target.ce -=imbued
 
-            if k == "Left Leg":
-                if target.ce >= imbued:
-                    bodypart = target.bodyparts["Left Leg"]
-                    bodypart.ce += imbued
-                    target.ce -= imbued
+    # Calculate base damage distribution
+    base_10_percent = 10  # Base percent for limbs and head (10%)
+    base_50_percent = 50  # Base percent for torso (50%)
+    # Create a dictionary to track damage distribution percentages
+    damage_distribution = {
+        "Head": base_10_percent,
+        "Left Arm": base_10_percent,
+        "Right Arm": base_10_percent, 
+        "Torso": base_50_percent,
+        "Left Leg": base_10_percent,
+        "Right Leg": base_10_percent
+    }
+    # Handle attack vows (redistribute damage to specific parts)
+    if atk_vow:
+        # Calculate how much percentage to redistribute
+        total_redistribution = sum(atk_vow.values())
+        if total_redistribution > 100:
+            pass
+        else:
+            # First reduce percentages from non-targeted parts proportionally
+            non_targeted_parts = [part for part in damage_distribution if part not in atk_vow]
+            if non_targeted_parts:
+                total_non_targeted_percent = sum(damage_distribution[part] for part in non_targeted_parts)
+                for part in non_targeted_parts:
+                    # Calculate how much this part should contribute to redistribution
+                    if total_non_targeted_percent > 0:
+                        reduction_factor = damage_distribution[part] / total_non_targeted_percent 
 
-            if k == "Right Leg":
-                if target.ce >= imbued:
-                    bodypart = target.bodyparts["Right Leg"]
-                    bodypart.ce += imbued
-                    target.ce -= imbued
+                        reduction = total_redistribution * reduction_factor
 
-            if k == "Head":
-                if target.ce >= imbued:
-                    bodypart = target.bodyparts["Head"]
-                    bodypart.ce += imbued
-                    target.ce -= imbued
+                        damage_distribution[part] = max(damage_distribution[part] - reduction, 0)
 
-            if k == "Torso":
-                if target.ce >= imbued:
-                    bodypart = target.bodyparts["Torso"]
-                    bodypart.ce += imbued
-                    target.ce -= imbued
+                    else:
+                        damage_distribution[part] = 0
+            
+            # Then add the redistributed percentages to targeted parts
+            for part, additional_percent in atk_vow.items():
+                old_damage = damage_distribution[part]
+                damage_distribution[part] += additional_percent
+                damage_distribution[part] -= old_damage
+                print(f"Attack vow redistributes {additional_percent}% more damage to {part}")
 
-    bp_10_dmg = dmg * 10 // 100
-    print("Incoming limb or head damage " + str(bp_10_dmg) )
-    bp_50_dmg = dmg * 50 // 100
-    print("Incoming torso damage " + str(bp_50_dmg) )
-    bp_soul_10 = soul * 10 // 100 if soul else 0
-    print("Incoming limb or head soul damage " + str(bp_soul_10))
-    defense_soul_10 = defense.soul * 10 // 100 if defense.soul else 0
-    print("Target limb or head defense soul strength " + str(defense_soul_10))
-    bp_soul_50 = soul * 50//100 if soul else 0
-    print("Incoming torso soul damage " + str(bp_soul_50))
-    defense_soul_50 = defense.soul * 50 // 100 if defense.soul else 0
-    print("Target torso defense soul strength " + str(defense_soul_50))
-        
+    # Calculate actual damage amounts based on percentages
+    damage_amounts = {part: (dmg * percent // 100) for part, percent in damage_distribution.items()}
+    # Debug output
+    for part, dmg_amount in damage_amounts.items():
+        print(f"{part} will take {dmg_amount} damage ({damage_distribution[part]}% of total)")
+
+    # Calculate soul damage
+    soul_damage = {}
+    defense_soul = {}
+    
+    if soul:
+        for part, percent in damage_distribution.items():
+    
+            soul_damage[part] = soul * percent // 100
+    
+    if defense.soul:
+        for part, percent in damage_distribution.items():
+            defense_soul[part] = defense.soul * percent // 100
+    
+    total_hp = 0
+    total_maxhp = 0   
+
     for bodypart in target.bodyparts.keys():
         print("Pre damage check body: " + str(target.bodyparts[bodypart].__dict__))
         bp = target.bodyparts[bodypart]
-        bod_damage = 0
-
-        if bp.name == "Torso":
-            if bp.hp <= 0:
-              bp_10_dmg += bp_50_dmg
-              if bp_soul_10 > 0:
-                    bp_soul_10 += bp_soul_10
-            
-            elif bp.ce and bp.ce > 0:
-                print("Bodypart ce enforcement reducing damage by " + str(bp.ce))
-                print("Pre ce check damage " + str(bp_50_dmg))
-
-                reduced_dmg = max(bp_50_dmg - bp.ce, 0)
-                reduced_ce = max(bp.ce - bp_50_dmg, 0)
-
-                print("Post ce check damage " + str(bp_50_dmg))
-                bp.ce = reduced_ce
-                bp.hp -= reduced_dmg
-                if soul:
-                    bp.max_hp -= max(bp_soul_50 - defense_soul_50, 0)
-                    print(f"{bp.name} took {max(bp_soul_50 - defense_soul_50, 0)} soul damage reducing their max hp to {bp.max_hp}")
-                    if bp.max_hp < bp.hp:
-                        bp.hp = bp.max_hp
-                print(bp.name + " taking " + str(reduced_dmg) + " damage")
-                bod_damage += reduced_dmg
-                print("Remaining ce "  + str(bp.ce))
-    
-                
-
-                
-
-            else:
-                    # If bodypart has no CE or CE is not > 0, just apply damage directly
-                    print("No CE on bodypart to absorb damage")
-                    bp.hp -= bp_50_dmg
-                    bod_damage += bp_50_dmg
-                    if soul:
-                        bp.max_hp -= max(bp_soul_50 - defense_soul_50, 0)
-                        print(f"{bp.name} took {max(bp_soul_50 - defense_soul_50, 0)} soul damage reducing their max hp to {bp.max_hp}")
-                        if bp.max_hp < bp.hp:
-                            bp.hp = bp.max_hp
-                    print(f"{bp.name} took {bp_50_dmg} damage")
-
-        elif bp.name == "Right Leg" or bp.name == "Left Leg" or bp.name == "Right Arm" or bp.name == "Left Arm" or bp.name == "Head":
-            if bp.hp <= 0:
-                bp_10_dmg += bp_10_dmg
-                if bp_soul_10 > 0:
-                    bp_soul_10 += bp_soul_10
-
-            elif bp.ce and bp.ce > 0:
-                print("Bodypart ce enforcement reducing damage by " + str(bp.ce))
-                print("Pre ce check damage " + str(bp_10_dmg))
-
-                reduced_dmg = max(bp_10_dmg - bp.ce, 0)
-                reduced_ce = max(bp.ce - bp_50_dmg, 0)
-
-                print("Post ce check damage " + str(bp_10_dmg))
-                print(bp.name + " taking " + str(reduced_dmg) + " damage")
-                bp.ce = reduced_ce
-                bp.hp -= reduced_dmg
-
-                if soul:
-                    bp.max_hp -= max(bp_soul_10 - defense_soul_10, 0)
-                    print(f"{bp.name} took {max(bp_soul_10 - defense_soul_10, 0)} soul damage reducing their max hp to {bp.max_hp}")
-                    if bp.max_hp < bp.hp:
-                            bp.hp = bp.max_hp
-
-                bod_damage += reduced_dmg   
-                print("Remaining ce "  + str(bp.ce))
-
-
-            else:
-                bp.hp -=  bp_10_dmg
-                bod_damage += bp_10_dmg
-                if soul:
-                    bp.max_hp -= max(bp_soul_10 - defense_soul_10, 0)
-                    print(f"{bp.name} took {max(bp_soul_10 - defense_soul_10, 0)} soul damage reducing their max hp to {bp.max_hp}")
-                    if bp.max_hp < bp.hp:
-                            bp.hp = bp.max_hp
-                print(f"{bp.name} took {bp_10_dmg} damage")
-        print("Post damage check body: " + str(target.bodyparts[bodypart].__dict__))
         
+        # Get the damage amount for this part
+        part_damage = damage_amounts.get(bp.name, 0)
 
+        if bp.hp <= 0:
+            # If part is already disabled, redistribute its damage among other parts
+            still_active = [p for p in target.bodyparts.values() if p.hp > 0 and p.name != bp.name]
+            if still_active:
+                extra_per_part = part_damage // len(still_active)
+
+                for active_part in still_active:
+                    damage_amounts[active_part.name] += extra_per_part
+                print(f"{bp.name} is disabled, its {part_damage} damage redistributed")
+            continue
+            
+        elif bp.ce and bp.ce > 0:
+            print(f"Bodypart ce enforcement reducing damage by {bp.ce}")
+            print(f"Pre ce check damage {part_damage}")
+
+            # Apply the damage with CE protection
+            reduced_dmg = max(part_damage - bp.ce, 0)
+            reduced_ce = max(bp.ce - part_damage, 0)
+
+            print(f"Post ce check damage {reduced_dmg}")
+            bp.ce = reduced_ce
+            bp.hp -= reduced_dmg
+            
+            if soul:
+                part_soul_dmg = soul_damage.get(bp.name, 0)
+                part_def_soul = defense_soul.get(bp.name, 0) if defense_soul else 0
+                bp.max_hp -= max(part_soul_dmg - part_def_soul, 0)
+                print(f"{bp.name} took {max(part_soul_dmg - part_def_soul, 0)} soul damage reducing their max hp to {bp.max_hp}")
+                if bp.max_hp < bp.hp:
+                    bp.hp = bp.max_hp
+            
+            print(f"{bp.name} taking {reduced_dmg} damage")
+            print(f"Remaining ce {bp.ce}")
+        else:
+            # If bodypart has no CE, apply damage directly
+            print(f"No CE on bodypart to absorb damage")
+            bp.hp -= part_damage
+            
+            if soul:
+                part_soul_dmg = soul_damage.get(bp.name, 0)
+                part_def_soul = defense_soul.get(bp.name, 0) if defense_soul else 0
+                bp.max_hp -= max(part_soul_dmg - part_def_soul, 0)
+                print(f"{bp.name} took {max(part_soul_dmg - part_def_soul, 0)} soul damage reducing their max hp to {bp.max_hp}")
+                if bp.max_hp < bp.hp:
+                    bp.hp = bp.max_hp
+            
+            print(f"{bp.name} took {part_damage} damage")
+        
+        total_hp += bp.hp
+        total_maxhp += bp.max_hp
+        print("Post damage check body: " + str(target.bodyparts[bodypart].__dict__))
+
+    target.hp = total_hp
+    target.max_hp = total_maxhp
+    print("Total hp left: " + str(total_hp))
+    print("Total maxhp left: " + str(total_maxhp))    
     return target.hp, target.max_hp
 
 #endregion
@@ -329,8 +329,8 @@ def type_increment(player, attack=None, defense=None, tools=None):
         return defense_strength, defense_speed
 
       
-# region visability checks
-def attack_visability(target, attack):
+# region visibility checks
+def attack_visibility(target, attack):
     if attack:
         print(f"Accessing {target.name}'s visibility of incoming attack...")
         if target.technique == "Heavenly Restriction: Zero":        
@@ -341,7 +341,7 @@ def attack_visability(target, attack):
             return True       
         
 
-def defense_visability(player, target, attack, defense):          
+def defense_visibility(player, target, attack, defense):          
     if defense:
         print(f"Accessing {player.name}'s visablity of target...")
         if player.technique == "Heavenly Restriction: Zero":
@@ -509,11 +509,8 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
 
     if attack.sure_hit: # need to improve this
             print(f"{defense.name} was hit by sure hit {attack.name}")
-            target.hp -= dmg
-            if attack.soul:
-                target.max_hp-= attack.soul
-            return ("hit", dmg, target.hp<=0, target.max_hp<=0)
-    
+            damage_target(target=target, dmg=dmg, soul=attack.soul, defense=defense, atk_vow={"Right Leg" : 50, "Left Leg" : 50}, def_vow={"Head" : 400})
+            return
     if targ_invis:
         dmg = 0
         print(f"{attack.name} could not target {target.name}")
@@ -645,11 +642,10 @@ def barrier_checks(target, attack, dmg, defense, defense_strength,):
             target_hp, target_maxhp = damage_target(target, dmg, attack.soul, defense)
             return ("hit", dmg, target_hp <=0, target_maxhp <=0)
 
+#region Battle Checks
 def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):      
-        
         tools=None
         target_tools=None
-
     # verify and get move/tools
         attack = attack_verify(player, target, attack_str)
         defense = defense_verify(target, defense_str)
@@ -672,7 +668,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         soul_defense=0
         dmg = 0
         speed = 0
-
 # region conditional increments
     # tool/no tool increment
         if tools:
@@ -694,20 +689,17 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 if item.poison:
                     player.poison = item.poison
                     print(f"{item.name} has a poison of {item.poison}")
-            
         if attack.type == 'amp':
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
             results = barrier_checks(player, target, defense, attack, dmg)
         else:
-
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
     
 
 #     # target tool/no tool increment
         if target_tools:
-
             defense_strength, defense_speed, items = type_increment(defense=defense, tools=target_tools)
          
             for item in items:
@@ -718,7 +710,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 if item.soul:
                     soul_defense += item.soul
                     print(f"{item.name} has a soul defense of {soul_defense}")
-
 
         if defense.type == 'amp':
             defense_strength, defense_speed = type_increment(target, defense=defense)
@@ -742,10 +733,10 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         targ_invis=None
 
         if attack.invisible:
-            atk_invis = attack_visability(target, attack)
+            atk_invis = attack_visibility(target, attack)
 
         if defense.invisible:
-            targ_invis = defense_visability(target, attack)
+            targ_invis = defense_visibility(player, target, attack, defense)
 
     # negate checks - needs to be improved
         if defense.negates:
@@ -792,7 +783,6 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             results = tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=soul_defense)
             return results
         
-        
     # counter check
         if defense.type == 'counter':
             print(f"{defense.name} 'counter check' against {attack.name}...")
@@ -805,12 +795,12 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             print(f"{defense.name} 'dodge check' against {attack.name}...")
             results = dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
             return results   
-
     # domain defense check
         else:
             print(f"{defense.name} 'barrier check' with attack {attack.name}...")    
             results = barrier_checks(target, attack, dmg, defense, defense_strength, )
             return results
+#endregion
         
 
 # region test players
@@ -840,7 +830,7 @@ test_player2= Player(
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Limitless",
+    technique="Sky Manipulation",
     playerclass="sorcerer",
     colony=1,
     xp=0,
@@ -850,5 +840,5 @@ test_player2= Player(
     grade=5
 )
 
-results = battle_checks(test_player1, test_player2, "Resonance", "Domain Expansion")
+results = battle_checks(test_player1, test_player2, "Resonance", "Cloak Dodge")
 print(results)
