@@ -8,21 +8,29 @@ from cursed_tools import cursed_tools
 #region damage target
 def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     # Handle defense vows (CE distribution for protection)
+    #region defense vow distribution
     if def_vow:
-        vow = def_vow
-        for k in vow.keys():
-            imbued = vow[k]
-            if k in target.bodyparts and target.ce >= imbued:
-                bodypart = target.bodyparts[k]
-                if bodypart.ce:
-                    bodypart.ce += imbued
-                    bodypart.max_ce += imbued
-                    target.ce -= imbued
-                else:
-                    bodypart.ce = imbued
-                    bodypart.max_ce = imbued
-                    target.ce -=imbued
-
+        #check if total defense vow ce is greater than target ce
+        total_def_ce = sum(def_vow.values())
+        if total_def_ce > target.ce:
+            pass
+        else:
+            vow = def_vow
+            for k in vow.keys():
+                
+                imbued = vow[k]
+                if k in target.bodyparts and target.ce >= imbued:
+                    bodypart = target.bodyparts[k]
+                    if bodypart.ce:
+                        bodypart.ce += imbued
+                        bodypart.max_ce += imbued
+                        target.ce -= imbued
+                    else:
+                        bodypart.ce = imbued
+                        bodypart.max_ce = imbued
+                        target.ce -=imbued
+    #endregion
+    #region attack vow distribution
     # Calculate base damage distribution
     base_10_percent = 10  # Base percent for limbs and head (10%)
     base_50_percent = 50  # Base percent for torso (50%)
@@ -64,13 +72,15 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
                 damage_distribution[part] += additional_percent
                 damage_distribution[part] -= old_damage
                 print(f"Attack vow redistributes {additional_percent}% more damage to {part}")
+   
 
     # Calculate actual damage amounts based on percentages
     damage_amounts = {part: (dmg * percent // 100) for part, percent in damage_distribution.items()}
     # Debug output
     for part, dmg_amount in damage_amounts.items():
         print(f"{part} will take {dmg_amount} damage ({damage_distribution[part]}% of total)")
-
+    #endregion
+    #region soul
     # Calculate soul damage
     soul_damage = {}
     defense_soul = {}
@@ -84,16 +94,19 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
         for part, percent in damage_distribution.items():
             defense_soul[part] = defense.soul * percent // 100
     
+    #endregion
+
+   
     total_hp = 0
     total_maxhp = 0   
 
     for bodypart in target.bodyparts.keys():
         print("Pre damage check body: " + str(target.bodyparts[bodypart].__dict__))
         bp = target.bodyparts[bodypart]
-        
+
         # Get the damage amount for this part
         part_damage = damage_amounts.get(bp.name, 0)
-
+        #region dead bodypart
         if bp.hp <= 0:
             # If part is already disabled, redistribute its damage among other parts
             still_active = [p for p in target.bodyparts.values() if p.hp > 0 and p.name != bp.name]
@@ -104,7 +117,9 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
                     damage_amounts[active_part.name] += extra_per_part
                 print(f"{bp.name} is disabled, its {part_damage} damage redistributed")
             continue
-            
+        #endregion
+
+        #region ce checks    
         elif bp.ce and bp.ce > 0:
             print(f"Bodypart ce enforcement reducing damage by {bp.ce}")
             print(f"Pre ce check damage {part_damage}")
@@ -127,6 +142,8 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
             
             print(f"{bp.name} taking {reduced_dmg} damage")
             print(f"Remaining ce {bp.ce}")
+        #endregion
+        #region full damage
         else:
             # If bodypart has no CE, apply damage directly
             print(f"No CE on bodypart to absorb damage")
@@ -141,7 +158,7 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
                     bp.hp = bp.max_hp
             
             print(f"{bp.name} took {part_damage} damage")
-        
+        #endregion
         total_hp += bp.hp
         total_maxhp += bp.max_hp
         print("Post damage check body: " + str(target.bodyparts[bodypart].__dict__))
@@ -151,6 +168,7 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     print("Total hp left: " + str(total_hp))
     print("Total maxhp left: " + str(total_maxhp))    
     return target.hp, target.max_hp
+    #endregion
 
 #endregion
 
