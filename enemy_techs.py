@@ -1,170 +1,7 @@
 from techniques import Techniques
 
-enemy_techs = { "King Of Curses" :
-     [
-          {
-               "Attack" : 
-               {
-                    "Dismantle" : # need a visability attribute so it can't be seen by most sorcerers
-                         Techniques(
-                              name="Dismantle",
-                              level=1,
-                              act_speed=1,
-                              act_cost=20,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=500,
-                              speed=1000,
-                              type="projectile",
-                              invisable=True
-                         ),
-                    
-                    "Multi Dismantle" :
-                        Techniques(
-                              name="Multi Dismantle",
-                              level=2,
-                              act_speed=1,
-                              act_cost=60,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=3,
-                              strength=500,
-                              speed=1000,
-                              type="projectile",
-                              invisable=True
-                         ),
-
-                    "Cleave" :
-                         Techniques(
-                              name="Cleave",
-                              level=1,
-                              act_speed=1,
-                              act_cost=60, # should be based off opponent hp - special case in battlechecks
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1500, # should be based off opponent hp - special case in battlechecks
-                              speed=1000,
-                              type="melee"
-                         ),
-
-                    "Encanted Dismantle" :
-                         Techniques(
-                              name="Dismantle",
-                              level=4,
-                              act_speed=2,
-                              act_cost=40,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1000,
-                              speed=1000,
-                              type="projectile",
-                              invisable=True
-                         ),
-                    
-                    "Furnace" :
-                         Techniques(
-                              name="Furnace",
-                              level=4,
-                              act_speed=3,
-                              act_cost=100,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=2000,
-                              speed=500,
-                              type="projectile"
-                         )
-               }
-          },
-
-          {
-               "Defend": 
-           
-               {
-                    "Cleave Spider Web" :
-                         Techniques(
-                              name="Cleave Spider Web",
-                              level=1,
-                              act_speed=2,
-                              act_cost=100,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1500,
-                              speed=1000, 
-                              type="counter"
-                         ),
-
-                    "Dismantle Parry" :
-                         Techniques(
-                              name="Dismantle Parry",
-                              level=2,
-                              act_speed=1,
-                              act_cost=20,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=500,
-                              speed=1000,
-                              type="counter"
-                         ),
-
-                    "Dismantle Glove" : # like parry but strong since it envelopes the hand
-                         Techniques(
-                              name="Dismantle Glove",
-                              level=2,
-                              act_speed=1,
-                              act_cost=20,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1000,
-                              speed=1000,
-                              type="tank"
-                         ),
-
-                    "Dismantle Shield" : # creating a forcefield out of slashes
-                         Techniques(
-                              name="Dismantle Shield",
-                              level=4,
-                              act_speed=1,
-                              act_cost=100,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=5,
-                              strength=1000,
-                              speed=1000,
-                              type="tank"
-                         ),
-                    
-                    "Air Hop" : 
-                         Techniques(
-                              name="Air Hop",
-                              level=5,
-                              act_speed=2,
-                              act_cost=50,
-                              act_body=("full"),
-                              aoe=1,
-                              strength=0,
-                              speed=1500,
-                              type="dodge"
-                         )
-               }
-          },
-          {
-          "Domain" :
-               {
-                   "Malevolent Shrine" :
-                         Techniques(
-                              name="Malevolent Shrine",
-                              level=5,
-                              act_speed=2,
-                              act_cost=300,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=20,
-                              strength=2000,
-                              speed=9999,
-                              type="open",
-                              sure_hit=True
-
-                         )
-               }
-          }
-     ],
+enemy_tech = {
+#region Mahoraga
     "Mahoraga" : 
     [
         {"Attack" : 
@@ -213,6 +50,7 @@ enemy_techs = { "King Of Curses" :
                 )
 
             }},
+
             {
         "Defend" : 
         {
@@ -231,8 +69,8 @@ enemy_techs = { "King Of Curses" :
                 negates=True,
                 duration=5
                 )
-            } }
-    ],
+            } },],
+
     "Anxious Ears" : 
     [
         {"Attack" : {
@@ -266,51 +104,113 @@ enemy_techs = { "King Of Curses" :
          } }
     ],
 
-    "Soul Curse" : # Femhito - special grade
-        [
-            {"Attack" :
-                { "Callous Formation" : Techniques(
-                    name="Soul Manipulation: Callous Formation",
-                    level=1,
-                    act_speed=2,
-                    act_cost=50,
-                    act_body=("hands", "legs"),
-                    aoe=1,
-                    strength=1000,
-                    speed=600,
-                    type="melee",
-                    soul=200,
-                    buff=(1, "strength", 200)
-                    ),
-                "Soul Transmute" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
-                    name="Soul Manipulation: Soul Transmute", 
-                    level=1,
-                    act_speed=1,
-                    act_cost=50,
-                    act_body=("full"),
-                    aoe=1,
-                    strength=600,
-                    speed=800,
-                    type="melee"
-                    )
-                }   
-            },
-            {"Defense" :
-                {"Body Morph" : Techniques( # will need sub techniques for separate abilities
-                    name="Soul Manipulation : Body Morph",
-                    level=1,
-                    act_speed=1,
-                    act_cost=50,
-                    act_body=("hands","legs", "torso", "head"),
-                    aoe=1,
-                    strength=600,
-                    speed=800,
-                    type="dodge" # wings/legs or smth
-                    )
-                }
-            }
-        ],
+"Frog" : 
+[
+    {'Attack' : 
+     {
+         "Frog Grab" : 
+         Techniques(
+             name="Frog Grab",
+             level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="projectile",
+             stun=1
+         ),
+         "Frog Throw":
+         Techniques(
+             name="Frog Throw",
+             level=2,
+             act_speed=2,
+             act_cost=5,
+             act_body=("Head"),
+             aoe=2,
+             strength=200,
+             speed=600,
+             type="melee",
+             charge=True,
+         )
+     }},
+     {"Defense" : {
+       "Frog Grab" : 
+       Techniques(
+           name="Frog Grab",
+           level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="counter",
+             stun=1,
+       ),
+       "Frog Hop" : 
+       Techniques(
+           name="Frog Hop",
+           level=1,
+           act_speed=1,
+           act_cost=5,
+           act_body=("Head"),
+           aoe=1,
+           strength=10,
+           speed=600,
+           type="dodge",
+       )  }}
+],
+#endregion
+    # "Soul Curse" : # Femhito - special grade
+    # "Soul Curse" : # Femhito - special grade
+    #     [
+    #         {"Attack" :
+    #             { "Callous Formation" : Techniques(
+    #                 name="Soul Manipulation: Callous Formation",
+    #                 level=1,
+    #                 act_speed=2,
+    #                 act_cost=50,
+    #                 act_body=("hands", "legs"),
+    #                 aoe=1,
+    #                 strength=1000,
+    #                 speed=600,
+    #                 type="melee",
+    #                 soul=200,
+    #                 buff=(1, "strength", 200)
+    #                 ),
+    #             "Soul Transmute" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
+    #                 name="Soul Manipulation: Soul Transmute", 
+    #                 level=1,
+    #                 act_speed=1,
+    #                 act_cost=50,
+    #                 act_body=("full"),
+    #                 aoe=1,
+    #                 strength=600,
+    #                 speed=800,
+    #                 type="melee"
+    #                 )
+    #             }   
+    #         },
+    #         {"Defense" :
+    #             {"Body Morph" : Techniques( # will need sub techniques for separate abilities
+    #                 name="Soul Manipulation : Body Morph",
+    #                 level=1,
+    #                 act_speed=1,
+    #                 act_cost=50,
+    #                 act_body=("hands","legs", "torso", "head"),
+    #                 aoe=1,
+    #                 strength=600,
+    #                 speed=800,
+    #                 type="dodge" # wings/legs or smth
+    #                 )
+    #             }
+    #         }
+    #     ],
         
+
+#region Orbmaster
     "Orbmaster" : # grade 1
         [    
             {"Attack" : 
@@ -342,9 +242,10 @@ enemy_techs = { "King Of Curses" :
                     sure_hit=True
                     )
                 }
-            }
-        ],
-
+            }]
+        ,
+#endregion
+#region Charger
     "Charger" : 
         [ 
             {"Attack" :
@@ -388,7 +289,6 @@ enemy_techs = { "King Of Curses" :
                 }
             }
         ],
-
     "Stinkaspore" : # grade 2
         [
             {"Attack" : 
@@ -436,7 +336,9 @@ enemy_techs = { "King Of Curses" :
                 }
             }
         ],
-
+#endregion
+    
+#region Primate
     "Primate" : 
         [ 
             {"Attack" :
@@ -543,6 +445,9 @@ enemy_techs = { "King Of Curses" :
                 }
             }
         ],
+#endregion
+#region Furrpede
+
         "Furrpede" : 
         [
             {"Attack" : {
@@ -584,6 +489,8 @@ enemy_techs = { "King Of Curses" :
 
             }}
         ]
+
+#endregion
 
 
 
