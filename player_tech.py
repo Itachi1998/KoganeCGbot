@@ -2171,9 +2171,9 @@ ten_shadows={
                               type="summon",
                          ),
 
-                    "Great Serpent Choke" : 
+                    "Great Serpent" : 
                          Techniques(
-                              name="Great Serpent Choke",
+                              name="Great Serpent",
                               level=1,
                               act_speed=2,                             
                               act_cost=30,
@@ -2185,9 +2185,9 @@ ten_shadows={
                               summon={"Great Serpent" : {"Speed" : 600, "strength" : 500, "Max CE" : 100}}
                          ),
                     
-                    "Max Elephant Drop" : 
+                    "Max Elephant" : 
                          Techniques(
-                              name="Max Elephant Drop",
+                              name="Max Elephant",
                               level=1,
                               act_speed=3,                              
                               act_cost=35,
@@ -2201,7 +2201,7 @@ ten_shadows={
 
                     "Piercing Ox" : 
                          Techniques(
-                              name="Piercing Bull Charge",
+                              name="Piercing Ox",
                               level=2,
                               act_speed=3,
                               act_cost=50,
@@ -2248,9 +2248,9 @@ ten_shadows={
                               summon={"Rabbit Escape" : {"Speed" : 800, "strength" : 100, "Max CE" : 100}}
                          ),
                     
-                    "Toad Tongue" : 
+                    "Toad" : 
                          Techniques(
-                              name="Toad Tongue",
+                              name="Toad",
                               level=1,
                               act_speed=1,
                               act_cost=30,

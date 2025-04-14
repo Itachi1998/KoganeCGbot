@@ -365,9 +365,8 @@ def attack_visibility(target, attack):
         else:
             print(f"{target.name} can't see but could sense the activation of {attack.name}")
             return True       
-#endregion
         
-#region defense visibility
+        
 def defense_visibility(player, target, attack, defense):          
     if defense:
         print(f"Accessing {player.name}'s visablity of target...")
@@ -710,9 +709,10 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         soul_defense=0
         dmg = 0
         speed = 0
-# region conditional increments
+    
+    # region conditional increments
 
-    # tool/no tool increment
+        # player increment
         if tools:
             dmg, speed, items = type_increment(player, attack=attack, tools=tools)  
             for item in items:
@@ -741,9 +741,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             dmg, speed = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
 
-# endregion
-
-      # target tool/no tool increment
+        # target increment
         if target_tools:
             defense_strength, defense_speed, items = type_increment(defense=defense, tools=target_tools)
          
@@ -764,24 +762,25 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
         else:
             defense_strength, defense_speed = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}") 
-#endregion
+    #endregion
 
-# region conditional checks
-    # sure hit checks
+    # region conditional checks
+        # sure hit checks
         if attack.sure_hit:
             print(f"{attack.name} is a sure hit")
 
         if defense.sure_hit:
             print(f"{defense.name} is a sure hit")
 
-    # visability checks
+        # visability checks
         atk_invis=None
         targ_invis=None
         if attack.invisible:
             atk_invis = attack_visibility(target, attack)
         if defense.invisible:
             targ_invis = defense_visibility(player, target, attack, defense)
-    # negate checks - needs to be improve
+
+        # negate checks - needs to be improved
         if defense.negates:
             attack_negated=True
             if attack_negated:
@@ -793,7 +792,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 results = negate_check(target, dmg, defense_strength, attack=attack)
             #     return results
 
-    # soul/stack checks
+        # soul/stack checks
         if defense.soul:
             soul_defense += defense.soul
             print(f"{defense.name} has a soul strength of {soul_defense}") 
@@ -803,7 +802,8 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             stack -= 1
             player.stack = stack
         print(f"{attack.name}'s type is {attack.type}\n{defense.name}'s type is {defense.type}")
-    # domain clash/attack check - if we don't have a separate domain clash func we can check for just tank/counter/dodge and melee/projectile then have an else for barrier checks
+    
+        # domain clash/attack check - if we don't have a separate domain clash func we can check for just tank/counter/dodge and melee/projectile then have an else for barrier checks
         if attack.type == 'open' or attack.type == 'closed':
             if defense.type == 'open' or defense.type == 'closed':
                 print(f"{defense.name} 'domain clash' against {attack.name}...")    
@@ -814,28 +814,29 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
                 results = barrier_checks(player, target, attack, dmg, speed, defense, defense_strength)
                 return results
         
-    # tank check
+        # tank check
         if defense.type == 'tank':
             print(f"{defense.name} 'tank check' against {attack.name}...")
             results = tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=soul_defense)
             return results
         
-    # counter check
+        # counter check
         if defense.type == 'counter':
             print(f"{defense.name} 'counter check' against {attack.name}...")
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
             return results
-    # dodge check
+        # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
             results = dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
             return results   
         
-    # domain defense check
+        # domain defense check
         else:
             print(f"{defense.name} 'barrier check' with attack {attack.name}...")    
             results = barrier_checks(player, target, attack, dmg, speed, defense, defense_strength)
             return results
+        #endregion
 #endregion
 
 # region test players
@@ -877,7 +878,7 @@ test_player2= Player(
     imbue=0
 )
 
-summon_check("Mahoraga", "shikigami")
+#summon_check("Nue", "shikigami")
 results = battle_checks(test_player1, test_player2, "Dismantle", "Blue")
 
 print(results)
