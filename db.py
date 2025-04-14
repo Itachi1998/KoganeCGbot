@@ -1,5 +1,5 @@
 import os, json, models
-from models import Player, Colony, Technique, Enemy
+from models import Player, Colony, Technique, Enemy, Base
 from datetime import datetime
 from typing import List, Optional
 from sqlalchemy import create_engine, String, JSON
@@ -10,127 +10,127 @@ dotfile = find_dotenv('.env')
 loaded = load_dotenv(dotfile)
 passw = os.getenv('PASS')
 
-db_url = "sqlite:///kogane.db"
+db_url = "sqlite:///database.db"
 
 engine = create_engine(db_url)
 
+# Update create_player function
+
 def create_player(user_id: int, colony_id: int, playername: str,
-                   playerclass:str, technique: str, max_ce: int, max_hp: int, six_eyes:bool):
+                  playerclass: str, technique: str, max_ce: int, max_hp: int, six_eyes: bool):
     with Session(engine) as session:
-        exisiting_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
-        if not exisiting_colony:
-            raise False
-        existing_players = exisiting_colony.players
+        existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
+        if not existing_colony:
+            return False
+        
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if existing_player:
             return False
-    # id: Mapped[int] = mapped_column(primary_key=True)
-    # user_id: Mapped[int]
-    # colony_id: Mapped[int]
-    # date_entered: Mapped[str]
-    # player_level: Mapped[int]
-    # player_name: Mapped[str] = mapped_column(String(200))
-    # player_equipped: Mapped[List]
-    # player_inventory: Mapped[List]
-    # max_hp: Mapped[int]
-    # hp: Mapped[int]
-    # max_ce: Mapped[int]
-    # ce: Mapped[int]
-    # cgp: Mapped[int]
-    # xp: Mapped[int]
-    # skp: Mapped[int]
-    # technique: Mapped[List[str]] = mapped_column(JSON)
-    # playerclass: Mapped[str] = mapped_column(String(100))
-    # six_eyes: Mapped[bool]
-       
-        new_player=   Player(
-             user_id=user_id,
-             colony_id=colony_id,
-             date_entered=datetime.now().astimezone().strftime("%c"),
-             player_level=1,
-             player_name=playername,
-             player_equipped=[],
-             player_inventory=[],
-             max_hp =max_hp,
-             hp=max_hp,
-             max_ce=max_ce,
-             ce=max_ce,
-             cgp=0,
-             xp=0,
-             skp=0,
-             technique=technique,
-             playerclass=playerclass,
-             six_eyes=six_eyes
-             
-        )
-        new_tech = Technique(
-             name=technique,
-             level=1,
-             rct=False,
-             six_eyes=six_eyes,
-             innate=True,
-             user_id=user_id,
+        
+        new_player = Player(
+            user_id=user_id,
             colony_id=colony_id,
+            date_entered=datetime.now().astimezone().strftime("%c"),
+            player_level=1,
+            player_name=playername,
+            player_equipped=[],
+            player_inventory=[],
+            max_hp=max_hp,
+            hp=max_hp,
+            max_ce=max_ce,
+            ce=max_ce,
+            cgp=0,
+            xp=0,
+            skp=0,
+            playerclass=playerclass,
+            six_eyes=six_eyes
+        )
+        
+        session.add(new_player)
+        # Flush to get the ID for the new player
+        session.flush()
+        
+        new_tech = Technique(
+            name=technique,
+            level=1,
+            rct=False,
+            six_eyes=six_eyes,
+            innate=True,
+            user_id=user_id,
+            colony_id=colony_id,
+            player=new_player,
             binding_vows=[]
         )
-        existing_players.append(user_id)
-        updated_colony = update_colony(colony_id, {"players": existing_players})
-        if not updated_colony:
-            print("Failed to update colony with new player")
-            return False
-        session.add(new_player, new_tech)
-        session.commit()
-        session.close()
-        return True
         
+        session.add(new_tech)
+        session.commit()
+        return True
+
+# Update create_colony function
 def create_colony(colony_data, enemies):
-        with Session(engine) as session:
-          existing_colony = session.query(Colony).filter_by(colony_id=colony_data["colony id"]).first()
-          if existing_colony:
-                 raise ValueError("Colony already exists")
-          with Session(engine) as session:
-                colony = Colony(
-                    colony_name=colony_data['name'],
-                    colony_id=colony_data['colony id'],
-                    creation_date=colony_data['creation date'],
-                    color=colony_data['color'],
-                    players=colony_data['players'],
-                    enemies=colony_data['enemies'],
-                    items=colony_data['items'],
-                    ce=colony_data['ce'],
-                    xp=colony_data['xp'],
-                    six_eyes=colony_data['six eyes'],
-                    leaderboard=colony_data['leaderboard'],
-               )
-                session.add(colony)
-                for e in enemies:
-                    existing_enemy = session.query(Enemy).filter_by(colony_id=colony_data['colony id'], name=e.name).first()
-                    if existing_enemy:
-                        raise ValueError("Enemy already exists")
-                    else:
-                        enemy = Enemy(
-                                name=e.name,
-                                level=e.level,
-                                max_hp=e.max_hp,
-                                hp=e.hp,
-                                max_ce=e.max_ce,
-                                ce=e.ce,
-                                strength=e.strength,
-                                speed=e.speed,
-                                technique=e.technique,
-                                colony_id=colony.colony_id,
-                                colony=colony,
-                                playerclass=e.playerclass,
-                                tamed=e.tamed,
-                                bodyparts=e.bodyparts,
-                                cgp=e.cgp,
-                                xp=e.xp
-                            )
-                        session.add(enemy)
-               
-                session.commit()
-                session.close()
-                return colony
+    with Session(engine) as session:
+        existing_colony = session.query(Colony).filter_by(colony_id=colony_data["colony id"]).first()
+        if existing_colony:
+            raise ValueError("Colony already exists")
+        
+        # Create colony without players and enemies initially
+        colony = Colony(
+            colony_name=colony_data['name'],
+            colony_id=colony_data['colony id'],
+            creation_date=colony_data['creation date'],
+            color=colony_data['color'],
+            ce=colony_data['ce'],
+            xp=colony_data['xp'],
+            six_eyes=colony_data['six eyes'],
+            special_grades=colony_data.get('special_grades', [])
+        )
+        
+        session.add(colony)
+        session.flush()  # Flush to get the ID
+        
+        # Add enemies to colony
+        for e in enemies:
+            existing_enemy = session.query(Enemy).filter_by(
+                colony_id=colony_data['colony id'], name=e.name
+            ).first()
+            
+            if existing_enemy:
+                raise ValueError("Enemy already exists")
+            
+            enemy = Enemy(
+                name=e.name,
+                level=e.level,
+                max_hp=e.max_hp,
+                hp=e.hp,
+                max_ce=e.max_ce,
+                ce=e.ce,
+                strength=e.strength,
+                speed=e.speed,
+                technique=e.technique,
+                colony_id=colony.colony_id,
+                colony=colony,
+                playerclass=e.playerclass,
+                tamed=e.tamed,
+                bodyparts=e.bodyparts,
+                cgp=e.cgp,
+                xp=e.xp
+            )
+            session.add(enemy)
+        
+        session.commit()
+        return colony
+
+# Update delete_player function
+def delete_player(colony_id, user_id):
+    with Session(engine) as session:
+        existing_player = session.query(Player).filter_by(colony_id=colony_id, user_id=user_id).first()
+        if not existing_player:
+            raise ValueError("Player does not exist")
+        
+        # No need to manually update colony.players, SQLAlchemy relationships handle this
+        session.delete(existing_player)
+        session.commit()
+        return True
 
 def create_technique(tech_data):
         with Session(engine) as session:
@@ -153,18 +153,43 @@ def create_technique(tech_data):
                 session.close()
                 return technique 
             
+
+# Update check_relationship function
 def check_relationship():
     with Session(engine) as session:
         colonies = session.query(Colony).all()
         for colony in colonies:
             print(f"Colony: {colony.colony_name} (ID: {colony.colony_id})")
-            print(colony.enemies)
-        enemies = session.query(Enemy).all()
-        for enemy in enemies:
-            print(f"Enemy: {enemy.name} - colony_id: {enemy.colony_id}")
+            print(f"Players: {len(colony.players)}")
+            print(f"Enemies: {len(colony.enemies)}")
+            print(f"Shop items: {len(colony.shop)}")
+        
+        players = session.query(Player).all()
+        for player in players:
+            print(f"Player: {player.player_name} - Techniques: {len(player.techniques)}")
 
+# Update read_technique function to match new model
+def read_technique(techname: str, colony_id: int, user_id: int, value=None):
+    with Session(engine) as session:
+        existing_tech = session.query(Technique).filter_by(
+            name=techname, colony_id=colony_id, user_id=user_id
+        ).first()
+        
+        if existing_tech:
+            if value:
+                tech_data = {
+                    column.name: getattr(existing_tech, column.name) 
+                    for column in existing_tech.__table__.columns
+                }
+                session.close()
+                return tech_data
+            else:
+                session.close()
+                return existing_tech
+        else:
+            session.close()
+            return False
 
-check_relationship()
 def read_colony(colony_id: int, value=None):
             with Session(engine) as session:
                      existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
@@ -208,24 +233,6 @@ def read_enemy(colony_id: int, value=None):
                         session.close()
                         return False
 
-def read_technique(techname: str, colony_id: int, user_id: int, value=None):
-        with Session(engine) as session:
-                existing_tech = session.query(Technique).filter_by(name=techname, colony_id=colony_id, user_id=user_id).first()
-                if existing_tech:
-                        if value:
-                            tech_data = {
-                                column.name: getattr(existing_tech, column.name) for column in existing_tech.__table__.columns
-                            }
-                            session.close()
-                            return tech_data
-
-                        else:
-                            session.close()
-                            return True
-                else:
-                        session.close()
-                        return False
-                
 def update_player(user_id, colony_id, value=None):
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()

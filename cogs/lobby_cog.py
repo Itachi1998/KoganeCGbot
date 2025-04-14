@@ -370,14 +370,14 @@ class Lobby_Cog(commands.Cog):
             await thread.send("Private lobby created, only invited players can join.")
             self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=0, private=True,
                                                      players=[ctx.author.id], invited=invited, teamA=[], teamB=[],
-                                                    status=1,  ready=[], Round=0, start_time=datetime.now(), timer=300, 
+                                                    status=1,  ready=[], Round=0, start_time=datetime.now(),
                                                     field=[], graveyard=[], feed=[], spectators = []), "embed" : ""}
         else:
             thread = await ctx.channel.create_thread(name=name, type=discord.ChannelType.public_thread, auto_archive_duration=1440, 
                                                      reason="## Lobby created " + name)
             self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=0, private=False,
                                                         players=[ctx.author.id], invited=[], teamA=[], teamB=[],
-                                                        status=1,  ready=[], Round=0, start_time=datetime.now(), timer=300, 
+                                                        status=1,  ready=[], Round=0, start_time=datetime.now(),
                                                         field=[], graveyard=[], feed=[], spectators = []), "embed" : ""}
         lobby = self.lobbies[thread.id]["Lobby"]
         embed = generate_lobby_embed(lobby, self.bot)
@@ -414,9 +414,7 @@ class Lobby_Cog(commands.Cog):
                 embed = self.lobbies[ctx.channel.id]["embed"]
                 del(embed)
                 del(self.lobbies[ctx.channel.id])
-
                 thread = ctx.channel
-       
                 await ctx.send("`Lobby Disbanded`")
                 await thread.send("`Channel Archived` at " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
                 await thread.edit(locked=True)
