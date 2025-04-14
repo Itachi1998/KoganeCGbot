@@ -1,7 +1,7 @@
 from techniques import Techniques
 from random import randint
 
-# region ### Auspicious Beasts Summon
+# region Auspicious Beasts Summon
 auspicious_beasts_summon={
 "Auspicious Beasts Summon" :
      [
@@ -70,10 +70,9 @@ auspicious_beasts_summon={
      ],
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### BIRD MANIP
-
+# region Bird Manipulation
 bird_manip = {
      "Bird Manipulation" : 
      [
@@ -155,9 +154,9 @@ bird_manip = {
      ],
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### BLOOD MANIP
+# region Blood Manipulation
 blood_manip= {
     "Blood Manipulation" : 
           [
@@ -242,9 +241,9 @@ blood_manip= {
           ], 
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### Body Hop
+# region Body Hop
 body_hop={
      
 "Body Hop" :
@@ -305,9 +304,9 @@ body_hop={
      ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### BOOGIE WOOGIE
+# region Boogie Woogie
 boogie_woogie = {
 
 "Boogie Woogie" : 
@@ -402,10 +401,9 @@ boogie_woogie = {
 
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### Cursed Energy Discharge
-
+# region Cursed Energy Discharge
 ce_discharge={
      
 "Cursed Energy Discharge" :
@@ -448,10 +446,9 @@ ce_discharge={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### COMEDIAN
-
+# region Comedian
 comedian={
 "Comedian" : 
      [
@@ -586,10 +583,9 @@ comedian={
 
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### CONSTRUCTION
-
+# region Construction
 construction={
      "Construction": [
           {
@@ -732,10 +728,9 @@ construction={
 "Rarity" : 15, 
 "Six Eyes" : False
 }
+# endregion
 
-
-# region ### COPY
-
+# region Copy
 copy={ # change to be like cursed spirit manipulation?
      "Copy" : [
           {
@@ -848,10 +843,9 @@ copy={ # change to be like cursed spirit manipulation?
 
 "Six Eyes" : False
 }
+# endregion
 
-
-# region ### CURSED SPEECH
-
+# region Cursed Speech
 cursed_speech={
      "Cursed Speech" :
      [
@@ -941,9 +935,9 @@ cursed_speech={
      ],
      "Rarity" : 50
 }
+# endregion
 
-
-# region ### Cursed Spirit Manipulation
+# region Cursed Spirit Manipulation
 cursed_spirit_manip={
      "Cursed Spirit Manip" : [
           {
@@ -985,12 +979,10 @@ cursed_spirit_manip={
      ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### Heavenly Restriction: Zero
-
+# region Heavenly Restriction: Zero
 hr_zero={
-      
 "Heavenly Restriction: Zero" : 
      [
           {
@@ -1096,10 +1088,9 @@ hr_zero={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Ice Manipulation
-
+# region Ice Manipulation
 ice_manip={
      
 "Ice Manipulation" :
@@ -1224,10 +1215,9 @@ ice_manip={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Idle Transfiguration
-
+# region Idle Transfiguration
 idle_transfig={
      
 "Idle Transfiguration" :
@@ -1360,10 +1350,9 @@ idle_transfig={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Limitless
-
+# region Limitless
 limitless={
 "Limitless" :
      [
@@ -1521,13 +1510,12 @@ limitless={
 "Rarity" : 3,
 "Six Eyes" : True
 }
+# endregion
 
-
-# region ### MBA
-
+# region Mythic Beast Amber
 mba={
      
-"Mythic Beast Amber" : # add self_dmg in checks
+"Mythic Beast Amber" :
      [
           {
                "Attack" : 
@@ -1545,7 +1533,7 @@ mba={
                             type="melee"
                         ),
 
-                    "Lightning Rod" : # requires cursed tool - add in checks
+                    "Lightning Rod" :
                         Techniques(
                             name="Lightning Rod",
                             level=3,
@@ -1610,10 +1598,9 @@ mba={
 "Rarity" : 7,
 "Activated" : False
 }
+# endregion
 
-
-# region ### Projection Sorcery
-
+# region Projection Sorcery
 projection_sorcery={
      
 "Projection Sorcery" :
@@ -1693,10 +1680,9 @@ projection_sorcery={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### Shrine
-
+# region Shrine
 shrine={
 
 "Shrine" :
@@ -1899,9 +1885,9 @@ shrine={
 "Rarity" : 5,
 "Friction" : 0
 }
+# endregion
 
-
-# region ### Sky Manipulation
+# region Sky Manipulation
 
 sky_manip={
      
@@ -1971,34 +1957,12 @@ sky_manip={
                          )
                }
           },
-          # {
-          # "Barrier" :
-          #      {
-          #          "Domain Expansion: " :
-          #                Techniques(
-          #                     name="Domain Expansion: ",
-          #                     level=4,
-          #                     act_speed=2,
-          #                     act_cost=300,
-          #                     act_body=("Left Arm", "Right Arm"),
-          #                     aoe=20,
-          #                     strength=1000,
-          #                     speed=9000,
-          #                     type="closed",
-          #                     intern_strength=30,
-          #                     extern_strength=30,
-          #                     sure_hit=True
-
-          #                )
-          #      }
-          # }
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Star Rage
-
+# region Star Rage
 star_rage={
      
 "Star Rage" :
@@ -2069,10 +2033,9 @@ star_rage={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Straw Doll
-
+# region Straw Doll
 straw_doll={
      
 "Straw Doll" :
@@ -2159,10 +2122,9 @@ straw_doll={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### Ten Shadows
-
+# region Ten Shadows
 ten_shadows={
      
 "Ten Shadows" :
@@ -2326,10 +2288,9 @@ ten_shadows={
      ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### TEMPLATE
-
+# region TEMPLATE
 # _={
      
 # "" :
@@ -2372,7 +2333,7 @@ ten_shadows={
 #         ],
 # "Rarity" : 100
 # }
-
+# endregion
 
 technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, body_hop, boogie_woogie, 
                   ce_discharge, comedian, construction, copy, cursed_speech, 

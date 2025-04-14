@@ -162,6 +162,65 @@ enemy_tech = {
            type="dodge",
        )  }}
 ],
+
+
+"Divine Dog" : 
+[
+    {'Attack' : 
+     {
+         "Claw" : 
+         Techniques(
+             name="Claw",
+             level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="melee",
+             stun=1
+         ),
+         "Frog Throw":
+         Techniques(
+             name="Frog Throw",
+             level=2,
+             act_speed=2,
+             act_cost=5,
+             act_body=("Head"),
+             aoe=2,
+             strength=200,
+             speed=600,
+             type="melee",
+             charge=True,
+         )
+     }},
+     {"Defense" : {
+       "Frog Grab" : 
+       Techniques(
+           name="Frog Grab",
+           level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="counter",
+             stun=1,
+       ),
+       "Frog Hop" : 
+       Techniques(
+           name="Frog Hop",
+           level=1,
+           act_speed=1,
+           act_cost=5,
+           act_body=("Head"),
+           aoe=1,
+           strength=10,
+           speed=600,
+           type="dodge",
+       )  }}
 #endregion
     # "Soul Curse" : # Femhito - special grade
     # "Soul Curse" : # Femhito - special grade
