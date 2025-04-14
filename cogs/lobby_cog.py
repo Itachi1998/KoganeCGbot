@@ -74,8 +74,6 @@ def start_pve_embed(lobby):
                 else:
                     lobby.add_spectator(p)
                         
-            
-                    
             enemies = [e for e in colony.enemies if e.level <= max_level]
             e_choice = random.choice(enemies)
             enemy = Enemy(**e_choice.__dict__)
@@ -93,10 +91,16 @@ def start_pve_embed(lobby):
                 lobby.field.append(e for e in enemy_list)
             else:
                 lobby.field = enemy_list
+            
+            if  lobby.teamA:
+                teamname = lobby.teamA['name'] if lobby.teamA['name'] else  "Team A"
+                teamAlist = [p.name for p in lobby.teamA['players']]
+                embed.add_field(name=teamname, value="\n".join(teamAlist))
+            if  lobby.teamB:
+                teamname = lobby.teamB['name'] if lobby.teamB['name'] else  "Team B"
+                teamBlist = [p.name for p in lobby.teamB['players']]
+                embed.add_field(name=teamname, value="\n".join(teamBlist))
 
-            embed.add_field(name="Team A", value="\n".join() if teamA_list else "No players")
-
-        
             return embed, lobby
 
 class Lobby():
@@ -461,12 +465,8 @@ class Lobby_Cog(commands.Cog):
                         lobby.teamA = lobby.players
                     else:
                         return 
-            
-
         if pvp:
             pass
-
-                   
 
 
 async def setup(bot):
