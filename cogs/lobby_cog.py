@@ -439,7 +439,6 @@ class Lobby_Cog(commands.Cog):
             if player_removed == "delete_lobby":
                 await thread.send("`No New Owner Found Lobby Will Be Deleted`")
                 del self.lobbies[ctx.channel.id]
-              
                 await thread.send("`Channel Archived` at " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
                 await thread.edit(locked=True)
                 await thread.edit(archived=True)

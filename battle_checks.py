@@ -7,7 +7,6 @@ from cursed_tools import cursed_tools
 
 #region damage target
 def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
-    # Handle defense vows (CE distribution for protection)
 #region defense vow distribution
     if def_vow:
         #check if total defense vow ce is greater than target ce
@@ -27,8 +26,8 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
                     else:
                         bodypart.ce = imbued
                         bodypart.max_ce = imbued
-                        target.ce -=imbued
-    #endregion
+                        target.ce -= imbued
+#endregion
 
 #region attack vow distribution
     # Calculate base damage distribution
@@ -86,15 +85,13 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     # Calculate soul damage
     soul_damage = {}
     defense_soul = {}
-    
     if soul:
         for part, percent in damage_distribution.items():
             soul_damage[part] = soul * percent // 100
-    
+
     if defense.soul:
         for part, percent in damage_distribution.items():
             defense_soul[part] = defense.soul * percent // 100
-    
     #endregion
     
     total_hp = 0
@@ -103,17 +100,14 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     for bodypart in target.bodyparts.keys():
         print("Pre damage check body: " + str(target.bodyparts[bodypart].__dict__))
         bp = target.bodyparts[bodypart]
-
         # Get the damage amount for this part
         part_damage = damage_amounts.get(bp.name, 0)
-        
         #region dead bodypart
         if bp.hp <= 0:
             # If part is already disabled, redistribute its damage among other parts
             still_active = [p for p in target.bodyparts.values() if p.hp > 0 and p.name != bp.name]
-            if still_active:
+            if len(still_active) > 0:
                 extra_per_part = part_damage // len(still_active)
-
                 for active_part in still_active:
                      damage_amounts[active_part.name] += extra_per_part
                 # print(f"{bp.name} is disabled, its {part_damage} damage redistributed")
@@ -140,7 +134,6 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
                 print(f"{bp.name} took {max(part_soul_dmg - part_def_soul, 0)} soul damage reducing their max hp to {bp.max_hp}")
                 if bp.max_hp < bp.hp:
                     bp.hp = bp.max_hp
-            
             print(f"{bp.name} taking {reduced_dmg} damage")
             print(f"Remaining ce {bp.ce}")
         #endregion
@@ -168,7 +161,8 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     target.max_hp = total_maxhp
     print("Total hp left: " + str(total_hp))
     print("Total maxhp left: " + str(total_maxhp))    
-    return target.hp, target.max_hp
+    results = ("hit", dmg, target.hp <=0, target.max_hp <=0)
+    return results
     #endregion
 
 # region get move
@@ -670,8 +664,12 @@ def barrier_checks(target, attack, dmg, defense, defense_strength,):
             return ("hit", dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
+# region Tech Vows
+
+#endregion
+
 #region Battle Checks
-def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=None):      
+def battle_checks(player, target, attack_str, defense_str, targets=None, tech_vow=None):      
         tools=None
         target_tools=None
         attack = attack_verify(player, target, attack_str)
