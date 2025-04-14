@@ -1,7 +1,7 @@
 from techniques import Techniques
 from random import randint
 
-# region ### Auspicious Beasts Summon
+# region Auspicious Beasts Summon
 auspicious_beasts_summon={
 "Auspicious Beasts Summon" :
      [
@@ -48,7 +48,7 @@ auspicious_beasts_summon={
                             act_cost=30,
                             act_body=("Full"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=700,
                             type="dodge"
                          ),
@@ -70,10 +70,9 @@ auspicious_beasts_summon={
      ],
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### BIRD MANIP
-
+# region Bird Manipulation
 bird_manip = {
      "Bird Manipulation" : 
      [
@@ -132,7 +131,7 @@ bird_manip = {
                          act_cost=50,
                          act_body=("Head", "left arm", "right arm"),
                          aoe=3,
-                         strength=0,
+                         strength=100,
                          speed=100,
                          type="dodge"
                          ),
@@ -140,11 +139,11 @@ bird_manip = {
                     Techniques(
                          name="Birds Eye",
                          level=2,
-                         act_speed=20,
+                         act_speed=5,
                          act_cost=10,
                          act_body=("head"),
                          aoe=5,
-                         strength=0,
+                         strength=100,
                          speed=500,
                          buff=("speed", 550),
                          type="dodge"
@@ -155,9 +154,9 @@ bird_manip = {
      ],
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### BLOOD MANIP
+# region Blood Manipulation
 blood_manip= {
     "Blood Manipulation" : 
           [
@@ -242,9 +241,9 @@ blood_manip= {
           ], 
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### Body Hop
+# region Body Hop
 body_hop={
      
 "Body Hop" :
@@ -305,9 +304,9 @@ body_hop={
      ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### BOOGIE WOOGIE
+# region Boogie Woogie
 boogie_woogie = {
 
 "Boogie Woogie" : 
@@ -368,7 +367,7 @@ boogie_woogie = {
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=5,
-                              strength=0,
+                              strength=100,
                               speed=2000,
                               type="dodge"
                               ),
@@ -380,7 +379,7 @@ boogie_woogie = {
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=2000,
                               type="reflect"
                               ),
@@ -392,7 +391,7 @@ boogie_woogie = {
                               act_cost=100,
                               act_body=("Head", "Torso"),
                               aoe=5,
-                              strength=0,
+                              strength=100,
                               speed=5000,
                               type="dodge"
                               )
@@ -402,10 +401,9 @@ boogie_woogie = {
 
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### Cursed Energy Discharge
-
+# region Cursed Energy Discharge
 ce_discharge={
      
 "Cursed Energy Discharge" :
@@ -448,10 +446,9 @@ ce_discharge={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### COMEDIAN
-
+# region Comedian
 comedian={
 "Comedian" : 
      [
@@ -562,7 +559,7 @@ comedian={
                               act_cost=10,
                               act_body=("full"),
                               aoe=2,
-                              strength=0,
+                              strength=100,
                               speed=900,
                               type="dodge"
                               ),
@@ -586,10 +583,9 @@ comedian={
 
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### CONSTRUCTION
-
+# region Construction
 construction={
      "Construction": [
           {
@@ -732,10 +728,9 @@ construction={
 "Rarity" : 15, 
 "Six Eyes" : False
 }
+# endregion
 
-
-# region ### COPY
-
+# region Copy
 copy={ # change to be like cursed spirit manipulation?
      "Copy" : [
           {
@@ -848,10 +843,9 @@ copy={ # change to be like cursed spirit manipulation?
 
 "Six Eyes" : False
 }
+# endregion
 
-
-# region ### CURSED SPEECH
-
+# region Cursed Speech
 cursed_speech={
      "Cursed Speech" :
      [
@@ -941,9 +935,9 @@ cursed_speech={
      ],
      "Rarity" : 50
 }
+# endregion
 
-
-# region ### Cursed Spirit Manipulation
+# region Cursed Spirit Manipulation
 cursed_spirit_manip={
      "Cursed Spirit Manip" : [
           {
@@ -985,12 +979,10 @@ cursed_spirit_manip={
      ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### Heavenly Restriction: Zero
-
+# region Heavenly Restriction: Zero
 hr_zero={
-      
 "Heavenly Restriction: Zero" : 
      [
           {
@@ -1004,7 +996,7 @@ hr_zero={
                               act_cost=1,  # Updated act_cost to 1
                               act_body=("Left Arm", "Right Arm"),
                               aoe=3,
-                              strength=0,
+                              strength=100,
                               speed=1200,
                               type="melee"
                          ),
@@ -1060,7 +1052,7 @@ hr_zero={
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1200,
                               type="dodge"
                          ),
@@ -1073,7 +1065,7 @@ hr_zero={
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1200,
                               type="counter"
                          ),
@@ -1086,7 +1078,7 @@ hr_zero={
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1500,
                               type="dodge"
                          )
@@ -1096,10 +1088,9 @@ hr_zero={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Ice Manipulation
-
+# region Ice Manipulation
 ice_manip={
      
 "Ice Manipulation" :
@@ -1224,10 +1215,9 @@ ice_manip={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Idle Transfiguration
-
+# region Idle Transfiguration
 idle_transfig={
      
 "Idle Transfiguration" :
@@ -1316,7 +1306,7 @@ idle_transfig={
                             act_cost=80,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=800,
                             type="dodge"
                             ),
@@ -1360,10 +1350,9 @@ idle_transfig={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Limitless
-
+# region Limitless
 limitless={
 "Limitless" :
      [
@@ -1459,7 +1448,7 @@ limitless={
                     Techniques(
                          name="Blue",
                          level=1,
-                         act_speed=4,
+                         act_speed=1,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
@@ -1481,7 +1470,7 @@ limitless={
                          type="counter"
                     ),
 
-               "Void Punch" : 
+               "Void Punch" : # add a sneaky red move to combo lol
                     Techniques(
                          name="Void Punch",
                          level=4,
@@ -1521,13 +1510,12 @@ limitless={
 "Rarity" : 3,
 "Six Eyes" : True
 }
+# endregion
 
-
-# region ### MBA
-
+# region Mythic Beast Amber
 mba={
      
-"Mythic Beast Amber" : # add self_dmg in checks
+"Mythic Beast Amber" :
      [
           {
                "Attack" : 
@@ -1545,7 +1533,7 @@ mba={
                             type="melee"
                         ),
 
-                    "Lighting Rod" : # requires cursed tool - add in checks
+                    "Lightning Rod" :
                         Techniques(
                             name="Lightning Rod",
                             level=3,
@@ -1587,7 +1575,7 @@ mba={
                             act_cost=10,
                             act_body=("Full"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=900,
                             type="dodge"
                         ),
@@ -1610,10 +1598,9 @@ mba={
 "Rarity" : 7,
 "Activated" : False
 }
+# endregion
 
-
-# region ### Projection Sorcery
-
+# region Projection Sorcery
 projection_sorcery={
      
 "Projection Sorcery" :
@@ -1649,7 +1636,7 @@ projection_sorcery={
                             act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=1200,
                             type="dodge"
                         ),
@@ -1693,10 +1680,9 @@ projection_sorcery={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### Shrine
-
+# region Shrine
 shrine={
 
 "Shrine" :
@@ -1819,7 +1805,7 @@ shrine={
                               type="tank"
                          ),
 
-                    "Dismantle Glove" : # like parry but strong since it envelopes the hand
+                    "Dismantle Glove" : # like parry but strong since it envelops the hand
                          Techniques(
                               name="Dismantle Glove",
                               level=2,
@@ -1853,7 +1839,7 @@ shrine={
                               act_cost=50,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1500,
                               type="dodge"
                          )
@@ -1889,7 +1875,7 @@ shrine={
                               aoe=1,
                               strength=0,
                               speed=0,
-                              type="envelope",
+                              type="envelop",
                               negates=True
 
                          )
@@ -1899,9 +1885,9 @@ shrine={
 "Rarity" : 5,
 "Friction" : 0
 }
+# endregion
 
-
-# region ### Sky Manipulation
+# region Sky Manipulation
 
 sky_manip={
      
@@ -1964,41 +1950,19 @@ sky_manip={
                               act_cost=50,
                               act_body=("Full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=500,
                               type="dodge",
                               invisible=True
                          )
                }
           },
-          # {
-          # "Barrier" :
-          #      {
-          #          "Domain Expansion: " :
-          #                Techniques(
-          #                     name="Domain Expansion: ",
-          #                     level=4,
-          #                     act_speed=2,
-          #                     act_cost=300,
-          #                     act_body=("Left Arm", "Right Arm"),
-          #                     aoe=20,
-          #                     strength=1000,
-          #                     speed=9000,
-          #                     type="closed",
-          #                     intern_strength=30,
-          #                     extern_strength=30,
-          #                     sure_hit=True
-
-          #                )
-          #      }
-          # }
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Star Rage
-
+# region Star Rage
 star_rage={
      
 "Star Rage" :
@@ -2069,10 +2033,9 @@ star_rage={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Straw Doll
-
+# region Straw Doll
 straw_doll={
      
 "Straw Doll" :
@@ -2159,10 +2122,9 @@ straw_doll={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### Ten Shadows
-
+# region Ten Shadows
 ten_shadows={
      
 "Ten Shadows" :
@@ -2170,37 +2132,48 @@ ten_shadows={
             {
                "Attack" : 
                {
-                    "Divine Dog Claw" : 
+                   "White Dog" : 
+                   Techniques(
+                       name="White Dog",
+                       level=1,
+                       act_speed=2,
+                       act_cost=50,
+                       act_body=("Left Arm", "Right Arm"),
+                       aoe=1,
+                       strength=0,
+                       speed=0,
+                       type="summon"
+                   ),
+
+                    "Black Dog" : 
                          Techniques(
-                              name="Divine Dog Claw",
+                              name="Black Dog",
                               level=1,
                               act_speed=2,                              
-                              act_cost=20,
+                              act_cost=50,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=400,
-                              speed=600,
+                              strength=0,
+                              speed=0,
                               type="summon",
-                              summon={"Divine Dogs" : {"Speed" : 600, "strength" : 400, "Max CE" : 100}}
                          ),
                     
-                    "Nue Lightning" : 
+                    "Nue" : 
                          Techniques(
-                              name="Nue Lightning",
+                              name="Nue",
                               level=1,
                               act_speed=2,                            
                               act_cost=25,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=400,
-                              speed=700,
+                              strength=0,
+                              speed=0,
                               type="summon",
-                              summon={"Nue" : {"Speed" : 700, "strength" : 400, "Max CE" : 100}}
                          ),
 
-                    "Great Serpent Choke" : 
+                    "Great Serpent" : 
                          Techniques(
-                              name="Great Serpent Choke",
+                              name="Great Serpent",
                               level=1,
                               act_speed=2,                             
                               act_cost=30,
@@ -2212,9 +2185,9 @@ ten_shadows={
                               summon={"Great Serpent" : {"Speed" : 600, "strength" : 500, "Max CE" : 100}}
                          ),
                     
-                    "Max Elephant Drop" : 
+                    "Max Elephant" : 
                          Techniques(
-                              name="Max Elephant Drop",
+                              name="Max Elephant",
                               level=1,
                               act_speed=3,                              
                               act_cost=35,
@@ -2228,7 +2201,7 @@ ten_shadows={
 
                     "Piercing Ox" : 
                          Techniques(
-                              name="Piercing Bull Charge",
+                              name="Piercing Ox",
                               level=2,
                               act_speed=3,
                               act_cost=50,
@@ -2275,9 +2248,9 @@ ten_shadows={
                               summon={"Rabbit Escape" : {"Speed" : 800, "strength" : 100, "Max CE" : 100}}
                          ),
                     
-                    "Toad Tongue" : 
+                    "Toad" : 
                          Techniques(
-                              name="Toad Tongue",
+                              name="Toad",
                               level=1,
                               act_speed=1,
                               act_cost=30,
@@ -2326,10 +2299,9 @@ ten_shadows={
      ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### TEMPLATE
-
+# region TEMPLATE
 # _={
      
 # "" :
@@ -2345,7 +2317,7 @@ ten_shadows={
 #                               act_cost=1,
 #                               act_body=("Left Arm", "Right Arm"),
 #                               aoe=1,
-#                               strength=0,
+#                               strength=100,
 #                               speed=0,
 #                               type=""
 #                          )
@@ -2363,7 +2335,7 @@ ten_shadows={
 #                               act_cost=1,
 #                               act_body=("Left Arm", "Right Arm"),
 #                               aoe=1,
-#                               strength=0,
+#                               strength=100,
 #                               speed=0,
 #                               type=""
 #                          )
@@ -2372,7 +2344,7 @@ ten_shadows={
 #         ],
 # "Rarity" : 100
 # }
-
+# endregion
 
 technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, body_hop, boogie_woogie, 
                   ce_discharge, comedian, construction, copy, cursed_speech, 

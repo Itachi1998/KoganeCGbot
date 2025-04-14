@@ -1,6 +1,124 @@
 from techniques import Techniques
 
 enemy_tech = {
+#region Divine Dog
+"Divine Dog" : 
+[
+    {'Attack' : 
+     {
+         "Divine Claw" : 
+         Techniques(
+             name="Divine Claw",
+             level=1,
+             act_speed=1,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=200,
+             speed=400,
+             type="melee"
+         ),
+         "Divine Bite":
+         Techniques(
+             name="Divine Bite",
+             level=2,
+             act_speed=2,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=300,
+             speed=300,
+             type="melee"
+        )
+    }},
+    {"Defense" : {
+        "Divine Claw" : 
+         Techniques(
+             name="Divine Claw",
+             level=1,
+             act_speed=1,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=200,
+             speed=400,
+             type="counter"
+         ),
+         "Divine Bite":
+         Techniques(
+             name="Divine Bite",
+             level=2,
+             act_speed=2,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=300,
+             speed=300,
+             type="counter"
+        )  
+    }}
+],
+#endregion 
+#region Toad
+"Toad" : 
+[
+    {'Attack' : 
+     {
+         "Frog Grab" : 
+         Techniques(
+             name="Frog Grab",
+             level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="projectile",
+             stun=1
+         ),
+         "Frog Throw":
+         Techniques(
+             name="Frog Throw",
+             level=2,
+             act_speed=2,
+             act_cost=5,
+             act_body=("Head"),
+             aoe=2,
+             strength=200,
+             speed=600,
+             type="melee",
+             charge=True,
+         )
+     }},
+     {"Defense" : {
+       "Frog Grab" : 
+       Techniques(
+           name="Frog Grab",
+           level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="counter",
+             stun=1,
+       ),
+       "Frog Hop" : 
+       Techniques(
+           name="Frog Hop",
+           level=1,
+           act_speed=1,
+           act_cost=5,
+           act_body=("Head"),
+           aoe=1,
+           strength=10,
+           speed=600,
+           type="dodge",
+       )  }}
+],
+#endregion
 #region Mahoraga
     "Mahoraga" : 
     [
@@ -70,146 +188,81 @@ enemy_tech = {
                 duration=5
                 )
             } },],
-
-    "Anxious Ears" : 
-    [
-        {"Attack" : {
-            "Sound Clap" : Techniques(
-                name="Anxious Ears: Sound Clap",
-                level=1,
-                act_speed=1,
-                act_cost=50,
-                act_body=("head", "torso"),
-                aoe=1,
-                strength=300,
-                speed=300,
-                type="projectile",
-                stun=1
-            ),
-        }},
-        {"Defend" :
-         {
-             "Sound Reflection" : Techniques(
-                 "Anxious Ears: Sound Reflection",
-                 level=1,
-                    act_speed=1,
-                    act_cost=50,
-                    act_body=("head", "torso"),
-                    aoe=1,
-                    strength=300,
-                    speed=300,
-                    type="counter",
-                
-             )
-         } }
-    ],
-
-"Frog" : 
-[
-    {'Attack' : 
-     {
-         "Frog Grab" : 
-         Techniques(
-             name="Frog Grab",
-             level=1,
-             act_speed=1,
-             act_cost=30,
-             act_body=("Head"),
-             aoe=1,
-             strength=50,
-             speed=600,
-             type="projectile",
-             stun=1
-         ),
-         "Frog Throw":
-         Techniques(
-             name="Frog Throw",
-             level=2,
-             act_speed=2,
-             act_cost=5,
-             act_body=("Head"),
-             aoe=2,
-             strength=200,
-             speed=600,
-             type="melee",
-             charge=True,
-         )
-     }},
-     {"Defense" : {
-       "Frog Grab" : 
-       Techniques(
-           name="Frog Grab",
-           level=1,
-             act_speed=1,
-             act_cost=30,
-             act_body=("Head"),
-             aoe=1,
-             strength=50,
-             speed=600,
-             type="counter",
-             stun=1,
-       ),
-       "Frog Hop" : 
-       Techniques(
-           name="Frog Hop",
-           level=1,
-           act_speed=1,
-           act_cost=5,
-           act_body=("Head"),
-           aoe=1,
-           strength=10,
-           speed=600,
-           type="dodge",
-       )  }}
-],
 #endregion
-    # "Soul Curse" : # Femhito - special grade
-    # "Soul Curse" : # Femhito - special grade
-    #     [
-    #         {"Attack" :
-    #             { "Callous Formation" : Techniques(
-    #                 name="Soul Manipulation: Callous Formation",
-    #                 level=1,
-    #                 act_speed=2,
-    #                 act_cost=50,
-    #                 act_body=("hands", "legs"),
-    #                 aoe=1,
-    #                 strength=1000,
-    #                 speed=600,
-    #                 type="melee",
-    #                 soul=200,
-    #                 buff=(1, "strength", 200)
-    #                 ),
-    #             "Soul Transmute" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
-    #                 name="Soul Manipulation: Soul Transmute", 
-    #                 level=1,
-    #                 act_speed=1,
-    #                 act_cost=50,
-    #                 act_body=("full"),
-    #                 aoe=1,
-    #                 strength=600,
-    #                 speed=800,
-    #                 type="melee"
-    #                 )
-    #             }   
-    #         },
-    #         {"Defense" :
-    #             {"Body Morph" : Techniques( # will need sub techniques for separate abilities
-    #                 name="Soul Manipulation : Body Morph",
-    #                 level=1,
-    #                 act_speed=1,
-    #                 act_cost=50,
-    #                 act_body=("hands","legs", "torso", "head"),
-    #                 aoe=1,
-    #                 strength=600,
-    #                 speed=800,
-    #                 type="dodge" # wings/legs or smth
-    #                 )
-    #             }
-    #         }
-    #     ],
-        
+#region Finger Bearer
+    "Finger Bearer" : 
+    [
+        {
+            "Atttack" : 
+            {
+                    "Energy Blast" : Techniques(
+                        name="Energy Blast",
+                        level=1,
+                        act_speed=5,
+                        act_cost=50,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=500,
+                    speed=500,
+                    type="projectile",
+                    ),
+                    "Claw Cleave": Techniques(
+                    name="Claw Cleave",
+                    level=1,
+                    act_speed=1,
+                    act_cost=100,
+                    act_body=("hands"),
+                    aoe=1,
+                    strength=700,
+                    speed=700,
+                    type="melee",
+                    
+                    )  
+            }
+        },
+        {
+            "Defense" : 
+            {
+                "Energy Shield" : Techniques(
+                    name="Energy Shield",
+                    level=1,
+                    act_speed=5,
+                    act_cost=50,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=500,
+                    speed=500,
+                    type="tank",
+                ),
 
+                "Self Heal" : Techniques(
+                    name="Self Heal",
+                    level=1,
+                    act_speed=5,
+                    act_cost=50,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=500,
+                    speed=500,
+                    type="heal",
+                    
+                ),
+                "Body Flicker" : Techniques(
+                    name="Body Flicker",
+                    level=1,
+                    act_speed=5,
+                    act_cost=150,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=000,
+                    speed=200,
+                    type="dodge"
+                )
+
+            }
+        }
+    ],
+#endregion
 #region Orbmaster
     "Orbmaster" : # grade 1
         [    
@@ -289,6 +342,8 @@ enemy_tech = {
                 }
             }
         ],
+#endregion
+#region Stinkaspore
     "Stinkaspore" : # grade 2
         [
             {"Attack" : 
@@ -337,7 +392,6 @@ enemy_tech = {
             }
         ],
 #endregion
-    
 #region Primate
     "Primate" : 
         [ 
@@ -373,81 +427,8 @@ enemy_tech = {
                 }
             }
         ],
-        "Finger Bearer" : 
-        [
-            {
-                "Atttack" : 
-                {
-                      "Energy Blast" : Techniques(
-                          name="Energy Blast",
-                          level=1,
-                          act_speed=5,
-                          act_cost=50,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="projectile",
-                      ),
-                      "Claw Cleave": Techniques(
-                        name="Claw Cleave",
-                        level=1,
-                        act_speed=1,
-                        act_cost=100,
-                        act_body=("hands"),
-                        aoe=1,
-                        strength=700,
-                        speed=700,
-                        type="melee",
-                      
-                      )  
-                }
-            },
-            {
-                "Defense" : 
-                {
-                    "Energy Shield" : Techniques(
-                        name="Energy Shield",
-                        level=1,
-                        act_speed=5,
-                        act_cost=50,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="tank",
-                    ),
-
-                    "Self Heal" : Techniques(
-                        name="Self Heal",
-                        level=1,
-                        act_speed=5,
-                        act_cost=50,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="heal",
-                        
-                    ),
-                    "Body Flicker" : Techniques(
-                        name="Body Flicker",
-                        level=1,
-                        act_speed=5,
-                        act_cost=150,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=000,
-                        speed=200,
-                        type="dodge"
-                    )
-
-                }
-            }
-        ],
 #endregion
 #region Furrpede
-
         "Furrpede" : 
         [
             {"Attack" : {
@@ -488,11 +469,40 @@ enemy_tech = {
                 )
 
             }}
-        ]
-
+        ],
 #endregion
-
-
-
-
+#region Anxious Ears
+    "Anxious Ears" : 
+    [
+        {"Attack" : {
+            "Sound Clap" : Techniques(
+                name="Anxious Ears: Sound Clap",
+                level=1,
+                act_speed=1,
+                act_cost=50,
+                act_body=("head", "torso"),
+                aoe=1,
+                strength=300,
+                speed=300,
+                type="projectile",
+                stun=1
+            ),
+        }},
+        {"Defend" :
+         {
+             "Sound Reflection" : Techniques(
+                 "Anxious Ears: Sound Reflection",
+                 level=1,
+                    act_speed=1,
+                    act_cost=50,
+                    act_body=("head", "torso"),
+                    aoe=1,
+                    strength=300,
+                    speed=300,
+                    type="counter",
+                
+             )
+         } }
+    ],
+#endregion
 }

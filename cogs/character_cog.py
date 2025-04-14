@@ -2,7 +2,7 @@ import discord, os, random, techniques, db, game, player_tech
 from random import randint
 from game import Player
 from db import create_player, update_player, update_colony, create_technique
-from models.py import Technique
+from models import Technique
 from discord.ext import commands
 from discord import app_commands
 
@@ -292,11 +292,9 @@ class CreateButtons(discord.ui.View):
             'name': techname,
             'level': 1,
             'rct': False,
-            'six eyes': six_eyes,
-            'innate': True,
-            'user id': interaction.user.id,
-            'colony id': interaction.guild_id,
-            'binding vows': []
+            'six_eyes': six_eyes,
+            'user_id': interaction.user.id,
+            'colony_id': interaction.guild_id
         }
         
         
@@ -307,7 +305,7 @@ class CreateButtons(discord.ui.View):
             max_ce=ce,
             speed=speed,
             strength=strength,
-            technique=Technique(**tech_data),
+            technique=None,
             playerclass=pclass,
             colony=self.playerdict['colony'],
             xp=0,
@@ -319,7 +317,6 @@ class CreateButtons(discord.ui.View):
         created = create_player(user_id=interaction.user.id, colony_id=interaction.guild_id, 
                     playername=self.playerdict['name'], playerclass=pclass, technique=techname,
                     max_ce=ce, max_hp=hp, six_eyes=six_eyes)
-        
         
 
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}

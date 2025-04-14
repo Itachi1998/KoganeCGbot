@@ -1,8 +1,3 @@
-
-
-
-
-
 class Techniques():
     def __init__(self, 
                 name: str,  # "Blood Manipulation: Piercing Blood"
