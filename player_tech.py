@@ -1459,12 +1459,12 @@ limitless={
                     Techniques(
                          name="Blue",
                          level=1,
-                         act_speed=1,
+                         act_speed=4,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=100,
-                         speed=0,
+                         speed=1200,
                          type="dodge"
                     ),
 

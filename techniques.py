@@ -14,6 +14,7 @@ class Techniques():
                 strength: int, # strength of attack or defense (will be used in attack vs defense checks, can be changed with binding vows)
                 speed: int, # speed of attack or defense (will be used in attack vs defense checks, can be changed with binding vows) 
                 type: str,
+                vows: dict={"Focus Damage" : {}, "Defense Imbue" : {}, "Technique Vows" : {}}, 
                 soul: int=None,
                 buff: tuple=None,
                 debuff: tuple=None,
@@ -42,6 +43,7 @@ class Techniques():
             self.strength = strength
             self.speed = speed
             self.type=type
+            self.vows=vows
             self.soul=soul
             self.buff=buff
             self.debuff=debuff
@@ -81,7 +83,8 @@ class CursedTools():
                 stun: int = None,
                 negates: bool = None,
                 self_dmg: int = None,
-                charge: int =None
+                charge: int =None,
+                
                 ):
                 
             self.name=name

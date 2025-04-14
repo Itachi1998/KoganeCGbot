@@ -76,7 +76,7 @@ class Battle(commands.Cog):
 
     @commands.hybrid_command(name="pve",with_app_command=True)
     async def pve(self, ctx):
-        embed = 
+        pass
 
 
 
