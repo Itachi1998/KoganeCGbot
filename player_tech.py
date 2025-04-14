@@ -48,7 +48,7 @@ auspicious_beasts_summon={
                             act_cost=30,
                             act_body=("Full"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=700,
                             type="dodge"
                          ),
@@ -132,7 +132,7 @@ bird_manip = {
                          act_cost=50,
                          act_body=("Head", "left arm", "right arm"),
                          aoe=3,
-                         strength=0,
+                         strength=100,
                          speed=100,
                          type="dodge"
                          ),
@@ -144,7 +144,7 @@ bird_manip = {
                          act_cost=10,
                          act_body=("head"),
                          aoe=5,
-                         strength=0,
+                         strength=100,
                          speed=500,
                          buff=("speed", 550),
                          type="dodge"
@@ -368,7 +368,7 @@ boogie_woogie = {
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=5,
-                              strength=0,
+                              strength=100,
                               speed=2000,
                               type="dodge"
                               ),
@@ -380,7 +380,7 @@ boogie_woogie = {
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=2000,
                               type="reflect"
                               ),
@@ -392,7 +392,7 @@ boogie_woogie = {
                               act_cost=100,
                               act_body=("Head", "Torso"),
                               aoe=5,
-                              strength=0,
+                              strength=100,
                               speed=5000,
                               type="dodge"
                               )
@@ -562,7 +562,7 @@ comedian={
                               act_cost=10,
                               act_body=("full"),
                               aoe=2,
-                              strength=0,
+                              strength=100,
                               speed=900,
                               type="dodge"
                               ),
@@ -1004,7 +1004,7 @@ hr_zero={
                               act_cost=1,  # Updated act_cost to 1
                               act_body=("Left Arm", "Right Arm"),
                               aoe=3,
-                              strength=0,
+                              strength=100,
                               speed=1200,
                               type="melee"
                          ),
@@ -1060,7 +1060,7 @@ hr_zero={
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1200,
                               type="dodge"
                          ),
@@ -1073,7 +1073,7 @@ hr_zero={
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1200,
                               type="counter"
                          ),
@@ -1086,7 +1086,7 @@ hr_zero={
                               act_cost=1,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1500,
                               type="dodge"
                          )
@@ -1316,7 +1316,7 @@ idle_transfig={
                             act_cost=80,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=800,
                             type="dodge"
                             ),
@@ -1459,7 +1459,7 @@ limitless={
                     Techniques(
                          name="Blue",
                          level=1,
-                         act_speed=4,
+                         act_speed=1,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
@@ -1587,7 +1587,7 @@ mba={
                             act_cost=10,
                             act_body=("Full"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=900,
                             type="dodge"
                         ),
@@ -1649,7 +1649,7 @@ projection_sorcery={
                             act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=0,
+                            strength=100,
                             speed=1200,
                             type="dodge"
                         ),
@@ -1853,7 +1853,7 @@ shrine={
                               act_cost=50,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1500,
                               type="dodge"
                          )
@@ -1964,7 +1964,7 @@ sky_manip={
                               act_cost=50,
                               act_body=("Full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=500,
                               type="dodge",
                               invisible=True
@@ -2345,7 +2345,7 @@ ten_shadows={
 #                               act_cost=1,
 #                               act_body=("Left Arm", "Right Arm"),
 #                               aoe=1,
-#                               strength=0,
+#                               strength=100,
 #                               speed=0,
 #                               type=""
 #                          )
@@ -2363,7 +2363,7 @@ ten_shadows={
 #                               act_cost=1,
 #                               act_body=("Left Arm", "Right Arm"),
 #                               aoe=1,
-#                               strength=0,
+#                               strength=100,
 #                               speed=0,
 #                               type=""
 #                          )

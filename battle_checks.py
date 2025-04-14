@@ -4,9 +4,13 @@ from player_tech import technique_list
 from enemy_techs import enemy_tech
 from cursed_tools import cursed_tools
 
+
 #region damage target
 def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     # Handle defense vows (CE distribution for protection)
+    
+    
+    
     #region defense vow distribution
     if def_vow:
         #check if total defense vow ce is greater than target ce
@@ -167,8 +171,6 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     # print("Total hp left: " + str(total_hp))
     # print("Total maxhp left: " + str(total_maxhp))    
     return target.hp, target.max_hp
-
-
 #endregion
 
 
@@ -605,7 +607,6 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
                 target.max_hp -= attack.soul
             return ("dodge", reduced_dmg, target.hp<=0, target.max_hp<=0)
 
-        
 
 # region domain clash
 def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
@@ -833,7 +834,7 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
     # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
-            results = dodge_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
+            results = dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
             return results   
         
     # domain defense check
