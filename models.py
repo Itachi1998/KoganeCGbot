@@ -47,7 +47,6 @@ class Player(Base):
 
 class Colony(Base):
     __tablename__ = "colony"
-    
     id: Mapped[int] = mapped_column(primary_key=True)
     colony_name: Mapped[str]
     colony_id: Mapped[int] = mapped_column(unique=True)

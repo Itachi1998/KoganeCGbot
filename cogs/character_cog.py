@@ -159,7 +159,7 @@ def get_random_curse_tech(techlist=cursed_techs):
 
 class Character_cog(commands.Cog):
 
-    welcstr="# Welcome to Kogane Culling Games!"
+    welcstr="# Welcome to the Discord Culling Game "
     def __init__(self, bot):
         self.bot = bot
         self.playerdict={}
@@ -171,7 +171,7 @@ class Character_cog(commands.Cog):
             name=ctx.author.display_name
         self.playerdict["colony"] = ctx.guild.id
         self.playerdict["name"] = name
-        embed= discord.Embed(title="Create a character", description= self.welcstr +
+        embed= discord.Embed(title="Create a character", description= self.welcstr + name +
         "\n## The first step in creating your character, here you can spin for your player Class, Technique, and Cursed Energy!"
         "\n* You may only spin once for each attribute!")
         embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
@@ -225,9 +225,6 @@ class Character_cog(commands.Cog):
             return
 
 
-
-
-
 class CreateButtons(discord.ui.View):
     def __init__(self, embed, bot, playerdict: dict, user: int, timeout=30):
         super().__init__(timeout=timeout)
@@ -279,9 +276,11 @@ class CreateButtons(discord.ui.View):
             print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
             ce += 1000
             hp += 100
+
         if techname == "Shrine":
             ce += 2000
             hp += 200
+
         if 'zero' in techname.lower():
             strength += 200
             speed += 200

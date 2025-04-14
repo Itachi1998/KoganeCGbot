@@ -55,7 +55,6 @@ def start_pve_embed(lobby):
             max_level=0
             #populate the teamA and teamB list with players
             for p in lobby.players:
-                
                 player_from_db = read_player(p)
                 real_player = Player(**player_from_db.__dict__)
 
@@ -64,7 +63,6 @@ def start_pve_embed(lobby):
                         if real_player.user_id in lobby.teamA['players']:
                             lobby.teamA['players'].remove(real_player.user_id)
                             lobby.add_teamA(real_player)
-
                         elif real_player.user_id in lobby.teamB:
                             lobby.teamB['players'].remove(real_player.user_id)
                             lobby.add_teamB(real_player)
