@@ -249,7 +249,6 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
             return new_defense
 #endregion
         
-
 # region verify checks
 def attack_verify(player, target, attack):
     attack = get_move(player, attack=attack)
@@ -397,7 +396,6 @@ def negate_check(target, dmg, defense_strength, attack=None, defense=None):
         print(f"{target.name} negates {dmg} damage from {attack.name}") 
         return ("negate", dmg, target.hp<=0, target.max_hp <=0)
 # endregion
-
 
 # region joke check
 # def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=None, attack=None):
@@ -585,17 +583,16 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
 #endregion
 
 # region Summon Check
-def summon_check(name, type):
+def summon_check(name, type, tamed=False):
     print("Summoning " + name)
     if type == "shikigami":
         shikigami = [s for s in shikigami_list if s.name == name]
         shiki = shikigami[0]
+        shiki.tamed = tamed
         if shikigami:
             print(f"Summoned: {type} {name}\nStrength: {shiki.strength}\nSpeed: {shiki.speed}\nTechnique: {shiki.technique}")
             return shiki
-        
         return None
-
 #endregion
 
 # region domain clash

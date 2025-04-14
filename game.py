@@ -369,8 +369,6 @@ class Player(Actor):
 
 #endregion
         
-## SUBCLASSES OF ENEMY CLASS
-
 #region Bugfly
 class Grade4_Bugfly(Enemy):
     def __init__(self):

@@ -428,7 +428,6 @@ class Lobby_Cog(commands.Cog):
             else:
                 await thread.send("You are not the owner")
 
-
     @lobby.command(name='leave')
     async def kick(self, ctx):
         lobby = self.lobbies[ctx.channel.id]["Lobby"]
