@@ -185,7 +185,7 @@ class Character_cog(commands.Cog):
     async def delete(self, ctx):
         existing_player = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
         if existing_player:
-            playername = existing_player.player_name
+            playername = existing_player.name
             db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
             db.delete_technique(user_id=ctx.author.id, colony_id=ctx.guild.id)
             embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
@@ -194,27 +194,34 @@ class Character_cog(commands.Cog):
 
     @commands.hybrid_command(name="profile", description="View your player profile, or someone else's!")
     async def profile(self, ctx, user: discord.User=None):
+
         if not user:
             user = ctx.author
         player = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
+        if not player:
+            await ctx.send("Player does not exist")
+            return
         colony = db.read_colony(colony_id=ctx.guild.id)
+        techname = player.techniques[0].name if player.techniques and len(player.techniques) > 0 else "None"
         if not colony:
             await ctx.send("You are not in a colony")
             return
-        
         if player.colony_id != colony.colony_id:
             await ctx.send("You are not in this colony")
             return
-        
+
         if player:
-            embed = discord.Embed(title=f"{player.player_name}'s Profile", description="# Player Profile\n## Colony: `" + colony.colony_name + "`\n## Player Info")
-            embed.add_field(name="Level", value=player.player_level, inline=True)
-            embed.add_field(name="HP", value="`" + str(player.hp) + "`", inline=True)
-            embed.add_field(name="CE", value="`" + str(player.ce) + "`", inline=True)
-            embed.add_field(name="XP", value="`" + str(player.xp) + "`", inline=True)
-            embed.add_field(name="SKP", value="`" + str(player.skp) + "`", inline=True)
+            embed = discord.Embed(title=f"{player.name}'s Profile", description="# Player Profile\n## Colony: `" + colony.colony_name + "`\n## Player Info")
+            embed.add_field(name="Level", value="`" + str(player.level) + "`", inline=True)
+            embed.add_field(name="Health", value="`" + str(player.hp) + "`", inline=True)
+            embed.add_field(name="Energy", value="`" + str(player.ce) + "`", inline=True)
+            embed.add_field(name="Strength", value=f"`{player.strength}`", inline=True)
+            embed.add_field(name="Speed", value=f"`{player.speed}`", inline=True)
+            embed.add_field(name="Game Points")
+            embed.add_field(name="Exp", value="`" + str(player.xp) + "`", inline=True)
+            embed.add_field(name="Skillpoints", value="`" + str(player.skp) + "`", inline=True)
             embed.add_field(name="Class", value="`" + player.playerclass + "`", inline=True)
-            embed.add_field(name="Technique", value="`" + player.technique + "`", inline=True)
+            embed.add_field(name="Technique", value="`" + techname + "`", inline=True)
             embed.add_field(name="Status", value="`Active`", inline=True)
             embed.set_author(name=user.display_name, url=user.avatar, icon_url=user.avatar)
             embed.set_thumbnail(url=self.bot.user.avatar)
@@ -223,6 +230,7 @@ class Character_cog(commands.Cog):
         else:
             await ctx.send("Player does not exist in this colony")
             return
+
 
 
 class CreateButtons(discord.ui.View):
@@ -287,16 +295,6 @@ class CreateButtons(discord.ui.View):
             hp += 300
             ce = 0
 
-        tech_data = {
-            'name': techname,
-            'level': 1,
-            'rct': False,
-            'six_eyes': six_eyes,
-            'user_id': interaction.user.id,
-            'colony_id': interaction.guild_id
-        }
-        
-        
         player = Player(
             name=self.playerdict['name'],
             level=0,
@@ -304,26 +302,20 @@ class CreateButtons(discord.ui.View):
             max_ce=ce,
             speed=speed,
             strength=strength,
-            technique=None,
+            technique=techname,
             playerclass=pclass,
             colony=self.playerdict['colony'],
             xp=0,
             cgp=0,
             skp=0,
             user_id=interaction.user.id,
-            six_eyes=six_eyes
+            six_eyes=six_eyes,
         )
-        created = create_player(user_id=interaction.user.id, colony_id=interaction.guild_id, 
-                    playername=self.playerdict['name'], playerclass=pclass, technique=techname,
-                    max_ce=ce, max_hp=hp, six_eyes=six_eyes)
-        
-
+        created = create_player(player)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
-
         tech_rarity = next((k for k in rarity.keys() if rarity[k] == tech['Rarity']), None)
         class_rarity = next((k for k in rarity.keys() if rarity[k] == classes[pclass]), None)
         if created:
-            create_technique(tech_data=tech_data)
             print ("Created technique: " + techname)
             self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {techname}\n* HP: {hp}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}\n* Technique Rarity: {tech_rarity}\n* Class Rarity: {class_rarity}"
             self.embed.set_footer(text="Use /profile to view your character!", icon_url=self.bot.user.avatar)
@@ -331,7 +323,6 @@ class CreateButtons(discord.ui.View):
             return
         else:
             await interaction.response.send_message("You cannot create more than one player per colony")
-
 
 async def setup(bot):
     await bot.add_cog(Character_cog(bot))

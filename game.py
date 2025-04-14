@@ -171,7 +171,7 @@ class Player(Actor):
           self.speed=speed
           self.technique=technique
           self.colony=colony
-          self.userd_id=user_id
+          self.user_id=user_id
           self.equipped=equipped
           self.inventory=inventory
           self.summons=summons

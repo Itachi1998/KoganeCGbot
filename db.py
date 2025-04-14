@@ -1,9 +1,8 @@
 import os, json, models
-from models import Player, Colony, Technique, Enemy, Base
+from models import Player, Colony, Technique, Enemy
 from datetime import datetime
-from typing import List, Optional
-from sqlalchemy import create_engine, String, JSON
-from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, joinedload
 
 from dotenv import find_dotenv, load_dotenv
 dotfile = find_dotenv('.env')
@@ -16,50 +15,53 @@ engine = create_engine(db_url)
 
 # Update create_player function
 
-def create_player(user_id: int, colony_id: int, playername: str,
-                  playerclass: str, technique: str, max_ce: int, max_hp: int, six_eyes: bool):
+def create_player(player):
     with Session(engine) as session:
-        existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
+        existing_colony = session.query(Colony).filter_by(colony_id=player.colony).first()
         if not existing_colony:
             return False
         
-        existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
+        existing_player = session.query(Player).filter_by(user_id=player.user_id, colony_id=player.colony).first()
         if existing_player:
             return False
         
         new_player = Player(
-            user_id=user_id,
-            colony_id=colony_id,
-            date_entered=datetime.now().astimezone().strftime("%c"),
-            player_level=1,
-            player_name=playername,
-            player_equipped=[],
-            player_inventory=[],
-            max_hp=max_hp,
-            hp=max_hp,
-            max_ce=max_ce,
-            ce=max_ce,
-            cgp=0,
-            xp=0,
-            skp=0,
-            playerclass=playerclass,
-            six_eyes=six_eyes
+            user_id=player.user_id,
+            colony_id=player.colony,
+            entered=datetime.now().astimezone().strftime("%c"),
+            level=1,
+            name=player.name,
+            equipped=player.equipped,
+            inventory=player.inventory,
+            max_hp=player.max_hp,
+            hp=player.hp,
+            max_ce=player.max_ce,
+            ce=player.ce,
+            speed=player.speed,
+            strength=player.strength,
+            cgp=player.cgp,
+            xp=player.xp,
+            skp=player.skp,
+            playerclass=player.playerclass,
+            six_eyes=player.six_eyes
+        )
+        new_tech = Technique(name=player.technique,
+            level=1,
+            rct=False,
+            six_eyes=player.six_eyes,
+            user_id=player.user_id,
+            colony_id=player.colony,
+            player=new_player
         )
         
         session.add(new_player)
+        session.add(new_tech)
         # Flush to get the ID for the new player
         session.flush()
-        new_tech = Technique(
-            name=technique,
-            level=1,
-            rct=False,
-            six_eyes=six_eyes,
-            user_id=user_id,
-            colony_id=colony_id,
-            player=new_player,
-        )
         
-        session.add(new_tech)
+        # No need to manually append since we already set player=new_player
+        # new_player.techniques.append(new_tech)
+        
         session.commit()
         return True
 
@@ -123,10 +125,10 @@ def delete_player(colony_id, user_id):
         existing_player = session.query(Player).filter_by(colony_id=colony_id, user_id=user_id).first()
         if not existing_player:
             raise ValueError("Player does not exist")
-        
         # No need to manually update colony.players, SQLAlchemy relationships handle this
         session.delete(existing_player)
         session.commit()
+        session.close()
         return True
 
 def create_technique(tech_data):
@@ -140,10 +142,8 @@ def create_technique(tech_data):
                     level=tech_data['level'],
                     rct=tech_data['rct'],
                     six_eyes=tech_data['six eyes'],
-                    innate=tech_data['innate'],
                     user_id=tech_data['user id'],
-                    colony_id=tech_data['colony id'],
-                    binding_vows=tech_data['binding vows']
+                    colony_id=tech_data['colony id']
                 )
                 session.add(technique)
                 session.commit()
@@ -203,7 +203,9 @@ def read_colony(colony_id: int, value=None):
 
 def read_player(user_id: int, colony_id: int, value=None):
         with Session(engine) as session:
-                existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
+                existing_player = session.query(Player).options(
+            joinedload(Player.techniques)
+        ).filter_by(user_id=user_id, colony_id=colony_id).first()
                 if existing_player:
                         if value:
                             session.close()
@@ -211,6 +213,7 @@ def read_player(user_id: int, colony_id: int, value=None):
                         else:
                             session.close()
                             return existing_player
+                            
                 else:
                         session.close()
                         return False
@@ -279,22 +282,16 @@ def update_enemy(colony_id, value=None):
             session.commit()
             session.close()
             return True
-
-def delete_player(colony_id, user_id):
+def delete_colony_player(colony_id, user_id):
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(colony_id=colony_id, user_id=user_id).first()
-        existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
         if not existing_player:
             raise ValueError("Player does not exist")
-        existing_players = existing_colony.players
-        if user_id in existing_players:
-            existing_players.remove(int(user_id))
-            update_colony(colony_id, {"players": existing_players})
-        else:
-            raise ValueError("User ID not found in the players list")
+        
         session.delete(existing_player)
         session.commit()
         session.close()
+        return True
         return True
     
 def delete_enemy(colony_id, user_id):
