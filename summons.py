@@ -1,8 +1,7 @@
 from game import Enemy, human_body_parts
- 
- 
-class Mahoraga(Enemy):
 
+#region Mahoraga
+class Mahoraga(Enemy):
     def __init__(self):
         super().__init__(
             name="Mahoraga",
@@ -21,5 +20,7 @@ class Mahoraga(Enemy):
             bodyparts=human_body_parts
         )
 
-
 mahoraga = Mahoraga()
+#endregion
+
+shikigami_list = [mahoraga]

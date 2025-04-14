@@ -49,17 +49,14 @@ def create_player(user_id: int, colony_id: int, playername: str,
         session.add(new_player)
         # Flush to get the ID for the new player
         session.flush()
-        
         new_tech = Technique(
             name=technique,
             level=1,
             rct=False,
             six_eyes=six_eyes,
-            innate=True,
             user_id=user_id,
             colony_id=colony_id,
             player=new_player,
-            binding_vows=[]
         )
         
         session.add(new_tech)
@@ -134,7 +131,7 @@ def delete_player(colony_id, user_id):
 
 def create_technique(tech_data):
         with Session(engine) as session:
-            existing_tech = session.query(Technique).filter_by(name=tech_data["name"], user_id=tech_data["user id"]).first()
+            existing_tech = session.query(Technique).filter_by(name=tech_data["name"], user_id=tech_data["user_id"]).first()
             if existing_tech:
                 raise ValueError("Technique already exists")
             else:

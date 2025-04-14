@@ -37,9 +37,8 @@ class Player(Base):
     xp: Mapped[int]
     skp: Mapped[int]
     # Remove the technique as foreign key and replace with relationship
-    techniques: Mapped[List["Technique"]] = relationship("Technique", back_populates="player", cascade="all, delete-orphan")
+    techniques: Mapped[Optional[List["Technique"]]] = relationship("Technique", back_populates="player", cascade="all, delete-orphan")
     playerclass: Mapped[str] = mapped_column(String(100))
-    killed: Mapped[Optional[List]] = mapped_column(JSON)
     six_eyes: Mapped[bool]
     __table_args__ = (
         UniqueConstraint('user_id', 'colony_id', name='uq_user_colony'),
@@ -72,7 +71,6 @@ class Technique(Base):
     level: Mapped[int]
     rct: Mapped[bool]
     six_eyes: Mapped[bool]
-    innate: Mapped[bool]
     user_id: Mapped[int] = mapped_column(ForeignKey("player.user_id"))
     player: Mapped["Player"] = relationship("Player", back_populates="techniques")
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))

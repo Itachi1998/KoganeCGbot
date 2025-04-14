@@ -103,7 +103,8 @@ enemy_tech = {
              )
          } }
     ],
-
+#endregion
+#region Frog
 "Frog" : 
 [
     {'Attack' : 
@@ -167,9 +168,9 @@ enemy_tech = {
 "Divine Dog" : 
 [
     {'Attack' : 
-     {
-         "Claw" : 
-         Techniques(
+        {
+        "Claw" : 
+        Techniques(
              name="Claw",
              level=1,
              act_speed=1,
@@ -181,21 +182,22 @@ enemy_tech = {
              type="melee",
              stun=1
          ),
-         "Frog Throw":
-         Techniques(
-             name="Frog Throw",
-             level=2,
-             act_speed=2,
-             act_cost=5,
-             act_body=("Head"),
-             aoe=2,
-             strength=200,
-             speed=600,
-             type="melee",
-             charge=True,
-         )
-     }},
-     {"Defense" : {
+        "Frog Throw":
+        Techniques(
+            name="Frog Throw",
+            level=2,
+            act_speed=2,
+            act_cost=5,
+            act_body=("Head"),
+            aoe=2,
+            strength=200,
+            speed=600,
+            type="melee",
+            charge=True,
+            )
+        }
+    },
+    {"Defense" : {
        "Frog Grab" : 
        Techniques(
            name="Frog Grab",
@@ -209,8 +211,8 @@ enemy_tech = {
              type="counter",
              stun=1,
        ),
-       "Frog Hop" : 
-       Techniques(
+        "Frog Hop" : 
+        Techniques(
            name="Frog Hop",
            level=1,
            act_speed=1,
@@ -220,54 +222,11 @@ enemy_tech = {
            strength=10,
            speed=600,
            type="dodge",
-       )  }}
+        )  
+        }
+    }
+],
 #endregion
-    # "Soul Curse" : # Femhito - special grade
-    # "Soul Curse" : # Femhito - special grade
-    #     [
-    #         {"Attack" :
-    #             { "Callous Formation" : Techniques(
-    #                 name="Soul Manipulation: Callous Formation",
-    #                 level=1,
-    #                 act_speed=2,
-    #                 act_cost=50,
-    #                 act_body=("hands", "legs"),
-    #                 aoe=1,
-    #                 strength=1000,
-    #                 speed=600,
-    #                 type="melee",
-    #                 soul=200,
-    #                 buff=(1, "strength", 200)
-    #                 ),
-    #             "Soul Transmute" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
-    #                 name="Soul Manipulation: Soul Transmute", 
-    #                 level=1,
-    #                 act_speed=1,
-    #                 act_cost=50,
-    #                 act_body=("full"),
-    #                 aoe=1,
-    #                 strength=600,
-    #                 speed=800,
-    #                 type="melee"
-    #                 )
-    #             }   
-    #         },
-    #         {"Defense" :
-    #             {"Body Morph" : Techniques( # will need sub techniques for separate abilities
-    #                 name="Soul Manipulation : Body Morph",
-    #                 level=1,
-    #                 act_speed=1,
-    #                 act_cost=50,
-    #                 act_body=("hands","legs", "torso", "head"),
-    #                 aoe=1,
-    #                 strength=600,
-    #                 speed=800,
-    #                 type="dodge" # wings/legs or smth
-    #                 )
-    #             }
-    #         }
-    #     ],
-        
 
 #region Orbmaster
     "Orbmaster" : # grade 1
@@ -396,7 +355,6 @@ enemy_tech = {
             }
         ],
 #endregion
-    
 #region Primate
     "Primate" : 
         [ 
@@ -550,8 +508,4 @@ enemy_tech = {
         ]
 
 #endregion
-
-
-
-
 }

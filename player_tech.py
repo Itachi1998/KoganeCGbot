@@ -2132,32 +2132,43 @@ ten_shadows={
             {
                "Attack" : 
                {
-                    "Divine Dog Claw" : 
+                   "White Dog" : 
+                   Techniques(
+                       name="White Dog",
+                       level=1,
+                       act_speed=2,
+                       act_cost=50,
+                       act_body=("Left Arm", "Right Arm"),
+                       aoe=1,
+                       strength=0,
+                       speed=0,
+                       type="summon"
+                   ),
+
+                    "Black Dog" : 
                          Techniques(
-                              name="Divine Dog Claw",
+                              name="Black Dog",
                               level=1,
                               act_speed=2,                              
-                              act_cost=20,
+                              act_cost=50,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=400,
-                              speed=600,
+                              strength=0,
+                              speed=0,
                               type="summon",
-                              summon={"Divine Dogs" : {"Speed" : 600, "strength" : 400, "Max CE" : 100}}
                          ),
                     
-                    "Nue Lightning" : 
+                    "Nue" : 
                          Techniques(
-                              name="Nue Lightning",
+                              name="Nue",
                               level=1,
                               act_speed=2,                            
                               act_cost=25,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=400,
-                              speed=700,
+                              strength=0,
+                              speed=0,
                               type="summon",
-                              summon={"Nue" : {"Speed" : 700, "strength" : 400, "Max CE" : 100}}
                          ),
 
                     "Great Serpent Choke" : 
