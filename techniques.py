@@ -9,27 +9,26 @@ class Techniques():
                 strength: int, # strength of attack or defense (will be used in attack vs defense checks, can be changed with binding vows)
                 speed: int, # speed of attack or defense (will be used in attack vs defense checks, can be changed with binding vows) 
                 type: str,
+                vows: dict={"Focus Damage" : {}, "Defense Imbue" : {}, "Technique Vows" : {}}, 
                 soul: int=None,
                 buff: tuple=None,
                 debuff: tuple=None,
                 poison: tuple = None,
                 stun: int = None,
                 stack: int = None, # Projection Techniques
-                charge: bool=None, # Kashimo or Nobara techniques
+                charge: bool=False, # Kashimo or Nobara techniques
                 summon: dict=None,
                 sure_hit=None,
-                target: str=None,
                 negates: bool =None,
                 duration: int=None,
                 cooldown: int=None,
-                invisable: bool=None,
+                invisible: bool=None,
                 self_dmg: int=None,
                 self_heal: int=None,
                 heal: dict=None,
                 extern_strength: int=None,
                 intern_strength: int=None
                 ):
-            
             self.name = name
             self.level=level
             self.act_speed = act_speed
@@ -39,6 +38,7 @@ class Techniques():
             self.strength = strength
             self.speed = speed
             self.type=type
+            self.vows=vows
             self.soul=soul
             self.buff=buff
             self.debuff=debuff
@@ -48,11 +48,10 @@ class Techniques():
             self.charge=charge
             self.summon=summon
             self.sure_hit=sure_hit
-            self.target=target
             self.negates=negates
             self.duration=duration
             self.cooldown=cooldown
-            self.invisable=invisable
+            self.invisible=invisible
             self.self_dmg=self_dmg
             self.self_heal=self_heal
             self.heal=heal
@@ -72,7 +71,6 @@ class CursedTools():
                 strength: int,
                 speed: int,
                 type: str,
-                target=None,
                 soul: bool = None,
                 buff: tuple = None,
                 debuff: tuple = None,
@@ -80,7 +78,8 @@ class CursedTools():
                 stun: int = None,
                 negates: bool = None,
                 self_dmg: int = None,
-                charge: int =None
+                charge: int =None,
+                
                 ):
                 
             self.name=name
@@ -93,7 +92,6 @@ class CursedTools():
             self.strength=strength
             self.speed=speed
             self.type=type
-            self.target=target
             self.soul=soul
             self.buff=buff
             self.debuff=debuff

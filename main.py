@@ -1,11 +1,10 @@
 import discord, os, dotenv, traceback, db, enemy_techs
+from dotenv import load_dotenv
 from db import read_player, read_enemy, read_colony # Import general dependencies 
 from game import Player, Enemy
-from dotenv import load_dotenv, find_dotenv
 from discord.ext import commands
 
-dotenv = find_dotenv()
-load_dotenv(dotenv)
+load_dotenv
 log_channel = os.getenv('LOGCHANNEL')
 token = os.getenv('TOKEN')
 intents = discord.Intents.default()

@@ -870,7 +870,7 @@ cursed_speech={
                               speed=900,
                               type="projectile",
                               stun=3,
-                              invisable=True
+                              invisible=True
                          ),
 
                     "Blast Away" :
@@ -884,7 +884,7 @@ cursed_speech={
                               strength=800,
                               speed=800,
                               type="projectile",
-                              invisable=True
+                              invisible=True
                          ),
 
                     "Plummet" : 
@@ -899,7 +899,7 @@ cursed_speech={
                               speed=1000,
                               type="projectile",
                               stun=1,
-                              invisable=True
+                              invisible=True
                          )
                }
           },
@@ -919,7 +919,7 @@ cursed_speech={
                               speed=900,
                               type="counter",
                               stun=3,
-                              invisable=True
+                              invisible=True
                          ),
                     
                     "Blast Away" :
@@ -933,7 +933,7 @@ cursed_speech={
                               strength=800,
                               speed=800,
                               type="counter",
-                              invisable=True
+                              invisible=True
                          )
                     
                 }
@@ -1459,11 +1459,11 @@ limitless={
                     Techniques(
                          name="Blue",
                          level=1,
-                         act_speed=1,
+                         act_speed=4,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=0,
+                         strength=100,
                          speed=1200,
                          type="dodge"
                     ),
@@ -1716,7 +1716,7 @@ shrine={
                               strength=500,
                               speed=1200,
                               type="projectile",
-                              invisable=True
+                              invisible=True
                          ),
 
                     "Multi Dismantle" :
@@ -1730,7 +1730,7 @@ shrine={
                               strength=500,
                               speed=1200,
                               type="projectile",
-                              invisable=True
+                              invisible=True
                          ),
 
                     "Cleave" :
@@ -1757,7 +1757,7 @@ shrine={
                               strength=1000,
                               speed=1200,
                               type="projectile",
-                              invisable=True
+                              invisible=True
                          ),
                     
                     "Furnace" :
@@ -1784,7 +1784,7 @@ shrine={
                               strength=9000,
                               speed=1200,
                               type="projectile",
-                              invisable=True,
+                              invisible=True,
                               negates=True
                          )
                }
@@ -1923,7 +1923,7 @@ sky_manip={
                               type="projectile"
                          ),
 
-                    "Cloaked Attack" : # cloaks entire body to become virtually invisable
+                    "Cloaked Attack" : # cloaks entire body to become virtually invisible
                          Techniques(
                               name="Cloaked Attack",
                               level=3,
@@ -1934,7 +1934,7 @@ sky_manip={
                               strength=500,
                               speed=500,
                               type="melee",
-                              invisable=True
+                              invisible=True
                          )
                }
           },
@@ -1956,9 +1956,9 @@ sky_manip={
                               type="reflect"
                          ),
 
-                    "Cloaked Dodge" :
+                    "Cloak Dodge" :
                          Techniques(
-                              name="Cloaked dodge",
+                              name="Cloak Dodge",
                               level=3,
                               act_speed=1,                              
                               act_cost=50,
@@ -1967,7 +1967,7 @@ sky_manip={
                               strength=0,
                               speed=500,
                               type="dodge",
-                              invisable=True
+                              invisible=True
                          )
                }
           },
