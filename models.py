@@ -30,9 +30,7 @@ class Player(Base):
     equipped: Mapped[List] = mapped_column(JSON)
     inventory: Mapped[List] = mapped_column(JSON)
     max_hp: Mapped[int]
-    hp: Mapped[int]
     max_ce: Mapped[int]
-    ce: Mapped[int]
     cgp: Mapped[int]
     xp: Mapped[int]
     skp: Mapped[int]
@@ -98,9 +96,7 @@ class Enemy(Base):
     name: Mapped[str]
     level: Mapped[int]
     max_hp: Mapped[int]
-    hp: Mapped[int]
     max_ce: Mapped[int]
-    ce: Mapped[int]
     cgp: Mapped[int]
     xp: Mapped[int]
     strength: Mapped[int]

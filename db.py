@@ -34,9 +34,7 @@ def create_player(player):
             equipped=player.equipped,
             inventory=player.inventory,
             max_hp=player.max_hp,
-            hp=player.hp,
             max_ce=player.max_ce,
-            ce=player.ce,
             speed=player.speed,
             strength=player.strength,
             cgp=player.cgp,
@@ -100,9 +98,7 @@ def create_colony(colony_data, enemies):
                 name=e.name,
                 level=e.level,
                 max_hp=e.max_hp,
-                hp=e.hp,
                 max_ce=e.max_ce,
-                ce=e.ce,
                 strength=e.strength,
                 speed=e.speed,
                 technique=e.technique,
@@ -189,49 +185,54 @@ def read_technique(techname: str, colony_id: int, user_id: int, value=None):
 
 def read_colony(colony_id: int, value=None):
             with Session(engine) as session:
-                     existing_colony = session.query(Colony).filter_by(colony_id=colony_id).first()
-                     if existing_colony:
+                    existing_colony = session.query(Colony).options(
+                        joinedload(Colony.enemies)
+                    ).filter_by(colony_id=colony_id).first()
+                    if existing_colony:
                          if value:
                                session.close()
                                return {column.name: getattr(existing_colony, column.name) for column in existing_colony.__table__.columns}
                          else:
                                session.close()
                                return existing_colony
-                     else:
+                    else:
                          session.close()
                          return False
 
-def read_player(user_id: int, colony_id: int, value=None):
-        with Session(engine) as session:
-                existing_player = session.query(Player).options(
+def read_player(user_id, colony_id, value=None):
+    with Session(engine) as session:
+        existing_player = session.query(Player).options(
             joinedload(Player.techniques)
         ).filter_by(user_id=user_id, colony_id=colony_id).first()
-                if existing_player:
-                        if value:
-                            session.close()
-                            return {column.name: getattr(existing_player, column.name) for column in existing_player.__table__.columns}
-                        else:
-                            session.close()
-                            return existing_player
-                            
-                else:
-                        session.close()
-                        return False
+        
+        if existing_player:
+            # Always return a dictionary of the player data
+            player_dict = {column.name: getattr(existing_player, column.name) for column in existing_player.__table__.columns}
+            # Also include techniques data
+            player_dict['techniques'] = []
+            for tech in existing_player.techniques:
+                tech_dict = {column.name: getattr(tech, column.name) for column in tech.__table__.columns}
+                player_dict['techniques'].append(tech_dict)
+            del player_dict['id']
+            session.close()
+            return player_dict
+        else:
+            session.close()
+            return False
                 
-def read_enemy(colony_id: int, value=None):
-        with Session(engine) as session:
-                existing_enemy = session.query(Enemy).filter_by(colony_id=colony_id).first()
-                if existing_enemy:
-                        for e in Enemy.__subclasses__:
-                             if e.name == existing_enemy.name:
-                                  enemy=Enemy(**existing_enemy)
-                                  return enemy
-                        else:
-                            session.close()
-                            return True
-                else:
-                        session.close()
-                        return False
+def read_enemy(colony_id: int, enemy_name: str):
+    with Session(engine) as session:
+        query = session.query(Enemy).filter_by(colony_id=colony_id, name=enemy_name)
+        existing_enemy = query.first()
+        if existing_enemy:
+            enemy_dict = {column.name: getattr(existing_enemy, column.name) 
+                         for column in existing_enemy.__table__.columns}
+            del enemy_dict['id']
+            session.close()
+            return enemy_dict
+        else:
+            session.close()
+            return False
 
 def update_player(user_id, colony_id, value=None):
     with Session(engine) as session:

@@ -83,7 +83,7 @@ class Actor:
 # region Enemy
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass,  xp: int, cgp: int, 
-                stack=0, colony:int = None, defense: dict=None,
+                stack=0, colony_id:int = None, defense: dict=None,
                 inventory: list = None, equipped: list = None,
                 poison: tuple=None,charge: int=None, 
                 stun: tuple=None,  hi: bool=None, hr: str=None,
@@ -100,7 +100,7 @@ class Enemy(Actor):
                 speed, 
                 technique, 
                 playerclass, 
-                colony)
+                colony_id)
             inventory = {"Tools" : {}, "Technique Inv" : {}, "Summon" : {}}
             self.name = name
             self.ce = max_ce
@@ -112,7 +112,7 @@ class Enemy(Actor):
             self.speed = speed
             self.technique = technique
             self.playerclass = playerclass
-            self.colony = colony
+            self.colony = colony_id
             self.inventory = inventory 
             self.equipped = equipped 
             self.xp = xp
@@ -145,15 +145,18 @@ class Enemy(Actor):
 # region Player
 class Player(Actor):
     level_cap = 200
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
+    def __init__(self, 
+                    name, entered, level, max_hp, max_ce, strength, 
+                    speed, technique, playerclass, colony_id, 
                     xp: int, cgp: int, skp: int, user_id: int,
-                    stack=0, imbue=0,defense: dict={"Default" : "ce"}, inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
+                    stack=0, imbue=0,
+                    defense: dict={"Default" : "ce"}, 
+                    inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
                     equipped: list=None,
                     summons: list=None,
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
-                    rct: tuple=None, #(1, 2, 3) 
                     heal: dict=None,
                     self_heal: int=None,
                     killcount: list=None, 
@@ -162,7 +165,8 @@ class Player(Actor):
                     soul: dict=None, six_eyes: bool=None,
                     killed: str=None):
         try:          
-          super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
+          super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony_id)
+          self.entered=entered
           self.defense = defense
           self.xp = xp
           self.cgp = cgp
@@ -170,7 +174,7 @@ class Player(Actor):
           self.strength=strength
           self.speed=speed
           self.technique=technique
-          self.colony=colony
+          self.colony=colony_id
           self.user_id=user_id
           self.equipped=equipped
           self.inventory=inventory
@@ -181,7 +185,6 @@ class Player(Actor):
           self.stunned=stunned
           self.hr=hr
           self.hi =hi
-          self.rct = rct
           self.heal = heal
           self.self_heal = self_heal
           self.killcount=killcount

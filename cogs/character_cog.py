@@ -1,4 +1,4 @@
-import discord, os, random, techniques, db, game, player_tech
+import discord, os, random, techniques, db, game, player_tech, datetime
 from random import randint
 from game import Player
 from db import create_player, update_player, update_colony, create_technique
@@ -197,27 +197,36 @@ class Character_cog(commands.Cog):
 
         if not user:
             user = ctx.author
-        player = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
+
+        player_dict = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
+        technique = player_dict['techniques'][0]
+        techname = technique['name']
+        del player_dict['techniques']
+        player_dict['technique'] = techname
+        player = Player(**player_dict)
+
         if not player:
             await ctx.send("Player does not exist")
             return
+    
         colony = db.read_colony(colony_id=ctx.guild.id)
-        techname = player.techniques[0].name if player.techniques and len(player.techniques) > 0 else "None"
+        
         if not colony:
             await ctx.send("You are not in a colony")
             return
-        if player.colony_id != colony.colony_id:
+        
+        if player.colony != colony.colony_id:
             await ctx.send("You are not in this colony")
             return
-
+        
         if player:
-            embed = discord.Embed(title=f"{player.name}'s Profile", description="# Player Profile\n## Colony: `" + colony.colony_name + "`\n## Player Info")
+            embed = discord.Embed(title=f"Player Profile", description="## Colony: `" + colony.colony_name + "`\n## " + player.name)
             embed.add_field(name="Level", value="`" + str(player.level) + "`", inline=True)
             embed.add_field(name="Health", value="`" + str(player.hp) + "`", inline=True)
             embed.add_field(name="Energy", value="`" + str(player.ce) + "`", inline=True)
             embed.add_field(name="Strength", value=f"`{player.strength}`", inline=True)
             embed.add_field(name="Speed", value=f"`{player.speed}`", inline=True)
-            embed.add_field(name="Game Points")
+            embed.add_field(name="Game Points", value=f"`{player.cgp}`")
             embed.add_field(name="Exp", value="`" + str(player.xp) + "`", inline=True)
             embed.add_field(name="Skillpoints", value="`" + str(player.skp) + "`", inline=True)
             embed.add_field(name="Class", value="`" + player.playerclass + "`", inline=True)
@@ -294,7 +303,7 @@ class CreateButtons(discord.ui.View):
             speed += 200
             hp += 300
             ce = 0
-
+        entered = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         player = Player(
             name=self.playerdict['name'],
             level=0,
@@ -304,12 +313,13 @@ class CreateButtons(discord.ui.View):
             strength=strength,
             technique=techname,
             playerclass=pclass,
-            colony=self.playerdict['colony'],
+            colony_id=self.playerdict['colony'],
             xp=0,
             cgp=0,
             skp=0,
             user_id=interaction.user.id,
             six_eyes=six_eyes,
+            entered=entered
         )
         created = create_player(player)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
