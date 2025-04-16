@@ -195,7 +195,7 @@ class Player(Actor):
           self.killed=killed
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
-              "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce),
+              "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce*.1),
               "Left Arm": BodyPart(name='Left Arm', max_hp=self.max_hp * 10 // 100),
               "Right Arm": BodyPart(name='Right Arm', max_hp=self.max_hp * 10 // 100),
               "Left Leg": BodyPart(name='Left Leg', max_hp=self.max_hp * 10 // 100),

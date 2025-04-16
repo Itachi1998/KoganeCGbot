@@ -6,8 +6,10 @@ from enemy_techs import enemy_tech
 from cursed_tools import cursed_tools
 
 
-#region damage target
+#region Damage target
 def damage_target(target, defense, dmg, soul, def_vow=None, atk_vow=None):
+    initial_hp = target.hp # part of returning body_dmg
+
     # Handle defense vows (CE distribution for protection)
 #region defense vow distribution
     if def_vow:
@@ -92,9 +94,10 @@ def damage_target(target, defense, dmg, soul, def_vow=None, atk_vow=None):
         for part, percent in damage_distribution.items():
             soul_damage[part] = soul * percent // 100
     
-    if defense.soul:
-        for part, percent in damage_distribution.items():
-            defense_soul[part] = defense.soul * percent // 100
+    if type(defense) is not int:
+        if defense.soul:
+            for part, percent in damage_distribution.items():
+                defense_soul[part] = defense.soul * percent // 100
     
     #endregion
     
@@ -151,6 +154,7 @@ def damage_target(target, defense, dmg, soul, def_vow=None, atk_vow=None):
             # # If bodypart has no CE, apply damage directly
             # print(f"No CE on bodypart to absorb damage")
             bp.hp -= part_damage
+    
             if soul:
                 part_soul_dmg = soul_damage.get(bp.name, 0)
                 part_def_soul = defense_soul.get(bp.name, 0) if defense_soul else 0
@@ -167,9 +171,10 @@ def damage_target(target, defense, dmg, soul, def_vow=None, atk_vow=None):
         #endregion
     target.hp = total_hp
     target.max_hp = total_maxhp
+    body_dmg = initial_hp - total_hp # part of returning body_dmg
     print("Total hp left: " + str(total_hp))
     print("Total maxhp left: " + str(total_maxhp))    
-    return target.hp, target.max_hp
+    return target.hp, target.max_hp, body_dmg
     #endregion
 
 # region get move
@@ -428,9 +433,9 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
         defense.strength = 0
         target_hp = target.hp
         target_maxhp = target.max_hp
-        target_hp, target_maxhp = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
-        print(f"Attack negated {defense.name} dealing {dmg} dmg")
-        return ("hit", dmg, target_hp <= 0, target_maxhp <=0)
+        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
+        print(f"Attack negated {defense.name} dealing {body_dmg} dmg")
+        return ("hit", body_dmg, target_hp <= 0, target_maxhp <=0)
     
     if attack_negated:
         dmg = 0
@@ -446,20 +451,21 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
                     # 50 - 24
         total_dmg = dmg - reduction_multiplier
       
-        target_hp, target_maxhp = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
         print(f"{defense.name} was not able to activate in time to tank {attack.name}")
-        return ("hit", dmg, target_hp <= 0, target_maxhp <=0)
+        return ("hit", body_dmg, target_hp <= 0, target_maxhp <=0)
     
     else:
         print(f"dmg {dmg} defense {defense_strength}")
         total_dmg = max(dmg - defense_strength, 0)
         if total_dmg > 0:
-            target_hp, target_maxhp = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
         else:
             target_hp = target.hp
             target_maxhp = target.max_hp
-        print(f"{defense.name} was able to activate in time to tank {attack.name}. {total_dmg} damage dealt, {dmg - total_dmg} damage tanked")
-        return ("tank", total_dmg, target_hp <=0, target_maxhp <=0)
+            body_dmg = 0
+        print(f"{defense.name} was able to activate in time to tank {attack.name}. {body_dmg} damage dealt, {dmg - total_dmg} damage tanked")
+        return ("tank", body_dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
 # region counter check
@@ -471,14 +477,14 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
             print(f"{defense.name} negated {attack.name}")
             return ("hit", dmg, target_hp<=0, target_maxhp<=0)
         else:
-            target_hp, target_maxhp = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
+            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
             print(f"{defense.name} was hit by sure hit {attack.name}")
-            return ("hit", dmg, target_hp<=0, target_maxhp<=0)
+            return ("hit", body_dmg, target_hp<=0, target_maxhp<=0)
     
     if atk_invis:
-        target_hp, target_maxhp = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
+        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
         print(f"{defense.name} couldn't counter because {attack.name} was invisible")
-        return ("hit", dmg, target_hp<=0, target_maxhp<=0)
+        return ("hit", body_dmg, target_hp<=0, target_maxhp<=0)
     
     if targ_invis:
         dmg = 0
@@ -488,7 +494,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
     if attack_negated:
         dmg = 0
         print(f"{defense.name} negates {attack.name}. Effectively countered")
-        return ("negate", dmg, target.hp<=0, target.max_hp<=0)
+        #return ("negate", dmg, target.hp<=0, target.max_hp<=0)
 
     if defense.act_speed > attack.act_speed and dmg !=0:
         speed_diff = max(defense_speed - speed, 0)
@@ -499,9 +505,9 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
                     # 50 - 24
         total_dmg = dmg - reduction_multiplier
         
-        target_hp, target_maxhp = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
         print(f"{defense.name} was too slow to counter {attack.name}")
-        return ("hit", dmg, target_hp <=0, target_maxhp <=0)
+        return ("hit", body_dmg, target_hp <=0, target_maxhp <=0)
     
     if defense_negated:
         defense_strength = 0
@@ -518,10 +524,10 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
                 counter_dmg += item.strength
                 counter_soul = item.soul + defense.soul
                 print(f"{item.name} adds {item.strength} to counter damage")
-#region what to pass as defense here? needs to check defense.soul but defense is hitting the player/attacker
-        target_hp, target_maxhp = damage_target(target=player, defense=attack, dmg=counter_dmg, soul=counter_soul)
+
+        target_hp, target_maxhp, body_dmg = damage_target(target=player, defense=player.strength, dmg=counter_dmg, soul=counter_soul)
         print(f"{defense.name} was able to counter {attack.name} for {counter_dmg} damage")
-        return ("counter", counter_dmg, player.hp <=0, player.max_hp <=0)
+        return ("counter", body_dmg, player.hp <=0, player.max_hp <=0)
 # endregion
 
 
@@ -535,8 +541,8 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
 
     if attack.sure_hit:
             print(f"{defense.name} was hit by sure hit {attack.name}")
-            damage_target(target=target, dmg=dmg, soul=attack.soul, defense=defense)
-            return
+            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=reduced_dmg, soul=attack.soul)
+            return ("hit", body_dmg, target_hp<=0, target_maxhp <=0)
     
     if targ_invis:
         dmg = 0
@@ -553,7 +559,6 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
     
     else:
         dmg = max(dmg - defense_strength, 0)
-        print(f"Defense activaton speed: {defense.act_speed}\nAttack activation speed: {attack.act_speed}")
 
     if dmg == 0:
         print(f"{attack.name}'s damage is 0. Attack effectively dodged")
@@ -573,8 +578,9 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
         reduced_multiplier = speed_gap/attack_speed
                  # 50 - 24
         # print(f"Reduced multiplier: {reduced_multiplier}")
-        total_dmg = dmg - reduced_multiplier 
-        return damage_target(target=target, dmg=total_dmg, soul=attack.soul, defense=defense)
+        total_dmg = dmg - reduced_multiplier
+        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=reduced_dmg, soul=attack.soul)
+        return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
 
     else: 
         print(f"Defense activated before attack\nCalculating speed diff between {attack.name} and {defense.name}")
@@ -588,18 +594,18 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
             reduced_dmg = (dmg - defense_strength) // attack_speed
                             # 50 - 24
             total_dmg = (reduced_dmg * attack.level)
-            target_hp, target_maxhp= damage_target(target=target,defense=defense, dmg=total_dmg, soul=attack.soul)
+            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
             print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {total_dmg}")
-            return ("dodge", total_dmg, target_hp<=0, target_maxhp<=0)
+            return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
         
         else:
             reduced_dmg = dmg - defense_strength
-            target_hp, target_maxhp = damage_target(target=target,defense=defense, dmg=reduced_dmg, soul=attack.soul)
+            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=reduced_dmg, soul=attack.soul)
             print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {total_dmg}")
-            return ("dodge", reduced_dmg, target_hp<=0, target_maxhp<=0)
+            return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
 #endregion
 
-# region Summon Check
+# region summon check
 def summon_check(name, type, tamed=False):
     print("Summoning " + name)
     if type == "shikigami":
@@ -802,6 +808,9 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
             dmg = dmg + (speed * 2.4) 
             stack -= 1
             player.stack = stack
+        
+        # print other move stats
+        print(f"Defense activaton speed: {defense.act_speed}\nAttack activation speed: {attack.act_speed}")
         print(f"{attack.name}'s type is {attack.type}\n{defense.name}'s type is {defense.type}")
     
         # domain clash/attack check - if we don't have a separate domain clash func we can check for just tank/counter/dodge and melee/projectile then have an else for barrier checks
@@ -897,10 +906,10 @@ test_player3 = Player(
     imbue=0
 )
 
-test_player3.inventory['Technique Inv']['Charges'] = {"Gojo" : 1}
+#test_player3.inventory['Technique Inv']['Charges'] = {"Gojo" : 1}
 
 #summon_check("Nue", "shikigami")
-results = battle_checks(test_player1, test_player2, "World Cutting Slash", "Blue")
+results = battle_checks(test_player1, test_player2, "Dismantle", "Infinity")
 
 print(results)
 #endregion
