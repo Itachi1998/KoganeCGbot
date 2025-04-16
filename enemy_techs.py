@@ -89,7 +89,7 @@ enemy_tech = {
             strength=10,
             speed=500,
             type="dodge",
-            invisable=True
+            invisible=True
        )
      }}
 ],
