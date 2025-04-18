@@ -101,6 +101,7 @@ class Enemy(Actor):
                 technique, 
                 playerclass, 
                 colony_id)
+            
             inventory = {"Tools" : {}, "Technique Inv" : {}, "Summon" : {}}
             self.name = name
             self.ce = max_ce
@@ -291,16 +292,14 @@ class Player(Actor):
 
     def level_up(self, xp_needed):
 
-        if self.level >= self.level_cap:
+        if self.level >= self.level_cap: 
             self.level = self.level_cap
             self.save_to_db()
             return (False, self.level, self.xp) #if the player has reached the level cap, they will no longer level up, and will no longer gain skill points
 
         if self.xp >= xp_needed:
             while self.xp >= xp_needed:
-                    
                     self.level += 1 # If the players xp is greater than or equal to the xp needed to level up, they will level up
-
                     if self.level < 10: # If the players level is under 10, they will gain 2 skill points 
                         self.skp += 2
                     if self.level > 10: # If the players level is over 10, they will gain 4 skill points
@@ -312,8 +311,6 @@ class Player(Actor):
                     if self.level > 180: # If the players level is over 180, they will gain 10 skill points per level
                         self.skp += 10
                     
-                    
-
                     self.save_to_db()
                     xp_needed = self.ready_level_up()[1]
                 
@@ -387,7 +384,7 @@ class Grade4_Bugfly(Enemy):
              cgp=1, 
              technique="Bugfly", 
              playerclass="Curse", 
-             quantity=random.randrange(1, 8),
+             quantity=random.randrange(4, 8),
              bodyparts={
             "Head" : BodyPart(name="Head", max_hp=15, max_ce=20), 
         
@@ -416,7 +413,7 @@ class  Grade4_Floatjelly(Enemy):
              cgp=1, 
              technique="Floatjelly", 
              playerclass="Curse", 
-             quantity=random.randrange(1, 6), 
+             quantity=random.randrange(2, 6), 
              stun=1,
              bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
              timer=0,

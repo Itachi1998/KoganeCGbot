@@ -5,28 +5,11 @@ import random, traceback, game
 class Boogie_Woogie(Techniques):
     
   rarity = 50
-
-    
-  def __init__(self):
-      super().__init__(
-          "Boogie Woogie", 
-          1,
-          {"Clap": { "dmg": 50, "speed": 200, 'ct lvl':1, 'imbue cost' : 10}, 
-           'Vibraslap': {'dmg': 100, 'speed': 900, 'ct lvl':3, 'imbue cost' : 10}},
-          {"Defense Swap": {'def' : 10, 'speed': 500, 'dmg':5, 'stun': 1, 'ct lvl': 1, 'imbue cost' : 10}, 
+ 'stun': 1, 'ct lvl': 1, 'imbue cost' : 10}, 
            'Vibraslap Swap': {'def' : 10, "speed": 900, 'dmg': 5, 'stun': 1, 'ct lvl': 2 ,'imbue cost' : 10},
            'Fake Swap': {'def': 100, 'speed': 100, 'dmg': 5, 'ct lvl': 3, 'imbue cost' : 10},
            'Reversal': {'def': 200, 'speed': 900, 'dmg': 30, 'ct lvl': 4, 'imbue cost' : 25}, 
-           'CE' : {'def' : 10, 'speed' : 10, 'ct lvl' : 1, 'imbue cost' : 0}},  
-          0, 
-          20,
-          '<:boogiewoogie:1229457669392433356>')
-
-
-  def clap(self, player, targets):
-    if player.ce < self.ce_cost:
-            results = (0, 'NA ce', False, [])
-            targets = targets
+           'CE' : {'def' :          targets = targets
             return results, targets
 
 

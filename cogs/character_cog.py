@@ -306,7 +306,7 @@ class CreateButtons(discord.ui.View):
         entered = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         player = Player(
             name=self.playerdict['name'],
-            level=0,
+            level=1,
             max_hp=hp,
             max_ce=ce,
             speed=speed,

@@ -95,19 +95,12 @@ class Enemy(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     level: Mapped[int]
-    max_hp: Mapped[int]
-    max_ce: Mapped[int]
-    cgp: Mapped[int]
     xp: Mapped[int]
-    strength: Mapped[int]
-    speed: Mapped[int]
     technique: Mapped[str]
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
     colony: Mapped["Colony"] = relationship("Colony", back_populates="enemies")
-    playerclass: Mapped[str] = mapped_column(String(100))
     killed: Mapped[Optional[bool]]
     tamed: Mapped[Optional[int]]
-    bodyparts: Mapped[Optional[List]] = mapped_column(JSON)
    
 
 class ColonyLeaderboard(Base):
