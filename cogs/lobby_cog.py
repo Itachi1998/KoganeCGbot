@@ -49,11 +49,9 @@ def remove_name(text, name):
 
 
 def start_pve_embed(lobby, bot):
-
     # Create pve embed
     embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
     colony = read_colony(lobby.colony_id)
-
     # Populate the teamA and teamB list with players
     for p in lobby.players:
         player = read_player(p, lobby.colony_id)
@@ -73,7 +71,6 @@ def start_pve_embed(lobby, bot):
                     lobby.teamB['players'].remove(real_player.user_id)
                     lobby.add_teamB(real_player)
                 elif real_player.user_id not in lobby.teamB['players'] and real_player.user_id not in lobby.teamA['players']:
-
                     # Note: add_field should take a player object
                     lobby.add_field(real_player)
             else:
@@ -84,8 +81,7 @@ def start_pve_embed(lobby, bot):
     enemies = []
 
     if colony:
-        colony_enemies = colony.enemies
-        for e in colony_enemies:
+        for e in colony.enemies:
             if real_player.level >= e.level:
                 enemies.append(e)
     else:
@@ -95,26 +91,26 @@ def start_pve_embed(lobby, bot):
     print(f"Enemies: \n{enemies}")
 
     if enemies:  # Make sure there are enemies to choose from
+
         e_choice = random.choice(enemies)
         enemy = None
         for e  in Enemy.__subclasses__():
-            if e.name == e_choice.name:
-                enemy= e()
+            current_enemy = e()
+            if current_enemy.name == e_choice.name:
+                enemy = current_enemy
+                break
         enemy_list = [enemy]
         # Handle multiple enemy spawns if quantity is set
         if enemy.quantity and enemy.quantity > 1:
-                for e in range(enemy.quantity - 1):
+                for e in range(enemy.quantity):
                     enemy_clone = copy.deepcopy(enemy)
                     print(enemy.name + " was cloned")
                     enemy_list.append(enemy_clone)
 
-        if lobby.field:
-            for e in enemy_list:
+        for e in enemy_list:
                 lobby.add_field(e) 
-        else:
-            for p in enemy_list:
-                lobby.add_field(p)
     
+
     # Team display section
     if lobby.teamA and lobby.teamA['players']:
         teamname = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
@@ -230,12 +226,10 @@ class Lobby():
         return True
     
     def add_field(self, thing):
-        if thing.name in self.field.keys():
-            length = [k for k in self.field.keys() if k == thing.name]
-            index = len(length)
-            self.field[thing.name + " " + str(index + 1)] = thing 
-        else:
-            self.field[thing.name]= thing
+        if thing.name in self.field:
+            total_things = [k for k in self.field.keys() if thing.name in k]
+            thing.name = thing.name + " " + str(len(total_things) + 1)
+        self.field[thing.name] = thing
         return True
 
     def set_teamB_name(self, name):

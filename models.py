@@ -96,12 +96,11 @@ class Enemy(Base):
     name: Mapped[str]
     level: Mapped[int]
     xp: Mapped[int]
-    technique: Mapped[str]
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
     colony: Mapped["Colony"] = relationship("Colony", back_populates="enemies")
     killed: Mapped[Optional[bool]]
     tamed: Mapped[Optional[int]]
-   
+    killcount: Mapped[Optional[int]]
 
 class ColonyLeaderboard(Base):
     __tablename__ = "leaderboard"
@@ -111,6 +110,11 @@ class ColonyLeaderboard(Base):
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
     colony: Mapped[Colony] = relationship(Colony, back_populates=("leaderboard"))
     rank: Mapped[int]
+
+# class Inventory(Base):
+#     __tablename__ = "inventory"
+#     id: Mapped[int] = mapped_column(primary_key=True) 
+    
 Base.metadata.create_all(bind=engine)
 
 

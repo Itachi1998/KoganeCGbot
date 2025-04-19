@@ -151,7 +151,7 @@ class Player(Actor):
                     speed, technique, playerclass, colony_id, 
                     xp: int, cgp: int, skp: int, user_id: int,
                     stack=0, imbue=0,
-                    defense: dict={"Default" : "ce"}, 
+                    defense: str="CE", 
                     inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
                     equipped: list=None,
                     summons: list=None,

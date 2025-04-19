@@ -184,7 +184,7 @@ class Character_cog(commands.Cog):
     async def delete(self, ctx):
         existing_player = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
         if existing_player:
-            playername = existing_player.name
+            playername = existing_player['name']
             db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
             db.delete_technique(user_id=ctx.author.id, colony_id=ctx.guild.id)
             embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
@@ -288,7 +288,7 @@ class CreateButtons(discord.ui.View):
             hp += 300
             six_eyes=True
 
-        if any(keyword in techname.lower() for keyword in ['copy', 'shrine', 'limitless', 'star rage', 'cursed spirit']):
+        if any(keyword in techname.lower() for keyword in ['copy', 'shrine', 'limitless']):
             print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
             ce += 1000
             hp += 100

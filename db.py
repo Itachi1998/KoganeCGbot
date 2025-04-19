@@ -94,22 +94,13 @@ def create_colony(colony_data, enemies):
             if existing_enemy:
                 raise ValueError("Enemy already exists")
             
-            enemy = Enemy(
-                name=e.name,
-                level=e.level,
-                max_hp=e.max_hp,
-                max_ce=e.max_ce,
-                strength=e.strength,
-                speed=e.speed,
-                technique=e.technique,
-                colony_id=colony.colony_id,
-                colony=colony,
-                playerclass=e.playerclass,
-                tamed=e.tamed,
-                bodyparts=e.bodyparts,
-                cgp=e.cgp,
-                xp=e.xp
-            )
+            enemy = Enemy(name=e.name,
+                          level=e.level,
+                          xp=e.xp,
+                          colony_id=colony.colony_id,
+                          killed=False,
+                          killcount=0 
+                            )
             session.add(enemy)
         
         session.commit()
