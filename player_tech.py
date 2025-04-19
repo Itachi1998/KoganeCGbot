@@ -1765,6 +1765,18 @@ limitless={
           "Defend": 
           
           {
+              "CE" :
+                    Techniques(
+                         name="CE",
+                         level=1,
+                         act_speed=0,
+                         act_cost=0,
+                         act_body=("Full"),
+                         aoe=0,
+                         strength=0,
+                         speed=0,
+                         type="tank"
+                    ),
                "Infinity" :
                     Techniques(
                          name="Infinty",
@@ -2113,6 +2125,18 @@ shrine={
           {
                "Defend": 
                {
+                   "CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
                     "Cleave Spider Web" :
                          Techniques(
                               name="Cleave Spider Web",
@@ -2261,8 +2285,20 @@ sky_manip={
 
           {
                "Defend": 
+               {"CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
            
-               {
+               
                     "Redirect" : # redirects opponent attack back on themself
                          Techniques(
                               name="Redirect",
@@ -2350,6 +2386,18 @@ star_rage={
                "Defend": 
            
                {
+                   "CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
                     "It's Mass" : 
                          Techniques(
                               name="It's Mass",
@@ -2426,6 +2474,18 @@ straw_doll={
                "Defend": 
            
                {
+                   "CE" : 
+                         Techniques(
+                              name="CE",
+                              level=2,
+                              act_speed=2,                             
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=400,
+                              speed=800,
+                              type="counter"
+                         ),
                     "Squeaky Hammer" :
                          Techniques(
                               name="Squeaky Hammer",
@@ -2568,6 +2628,18 @@ ten_shadows={
                "Defend": 
            
                {
+                   "CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
                     "Rabbit Escape" : 
                          Techniques(
                               name="Rabbit Escape",

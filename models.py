@@ -24,19 +24,18 @@ class Player(Base):
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
     colony: Mapped["Colony"] = relationship("Colony", back_populates="players")
     rank: Mapped[Optional['ColonyLeaderboard']] = relationship("ColonyLeaderboard", back_populates="player", cascade="all, delete-orphan")
-    date_entered: Mapped[str]
-    player_level: Mapped[int]
-    player_name: Mapped[str] = mapped_column(String(200))
-    player_equipped: Mapped[List] = mapped_column(JSON)
-    player_inventory: Mapped[List] = mapped_column(JSON)
+    entered: Mapped[str]
+    level: Mapped[int]
+    name: Mapped[str] = mapped_column(String(200))
+    equipped: Mapped[List] = mapped_column(JSON)
+    inventory: Mapped[List] = mapped_column(JSON)
     max_hp: Mapped[int]
-    hp: Mapped[int]
     max_ce: Mapped[int]
-    ce: Mapped[int]
     cgp: Mapped[int]
     xp: Mapped[int]
     skp: Mapped[int]
-    # Remove the technique as foreign key and replace with relationship
+    strength: Mapped[int]
+    speed: Mapped[int]
     techniques: Mapped[Optional[List["Technique"]]] = relationship("Technique", back_populates="player", cascade="all, delete-orphan")
     playerclass: Mapped[str] = mapped_column(String(100))
     six_eyes: Mapped[bool]
@@ -44,10 +43,8 @@ class Player(Base):
         UniqueConstraint('user_id', 'colony_id', name='uq_user_colony'),
     )
 
-
 class Colony(Base):
     __tablename__ = "colony"
-    
     id: Mapped[int] = mapped_column(primary_key=True)
     colony_name: Mapped[str]
     colony_id: Mapped[int] = mapped_column(unique=True)
@@ -98,22 +95,12 @@ class Enemy(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     level: Mapped[int]
-    max_hp: Mapped[int]
-    hp: Mapped[int]
-    max_ce: Mapped[int]
-    ce: Mapped[int]
-    cgp: Mapped[int]
     xp: Mapped[int]
-    strength: Mapped[int]
-    speed: Mapped[int]
-    technique: Mapped[str]
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
     colony: Mapped["Colony"] = relationship("Colony", back_populates="enemies")
-    playerclass: Mapped[str] = mapped_column(String(100))
     killed: Mapped[Optional[bool]]
     tamed: Mapped[Optional[int]]
-    bodyparts: Mapped[Optional[List]] = mapped_column(JSON)
-   
+    killcount: Mapped[Optional[int]]
 
 class ColonyLeaderboard(Base):
     __tablename__ = "leaderboard"
@@ -123,6 +110,11 @@ class ColonyLeaderboard(Base):
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
     colony: Mapped[Colony] = relationship(Colony, back_populates=("leaderboard"))
     rank: Mapped[int]
+
+# class Inventory(Base):
+#     __tablename__ = "inventory"
+#     id: Mapped[int] = mapped_column(primary_key=True) 
+    
 Base.metadata.create_all(bind=engine)
 
 

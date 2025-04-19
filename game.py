@@ -101,6 +101,7 @@ class Enemy(Actor):
                 technique, 
                 playerclass, 
                 colony_id)
+
             inventory = {"Tools" : {}, "Technique Inv" : {}, "Summon" : {}}
             self.name = name
             self.ce = max_ce
@@ -112,7 +113,7 @@ class Enemy(Actor):
             self.speed = speed
             self.technique = technique
             self.playerclass = playerclass
-            self.colony_id = colony_id
+            self.colony = colony_id
             self.inventory = inventory 
             self.equipped = equipped 
             self.xp = xp
@@ -145,15 +146,20 @@ class Enemy(Actor):
 # region Player
 class Player(Actor):
     level_cap = 200
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony_id, 
+
+    def __init__(self, 
+                    name, entered, level, max_hp, max_ce, strength, 
+                    speed, technique, playerclass, colony_id, 
+
                     xp: int, cgp: int, skp: int, user_id: int,
-                    stack=0, imbue=0,defense: dict={"Default" : "ce"}, inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
+                    stack=0, imbue=0,
+                    defense: str="CE", 
+                    inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
                     equipped: list=None,
                     summons: list=None,
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
-                    rct: tuple=None, #(1, 2, 3) 
                     heal: dict=None,
                     self_heal: int=None,
                     killcount: list=None, 
@@ -163,6 +169,8 @@ class Player(Actor):
                     killed: str=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony_id)
+
+          self.entered=entered
           self.defense = defense
           self.xp = xp
           self.cgp = cgp
@@ -170,8 +178,10 @@ class Player(Actor):
           self.strength=strength
           self.speed=speed
           self.technique=technique
-          self.colony_id=colony_id
+          self.colony=colony_id
           self.userd_id=user_id
+          self.colony=colony_id
+          self.user_id=user_id
           self.equipped=equipped
           self.inventory=inventory
           self.summons=summons
@@ -181,7 +191,6 @@ class Player(Actor):
           self.stunned=stunned
           self.hr=hr
           self.hi =hi
-          self.rct = rct
           self.heal = heal
           self.self_heal = self_heal
           self.killcount=killcount
@@ -288,16 +297,14 @@ class Player(Actor):
 
     def level_up(self, xp_needed):
 
-        if self.level >= self.level_cap:
+        if self.level >= self.level_cap: 
             self.level = self.level_cap
             self.save_to_db()
             return (False, self.level, self.xp) #if the player has reached the level cap, they will no longer level up, and will no longer gain skill points
 
         if self.xp >= xp_needed:
             while self.xp >= xp_needed:
-                    
                     self.level += 1 # If the players xp is greater than or equal to the xp needed to level up, they will level up
-
                     if self.level < 10: # If the players level is under 10, they will gain 2 skill points 
                         self.skp += 2
                     if self.level > 10: # If the players level is over 10, they will gain 4 skill points
@@ -309,8 +316,6 @@ class Player(Actor):
                     if self.level > 180: # If the players level is over 180, they will gain 10 skill points per level
                         self.skp += 10
                     
-                    
-
                     self.save_to_db()
                     xp_needed = self.ready_level_up()[1]
                 
@@ -384,7 +389,7 @@ class Grade4_Bugfly(Enemy):
              cgp=1, 
              technique="Bugfly", 
              playerclass="Curse", 
-             quantity=random.randrange(1, 8),
+             quantity=random.randrange(4, 8),
              bodyparts={
             "Head" : BodyPart(name="Head", max_hp=15, max_ce=20), 
         
@@ -413,7 +418,7 @@ class  Grade4_Floatjelly(Enemy):
              cgp=1, 
              technique="Floatjelly", 
              playerclass="Curse", 
-             quantity=random.randrange(1, 6), 
+             quantity=random.randrange(2, 6), 
              stun=1,
              bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
              timer=0,
