@@ -981,6 +981,340 @@ cursed_spirit_manip={
 }
 # endregion
 
+# region Disaster Flames
+disaster_flames={
+     
+"Disaster Flames" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Fire Cannon" :
+                         Techniques(
+                              name="Fire Cannon",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=900,
+                              type="melee"
+                         ),
+
+                    "Inferno" :
+                         Techniques(
+                              name="Inferno",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=50,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=10,
+                              strength=200,
+                              speed=1000,
+                              type="projectile"
+                         ),
+                    
+                    "Fireflies" :
+                         Techniques(
+                              name="Fireflies",
+                              level=3,
+                              act_speed=2,                              
+                              act_cost=25,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=300,
+                              speed=1200,
+                              type="projectile"
+                         ),
+                    
+                    "Lava Eruption" :
+                         Techniques(
+                              name="Lava Eruption",
+                              level=3,
+                              act_speed=3,                              
+                              act_cost=100,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=1200,
+                              speed=800,
+                              type="projectile"
+                         ),
+                    
+                    "Lava Hands" :
+                         Techniques(
+                              name="Lava Hands",
+                              level=4,
+                              act_speed=3,                              
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1000,
+                              speed=1000,
+                              type="melee"
+                         ),
+                    
+                    "Maximum Meteor" :
+                         Techniques(
+                              name="Maximum Meteor",
+                              level=5,
+                              act_speed=5,                              
+                              act_cost=150,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=2000,
+                              speed=500,
+                              type="projectile"
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Fire Cannon" :
+                         Techniques(
+                              name="Fire Cannon",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=900,
+                              type="counter"
+                         ),
+
+                    "Inferno" :
+                         Techniques(
+                              name="Inferno",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=10,
+                              strength=200,
+                              speed=1000,
+                              type="counter"
+                         ),
+                    
+                     "Lava Surfboard" :
+                         Techniques(
+                              name="Lava Surfboard",
+                              level=4,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Full"),
+                              aoe=1,
+                              strength=100,
+                              speed=1000,
+                              type="dodge"
+                         )
+                }   
+                
+            }
+        ],
+"Rarity" : 10
+}
+# endregion
+
+# region Disaster Plants
+disaster_plants={
+     
+"Disaster Plants" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Cursed Buds" :
+                         Techniques(
+                              name="Cursed Buds",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=10,
+                              speed=800,
+                              type="projectile",
+                              debuff=('burn ce', 50) # burns 50 ce per round if it hits target (won't hit if target has no ce imbued or is hr zero)
+                         ), 
+
+                    "Roots" :
+                         Techniques(
+                              name="Roots",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=700,
+                              speed=700,
+                              type="projectile"
+                         ),
+
+                    "" :
+                         Techniques(
+                              name="",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=0,
+                              type=""
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Root Rider" :
+                         Techniques(
+                              name="Root Rider",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=700,
+                              type="dodge"
+                         ),
+
+                    "Roots" :
+                         Techniques(
+                              name="Roots",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=700,
+                              speed=700,
+                              type="counter"
+                         ),
+
+                    "" :
+                         Techniques(
+                              name="",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=0,
+                              type=""
+                         )
+                }
+            }
+        ],
+"Rarity" : 20
+}
+# endregion
+
+# region Disaster Tides
+disaster_tides={
+     
+"Disaster Tides" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Water Blast" :
+                         Techniques(
+                              name="Water Blast",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=100,
+                              speed=800,
+                              type="projectile",
+                              debuff=('slow', 50) # slows targets down by 50% with water for the following round or smth
+                         ), 
+
+                    "Water Vortex" : # twisting water attack
+                         Techniques(
+                              name="Water Vortex",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=800,
+                              type="melee"
+                         ),
+
+                    "" :
+                         Techniques(
+                              name="",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=0,
+                              type=""
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Water Blast" :
+                         Techniques(
+                              name="Water Blast",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=100,
+                              speed=800,
+                              type="counter",
+                              debuff=('slow', 50) # slows targets down by 50% with water for the following round or smth
+                         ), 
+
+                    "Water Vortex" : # twisting water attack
+                         Techniques(
+                              name="Water Vortex",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=800,
+                              type="counter"
+                         ),
+
+                    "Water Jets" :
+                         Techniques(
+                              name="Water Jets",
+                              level=3,
+                              act_speed=1,                              
+                              act_cost=10,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=800,
+                              type="dodge"
+                         )
+                }
+            }
+        ],
+"Rarity" : 20
+}
+# endregion
+
 # region Heavenly Restriction: Zero
 hr_zero={
 "Heavenly Restriction: Zero" : 
@@ -2418,8 +2752,9 @@ ten_shadows={
 # }
 # endregion
 
-technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, body_hop, boogie_woogie, 
-                  ce_discharge, comedian, construction, copy, cursed_speech, 
-                  cursed_spirit_manip, hr_zero,ice_manip, idle_transfig, limitless, 
-                  mba, projection_sorcery, shrine, sky_manip, star_rage, straw_doll, 
-                  ten_shadows]
+technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, 
+                  body_hop, boogie_woogie, ce_discharge, comedian, 
+                  construction, copy, cursed_speech, cursed_spirit_manip, 
+                  disaster_flames, disaster_plants, disaster_tides, hr_zero, 
+                  ice_manip, idle_transfig, limitless, mba, projection_sorcery, 
+                  shrine, sky_manip, star_rage, straw_doll, ten_shadows]

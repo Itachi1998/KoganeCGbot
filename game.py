@@ -60,7 +60,7 @@ class Actor:
             strength: int, 
             speed: int,
             technique: str, 
-            playerclass: str, colony
+            playerclass: str, colony_id
             ):
         self.name=name
         self.level=level
@@ -70,7 +70,7 @@ class Actor:
         self.speed=speed
         self.technique=technique
         self.playerclass=playerclass
-        self.colony=colony
+        self.colony_id=colony_id
         self.hp=max_hp
         self.ce=max_ce
 
@@ -101,7 +101,7 @@ class Enemy(Actor):
                 technique, 
                 playerclass, 
                 colony_id)
-            
+
             inventory = {"Tools" : {}, "Technique Inv" : {}, "Summon" : {}}
             self.name = name
             self.ce = max_ce
@@ -146,9 +146,11 @@ class Enemy(Actor):
 # region Player
 class Player(Actor):
     level_cap = 200
+
     def __init__(self, 
                     name, entered, level, max_hp, max_ce, strength, 
                     speed, technique, playerclass, colony_id, 
+
                     xp: int, cgp: int, skp: int, user_id: int,
                     stack=0, imbue=0,
                     defense: str="CE", 
@@ -167,6 +169,7 @@ class Player(Actor):
                     killed: str=None):
         try:          
           super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony_id)
+
           self.entered=entered
           self.defense = defense
           self.xp = xp
@@ -175,6 +178,8 @@ class Player(Actor):
           self.strength=strength
           self.speed=speed
           self.technique=technique
+          self.colony=colony_id
+          self.userd_id=user_id
           self.colony=colony_id
           self.user_id=user_id
           self.equipped=equipped
@@ -199,7 +204,7 @@ class Player(Actor):
           self.killed=killed
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
-              "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce*.1), #.1 ce for enforcement cap
+              "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce),
               "Left Arm": BodyPart(name='Left Arm', max_hp=self.max_hp * 10 // 100),
               "Right Arm": BodyPart(name='Right Arm', max_hp=self.max_hp * 10 // 100),
               "Left Leg": BodyPart(name='Left Leg', max_hp=self.max_hp * 10 // 100),

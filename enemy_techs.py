@@ -280,6 +280,112 @@ enemy_tech = {
      }}
 ],
 #endregion 
+#region Piercing Ox
+"Piercing Ox" : 
+[
+    {'Attack' : 
+     {
+        "Charge" : 
+         Techniques(
+            name="Charge",
+            level=1,
+            act_speed=3,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=1,
+            strength=1500,
+            speed=200,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+        "Charge" : 
+         Techniques(
+            name="Charge",
+            level=1,
+            act_speed=3,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=1,
+            strength=1500,
+            speed=200,
+            type="counter"
+         )
+     }}
+],
+#endregion
+#region Tiger Funeral
+# "Tiger Funeral" : 
+# [
+#     {'Attack' : 
+#      {
+#         "" : 
+#          Techniques(
+#             name="Water Flood",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Head"),
+#             aoe=1,
+#             strength=0,
+#             speed=0,
+#             type="melee"
+#          )
+#      }},
+#      {"Defense" : {
+#         "" : 
+#          Techniques(
+#             name="Water Flood",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Head"),
+#             aoe=1,
+#             strength=0,
+#             speed=0,
+#             type="melee"
+#          )
+#      }}
+# ],
+#endregion
+#region Round Deer
+"Round Deer" : 
+[
+    {'Attack' : 
+     {
+        "Positive Energy" : 
+         Techniques(
+            name="Positive Energy",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=10,
+            strength=100,
+            speed=1000,
+            type="projectile",
+            buff=("rct", 10), # heals 10% of player/teams hp per round
+            debuff=("negate techs", 10) # negates or weakens techs
+         )
+     }},
+     {"Defense" : {
+        "Positive Energy" : 
+         Techniques(
+            name="Positive Energy",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=10,
+            strength=100,
+            speed=1000,
+            type="counter",
+            buff=("rct", 10), # heals 10% of player/teams hp per round
+            debuff=("negate techs", 10) # negates or weakens techs
+         )
+     }}
+],
+#endregion
 #region Mahoraga
     "Mahoraga" : 
     [
@@ -349,6 +455,88 @@ enemy_tech = {
                 duration=5
                 )
             } },],
+#endregion
+#region Rika
+"Rika" : 
+[
+    {'Attack' : 
+     {
+        "Claw" : 
+         Techniques(
+            name="Claw",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Left Arm", "Right Arm"),
+            aoe=1,
+            strength=800,
+            speed=1000,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+        "Claw" : 
+         Techniques(
+            name="Claw",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Left Arm", "Right Arm"),
+            aoe=1,
+            strength=800,
+            speed=1000,
+            type="counter"
+         ),
+        
+        "Hold" : # holds opponent for player to counter 
+         Techniques(
+            name="Hold",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Left Arm", "Right Arm"),
+            aoe=1,
+            strength=0,
+            speed=1000,
+            type="counter",
+            stun=1
+         )
+     }}
+],
+#endregion
+#region Garuda
+# "Garuda" : 
+# [
+#     {'Attack' : 
+#      {
+#         "" : 
+#          Techniques(
+#             name="",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Left Arm", "Right Arm"),
+#             aoe=1,
+#             strength=0,
+#             speed=1,
+#             type="melee"
+#          )
+#      }},
+#      {"Defense" : {
+#         "" : 
+#          Techniques(
+#             name="",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Left Arm", "Right Arm"),
+#             aoe=1,
+#             strength=0,
+#             speed=1,
+#             type="melee"
+#          )
+#      }}
+# ],
 #endregion
 #region Finger Bearer
     "Finger Bearer" : 

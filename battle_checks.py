@@ -914,7 +914,7 @@ test_player1 = Player(
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Shrine",
+    technique="Disaster Flames",
     playerclass="sorcerer",
     colony_id=1,
     xp=0,
@@ -969,6 +969,7 @@ test_player3 = Player(
 
 test_player2.defense = "Infinity"
 test_player3.defense = "Nail Storm"
+
 #summon_check("Nue", "shikigami")
 # results = battle_checks(test_player1, test_player2, "Dismantle", "Infinity")
 
