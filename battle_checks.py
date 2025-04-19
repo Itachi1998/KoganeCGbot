@@ -851,15 +851,15 @@ def battle_checks(player, target, attack_str, defense_str, aoe=None, targets=Non
 
 # region test players
 test_player1 = Player(
-    name="Sukuna",
+    name="Jogo",
     level=10,
     max_hp=4000,
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Shrine",
+    technique="Disaster Flames",
     playerclass="sorcerer",
-    colony=1,
+    colony_id=1,
     xp=0,
     cgp=0,
     skp=0,
@@ -879,7 +879,7 @@ test_player2= Player(
     speed=100,
     technique="Limitless",
     playerclass="sorcerer",
-    colony=1,
+    colony_id=1,
     xp=0,
     cgp=0,
     skp=0,
@@ -897,7 +897,7 @@ test_player3 = Player(
     speed=10,
     technique="Straw Doll",
     playerclass="sorcerer",
-    colony=1,
+    colony_id=1,
     xp=0,
     cgp=0,
     skp=0,
@@ -909,7 +909,7 @@ test_player3 = Player(
 #test_player3.inventory['Technique Inv']['Charges'] = {"Gojo" : 1}
 
 #summon_check("Nue", "shikigami")
-results = battle_checks(test_player1, test_player2, "Dismantle", "Infinity")
+results = battle_checks(test_player1, test_player2, "Fireflies", "Infinity")
 
 print(results)
 #endregion
