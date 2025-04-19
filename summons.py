@@ -13,7 +13,7 @@ class White_Divine_Dog(Enemy):
             speed=500,
             technique="Divine Dog",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=500,
             cgp=0,
             bodyparts=human_body_parts
@@ -33,7 +33,7 @@ class Black_Divine_Dog(Enemy):
             speed=500,
             technique="Divine Dog",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=500,
             cgp=0,
             bodyparts=human_body_parts
@@ -53,7 +53,7 @@ class Rabbit_Escape(Enemy):
             speed=500,
             technique="Rabbit Escape",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=500,
             cgp=0,
             bodyparts=human_body_parts
@@ -73,7 +73,7 @@ class Toad(Enemy):
             speed=800,
             technique="Toad",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=500,
             cgp=0,
             bodyparts=human_body_parts
@@ -93,7 +93,7 @@ class Nue(Enemy):
             speed=700,
             technique="Nue",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=500,
             cgp=0,
             bodyparts=human_body_parts
@@ -113,7 +113,7 @@ class Great_Serpent(Enemy):
             speed=600,
             technique="Great Serpent",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=500,
             cgp=0,
             bodyparts={
@@ -136,7 +136,7 @@ class Max_Elephant(Enemy):
             speed=300,
             technique="Max Elephant",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=750,
             cgp=0,
             bodyparts=human_body_parts
@@ -156,7 +156,7 @@ class Piercing_Ox(Enemy):
             speed=100,
             technique="Piercing Ox",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=1000,
             cgp=0,
             bodyparts=human_body_parts
@@ -176,7 +176,7 @@ class Funeral_Tiger(Enemy):
             speed=500,
             technique="Funeral Tiger",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=1000,
             cgp=0,
             bodyparts=human_body_parts
@@ -196,7 +196,7 @@ class Round_Deer(Enemy):
             speed=100,
             technique="Round Deer",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=0,
             cgp=1000,
             bodyparts=human_body_parts
@@ -216,7 +216,7 @@ class Mahoraga(Enemy):
             speed=1000,
             technique="Mahoraga",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             inventory=["Dharma Chakra Wheel"],
             equipped=["Dharma Chakra Wheel"],
             xp=10000,
@@ -241,7 +241,7 @@ class Rika(Enemy):
             speed=1000,
             technique="Rika",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=20000,
             cgp=0,
             bodyparts={
@@ -267,7 +267,7 @@ class Garuda(Enemy):
             speed=500,
             technique="Garuda",
             playerclass="summon",
-            colony=0,
+            colony_id=0,
             xp=1000,
             cgp=0,
             bodyparts={
