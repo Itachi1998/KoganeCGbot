@@ -1,5 +1,6 @@
-from game import Enemy, human_body_parts
+from game import Enemy, BodyPart, human_body_parts
 
+#region Ten Shadows
 #region White Divine Dog
 class White_Divine_Dog(Enemy):
     def __init__(self):
@@ -19,8 +20,7 @@ class White_Divine_Dog(Enemy):
         )
 
 white_divine_dog = White_Divine_Dog()
-#endregion
-
+    #endregion
 #region Black Divine Dog
 class Black_Divine_Dog(Enemy):
     def __init__(self):
@@ -40,8 +40,7 @@ class Black_Divine_Dog(Enemy):
         )
 
 black_divine_dog = Black_Divine_Dog()
-#endregion
-
+    #endregion
 #region Rabbit Escape
 class Rabbit_Escape(Enemy): 
     def __init__(self):
@@ -61,8 +60,7 @@ class Rabbit_Escape(Enemy):
         )
 
 rabbit_escape = Rabbit_Escape()
-#endregion
-
+    #endregion
 #region Toad
 class Toad(Enemy):
     def __init__(self):
@@ -82,8 +80,7 @@ class Toad(Enemy):
         )
 
 toad = Toad()
-#endregion
-
+    #endregion
 #region Nue
 class Nue(Enemy):
     def __init__(self):
@@ -103,8 +100,7 @@ class Nue(Enemy):
         )
 
 nue = Nue()
-#endregion
-
+    #endregion
 #region Great Serpent
 class Great_Serpent(Enemy):
     def __init__(self):
@@ -120,12 +116,14 @@ class Great_Serpent(Enemy):
             colony=0,
             xp=500,
             cgp=0,
-            bodyparts=human_body_parts
+            bodyparts={
+                "Head" : BodyPart(name="Head", max_hp=30, max_ce=15),
+                "Body" : BodyPart(name="Body", max_hp=270, max_ce=135)
+            }
         )
 
 great_serpent = Great_Serpent()
-#endregion
-
+    #endregion
 #region Max Elephant
 class Max_Elephant(Enemy):
     def __init__(self):
@@ -145,8 +143,7 @@ class Max_Elephant(Enemy):
         )
 
 max_elephant = Max_Elephant()
-#endregion
-
+    #endregion
 #region Piercing Ox
 class Piercing_Ox(Enemy):
     def __init__(self):
@@ -166,8 +163,7 @@ class Piercing_Ox(Enemy):
         )
 
 piercing_ox = Piercing_Ox()
-#endregion
-
+    #endregion
 #region Funeral Tiger
 class Funeral_Tiger(Enemy):
     def __init__(self):
@@ -187,8 +183,7 @@ class Funeral_Tiger(Enemy):
         )
 
 funeral_tiger = Funeral_Tiger()
-#endregion
-
+    #endregion
 #region Round Deer
 class Round_Deer(Enemy):
     def __init__(self):
@@ -208,8 +203,7 @@ class Round_Deer(Enemy):
         )
 
 round_deer = Round_Deer()
-#endregion
-
+    #endregion
 #region Mahoraga
 class Mahoraga(Enemy):
     def __init__(self):
@@ -231,8 +225,61 @@ class Mahoraga(Enemy):
         )
 
 mahoraga = Mahoraga()
+    #endregion
+#endregion
+
+#region other shikigami
+#region Rika
+class Rika(Enemy):
+    def __init__(self):
+        super().__init__(
+            name="Rika",
+            level=1,
+            max_hp=5000,
+            max_ce=10000,
+            strength=1000,
+            speed=1000,
+            technique="Rika",
+            playerclass="summon",
+            colony=0,
+            xp=20000,
+            cgp=0,
+            bodyparts={
+            "Head" : BodyPart(name="Head", max_hp=500, max_ce=1000), 
+            "Torso" : BodyPart(name="Torso", max_hp=2500, max_ce=5000),
+            "Left Arm" : BodyPart(name="Left Arm", max_hp=500, max_ce=1000),
+            "Right Arm" : BodyPart(name="Right Arm", max_hp=500, max_ce=1000),
+            "Tail" : BodyPart(name="Tail", max_hp=1000, max_ce=2000)
+            }
+        )
+
+rika = Rika()
+    #endregion
+#region Garuda
+class Garuda(Enemy):
+    def __init__(self):
+        super().__init__(
+            name="Garuda",
+            level=1,
+            max_hp=1000,
+            max_ce=500,
+            strength=500,
+            speed=500,
+            technique="Garuda",
+            playerclass="summon",
+            colony=0,
+            xp=1000,
+            cgp=0,
+            bodyparts={
+            "Head" : BodyPart(name="Head", max_hp=100, max_ce=50), 
+            "Body" : BodyPart(name="Body", max_hp=900, max_ce=450)
+            }
+        )
+
+garuda = Garuda()
+    #endregion
 #endregion
 
 shikigami_list = [white_divine_dog, black_divine_dog, rabbit_escape, toad, 
                   nue, great_serpent, max_elephant, piercing_ox, funeral_tiger, 
-                  round_deer, mahoraga]
+                  round_deer, mahoraga, rika, garuda]

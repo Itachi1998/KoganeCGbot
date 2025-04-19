@@ -58,7 +58,42 @@ enemy_tech = {
         )  
     }}
 ],
-#endregion 
+#endregion
+#region Rabbit Escape
+"Rabbit Escape" : 
+[
+    {'Attack' : 
+     {
+         "Rabbit Kung Fu" : 
+         Techniques(
+             name="Rabbit Kung Fu",
+             level=1,
+             act_speed=1,
+             act_cost=25,
+             act_body=("Full"),
+             aoe=1,
+             strength=10,
+             speed=500,
+             type="melee"
+         )
+     }},
+     {"Defense" : {
+       "Escape" : 
+       Techniques(
+            name="Escape",
+            level=1,
+            act_speed=1,
+            act_cost=25,
+            act_body=("Full"),
+            aoe=1,
+            strength=10,
+            speed=500,
+            type="dodge",
+            invisible=True
+       )
+     }}
+],
+#endregion
 #region Toad
 "Toad" : 
 [
@@ -119,6 +154,132 @@ enemy_tech = {
        )  }}
 ],
 #endregion
+#region Nue
+"Nue" : 
+[
+    {'Attack' : 
+     {
+         "Lighting Dive" : 
+         Techniques(
+             name="Lighting Dive",
+             level=1,
+             act_speed=2,
+             act_cost=50,
+             act_body=("Full"),
+             aoe=1,
+             strength=300,
+             speed=500,
+             type="melee"
+         )
+     }},
+     {"Defense" : {
+       "Hitch A Ride" : 
+       Techniques(
+            name="Hitch A Ride",
+            level=1,
+            act_speed=2,
+            act_cost=25,
+            act_body=("Full"),
+            aoe=1,
+            strength=10,
+            speed=500,
+            type="dodge"
+       )
+     }}
+],
+#endregion
+#region Great Serpent
+"Great Serpent" : 
+[
+    {'Attack' : 
+     {
+         "Choke" : 
+         Techniques(
+            name="Choke",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=300,
+            speed=500,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+       "Choke" : 
+         Techniques(
+            name="Choke",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=300,
+            speed=500,
+            type="counter"
+         )
+     }}
+],
+#endregion
+#region Max Elephant
+"Max Elephant" : 
+[
+    {'Attack' : 
+     {
+        "Water Flood" : 
+         Techniques(
+            name="Water Flood",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=5,
+            strength=300,
+            speed=500,
+            type="melee"
+         ),
+        "Certain Death From Above" : 
+         Techniques(
+            name="Certain Death From Above",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=800,
+            speed=500,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+        "Water Flood" : 
+         Techniques(
+            name="Water Flood",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=5,
+            strength=300,
+            speed=500,
+            type="counter"
+         ),
+        "Certain Death From Above" : 
+         Techniques(
+            name="Certain Death From Above",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=800,
+            speed=500,
+            type="counter"
+         )
+     }}
+],
+#endregion 
 #region Mahoraga
     "Mahoraga" : 
     [

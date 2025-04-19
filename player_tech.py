@@ -1466,7 +1466,7 @@ limitless={
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
                          strength=1200,
-                         speed=0,
+                         speed=800,
                          type="counter"
                     ),
 
