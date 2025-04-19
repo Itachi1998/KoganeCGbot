@@ -20,8 +20,7 @@ class Copy(Techniques):
       0,
       10,
       "<:Yuta:1287212194609496064>")
-
-
+      
 
   def partial_rika(self, player, targets):
     if player.ce < self.ce_cost:
