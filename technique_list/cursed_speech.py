@@ -436,7 +436,6 @@ def aoe_check(targets, player, attack = None, def_aoe = None, strength=None):
             for t in targets:
                 if t.defense != def_aoe:
                     t.defense = def_aoe
-                    t.speed = def_speed  
                     t.save_to_db()
                     result_list.append({'target': t.name, 'defense': t.defense})
 

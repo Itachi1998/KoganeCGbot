@@ -54,15 +54,6 @@ class Colonies(commands.Cog):
 
         for guild in self.bot.guilds:
             enemies = [enemy_class() for enemy_class in game.Enemy.__subclasses__()]
-            enemy_dicts = [enemy.__dict__ for enemy in enemies]
-
-            for e in enemy_dicts:
-                body_parts_dict = {}
-                for part in e['bodyparts']:
-                    body_parts_dict[part] = e['bodyparts'][part].__dict__
-
-                e['bodyparts'] = body_parts_dict
-
             colony_data = {
                 'name': guild.name,
                 'colony id': guild.id,

@@ -1,4 +1,4 @@
-import discord, datetime, re, random
+import discord, datetime, re, random, copy
 from game import Enemy, Player
 from db import read_player, read_enemy, read_colony
 from datetime import datetime
@@ -48,60 +48,91 @@ def remove_name(text, name):
     return re.sub(pattern, '', text)
 
 
-def start_pve_embed(lobby):
-            #create pve embed
-            embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
-            colony = read_colony(lobby.colony_id)
-            max_level=0
-            #populate the teamA and teamB list with players
-            for p in lobby.players:
-                
-                player_from_db = read_player(p)
-                real_player = Player(**player_from_db.__dict__)
-
-                if p in lobby.ready:
-                    if real_player:
-                        if real_player.user_id in lobby.teamA['players']:
-                            lobby.teamA['players'].remove(real_player.user_id)
-                            lobby.add_teamA(real_player)
-
-                        elif real_player.user_id in lobby.teamB:
-                            lobby.teamB['players'].remove(real_player.user_id)
-                            lobby.add_teamB(real_player)
-
-                    else:
-                        lobby.add_spectator(p)
-                else:
-                    lobby.add_spectator(p)
-                        
-            enemies = [e for e in colony.enemies if e.level <= max_level]
-            e_choice = random.choice(enemies)
-            enemy = Enemy(**e_choice.__dict__)
-            enemy_list = []
-           
-            # Handle multiple enemy spawns if quantity is set
-            if hasattr(enemy, "quantity") and enemy.quantity > 1:
-                for i in range(enemy.quantity):
-                    enemy_clone = Enemy(**e_choice.__dict__)
-                    enemy_clone.name = f"{enemy_clone.name} {i+1}"
-                    enemy_list.append(f"{enemy_clone.name}: {healthbar(enemy_clone.hp, enemy_clone.max_hp)}")
+def start_pve_embed(lobby, bot):
+    # Create pve embed
+    embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
+    colony = read_colony(lobby.colony_id)
+    # Populate the teamA and teamB list with players
+    for p in lobby.players:
+        player = read_player(p, lobby.colony_id)
+        # Initialize real_player as None for safety
+        real_player = None
+        if player:
+            tech = player['techniques'][0]
+            player['technique'] = tech['name'] if isinstance(tech, dict) else tech.name
+            del player['techniques']
+            real_player = Player(**player)
+            # Only proceed with real_player logic if we have a valid player
+            if real_player.user_id in lobby.ready:
+                if real_player.user_id in lobby.teamA['players']:
+                    lobby.teamA['players'].remove(real_player.user_id)
+                    lobby.add_teamA(real_player)
+                elif real_player.user_id in lobby.teamB['players']:
+                    lobby.teamB['players'].remove(real_player.user_id)
+                    lobby.add_teamB(real_player)
+                elif real_player.user_id not in lobby.teamB['players'] and real_player.user_id not in lobby.teamA['players']:
+                    # Note: add_field should take a player object
+                    lobby.add_field(real_player)
             else:
-                enemy_list.append(f"{enemy.name}: {healthbar(enemy.hp, enemy.max_hp)}")
-            if lobby.field:
-                lobby.field.append(e for e in enemy_list)
-            else:
-                lobby.field = enemy_list
-            
-            if  lobby.teamA:
-                teamname = lobby.teamA['name'] if lobby.teamA['name'] else  "Team A"
-                teamAlist = [p.name for p in lobby.teamA['players']]
-                embed.add_field(name=teamname, value="\n".join(teamAlist))
-            if  lobby.teamB:
-                teamname = lobby.teamB['name'] if lobby.teamB['name'] else  "Team B"
-                teamBlist = [p.name for p in lobby.teamB['players']]
-                embed.add_field(name=teamname, value="\n".join(teamBlist))
+                lobby.add_spectator(p)
+        else:
+            # If player data couldn't be retrieved, add to spectators
+            lobby.add_spectator(p)
+    enemies = []
 
-            return embed, lobby
+    if colony:
+        for e in colony.enemies:
+            if real_player.level >= e.level:
+                enemies.append(e)
+    else:
+        print("no colony found")
+        return
+
+    print(f"Enemies: \n{enemies}")
+
+    if enemies:  # Make sure there are enemies to choose from
+
+        e_choice = random.choice(enemies)
+        enemy = None
+        for e  in Enemy.__subclasses__():
+            current_enemy = e()
+            if current_enemy.name == e_choice.name:
+                enemy = current_enemy
+                break
+        enemy_list = [enemy]
+        # Handle multiple enemy spawns if quantity is set
+        if enemy.quantity and enemy.quantity > 1:
+                for e in range(enemy.quantity):
+                    enemy_clone = copy.deepcopy(enemy)
+                    print(enemy.name + " was cloned")
+                    enemy_list.append(enemy_clone)
+
+        for e in enemy_list:
+                lobby.add_field(e) 
+    
+
+    # Team display section
+    if lobby.teamA and lobby.teamA['players']:
+        teamname = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
+        teamAlist = [p.name for p in lobby.teamA['players']]
+        embed.add_field(name=teamname, value="\n".join(teamAlist) if teamAlist else "Empty")
+    
+    if lobby.teamB and lobby.teamB['players']:
+        teamname = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
+        teamBlist = [p.name for p in lobby.teamB['players']]
+        embed.add_field(name=teamname, value="\n".join(teamBlist) if teamBlist else "Empty")
+    
+    embed.add_field(name="Field", value="\n".join(k for k in lobby.field.keys()))
+    
+    if lobby.spectators:
+        usernames=[]
+        for user in  lobby.spectators:
+            disc_user = bot.get_user(user)
+            usernames.append(disc_user.name)
+
+        embed.add_field(name="Spectators", value="\n".join(usernames) if usernames else "None")
+
+    return embed, lobby
 
 class Lobby():
     def __init__(self, 
@@ -149,9 +180,9 @@ class Lobby():
         if player in self.players:
             self.players.remove(player)
             if player in self.teamA:
-                self.teamA.remove(player)
+                self.teamA['players'].remove(player)
             if player in self.teamB:
-                self.teamB.remove(player)
+                self.teamB['players'].remove(player)
             if player in self.spectators:
              self.spectators.remove(player)
             if player in self.field:
@@ -161,7 +192,8 @@ class Lobby():
             if player in self.ready:
                 self.ready.remove(player)
             if player in self.field:
-                self.field.remove(player)
+                del self.field[player.name]
+
             # Check if the player is the owner
             if player == self.owner:
                 if self.players:  # If there are more players left
@@ -193,6 +225,12 @@ class Lobby():
         self.teamA['players'] = player_list 
         return True
     
+    def add_field(self, thing):
+        if thing.name in self.field:
+            total_things = [k for k in self.field.keys() if thing.name in k]
+            thing.name = thing.name + " " + str(len(total_things) + 1)
+        self.field[thing.name] = thing
+        return True
 
     def set_teamB_name(self, name):
         self.teamB['name'] = name
@@ -210,9 +248,7 @@ class Lobby():
     
     def player_killed(self, player):
         if player in self.teamB or self.teamA or self.field:
-
             self.remove_player(player)
-
             self.graveyard.append({"player" : player.__dict__, "killed by" : player.killed})
             return True
         else:
@@ -240,15 +276,17 @@ def generate_lobby_embed(lobby: Lobby, bot) -> discord.Embed:
     embed.set_author(name="Lobby", icon_url=owner_user.avatar.url if owner_user else None)
     embed.set_thumbnail(url=bot.user.avatar.url)
     embed.add_field(name="Players", value="\n".join(f"<@{player}>" for player in lobby.players) or "No players", inline=False)
-    embed.add_field(name="Team A", value="\n".join(f"<@{player}>" for player in lobby.teamA) or "No players", inline=True)
-    embed.add_field(name="Team B", value="\n".join(f"<@{player}>" for player in lobby.teamB) or "No players", inline=True)
+    embed.add_field(name="Team A", value="\n".join(f"{player.name}" for player in lobby.teamA['players']) or "No players", inline=True)
+    embed.add_field(name="Team B", value="\n".join(f"{player.name}" for player in lobby.teamB['players']) or "No players", inline=True)
     embed.add_field(name="Ready Players", value="\n".join(f"<@{player}>" for player in lobby.ready) or "No players", inline=False)
     embed.add_field(name="Spectators", value="\n".join(f"<@{player}>" for player in lobby.spectators) or "No spectators", inline=False)
+    
     if lobby.private:
         embed.add_field(name="Invited Players", value="\n".join(f"<@{player}>" for player in lobby.invited) or "No invited players", inline=False)
+    
     embed.set_footer(
         text=f"Lobby created at {lobby.start.astimezone().strftime('%c')}",
-        icon_url=None  # Optionally, you can add an icon URL here
+        icon_url=None  
     )
     return embed
 
@@ -259,6 +297,8 @@ class Lobby_Cog(commands.Cog):
         self.lobbies = {}  # Dictionary to store active lobbies
         # Reference to the battle cog for starting battles
         self.battle_cog = bot.get_cog('battle')
+
+
     @commands.Cog.listener()
     async def on_thread_member_join(self, member):
         thread = member.thread
@@ -267,14 +307,13 @@ class Lobby_Cog(commands.Cog):
             lobby = self.lobbies[thread.id]["Lobby"]
         else:
             return
-    
         if user.id not in lobby.players and user.id not in lobby.invited:
             lobby.add_player(user.id)
             embed = generate_lobby_embed(lobby, self.bot)
             self.lobbies[thread.id]["embed"] = embed
             embed.description = "New player joined " + user.mention
             await thread.send(embed=embed)
-            
+
         elif user.id in lobby.invited:
             lobby.add_player(user.id)
             embed = generate_lobby_embed(lobby, self.bot)
@@ -282,7 +321,7 @@ class Lobby_Cog(commands.Cog):
             await thread.send("Invited player joined " + user.mention)
 
         elif user.id in lobby.players:
-            await thread.send("Player already in lobby " + user.mention)
+            return
       
     @commands.hybrid_group(name="lobby", description="Use /lobby <option>")
     async def lobby(self, ctx):
@@ -309,8 +348,33 @@ class Lobby_Cog(commands.Cog):
             elif ctx.channel.type == discord.ChannelType.public_thread:
                 return "public"
             else:
-
                 return False
+            
+    @lobby.command(name="ready")
+    async def ready(self, ctx):
+        user = ctx.author.id
+        channel = ctx.channel.id
+        lobby = self.lobbies[channel]['Lobby']
+        playerd = read_player(user, ctx.guild.id)
+        tech = playerd['techniques'][0]
+        del playerd['techniques']
+        playerd['technique'] = tech['name']
+        player = Player(**playerd)
+        if player and lobby:
+            if user in lobby.players:
+                ready = lobby.ready_up(user)
+                if ready:
+                    await ctx.send("Player " + player.name + " is ready")
+                    return True
+                else:
+                    await ctx.send("Error ready player")
+            else:
+                await ctx.send("You are not in this lobby")
+                return False
+        else:
+            await ctx.send("Error ready player")
+            return False
+            
             
     @lobby.command(name="invite")
     async def invite(self, ctx, member: discord.Member):
@@ -372,17 +436,19 @@ class Lobby_Cog(commands.Cog):
             await thread.add_user(ctx.author)
             await thread.edit(invitable=False)
             await thread.send("Private lobby created, only invited players can join.")
-            self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=0, private=True,
-                                                     players=[ctx.author.id], invited=invited, teamA=[], teamB=[],
+            self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=ctx.guild.id, private=True,
+                                                     players=[ctx.author.id], invited=invited, teamA={"name" : "Team A", "players" : [], "leader" : ""}, 
+                                                     teamB={"name" : "Team B", "players" : [], "leader" : ""},
                                                     status=1,  ready=[], Round=0, start_time=datetime.now(),
-                                                    field=[], graveyard=[], feed=[], spectators = []), "embed" : ""}
+                                                    field={}, graveyard=[], feed=[], spectators = []), "embed" : ""}
         else:
             thread = await ctx.channel.create_thread(name=name, type=discord.ChannelType.public_thread, auto_archive_duration=1440, 
                                                      reason="## Lobby created " + name)
-            self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=0, private=False,
-                                                        players=[ctx.author.id], invited=[], teamA=[], teamB=[],
-                                                        status=1,  ready=[], Round=0, start_time=datetime.now(),
-                                                        field=[], graveyard=[], feed=[], spectators = []), "embed" : ""}
+            self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=ctx.guild.id, private=False,
+                                                     players=[ctx.author.id],invited=[], teamA={"name" : "Team A", "players" : [], "leader" : ""}, 
+                                                     teamB={"name" : "Team B", "players" : [], "leader" : ""},
+                                                    status=1,  ready=[], Round=0, start_time=datetime.now(),
+                                                    field={}, graveyard=[], feed=[], spectators = []), "embed" : ""}
         lobby = self.lobbies[thread.id]["Lobby"]
         embed = generate_lobby_embed(lobby, self.bot)
         self.lobbies[thread.id]["embed"] = embed
@@ -391,6 +457,29 @@ class Lobby_Cog(commands.Cog):
         await thread.send(embed=embed)
         await ctx.send(f"Lobby created: {thread.mention}")
 
+    @lobby.command(name="teama")
+    async def teama(self, ctx):
+        player = read_player(ctx.author.id, ctx.guild.id)
+        tech = player['techniques'][0]
+        player['technique'] = tech['name']
+        del player['techniques']
+        print(player)
+        player = Player(**player)
+        if ctx.channel.id in self.lobbies:
+            lobby = self.lobbies[ctx.channel.id]['Lobby']
+            added = lobby.add_teamA(player)
+            if added:
+                await ctx.send("Player added to teamA : " + player.name)
+                embed = generate_lobby_embed(lobby, self.bot)
+                await ctx.send(embed=embed)
+                return
+            else:
+                await ctx.send("Error adding player to Team A", ephemeral=True)
+                return
+        else:
+            await ctx.send("error finding lobby")
+            return
+        
     @lobby.command(name="kick")
     async def kick(self, ctx, member: discord.Member):
         if ctx.channel.id in self.lobbies.keys():
@@ -426,7 +515,7 @@ class Lobby_Cog(commands.Cog):
                 return
       
             else:
-                await thread.send("You are not the owner")
+                await ctx.send("You are not the owner")
 
     @lobby.command(name='leave')
     async def kick(self, ctx):
@@ -439,34 +528,41 @@ class Lobby_Cog(commands.Cog):
             if player_removed == "delete_lobby":
                 await thread.send("`No New Owner Found Lobby Will Be Deleted`")
                 del self.lobbies[ctx.channel.id]
-              
-                await thread.send("`Channel Archived` at " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
+                await ctx.send("`Channel Archived` at " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
                 await thread.edit(locked=True)
                 await thread.edit(archived=True)
                 return
-            await thread.send(f"{ctx.author.mention} has left the lobby.")
+            await ctx.send(f"{ctx.author.mention} has left the lobby.")
             embed = generate_lobby_embed(lobby, self.bot)
             self.lobbies[ctx.channel.id]["embed"] = embed
             embed.description = "Player left lobby: " + ctx.author.mention
             await ctx.send("`Lobby updated`")
             await thread.send(embed=embed)
+            return
         else:
-             await thread.send("`Error: lobby doesn't exist`")
+             await ctx.send("`Error: lobby doesn't exist`")
+             return
 
 
     @lobby.command(name="start")
     async def start(self, ctx, pve: bool=False, pvp: bool=False):
-        if pve:
-            lobby = self.lobbies[ctx.channel.id]['Lobby']
-            if lobby:
-                if len(lobby.teamA) and len(lobby.teamB) == 0:
-                    if lobby.players:
-                        lobby.teamA = lobby.players
-                    else:
-                        return 
-        if pvp:
-            pass
-
+        if ctx.channel.id in self.lobbies:
+            if pve:
+                thread = ctx.channel.id
+                lobby = self.lobbies[thread]['Lobby']
+                print(lobby)
+                if ctx.author.id == lobby.owner:
+                        embed, new_lobby = start_pve_embed(lobby, self.bot)
+                        if embed:
+                            self.lobbies[ctx.channel.id]['Lobby'] = new_lobby
+                            await ctx.send(embed=embed)
+                        else:
+                            await ctx.send("Error starting PVE")
+                else:
+                    await ctx.send("You are not the lobby owner")
+        
+        else:
+            await ctx.send("You are not in a lobby")
 
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))
