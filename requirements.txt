@@ -3,6 +3,5 @@ discord.py==2.5.2
 Pillow==11.1.0
 Requests==2.32.3
 typing_extensions==4.12.2
-dotenv==0.9.9
 sqlalchemy== 2.0.38
 
