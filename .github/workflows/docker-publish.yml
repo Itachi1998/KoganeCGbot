@@ -37,8 +37,10 @@ jobs:
         tags: ${{ secrets.DOCKER_USER }}/koganehub:latest
         provenance: true
         sbom: true
-        outputs:
-          image: ${{ steps.build-push.outputs.image }} # Corrected outputs syntax
+
+    - name: Build push output
+      run: |   
+          echo "Built image: ${{ steps.build-push.outputs.image }}" # Corrected outputs syntax
 
     - name: Set up Cosign
       uses: sigstore/cosign-installer@v3
