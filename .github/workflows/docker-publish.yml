@@ -41,7 +41,7 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@v3
       with:
-        cosign-release: 'latest'
+        cosign-release: v3.8.2
         
     - name: Sign Image with Cosign using OIDC
       run: cosign sign ${{ steps.build-push.outputs.image }}
