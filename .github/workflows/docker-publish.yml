@@ -16,9 +16,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # Ensure full history is fetched (if needed by provenance action)
-        #   ref: ${{ github.ref }} # Optionally, be explicit about the ref
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
@@ -35,13 +33,14 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_USER }}/koganehub:latest
-        provenance: true #buildx provenance
-        sbom: true #buildx sbom
+        provenance: true # Generate SLSA provenance
+        sbom: true # Generate SBOM
         outputs: |
           image: ${{ steps.build-push.outputs.digest }}
 
     - name: Set up Cosign
       uses: sigstore/cosign-installer@v3
+
 
     - name: Upload SBOM Artifact
       uses: actions/upload-artifact@v4.6.2
@@ -52,12 +51,6 @@ jobs:
     - name: Sign SBOM with Cosign (OIDC)
       run: cosign attach sbom --sbom sbom.cdx.json -key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
 
-    - name: Generate and Sign Attestation (SLSA Provenance)
-      uses: slsa-framework/slsa-github-generator/github-actions/provenance@v2.1.0
-      with:
-        subject: ${{ steps.build-push.outputs.image }}
-        upload: true # This will automatically sign and upload the provenance 
-        #   ref: ${{ github.ref }} #may need to specify the ref
     - name: Generate Shasum
       id: shasum
       run: |
