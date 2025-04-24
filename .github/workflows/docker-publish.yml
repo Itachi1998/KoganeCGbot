@@ -39,10 +39,9 @@ jobs:
         sbom: true
         
     - name: Install Cosign
-      run: |
-        curl -sSL https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 -o /usr/local/bin/cosign
-        chmod +x /usr/local/bin/cosign
-
+      uses: sigstore/cosign-installer@v3
+      with:
+        cosign-release: 'latest'
+        
     - name: Sign Image with Cosign using OIDC
-      run: |
-        cosign sign --oidc ${{ steps.build-push.outputs.image }}
+      run: cosign sign ${{ steps.build-push.outputs.image }}
