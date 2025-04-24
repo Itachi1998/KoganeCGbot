@@ -945,6 +945,8 @@ test_player2= Player(
     grade=5,
     imbue=0
 )
+enemy = game.Grade1_Orbmaster()
+
 
 test_player3 = Player(
     name="Nobara",
@@ -971,10 +973,7 @@ test_player2.defense = "Infinity"
 test_player3.defense = "Nail Storm"
 
 #summon_check("Nue", "shikigami")
-# results = battle_checks(test_player1, test_player2, "Dismantle", "Infinity")
-
-results = battle_aoe_check(test_player2, [test_player3], defense="Infinity")
-results = battle_aoe_check(test_player1, [test_player2, test_player3], attack_str="Dismantle")
+results = battle_checks(enemy, test_player2, "Impending Doom", "Infinity")
 
 print(results)
 #endregion

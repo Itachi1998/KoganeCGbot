@@ -760,16 +760,16 @@
 # }
 
 
-# def set_technique(techniques: list):
-#     rarity = {"epic": 5, "rare": 15, "uncommon": 30, "common": 50}
-#     sum = 0
-#     value = 0
-#     for r in rarity:
-#         sum += rarity[r]
-#     choice = randint(1, sum)
-#     for r in rarity:
-#         if choice > rarity[r]:
-#             value = rarity[r]
+def set_technique(techniques: list):
+    rarity = {"epic": 5, "rare": 15, "uncommon": 30, "common": 50}
+    sum = 0
+    value = 0
+    for r in rarity:
+        sum += rarity[r]
+    choice = randint(1, sum)
+    for r in rarity:
+        if choice > rarity[r]:
+            value = rarity[r]
 
 #     print(f"Getting technique value : {value}")
 

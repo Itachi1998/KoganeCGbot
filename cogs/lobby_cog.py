@@ -8,7 +8,7 @@ import time, asyncio
 # MAIN CLASS FOR LOBBIES
 # Use this to instantiate lobby instances
 
-
+#region Healthbar 
 def healthbar(health, max_health):
     max_dashes = 4
     dash_ratio = max_health / max_dashes
@@ -26,7 +26,9 @@ def healthbar(health, max_health):
         percent = "`0%`"
     bar = f"{dashes}{percent}"
     return bar
+#endregion
 
+#region CE Bar
 def ce_bar(ce, max_ce):
     max_dashes = 4
     dash_ratio = max_ce / max_dashes
@@ -41,13 +43,16 @@ def ce_bar(ce, max_ce):
         percent = "`0%`"
     bar = f"{dashes}{percent}"
     return bar
+#endregion
 
 
+#region Remove Characters
 def remove_name(text, name):
     pattern = re.escape(name)
     return re.sub(pattern, '', text)
+#endregion
 
-
+#region PVE embed
 def start_pve_embed(lobby, bot):
     # Create pve embed
     embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
@@ -133,6 +138,63 @@ def start_pve_embed(lobby, bot):
         embed.add_field(name="Spectators", value="\n".join(usernames) if usernames else "None")
 
     return embed, lobby
+#endregion
+
+def start_pvp_embed(lobby, bot):
+    for p in lobby.players:
+        player = read_player(p, lobby.colony_id)
+        # Initialize real_player as None for safety
+        real_player = None
+        if player:
+            tech = player['techniques'][0]
+            player['technique'] = tech['name'] if isinstance(tech, dict) else tech.name
+            del player['techniques']
+            real_player = Player(**player)
+            # Only proceed with real_player logic if we have a valid player
+            if real_player.user_id in lobby.ready:
+                if real_player.user_id in lobby.teamA['players']:
+                    lobby.teamA['players'].remove(real_player.user_id)
+                    lobby.add_teamA(real_player)
+
+                elif real_player.user_id in lobby.teamB['players']:
+                    lobby.teamB['players'].remove(real_player.user_id)
+                    lobby.add_teamB(real_player)
+
+                elif real_player.user_id not in lobby.teamB['players'] and real_player.user_id not in lobby.teamA['players']:
+                    # Note: add_field should take a player object
+                    lobby.add_field(real_player)
+                else:
+                    lobby.add_spectator(p)
+            else:
+                lobby.add_spectator(p)
+
+    embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) + "`")
+    
+    # Team display 
+    if lobby.teamA and lobby.teamA['players']:
+        teamname = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
+        teamAlist = [p.name for p in lobby.teamA['players']]
+        embed.add_field(name=teamname, value="\n".join(teamAlist) if teamAlist else "Empty")
+
+    if lobby.teamB and lobby.teamB['players']:
+        teamname = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
+        teamBlist = [p.name for p in lobby.teamB['players']]
+        embed.add_field(name=teamname, value="\n".join(teamBlist) if teamBlist else "Empty")
+    
+    if lobby.field:
+        field_list = [thing.name for thing in lobby.field.values()]
+        embed.add_field(name="Field", value="\n".join(field_list) if field_list else "Empty")
+
+    if lobby.spectators:
+        usernames=[]
+        for user in  lobby.spectators:
+            disc_user = bot.get_user(user)
+            usernames.append(disc_user.name)
+
+        embed.add_field(name="Spectators", value="\n".join(usernames) if usernames else "None")
+
+    return embed, lobby
+
 
 class Lobby():
     def __init__(self, 
@@ -225,6 +287,13 @@ class Lobby():
         self.teamA['players'] = player_list 
         return True
     
+    def remove_teamA(self, player):
+        if player in self.teamA['players']:
+            self.teamA['players'].remove(player)
+            return True
+        else:
+            return False
+    
     def add_field(self, thing):
         if thing.name in self.field:
             total_things = [k for k in self.field.keys() if thing.name in k]
@@ -246,6 +315,17 @@ class Lobby():
          self.teamB['players'] = player_list 
          return True
     
+    def remove_teamB(self, player):
+        if player in self.teamB['players']:
+            self.teamB['players'].remove(player)
+            return True
+        else:
+            return False
+    
+    def add_feed(self, text):
+        self.feed.append(text)
+        return True
+
     def player_killed(self, player):
         if player in self.teamB or self.teamA or self.field:
             self.remove_player(player)
@@ -265,7 +345,6 @@ class Lobby():
         else:
              return False
         
-
 def generate_lobby_embed(lobby: Lobby, bot) -> discord.Embed:
     embed = discord.Embed(
         title=f"{lobby.name}",
@@ -460,21 +539,80 @@ class Lobby_Cog(commands.Cog):
     @lobby.command(name="teama")
     async def teama(self, ctx):
         player = read_player(ctx.author.id, ctx.guild.id)
+
+        tech = player['techniques'][0]
+        player['technique'] = tech['name']
+
+        del player['techniques']
+        print(player)
+
+        lobby = self.lobbies[ctx.channel.id]['Lobby']
+        player = Player(**player)
+
+        if ctx.channel.id in self.lobbies:
+            lobby = self.lobbies[ctx.channel.id]['Lobby']
+            if player in lobby.teamB['players']:
+                    lobby.remove_teamB(player)
+            if player.user_id in lobby.spectators:
+                lobby.spectators.remove(player.user_id)
+            if player.name in lobby.field.keys():
+                lobby.field.remove(player.name)
+
+            added = lobby.add_teamA(player)
+
+            if added:
+                await ctx.send("Player added to teamA : " + player.name)
+                embed = generate_lobby_embed(lobby, self.bot)
+                await ctx.send(embed=embed)
+                return
+                                
+            if player.user_id in lobby.teamA['players']:
+                await ctx.send("Your player is already in teamA", ephemeral=True)
+            else:
+                await ctx.send("Player added to teamA : " + player.name)
+                embed = generate_lobby_embed(lobby, self.bot)
+                await ctx.send(embed=embed)
+                return
+    
+        else:
+            await ctx.send("error finding lobby")
+            return
+        
+    @lobby.command(name="teamb")
+    async def teamb(self, ctx):
+        player = read_player(ctx.author.id, ctx.guild.id)
         tech = player['techniques'][0]
         player['technique'] = tech['name']
         del player['techniques']
         print(player)
         player = Player(**player)
         if ctx.channel.id in self.lobbies:
+            
+            if player.user_id in self.lobbies[ctx.channel.id]['Lobby'].teamA['players']:
+                self.lobbies[ctx.channel.id]['Lobby'].teamA['players'].remove(player.user_id)
+            
+            if player.user_id in self.lobbies[ctx.channel.id]['Lobby'].teamB['players']:
+                await ctx.send("Your player is already in teamB", ephemeral=True)
+            
             lobby = self.lobbies[ctx.channel.id]['Lobby']
-            added = lobby.add_teamA(player)
+            
+            if player in lobby.teamA['players']:
+                lobby.remove_teamA(player)
+            
+            if player.user_id in lobby.spectators:
+                lobby.spectators.remove(player.user_id)
+            
+            if player.name in lobby.field.keys():
+                lobby.field.remove(player.name)
+
+            added = lobby.add_teamB(player)
             if added:
-                await ctx.send("Player added to teamA : " + player.name)
+                await ctx.send("Player added to teamB : " + player.name)
                 embed = generate_lobby_embed(lobby, self.bot)
                 await ctx.send(embed=embed)
                 return
             else:
-                await ctx.send("Error adding player to Team A", ephemeral=True)
+                await ctx.send("Error adding player to Team B", ephemeral=True)
                 return
         else:
             await ctx.send("error finding lobby")
@@ -544,25 +682,47 @@ class Lobby_Cog(commands.Cog):
              return
 
 
-    @lobby.command(name="start")
-    async def start(self, ctx, pve: bool=False, pvp: bool=False):
+    @lobby.command(name="pve")
+    async def pve(self, ctx):
         if ctx.channel.id in self.lobbies:
-            if pve:
                 thread = ctx.channel.id
                 lobby = self.lobbies[thread]['Lobby']
-                print(lobby)
                 if ctx.author.id == lobby.owner:
                         embed, new_lobby = start_pve_embed(lobby, self.bot)
                         if embed:
                             self.lobbies[ctx.channel.id]['Lobby'] = new_lobby
                             await ctx.send(embed=embed)
+                            return
                         else:
                             await ctx.send("Error starting PVE")
-                else:
+                            return
+                else:       
                     await ctx.send("You are not the lobby owner")
-        
+                    return
         else:
             await ctx.send("You are not in a lobby")
+            return
+    
+    @lobby.command(name="pvp")
+    async def pvp(self, ctx):
+        if ctx.channel.id in self.lobbies:
+                thread = ctx.channel.id
+                lobby = self.lobbies[thread]['Lobby']
+                if ctx.author.id == lobby.owner:
+                        embed, new_lobby = start_pvp_embed(lobby, self.bot)
+                        if embed:
+                            self.lobbies[ctx.channel.id]['Lobby'] = new_lobby
+                            await ctx.send(embed=embed)
+                            return
+                        else:
+                            await ctx.send("Error starting PVP")
+                            return
+                else:
+                    await ctx.send("You are not the lobby owner")
+                    return
+        else:
+            await ctx.send("You are not in a lobby")
+            return
 
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))

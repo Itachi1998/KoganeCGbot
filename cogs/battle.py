@@ -1781,14 +1781,7 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
     @discord.ui.button(label="Physical",style=discord.ButtonStyle.green, emoji='🤜', row=1)
     async def physical(self, interaction: discord.Interaction,
                        button: discord.ui.Button):
-        id = check_id(interaction.user.id, self.player.user_id)
-        if not id:
-            await interaction.response.send_message(
-                content="It is not your turn yet")
-            button.disabled = False
-            await interaction.edit_original_response(view=BattleButtons(self.bot, self.msg, self.player, self.enemy,self.next_targets, self.host_id, self.ct))
-            return
-
+      
         await interaction.response.defer()
 
         button.disabled = True

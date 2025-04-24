@@ -1118,10 +1118,9 @@ disaster_flames={
 }
 # endregion
 
-# region Disaster Plants
+# region Natures Wrath
 disaster_plants={
-     
-"Disaster Plants" :
+"Natures Wrath" :
      [
           {
                "Attack" : 
@@ -1152,19 +1151,6 @@ disaster_plants={
                               speed=700,
                               type="projectile"
                          ),
-
-                    "" :
-                         Techniques(
-                              name="",
-                              level=1,
-                              act_speed=1,                              
-                              act_cost=1,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=100,
-                              speed=0,
-                              type=""
-                         )
                }
           },
 
@@ -1196,23 +1182,10 @@ disaster_plants={
                               speed=700,
                               type="counter"
                          ),
-
-                    "" :
-                         Techniques(
-                              name="",
-                              level=1,
-                              act_speed=1,                              
-                              act_cost=1,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=100,
-                              speed=0,
-                              type=""
-                         )
                 }
             }
         ],
-"Rarity" : 20
+"Rarity" : 35
 }
 # endregion
 
@@ -1251,18 +1224,6 @@ disaster_tides={
                               type="melee"
                          ),
 
-                    "" :
-                         Techniques(
-                              name="",
-                              level=1,
-                              act_speed=1,                              
-                              act_cost=1,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=100,
-                              speed=0,
-                              type=""
-                         )
                }
           },
 
@@ -1311,7 +1272,7 @@ disaster_tides={
                 }
             }
         ],
-"Rarity" : 20
+"Rarity" : 50
 }
 # endregion
 

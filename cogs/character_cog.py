@@ -6,6 +6,7 @@ from models import Technique
 from discord.ext import commands
 from discord import app_commands
 
+#region List of Techniques and Classes
 sorcerer_techs = [
     player_tech.hr_zero,
     player_tech.auspicious_beasts_summon,
@@ -45,6 +46,9 @@ cursed_techs = [
 
 classes = {"Sorcerer" : 50, "Curse" : 30, "Reincarnate" : 15}
 
+#endregion
+
+#region Weight Randomizer
 def weight_system(weight_dictionary: dict, target_list: list = None, target_dict: dict = None):
     """
     This function takes in the weights for each rarity and returns a dictionary with the weights.
@@ -87,13 +91,10 @@ def weight_system(weight_dictionary: dict, target_list: list = None, target_dict
                 
     
     
+#endregion
 
 
-
-
-
-
-
+#region Random Attributes
 
 def get_random_class(class_dict=classes):
     rarity = {"rare" : 20, "uncommon" : 30, "common" : 50}
@@ -128,7 +129,9 @@ def get_random_curse_tech(techlist=cursed_techs):
     print(f"Getting technique: {tech_name}, rarity level: {pick['Rarity']}")
     return pick
 
+#endregion
 
+#region Cog commands
 class Character_cog(commands.Cog):
 
     welcstr="# Welcome to the Discord Culling Game "
@@ -211,9 +214,9 @@ class Character_cog(commands.Cog):
         else:
             await ctx.send("Player does not exist in this colony")
             return
+#endregion
 
-
-
+# region Create Button
 class CreateButtons(discord.ui.View):
     def __init__(self, embed, bot, playerdict: dict, user: int, timeout=30):
         super().__init__(timeout=timeout)
@@ -224,7 +227,7 @@ class CreateButtons(discord.ui.View):
         self.user = user
 
 
-    @discord.ui.button(label="Spin", style=discord.ButtonStyle.primary, emoji="🎰")
+    @discord.ui.button(label="Spin", style=discord.ButtonStyle.primary, emoji="<a:slots:1364792630155804722>")
     async def spin(self, interaction: discord.Interaction, button: discord.Button):
         ce = random.randint(200, 2000)
         strength=random.randint(50, 200)
@@ -239,19 +242,23 @@ class CreateButtons(discord.ui.View):
             hp += 100
             ce += 50
             tech= get_random_sorcerer_tech()
+
         if pclass == "Reincarnate":
             ce += 100
             tech =  get_random_reincarnate_tech()      
             strength+= 120
             speed += 120
             hp += 150
+
         if pclass == "Curse":
             ce += 200
             strength += 150
             speed += 150
             hp += 150
             tech = get_random_curse_tech()
+
         six_eyes=False
+
         techname= next(iter(tech))
         print(f"rolled {techname}")
 
@@ -275,6 +282,7 @@ class CreateButtons(discord.ui.View):
             speed += 200
             hp += 300
             ce = 0
+
         entered = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         player = Player(
             name=self.playerdict['name'],
@@ -305,6 +313,9 @@ class CreateButtons(discord.ui.View):
             return
         else:
             await interaction.response.send_message("You cannot create more than one player per colony")
+            return
+        
+#endregion
 
 async def setup(bot):
     await bot.add_cog(Character_cog(bot))

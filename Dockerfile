@@ -96,5 +96,5 @@ COPY --from=build-stage /deps /deps
 ADD . /kogane
 # copy in the entrypoint script, and make it executable
 COPY requirements.txt ./ 
-COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --from=build-stage /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
