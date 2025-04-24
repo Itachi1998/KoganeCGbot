@@ -33,14 +33,19 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_USER }}/koganehub:latest
-        provenance: true # Generate SLSA provenance
-        sbom: true # Generate SBOM
         outputs: |
           image: ${{ steps.build-push.outputs.digest }}
 
     - name: Set up Cosign
       uses: sigstore/cosign-installer@v3
 
+    - name: Generate and Sign SBOM (Syft)
+      id: sbom
+      uses: anchore/sbom-action@v0.18.0
+      with:
+        image: ${{ steps.build-push.outputs.image }}
+        output: cyclonedx-json
+        file: sbom.cdx.json
 
     - name: Upload SBOM Artifact
       uses: actions/upload-artifact@v4.6.2
@@ -49,7 +54,7 @@ jobs:
         path: sbom.cdx.json
 
     - name: Sign SBOM with Cosign (OIDC)
-      run: cosign attach sbom --sbom sbom.cdx.json --key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
+      run: cosign attach sbom --sbom sbom.cdx.json  ${{ steps.build-push.outputs.image }}
 
     - name: Generate Shasum
       id: shasum
@@ -57,4 +62,4 @@ jobs:
         echo "SHASUM=$(echo ${{ steps.build-push.outputs.image }} | cut -d':' -f2)" >> $GITHUB_OUTPUT
 
     - name: Sign Shasum with Cosign (OIDC)
-      run: cosign sign --annotation "shasum=${{ steps.shasum.outputs.SHASUM }}" --key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
+      run: cosign sign --annotation "shasum=${{ steps.shasum.outputs.SHASUM }}" ${{ steps.build-push.outputs.image }}
