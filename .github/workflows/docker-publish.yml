@@ -38,7 +38,7 @@ jobs:
         provenance: true
         sbom: true
         outputs:
-          image: ${{ steps.build-push.outputs.digest }} # Corrected outputs syntax
+          image: ${{ steps.build-push.outputs.image }} # Corrected outputs syntax
 
     - name: Set up Cosign
       uses: sigstore/cosign-installer@v3
