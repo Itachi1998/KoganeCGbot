@@ -43,4 +43,4 @@ jobs:
       uses: sigstore/cosign-installer@v3.8.1
         
     - name: Sign Image with Cosign using OIDC
-      run: cosign sign ${{ steps.build-push.outputs.image }}
+      run: cosign sign --yes ${{ steps.build-push.outputs.image }}
