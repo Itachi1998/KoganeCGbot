@@ -1,10 +1,8 @@
-import discord, os, dotenv, traceback, db, enemy_techs
-from db import read_enemy # Import general dependencies 
-from dotenv import load_dotenv, find_dotenv
+import discord, os, traceback, db, enemy_techs
+from db import read_player, read_enemy, read_colony # Import general dependencies 
+from game import Player, Enemy
 from discord.ext import commands
 
-dotenv = find_dotenv()
-load_dotenv(dotenv)
 log_channel = os.getenv('LOGCHANNEL')
 token = os.getenv('TOKEN')
 intents = discord.Intents.default()
@@ -14,6 +12,38 @@ intents.guilds = True
 bot = commands.Bot(command_prefix=',', intents=intents)
 
 
+
+def get_player(colony_id, user_id):
+    player_data = read_player(user_id=user_id, colony_id=colony_id)
+    if player_data:
+        player = Player(
+            name=player_data.name,
+            level=player_data.level,
+            max_hp=player_data.max_hp,
+            max_ce=player_data.max_ce,
+            strength=player_data.strength,
+            speed=player_data.speed,
+            technique=player_data.technique,
+            playerclass=player_data.playerclass,
+            colony=player_data.colony_id,
+            xp=player_data.xp,
+            cgp=player_data.cgp,
+            skp=player_data.skp,
+            user_id=player_data.user_id,
+            six_eyes=player_data.six_eyes
+        )
+        
+        return player
+    else:
+        return False
+    
+def random_pve_enemy(colony_id, lobby):
+    colony = read_colony(colony_id)
+    
+
+
+
+bot.get_player = get_player
 
 async def load():
     for filename in os.listdir('cogs'):

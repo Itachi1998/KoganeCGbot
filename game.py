@@ -16,29 +16,19 @@ import old_techniques
 class GameMode(enum.IntEnum):
     ROAM = 1 #Roam status for when player does nothing
     PVE = 2 #Pve status for when player begins a PvE fight
-    PVP = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points
-    Q = 4 # for when the player is in a queue
-
-
+    PVP = 3 #Pvp status for when player begins a PvP fight earn more xp from killing players, team up against stronger players, team battles, earn higher points # for when the player is in a queue
 # to be used for all human characters/enemies
 
 
-
+# region BodyParts
 class BodyPart:
-    def __init__(self, name, max_hp, max_ce=None, soul=None):
-        self.max_ce = max_ce
+    def __init__(self, name, max_hp, max_ce=None):
         self.name = name
+        self.max_ce = max_ce
+        self.ce=max_ce
         self.max_hp = max_hp
         self.hp = max_hp
-        self.soul = soul
-        __dict__ = {
-                "name": name,
-                "max_hp": max_hp,
-                "max_ce": max_ce,
-                "soul": soul,
-                "destroyed": self.is_destroyed(),
-                "stunned": self.is_stunned()
-         }
+
     def take_damage(self, damage):
         self.hp -= damage
         if self.hp < 0:
@@ -52,49 +42,15 @@ class BodyPart:
     def is_destroyed(self):
         return self.hp <= 0
     
-
 human_body_parts = {"Head" : BodyPart('Head', 0, 0),
     "Left Arm" : BodyPart('Left Arm', 0,0),
     "Right Arm" : BodyPart('Right Arm', 0, 0),
     "Torso" : BodyPart('Torso', 0, 0)}
 
 
-# class Character:
-   # def __init__(self, name):
-       # self.name = name
-       # self.body_parts = {}
+#endregion
 
-   # def add_body_part(self, body_part):
-#         self.body_parts[body_part.name] = body_part
-
-#    # def take_damage(self, body_part_name, damage):
-#         if body_part_name in self.body_parts:
-           #  self.body_parts[body_part_name].take_damage(damage)
-           # if self.body_parts[body_part_name].is_destroyed():
-               # print(f"{self.body_parts[body_part_name].name} is destroyed!")
-       #  else:
-           # print(f"{body_part_name} not found on {self.name}.")
-
-
-# Example usage
-# player = Character("Hero")
-# head = BodyPart("Head", 50)
-# arm_left = BodyPart("Left Arm", 30)
-# arm_right = BodyPart("Right Arm", 30)
-# torso = BodyPart("Torso", 100)
-
-# player.add_body_part(head)
-# player.add_body_part(arm_left)
-# player.add_body_part(arm_right)
-# player.add_body_part(torso)
-
-# player.take_damage("Head", 20)
-# player.take_damage("Left Arm", 30)
-# player.take_damage("Torso", 110)
-# player.take_damage("Legs", 40) # Body part not found
-# Parent class for the Player and Enemy Subclasses
-
-
+#region Actor
 class Actor:
     def __init__(self,
             name: str, 
@@ -104,7 +60,7 @@ class Actor:
             strength: int, 
             speed: int,
             technique: str, 
-            playerclass: str, colony
+            playerclass: str, colony_id
             ):
         self.name=name
         self.level=level
@@ -114,7 +70,7 @@ class Actor:
         self.speed=speed
         self.technique=technique
         self.playerclass=playerclass
-        self.colony=colony
+        self.colony_id=colony_id
         self.hp=max_hp
         self.ce=max_ce
 
@@ -122,135 +78,19 @@ class Actor:
     def __repr__(self):
         return f"{self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique}"
 
+#endregion
 
-    # sukuna.physical_attack_checks(gojo, gojo.defense)
-    # def physical_attack_checks(self, target, attack, defense, **kwargs):
-    #     try:
-    #         print(f"{self.name} attacks {target.name}")
-    #         speed = self.speed + attack.speed # 100
-    #         strength = self.strength= + attack.strength
-    #         bf = attack.bf
-    #         def_speed = target.speed + defense.speed # 50
-    #         def_strength = target.strenght + defense.strength
-    #         speed_buff_percentage = (def_speed / speed) * 100 # 75+ to have a chance to dodge
-    #         if speed_buff_percentage > 100:
-    #              return(0, "dodge")
-    #         else:
-    #                                         # 0-15
-    #             result = random.randint(0, speed_buff_percentage)
-    #             if result > 75:
-    #                 return (0, "dodge")
-        
-    #         damage = strength - def_strength
-
-    #         if damage > 0:
-    #              if attack.stun:
-    #                  target.stun = attack.stun
-    #                  target.save_to_db()
-    #              return (damage, "hit", target.hp <= 0, bf)
-
-    #         elif damage <= 0:
-    #              return (damage, 'tank')
-            
-    #     except Exception as e:
-    #         print(f"Error in physical_attack_checks: {e}")
-     
-   
-    # def use_technique(self, technique, move, target, defense):
-    #     name = technique.name
-    #     domain = technique.domain
-    #     maximum = technique.maximum
-    #     rct = technique.rct
-    #     attack_type = technique.type
-    #     defense_type = defense.type
-        
-    #     if attack_type == "melee":
-    #          pass
-    #     if attack_type == "ranged":
-    #         pass
-    #     if attack_type == "curse":
-    #         pass
-    #     if attack_type == "domain":
-    #         pass
-    #     if attack_type == "maximum":
-    #         pass
-    #     if attack_type == "shikigami":
-    #         pass
-    #     if attack_type = 'mechabot':
-    #         pass
-    #     elif attack_type == None:
-    #         print("No attack type")
-    #         return False
-        
-    #     # if move == "attack":
-    #     #     atr = None
-    #     #     atk = None
-    #     #     t=None
-    #     #     if isinstance(self, Enemy):
-    #     #         t= old_techniques.Techniques(**self.technique)
-    #     #         atk = t.attack[technique]
-    #     #         target_tech = old_techniques.get_cursed_technique(target.technique)
-    #     #         if target.defense is not None:
-    #     #             def_name = technique.replace(" ", "_")
-    #     #             def_func = getattr(target_tech, def_name.lower())
-    #     #             results = def_func(self, target, atk)
-    #     #             return results
-                    
-    #     #         else:
-    #     #             def_name = 'ce'
-    #     #             def_func = getattr(target_tech, def_name.lower())
-    #     #             results = def_func(self, target, atk)
-                    
-    #     #     else:
-    #     #         t = old_techniques.get_cursed_technique(self.technique)
-    #     #     print(f"{self.name} launching attack {technique}")
-    #     #     atr = technique.lower()
-    #     #     atr = atr.replace(" ","_")
-    #     #     atk = getattr(t, atr)
-    #     #     results=None
-            
-    #     #     if target:
-    #     #         results = atk(self, target)
-                
-    #     #     if targets:
-    #     #         results, targets =atk(self, targets)
-    #     #         if targets:
-    #     #          return results, targets
-    #     #         else:
-    #     #             return results
-   
-    #     #     return results
-            
-    #     # if move == "defense":
-    #     #         lobdat = dynamo.read_lobby(host, colony_id = self.colony)
-    #     #         t = old_techniques.get_cursed_technique(self.technique)
-    #     #         self.defense=technique
-    #     #         technique = technique.replace(" ", "_")
-    #     #         if targets:
-    #     #             defense_func = getattr(t, technique.lower())
-    #     #             results, targets = defense_func(self, targets)
-    #     #             return results, targets
-    #     #         else:
-    #     #             defense_func = getattr(t, technique.lower())
-    #     #             results = defense_func(target, self, attack)
-    #     #             return results
-                
-    
-    #     def use_cursed_tool(self, tool: dict, **kwargs):
-    #         if tool[type] == 'melee':
-                 
-        
-    #     def domain(self, **kwargs):
-    #          pass
-     
 # region Enemy
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass,  xp: int, cgp: int, 
-                stack=0, colony:int = None,
-                inventory: list = None, equipped: list = None, poison: tuple=None,charge: tuple=None, 
-                stun: tuple=None,  hi: bool=None, hr: str=None, prescience: int=None, tamed: bool=None,
-                debuffed: list=None, buffed: list=None, summons: list=None, healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
-        try:   
+                stack=0, colony_id:int = None, defense: dict=None,
+                inventory: list = None, equipped: list = None,
+                poison: tuple=None,charge: int=None, 
+                stun: tuple=None,  hi: bool=None, hr: str=None,
+                prescience: int=None, tamed: bool=None,
+                debuffed: list=None, buffed: list=None, summons: list=None, 
+                healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
+            
             super().__init__(
                 name, 
                 level, 
@@ -260,8 +100,9 @@ class Enemy(Actor):
                 speed, 
                 technique, 
                 playerclass, 
-                colony)
+                colony_id)
 
+            inventory = {"Tools" : {}, "Technique Inv" : {}, "Summon" : {}}
             self.name = name
             self.ce = max_ce
             self.hp = max_hp
@@ -272,7 +113,7 @@ class Enemy(Actor):
             self.speed = speed
             self.technique = technique
             self.playerclass = playerclass
-            self.colony = colony
+            self.colony = colony_id
             self.inventory = inventory 
             self.equipped = equipped 
             self.xp = xp
@@ -296,42 +137,51 @@ class Enemy(Actor):
             self.killed=killed
             self.timer=timer
             self.imbue=0
-
-        except:
-            traceback.print_exc()
+            self.defense = defense
 
     def __repr__(self):
         return f"Enemy: {self.name} - {self.level} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - in colony: {self.colony}"
 # endregion 
 
-
-
 # region Player
 class Player(Actor):
     level_cap = 200
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony, 
+
+    def __init__(self, 
+                    name, entered, level, max_hp, max_ce, strength, 
+                    speed, technique, playerclass, colony_id, 
+
                     xp: int, cgp: int, skp: int, user_id: int,
                     stack=0, imbue=0,
-                    equipped: list=None, inventory: list=None,
-                    summons: list=None, charge: tuple=None, 
+                    defense: str="CE", 
+                    inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
+                    equipped: list=None,
+                    summons: list=None,
                     poisoned: tuple=None, stunned: tuple=None, 
                     hr: str=None, # heavenley restriction ("max", "zero")
                     hi: bool=None, # hidden inventory
-                    rct: tuple=None, #(1, 2, 3) 
                     heal: dict=None,
                     self_heal: int=None,
-                    killcount: list=None, buffed: list=None, 
-                    debuffed: list=None, status: str=None, grade=None, soul: dict=None):
+                    killcount: list=None, 
+                    buffed: list=None, 
+                    debuffed: list=None, status: str=None, grade=None, 
+                    soul: dict=None, six_eyes: bool=None,
+                    killed: str=None):
         try:          
-          super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony)
+          super().__init__(name, level, max_hp, max_ce, strength, speed, technique, playerclass, colony_id)
+
+          self.entered=entered
+          self.defense = defense
           self.xp = xp
           self.cgp = cgp
           self.skp = skp
           self.strength=strength
           self.speed=speed
           self.technique=technique
-          self.colony=colony
+          self.colony=colony_id
           self.userd_id=user_id
+          self.colony=colony_id
+          self.user_id=user_id
           self.equipped=equipped
           self.inventory=inventory
           self.summons=summons
@@ -341,18 +191,17 @@ class Player(Actor):
           self.stunned=stunned
           self.hr=hr
           self.hi =hi
-          self.rct = rct
           self.heal = heal
           self.self_heal = self_heal
           self.killcount=killcount
           self.buffed=buffed
           self.debuffed=debuffed
-          self.charge= charge
           self.status=status
           self.grade=grade
           self.soul=soul
           self.heal = heal
-          
+          self.six_eyes=six_eyes
+          self.killed=killed
           humanoid_body = {
               "Head": BodyPart(name='Head', max_hp=self.max_hp * 10 // 100),
               "Torso": BodyPart(name='Torso', max_hp=self.max_hp * 50 // 100, max_ce=self.max_ce),
@@ -362,13 +211,12 @@ class Player(Actor):
               "Right Leg": BodyPart(name='Right Leg', max_hp=self.max_hp * 10 // 100)
           }
           self.bodyparts = humanoid_body
+
           
           
         except:
              traceback.print_exc()
-                                        
- # endregion
- #          
+     
     def __repr__(self):
         return f"Character: {self.name} - HP: {self.hp}, XP: {self.xp}, CGP: {self.cgp}, Technique: {self.technique} - belonging to user_id: {self.user_id} - in colony: {self.colony}"
 
@@ -449,16 +297,14 @@ class Player(Actor):
 
     def level_up(self, xp_needed):
 
-        if self.level >= self.level_cap:
+        if self.level >= self.level_cap: 
             self.level = self.level_cap
             self.save_to_db()
             return (False, self.level, self.xp) #if the player has reached the level cap, they will no longer level up, and will no longer gain skill points
 
         if self.xp >= xp_needed:
             while self.xp >= xp_needed:
-                    
                     self.level += 1 # If the players xp is greater than or equal to the xp needed to level up, they will level up
-
                     if self.level < 10: # If the players level is under 10, they will gain 2 skill points 
                         self.skp += 2
                     if self.level > 10: # If the players level is over 10, they will gain 4 skill points
@@ -470,8 +316,6 @@ class Player(Actor):
                     if self.level > 180: # If the players level is over 180, they will gain 10 skill points per level
                         self.skp += 10
                     
-                    
-
                     self.save_to_db()
                     xp_needed = self.ready_level_up()[1]
                 
@@ -528,14 +372,9 @@ class Player(Actor):
 #     def save_to_db(self):
 #      save_player(self) #the imported save_player method from the database file
 
+#endregion
         
-## ENEMY CLASSES 
-## SUBCLASS OF ENEMY CLASS
-
-
-
-
-
+#region Bugfly
 class Grade4_Bugfly(Enemy):
     def __init__(self):
         
@@ -550,7 +389,7 @@ class Grade4_Bugfly(Enemy):
              cgp=1, 
              technique="Bugfly", 
              playerclass="Curse", 
-             quantity=random.randrange(1, 8),
+             quantity=random.randrange(4, 8),
              bodyparts={
             "Head" : BodyPart(name="Head", max_hp=15, max_ce=20), 
         
@@ -561,8 +400,9 @@ class Grade4_Bugfly(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 
+#endregion
 
-            
+#region FloatJelly      
 class  Grade4_Floatjelly(Enemy):
     def __init__(self):
           super().__init__(
@@ -578,15 +418,16 @@ class  Grade4_Floatjelly(Enemy):
              cgp=1, 
              technique="Floatjelly", 
              playerclass="Curse", 
-             quantity=random.randrange(1, 6), 
+             quantity=random.randrange(2, 6), 
              stun=1,
              bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
              timer=0,
              killed=False)
           self.hp = self.max_hp
           self.ce = self.max_ce
+#endregion
 
-
+#region Flymouth
 class Grade4_Flymouth(Enemy):
     min_level= 1
     def __init__(self):
@@ -609,30 +450,30 @@ class Grade4_Flymouth(Enemy):
     
           self.hp = self.max_hp
           self.ce = self.max_ce
-          
+#endregion
+
+#region Barehand
 class Grade3_Barehand(Enemy):
 
     def __init__(self):
           super().__init__(
               name="Barehand Curse", 
              level=1, 
-        
              max_hp=150, 
-   
              max_ce=100, 
              strength=80, 
              speed=120, 
              xp=50, 
              cgp=1, 
-             technique="Backhand", 
+             technique="Barehand", 
              playerclass="Curse", 
              quantity=random.randrange(1, 3),
- bodyparts= {"Head" : BodyPart(name='Head', max_hp=150 * 20// 100, max_ce=100 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=150 * 50 // 100, max_ce=100 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=150 * 30 // 100, max_ce = 150 * 30 //100)}
- ,
+ bodyparts= {"Head" : BodyPart(name='Head', max_hp=150 * 20// 100, max_ce=100 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=150 * 50 // 100, max_ce=100 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=150 * 30 // 100, max_ce = 150 * 30 //100)},
  timer=60,
  killed=False)
-  
+# endregion
 
+#region  Furrpede
 class Grade3_Furrpede(Enemy):
     def __init__(self):
         super().__init__(
@@ -655,7 +496,9 @@ class Grade3_Furrpede(Enemy):
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
+#endregion
 
+#region AnxiousEars
 class Grade3_AnxiousEars(Enemy):
     def __init__(self):
         super().__init__(
@@ -676,8 +519,9 @@ class Grade3_AnxiousEars(Enemy):
 
         self.hp = self.max_hp
         self.ce = self.max_ce
+#endregion
 
-
+#region Stinkaspor
 class Grade2_Stinkaspor(Enemy):
     def __init__(self):
         super().__init__(
@@ -700,9 +544,9 @@ class Grade2_Stinkaspor(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 
-             
+#endregion
 
-
+#region Primate
 class Grade2_Primate(Enemy):
     def __init__(self):
         super().__init__(
@@ -723,11 +567,9 @@ class Grade2_Primate(Enemy):
               killed=False)
         self.hp = self.max_hp
         self.ce = self.max_ce
-        
+#endregion
 
-
-
-
+#region Orbmaster
 class Grade1_Orbmaster(Enemy):
     def __init__(self ):
         super().__init__(
@@ -746,8 +588,9 @@ class Grade1_Orbmaster(Enemy):
              killed=False)
         self.hp = self.max_hp
         self.ce = self.max_ce
+#endregion
 
-
+#region Charger
 class Grade1_Charger(Enemy):
     def __init__(self):
             super().__init__(
@@ -769,8 +612,9 @@ class Grade1_Charger(Enemy):
                  )
             self.hp = self.max_hp
             self.ce = self.max_ce
+#endregion
 
-
+#region FingerBearer
 class SpecialGrade_FingerBearer(Enemy):
     def __init__(self):
           super().__init__(
@@ -791,8 +635,9 @@ class SpecialGrade_FingerBearer(Enemy):
              killed=False)
           self.hp = self.max_hp
           self.ce = self.max_ce
+#endregion
 
-
+#region DisasterFlames
 class SpecialGrade_DisasterFlames(Enemy):
         def __init__(self):
             super().__init__(
@@ -814,12 +659,9 @@ class SpecialGrade_DisasterFlames(Enemy):
                         )
             self.hp = self.max_hp
             self.ce = self.max_ce
-                
-                
+#endregion
 
-
-
-
+#region NatureSpirit
 class SpecialGrade_NatureSpirit(Enemy):
         def __init__(self):
             super().__init__(name="Nature Spirit",
@@ -841,8 +683,9 @@ class SpecialGrade_NatureSpirit(Enemy):
    
             self.hp = self.max_hp
             self.ce = self.max_ce
+#endregion
 
-
+#region TideCurse
 class SpecialGrade_TideCurse(Enemy):
        def __init__(self):
         super().__init__(name="Tide Curse",
@@ -863,8 +706,10 @@ class SpecialGrade_TideCurse(Enemy):
         )
         self.hp = self.max_hp
         self.ce = self.max_ce
-        
-class SpecialGrade_Soul_Curse(Enemy):
+#endregion
+
+#region SoulCurse
+class SpecialGrade_SoulCurse(Enemy):
        def __init__(self):
         super().__init__(
                     name="Soul Curse",
@@ -887,9 +732,9 @@ class SpecialGrade_Soul_Curse(Enemy):
      
         self.hp = self.max_hp
         self.ce = self.max_ce
+#endregion
 
-
-
+#region Toji
 class Toji(Enemy):
            def __init__(self):
             super().__init__(name="Toji",
@@ -900,7 +745,7 @@ class Toji(Enemy):
                        speed=1200,
                        xp=1200,
                        cgp=5,
-                       technique="Toji", 
+                       technique="Heavenly Restriction: Zero", 
                        playerclass="Reincarnate",
                        bodyparts=human_body_parts,
                        timer=300,
@@ -908,16 +753,14 @@ class Toji(Enemy):
                        )
             self.hp = self.max_hp
             self.ce = self.max_ce
+#endregion
 
-
-
+#region Reggie
 class Reggie(Enemy):
         def __init__(self):
                 super().__init__(name="Reggie", 
                            level=60,
-                         
                            max_hp=600,
-                      
                            max_ce=700,
                            strength=800,
                            speed=800,
@@ -932,6 +775,9 @@ class Reggie(Enemy):
 
                 self.hp = self.max_hp
                 self.ce = self.max_ce
+#endregion
+
+#region Uro
 class Uro(Enemy):
         def __init__(self):
                         super().__init__(name="Uro",
@@ -952,6 +798,9 @@ class Uro(Enemy):
                                    )
                         self.hp = self.max_hp
                         self.ce = self.max_ce
+#endregion
+
+#region Ryu
 class Ryu(Enemy): 
      def __init__(self):
           super().__init__(
@@ -971,9 +820,9 @@ class Ryu(Enemy):
                      )
           self.hp = self.max_hp
           self.ce = self.max_ce
-          
+#endregion
 
-
+#region Kashimo
 class Kashimo(Enemy):
      def __init__(self):
           super().__init__(
@@ -995,8 +844,10 @@ class Kashimo(Enemy):
                      )
           self.hp = self.max_hp
           self.ce = self.max_ce
+#endregion
 
-class KingOfCurse(Enemy):                  
+#region KingOfCurses
+class KingOfCurses(Enemy):                  
         def __init__(self, **kwargs):
                 super().__init__(name="King Of Curses", 
                            level=150, 
@@ -1008,18 +859,17 @@ class KingOfCurse(Enemy):
                            speed=5000, 
                            xp=2000, 
                            cgp=5,
-                           technique="King Of Curses",
+                           technique="Shrine",
                             playerclass="Reincarnate",
                            bodyparts=human_body_parts,
                            timer=500,
                            killed=False
-                    
                            )
                 self.hp = self.max_hp
                 self.ce = self.max_ce
-                
+#endregion
 
-
+#region Kenjaku
 class Kenjaku(Enemy):
         def __init__(self, ):
                 super().__init__(
@@ -1031,7 +881,7 @@ class Kenjaku(Enemy):
                      speed=2000, 
                      xp=2000, 
                      cgp=5, 
-                     technique="Body Hop: Anti Gravity Manipulation",
+                     technique="Body Hop",
                      playerclass="Reincarnate",
                      bodyparts=human_body_parts,
                      timer=500,
@@ -1040,3 +890,4 @@ class Kenjaku(Enemy):
                 self.hp = self.max_hp
                 self.ce = self.max_ce
              
+#endregion

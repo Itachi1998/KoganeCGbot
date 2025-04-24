@@ -1,9 +1,9 @@
-import discord, pagination, game, db
+import discord, pagination, game, db, random
 from game import Player, Enemy
-from db import read_player, read_colony, update_player,  update_colony, update_enemy, update_technique, read_technique, read_enemy, create_enemy
-
+from db import read_player, read_colony, update_player,  update_colony, update_enemy, update_technique, read_technique, read_enemy
 from discord.ext import commands
-from discord import app_commands
+from discord import Subscription, app_commands
+
 def healthbar(health, max_health):
     max_dashes = 4
     dash_ratio = max_health / max_dashes
@@ -31,8 +31,42 @@ def ce_bar(ce, max_ce):
     bar = f"{dashes}{percent}"
     return bar
 
-class Battle(commands.Cog): 
 
+def verify_players(players, colony):
+    print("Verifying players....")
+    verified_players = []
+    for p in players:
+        if p.colony_id == colony.colony_id and p.user_id in colony.players:
+            verified_players.append(p)
+    print("Verified players\n" + str(verified_players))
+    if len(verified_players) == len(players):
+        lob_players=[]
+        for p in verified_players:
+            player = read_player(p)
+            if player:
+                lob_players.append(p)
+            else:
+                print("Removing player: " + str(p))
+                players.remove(p)
+                verified_players.remove(p)            
+        return True
+    else:
+        return False
+
+
+
+
+
+def start_pvp_embed(lobby):
+    pass
+
+def pve_start(lobby, bot):
+    pass
+
+def pvp_start(lobby, bot):
+    pass
+
+class Battle(commands.Cog): 
     def __init__(self, bot):
         self.bot = bot
         
@@ -40,88 +74,10 @@ class Battle(commands.Cog):
     async def on_ready(self):
         print("Battle cog is ready!")
 
+    @commands.hybrid_command(name="pve",with_app_command=True)
+    async def pve(self, ctx):
+        pass
 
-    
-  
-    # @app_commands.command(name="slash", description="Example of a slash command")
-    # async def slash(self, interaction: discord.Interaction):
-    #     await interaction.response.send_message("This is a slash command!")
-
-    # @commands.hybrid_command(name="lobby", description="Host a lobby")
-    # async def lobby(self, ctx, name: str = None):
-    #     player = self.bot.load_character(ctx.author.id, ctx.guild.id)
-    #     if not player:
-    #         await ctx.send("Player not found")
-    #         return
-    #     host_id = int(ctx.author.id)
-    #     if name is None:
-    #         name = f"{player.name}'s lobby"
-    #     guild = await self.bot.fetch_guild(os.environ['SERVERID'])
-    #     log = await guild.fetch_channel(os.environ['LOGCHANNEL'])
-    #     await log.send(
-    #         f"Lobby created by: {str(ctx.author)}\nNamed {str(name)}\nHost id: {str(host_id)}"
-    #     )  #logging
-
-    #     ct = old_techniques.get_cursed_technique(player.technique)
-    #     title = f"{name}"
-    #     description = f"### Lobby created by host: `{player.name}`"
-    #     field1_name = "Host"
-    #     equipped = None
-    #     if len(player.equipment) > 1:
-    #         equipped = "`" + ", ".join(player.equipment) + "`"
-    #     field1_value = f"**PLAYER:** {player.name}\n**RANK:** `{player.get_grade()}`\n**CT:** `{ct.name}` {ct.emote}\n**EQUIP:** {equipped}"
-    #     thumbnail = self.bot.user.avatar.url
-    #     players = [player.user_id]
-    #     embed = make_embed(title=title,
-    #                        description=description,
-    #                        field1_name=field1_name,
-    #                        field1_value=field1_value,
-    #                        thumbnail=thumbnail)
-
-    #     dynamo.save_lobby(host_id, player.colony, name, players, 0)
-    #     await ctx.send(f"## Lobby created: {player.name}", ephemeral=True)
-    #     msg = await ctx.send(
-    #         embed=embed)  #save the message to be able to edit the embed later
-    #     await msg.edit(view=LobbyView(self.bot, msg, players, host_id))
-
-    # @commands.hybrid_command(name="pve", desscription="Battle ai")
-    # async def pve(self, ctx, name: str = None):
-    #     player = self.bot.load_character(ctx.author.id, ctx.guild.id)
-    #     if not player:
-    #         await ctx.send("Player not found")
-    #         return
-    #     await ctx.defer()
-    #     if name == None:
-    #         name = f"{player.name}'s lobby"
-    #     guild = await self.bot.fetch_guild(os.environ['SERVERID'])
-    #     log = await guild.fetch_channel(os.environ['LOGCHANNEL'])
-    #     await log.send(
-    #         f"Lobby created by: {str(ctx.author)}\nNamed {str(name)}\nHost id: {str(ctx.author.id)}\nServer: {str(ctx.guild.id)}"
-    #     )  #logging
-    #     msg = await ctx.send(f"### Solo lobby `{name}` CREATED!")
-
-    #     enemy = player.pve(ctx.guild.id)
-    #     avatar = self.bot.user.avatar.url
-    #     dynamo.save_lobby(player.user_id, ctx.guild.id, name,
-    #                           [player.user_id], 0)
-    #     await pve_embed(self.bot, msg, enemy, player, ctx.author.id, avatar)
-
-    # @commands.hybrid_command(name='pvp', description="Start pvp lobby")
-    # async def pvp(self, ctx, name: str = None):
-    #     player = self.bot.load_character(ctx.author.id, ctx.guild.id)
-    #     if not player:
-    #         await ctx.send("Player not found")
-    #         return
-    #     if not name:
-    #         name = f"{player.name}'s lobby"
-    #     host = ctx.author.id
-    #     dynamo.save_lobby(host, ctx.guild.id, name, [host], 0)
-    #     lob = dynamo.read_lobby(host, ctx.guild.id)
-    #     choice = ctx.author.id
-
-    #     description = f"### `PVP LOBBY`"
-    #     msg = await ctx.send(f"### `{player.name}` started a pvp lobby")
-    #     await pvp_embed(self.bot, host, lob['players'], lob, description, msg)
 
 
 # async def respawn_enemy(enemy, colony):

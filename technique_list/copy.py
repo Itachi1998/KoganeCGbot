@@ -15,20 +15,18 @@ class Copy(Techniques):
       {
        "Copy" : {'dmg': 10, 'speed': 10, 'ct lvl': 1, 'imbue cost': 50}, 'Manifest Rika' : {'dmg' : 600, 'speed' : 600, 'ct lvl' : 1,'soul' : 50, 'imbue cost' : 60},    
        "Authentic Love" : {'dmg' : 999, 'domain' : {'name': 'Authentic Love', 'dmg' : 999, 'speed' : 999, 'imbue cost' : 150}, 'speed' :999, 'ct lvl' : 3, 'imbue cost' : 150}},
-      {"Partial Rika Defense": {'def': 200, 'speed': 375, 'ct lvl': 1, 'imbue cost': 30}, 
+      {"Partial Rika": {'def': 200, 'speed': 375, 'ct lvl': 1, 'imbue cost': 30}, 
        'CE' : {'def' : 100, 'speed' : 100, 'ct lvl' : 1, 'imbue cost' : 10}, 'Full Rika Defense' : {'def' : 600, 'speed' : 600, 'soul def' : 100, 'counter' : True, 'dmg' : 200, 'ct lvl' : 1, 'imbue cost' : 60}},
       0,
       10,
       "<:Yuta:1287212194609496064>")
-
-
+      
 
   def partial_rika(self, player, targets):
     if player.ce < self.ce_cost:
         results = (0, 'NA ce', False, [])
         targets = targets
         return results, targets
-
 
     if player.imbued < self.attack['Partial Rika']['imbue cost']:
         results = (0, 'NA imbue', False, [])

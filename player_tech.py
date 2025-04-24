@@ -1,7 +1,7 @@
 from techniques import Techniques
 from random import randint
 
-# region ### Auspicious Beasts Summon
+# region Auspicious Beasts Summon
 auspicious_beasts_summon={
 "Auspicious Beasts Summon" :
      [
@@ -48,7 +48,7 @@ auspicious_beasts_summon={
                             act_cost=30,
                             act_body=("Full"),
                             aoe=1,
-                            strength=300,
+                            strength=100,
                             speed=700,
                             type="dodge"
                          ),
@@ -70,10 +70,9 @@ auspicious_beasts_summon={
      ],
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### BIRD MANIP
-
+# region Bird Manipulation
 bird_manip = {
      "Bird Manipulation" : 
      [
@@ -84,7 +83,7 @@ bird_manip = {
                     Techniques(
                          name="Talon Attack",
                          level=1,
-                         act_speed=100,
+                         act_speed=1,
                          act_cost=100,
                          act_body=("Head", "Right Arm", "Left Arm"),
                          aoe=3,
@@ -97,7 +96,7 @@ bird_manip = {
                     Techniques(
                          name="Bird Flock",
                          level=2,
-                         act_speed=50,
+                         act_speed=5,
                          act_cost=300,
                          act_body=("head", "left arm", "right arm"),
                          aoe=3,
@@ -110,7 +109,7 @@ bird_manip = {
                     Techniques(
                          name="Bird Sacrifice",
                          level=3,
-                         act_speed=20,
+                         act_speed=2,
                          act_cost=400,
                          act_body=("Head", "left arm", "right arm"),
                          aoe=2,
@@ -132,7 +131,7 @@ bird_manip = {
                          act_cost=50,
                          act_body=("Head", "left arm", "right arm"),
                          aoe=3,
-                         strength=50,
+                         strength=100,
                          speed=100,
                          type="dodge"
                          ),
@@ -140,11 +139,11 @@ bird_manip = {
                     Techniques(
                          name="Birds Eye",
                          level=2,
-                         act_speed=20,
+                         act_speed=5,
                          act_cost=10,
                          act_body=("head"),
                          aoe=5,
-                         strength=150,
+                         strength=100,
                          speed=500,
                          buff=("speed", 550),
                          type="dodge"
@@ -155,9 +154,9 @@ bird_manip = {
      ],
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### BLOOD MANIP
+# region Blood Manipulation
 blood_manip= {
     "Blood Manipulation" : 
           [
@@ -242,10 +241,9 @@ blood_manip= {
           ], 
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### Body Hop
-
+# region Body Hop
 body_hop={
      
 "Body Hop" :
@@ -253,16 +251,16 @@ body_hop={
           {
                "Attack" : # Need to make an option in the following turn after player or teammate defeats an opponent
                {
-                    "Steal Body" :
+                    "Body Hop" :
                          Techniques(
-                              name="Steal Body",
+                              name="Body Hop",
                               level=1,
                               act_speed=3,                              
                               act_cost=1,
                               act_body=("Head"),
                               aoe=1,
-                              strength=0,
-                              speed=500,
+                              strength=1,
+                              speed=1,
                               type="transform"
                          )
                }
@@ -271,19 +269,6 @@ body_hop={
           {
                "Defend": 
                {
-                    "Leave Body" :
-                         Techniques(
-                              name="Leave Body",
-                              level=1,
-                              act_speed=3,                              
-                              act_cost=1,
-                              act_body=("Head"),
-                              aoe=1,
-                              strength=0,
-                              speed=500,
-                              type="transform"
-                         ),
-                    
                     "Rotate Head" : # ability to reduce dmg of attack to head by "spinning the top"
                          Techniques(
                               name="Rotate Head",
@@ -297,13 +282,31 @@ body_hop={
                               type="dodge"
                          )
                }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion" :
+                         Techniques(
+                              name="Domain Expansion: Womb Profusion",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=9000,
+                              type="open", 
+                              sure_hit=True
+                         )
+               }
           }
      ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### BOOGIE WOOGIE
+# region Boogie Woogie
 boogie_woogie = {
 
 "Boogie Woogie" : 
@@ -315,7 +318,7 @@ boogie_woogie = {
                          Techniques(
                               name="Rock Throw",
                               level=1,
-                              act_speed=10,
+                              act_speed=5,
                               act_cost=20,
                               act_body=("Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg"),
                               aoe=1,
@@ -329,7 +332,7 @@ boogie_woogie = {
                          Techniques(
                               name="Double Switch Fake",
                               level=2,
-                              act_speed=0,
+                              act_speed=1,
                               act_cost=0,
                               act_body=("Head", "Torso", "Left Leg", "Right Leg", "Right Arm", "Left Arm"),
                               aoe=5,
@@ -341,7 +344,7 @@ boogie_woogie = {
                          Techniques(
                               name="Over Here",
                               level=2,
-                              act_speed=10,
+                              act_speed=3,
                               act_cost=50,
                               act_body=("Head", "Torso", "Right Arm", "Left Arm"),
                               aoe=5,
@@ -360,11 +363,11 @@ boogie_woogie = {
                          Techniques(
                               name="Clap Swap",
                               level=1,
-                              act_speed=10,
+                              act_speed=3,
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=5,
-                              strength=10,
+                              strength=100,
                               speed=2000,
                               type="dodge"
                               ),
@@ -372,13 +375,13 @@ boogie_woogie = {
                          Techniques(
                               name="Reverse Swap",
                               level=3,
-                              act_speed=10,
+                              act_speed=3,
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=10,
+                              strength=100,
                               speed=2000,
-                              type="counter"
+                              type="reflect"
                               ),
                     "Vibra Swap" : 
                          Techniques(
@@ -388,7 +391,7 @@ boogie_woogie = {
                               act_cost=100,
                               act_body=("Head", "Torso"),
                               aoe=5,
-                              strength=10,
+                              strength=100,
                               speed=5000,
                               type="dodge"
                               )
@@ -398,10 +401,9 @@ boogie_woogie = {
 
 "Rarity" : 50
 }
+# endregion
 
-
-# region ### Cursed Energy Discharge
-
+# region Cursed Energy Discharge
 ce_discharge={
      
 "Cursed Energy Discharge" :
@@ -435,7 +437,7 @@ ce_discharge={
                               act_cost=1,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=500,
+                              strength=1000,
                               speed=1000,
                               type="tank"
                          )
@@ -444,10 +446,9 @@ ce_discharge={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### COMEDIAN
-
+# region Comedian
 comedian={
 "Comedian" : 
      [
@@ -467,6 +468,7 @@ comedian={
                               type="melee",
                               buff=("strength", "speed")
                               ),
+                              
                     "One Liner" :
                          Techniques(
                               name="One Liner",
@@ -557,7 +559,7 @@ comedian={
                               act_cost=10,
                               act_body=("full"),
                               aoe=2,
-                              strength=900,
+                              strength=100,
                               speed=900,
                               type="dodge"
                               ),
@@ -581,10 +583,9 @@ comedian={
 
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### CONSTRUCTION
-
+# region Construction
 construction={
      "Construction": [
           {
@@ -701,15 +702,35 @@ construction={
                                    type="tank"
                               )
                     }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion" :
+                         Techniques(
+                              name="Domain Expansion: Three-fold Affliction",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="closed",
+                              intern_strength=30,
+                              extern_strength=30,
+                              sure_hit=True
+
+                         )
+               }
           }
 ],
 "Rarity" : 15, 
 "Six Eyes" : False
 }
+# endregion
 
-
-# region ### COPY
-
+# region Copy
 copy={ # change to be like cursed spirit manipulation?
      "Copy" : [
           {
@@ -795,16 +816,36 @@ copy={ # change to be like cursed spirit manipulation?
                               stun=2,
                          )
                }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion" :
+                         Techniques(
+                              name="Domain Expansion: Authentic Mutual Love",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="closed",
+                              intern_strength=30,
+                              extern_strength=30,
+                              sure_hit=True
+
+                         )
+               }
           }
      ],
 "Rarity" : 15,
 
 "Six Eyes" : False
 }
+# endregion
 
-
-# region ### CURSED SPEECH
-
+# region Cursed Speech
 cursed_speech={
      "Cursed Speech" :
      [
@@ -823,7 +864,7 @@ cursed_speech={
                               speed=900,
                               type="projectile",
                               stun=3,
-                              visable=False
+                              invisible=True
                          ),
 
                     "Blast Away" :
@@ -837,7 +878,7 @@ cursed_speech={
                               strength=800,
                               speed=800,
                               type="projectile",
-                              visable=False
+                              invisible=True
                          ),
 
                     "Plummet" : 
@@ -852,7 +893,7 @@ cursed_speech={
                               speed=1000,
                               type="projectile",
                               stun=1,
-                              visable=False
+                              invisible=True
                          )
                }
           },
@@ -872,7 +913,7 @@ cursed_speech={
                               speed=900,
                               type="counter",
                               stun=3,
-                              visable=False
+                              invisible=True
                          ),
                     
                     "Blast Away" :
@@ -886,7 +927,7 @@ cursed_speech={
                               strength=800,
                               speed=800,
                               type="counter",
-                              visable=False
+                              invisible=True
                          )
                     
                 }
@@ -894,26 +935,26 @@ cursed_speech={
      ],
      "Rarity" : 50
 }
+# endregion
 
-
-# region ### Cursed Spirit Manipulation
+# region Cursed Spirit Manipulation
 cursed_spirit_manip={
      "Cursed Spirit Manip" : [
           {
                "Attack" :
                     {
                          "Summon" : 
-                              Techniques(
-                                   name="Cursed Spirit Manipulation: Summoning",
-                                   level=1,
-                                   act_speed=20,
-                                   act_cost=100,
-                                   act_body=("Full"),
-                                   aoe=5,
-                                   strength=1000,
-                                   speed=1000,
-                                   type="summon",
-                                   summon={}
+                         Techniques(
+                              name="Cursed Spirit Manipulation: Summoning",
+                              level=1,
+                              act_speed=20,
+                              act_cost=100,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=1000,
+                              speed=1000,
+                              type="summon",
+                              summon={}
                               )
                     }
                  },
@@ -938,18 +979,350 @@ cursed_spirit_manip={
      ],
 "Rarity" : 5
 }
+# endregion
 
+# region Disaster Flames
+disaster_flames={
+     
+"Disaster Flames" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Fire Cannon" :
+                         Techniques(
+                              name="Fire Cannon",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=900,
+                              type="melee"
+                         ),
 
-# region ### Heavenly Restriction: Zero
+                    "Inferno" :
+                         Techniques(
+                              name="Inferno",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=50,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=10,
+                              strength=200,
+                              speed=1000,
+                              type="projectile"
+                         ),
+                    
+                    "Fireflies" :
+                         Techniques(
+                              name="Fireflies",
+                              level=3,
+                              act_speed=2,                              
+                              act_cost=25,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=300,
+                              speed=1200,
+                              type="projectile"
+                         ),
+                    
+                    "Lava Eruption" :
+                         Techniques(
+                              name="Lava Eruption",
+                              level=3,
+                              act_speed=3,                              
+                              act_cost=100,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=1200,
+                              speed=800,
+                              type="projectile"
+                         ),
+                    
+                    "Lava Hands" :
+                         Techniques(
+                              name="Lava Hands",
+                              level=4,
+                              act_speed=3,                              
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=1000,
+                              speed=1000,
+                              type="melee"
+                         ),
+                    
+                    "Maximum Meteor" :
+                         Techniques(
+                              name="Maximum Meteor",
+                              level=5,
+                              act_speed=5,                              
+                              act_cost=150,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=2000,
+                              speed=500,
+                              type="projectile"
+                         )
+               }
+          },
 
+          {
+               "Defend": 
+               {
+                    "Fire Cannon" :
+                         Techniques(
+                              name="Fire Cannon",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=900,
+                              type="counter"
+                         ),
+
+                    "Inferno" :
+                         Techniques(
+                              name="Inferno",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=10,
+                              strength=200,
+                              speed=1000,
+                              type="counter"
+                         ),
+                    
+                     "Lava Surfboard" :
+                         Techniques(
+                              name="Lava Surfboard",
+                              level=4,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Full"),
+                              aoe=1,
+                              strength=100,
+                              speed=1000,
+                              type="dodge"
+                         )
+                }   
+                
+            }
+        ],
+"Rarity" : 10
+}
+# endregion
+
+# region Disaster Plants
+disaster_plants={
+     
+"Disaster Plants" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Cursed Buds" :
+                         Techniques(
+                              name="Cursed Buds",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=10,
+                              speed=800,
+                              type="projectile",
+                              debuff=('burn ce', 50) # burns 50 ce per round if it hits target (won't hit if target has no ce imbued or is hr zero)
+                         ), 
+
+                    "Roots" :
+                         Techniques(
+                              name="Roots",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=700,
+                              speed=700,
+                              type="projectile"
+                         ),
+
+                    "" :
+                         Techniques(
+                              name="",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=0,
+                              type=""
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Root Rider" :
+                         Techniques(
+                              name="Root Rider",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=700,
+                              type="dodge"
+                         ),
+
+                    "Roots" :
+                         Techniques(
+                              name="Roots",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=700,
+                              speed=700,
+                              type="counter"
+                         ),
+
+                    "" :
+                         Techniques(
+                              name="",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=0,
+                              type=""
+                         )
+                }
+            }
+        ],
+"Rarity" : 20
+}
+# endregion
+
+# region Disaster Tides
+disaster_tides={
+     
+"Disaster Tides" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Water Blast" :
+                         Techniques(
+                              name="Water Blast",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=100,
+                              speed=800,
+                              type="projectile",
+                              debuff=('slow', 50) # slows targets down by 50% with water for the following round or smth
+                         ), 
+
+                    "Water Vortex" : # twisting water attack
+                         Techniques(
+                              name="Water Vortex",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=800,
+                              type="melee"
+                         ),
+
+                    "" :
+                         Techniques(
+                              name="",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=1,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=0,
+                              type=""
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Water Blast" :
+                         Techniques(
+                              name="Water Blast",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Full"),
+                              aoe=5,
+                              strength=100,
+                              speed=800,
+                              type="counter",
+                              debuff=('slow', 50) # slows targets down by 50% with water for the following round or smth
+                         ), 
+
+                    "Water Vortex" : # twisting water attack
+                         Techniques(
+                              name="Water Vortex",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=800,
+                              type="counter"
+                         ),
+
+                    "Water Jets" :
+                         Techniques(
+                              name="Water Jets",
+                              level=3,
+                              act_speed=1,                              
+                              act_cost=10,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=800,
+                              type="dodge"
+                         )
+                }
+            }
+        ],
+"Rarity" : 20
+}
+# endregion
+
+# region Heavenly Restriction: Zero
 hr_zero={
-      
 "Heavenly Restriction: Zero" : 
      [
           {
                "Attack" : 
                {
-                    "3 Piece" : 
+                    "Three Piece Combo" : 
                          Techniques(
                               name="Three Piece Combo",
                               level=1,
@@ -957,8 +1330,8 @@ hr_zero={
                               act_cost=1,  # Updated act_cost to 1
                               act_body=("Left Arm", "Right Arm"),
                               aoe=3,
-                              strength=1000,
-                              speed=1000,
+                              strength=100,
+                              speed=1200,
                               type="melee"
                          ),
                     "Spinning Back Kick":
@@ -969,8 +1342,8 @@ hr_zero={
                               act_cost=1,  # Updated act_cost to 1
                               act_body=("Left Leg", "Right Leg"),
                               aoe=1,
-                              strength=1200,
-                              speed=1200,
+                              strength=200,
+                              speed=1000,
                               type="melee"
                          ),
                     "Yeet Car" : 
@@ -982,7 +1355,7 @@ hr_zero={
                               act_body=("arms", "legs"),
                               aoe=1,
                               strength=800,
-                              speed=800,
+                              speed=600,
                               type="projectile"
                          )
                }
@@ -1001,19 +1374,45 @@ hr_zero={
                               act_body=("Full"),
                               aoe=1,
                               strength=1200,
-                              speed=9999,
+                              speed=9000,
                               type="tank"
+                         ),
+
+                    "Precognition" : 
+                         Techniques(
+                              name="Precognition",
+                              level=3,
+                              act_speed=1,
+                              act_cost=1,
+                              act_body=("full"),
+                              aoe=1,
+                              strength=100,
+                              speed=1200,
+                              type="dodge"
+                         ),
+
+                    "Read Like a Book" : 
+                         Techniques(
+                              name="Read Like a Book",
+                              level=3,
+                              act_speed=1,
+                              act_cost=1,
+                              act_body=("full"),
+                              aoe=1,
+                              strength=100,
+                              speed=1200,
+                              type="counter"
                          ),
                          
                     "Air Hop" : 
                          Techniques(
                               name="Air Hop",
                               level=5,
-                              act_speed=2,
-                              act_cost=50,
+                              act_speed=1,
+                              act_cost=1,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1500,
                               type="dodge"
                          )
@@ -1023,10 +1422,9 @@ hr_zero={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Ice Manipulation
-
+# region Ice Manipulation
 ice_manip={
      
 "Ice Manipulation" :
@@ -1151,10 +1549,9 @@ ice_manip={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Idle Transfiguration
-
+# region Idle Transfiguration
 idle_transfig={
      
 "Idle Transfiguration" :
@@ -1243,7 +1640,7 @@ idle_transfig={
                             act_cost=80,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=200,
+                            strength=100,
                             speed=800,
                             type="dodge"
                             ),
@@ -1264,18 +1661,18 @@ idle_transfig={
                }
           },
           {
-          "Domain" :
+          "Barrier" :
                {
-                   "Self-Embodiment of Perfection" :
+                   "Domain Expansion" :
                          Techniques(
-                              name="Self-Embodiment of Perfection",
+                              name="Domain Expansion: Self-Embodiment of Perfection",
                               level=4,
                               act_speed=2,
                               act_cost=300,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=20,
                               strength=1000,
-                              speed=9999,
+                              speed=8000,
                               type="closed",
                               intern_strength=30,
                               extern_strength=30,
@@ -1287,15 +1684,14 @@ idle_transfig={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Limitless
-
+# region Limitless
 limitless={
 "Limitless" :
      [
           {
-               "Attack" : 
+          "Attack" : 
                {
                "Blue" : 
                     Techniques(
@@ -1304,9 +1700,9 @@ limitless={
                          act_speed=1,
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
-                         aoe=(1, 5),
-                         strength=1000,
-                         speed=1600,
+                         aoe=1,
+                         strength=800,
+                         speed=1200,
                          type="projectile"
                     ),
                
@@ -1318,8 +1714,8 @@ limitless={
                          act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=1600,
-                         speed=1000,
+                         strength=1200,
+                         speed=800,
                          type="projectile"
                     ),
                
@@ -1328,11 +1724,11 @@ limitless={
                          name="Void Punch",
                          level=4,
                          act_speed=1,
-                         act_cost=25,
+                         act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=500,
-                         speed=1600,
+                         strength=800,
+                         speed=1200,
                          type="melee"
                     ),
 
@@ -1344,8 +1740,8 @@ limitless={
                          act_cost=150,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=2500,
-                         speed=1000,
+                         strength=2000,
+                         speed=2000,
                          type="projectile"
                     ),
                
@@ -1353,14 +1749,14 @@ limitless={
                     Techniques(
                          name="Unlimited Hollow Purple",
                          level=5,
-                         act_speed=3,
-                         act_cost=150,
+                         act_speed=5,
+                         act_cost=300,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=10,
-                         strength=2500,
+                         strength=2000,
                          speed=2000,
                          type="projectile",
-                         self_dmg=1250
+                         self_dmg=500
                     )
                }
           },
@@ -1369,16 +1765,28 @@ limitless={
           "Defend": 
           
           {
+              "CE" :
+                    Techniques(
+                         name="CE",
+                         level=1,
+                         act_speed=0,
+                         act_cost=0,
+                         act_body=("Full"),
+                         aoe=0,
+                         strength=0,
+                         speed=0,
+                         type="tank"
+                    ),
                "Infinity" :
                     Techniques(
                          name="Infinty",
                          level=1,
                          act_speed=0,
-                         act_cost=100,
+                         act_cost=10,
                          act_body=("Full"),
                          aoe=1,
-                         strength=9999,
-                         speed=9999,
+                         strength=9000,
+                         speed=9000,
                          type="tank"
                     ),
 
@@ -1387,54 +1795,54 @@ limitless={
                          name="Blue",
                          level=1,
                          act_speed=1,
-                         act_cost=350,
+                         act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
-                         aoe=(1, 5),
-                         strength=1000,
-                         speed=1600,
+                         aoe=1,
+                         strength=100,
+                         speed=1200,
                          type="dodge"
                     ),
-               
+
                "Red": # RCT required
                     Techniques(
                          name="Red",
                          level=2,
                          act_speed=2,
-                         act_cost=350,
+                         act_cost=50,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=1600,
-                         speed=1000,
+                         strength=1200,
+                         speed=800,
                          type="counter"
                     ),
 
-               "Void Punch" : 
+               "Void Punch" : # add a sneaky red move to combo lol
                     Techniques(
                          name="Void Punch",
                          level=4,
                          act_speed=1,
-                         act_cost=325,
+                         act_cost=25,
                          act_body=("Left Arm", "Right Arm"),
                          aoe=1,
-                         strength=500,
-                         speed=1600,
+                         strength=800,
+                         speed=1200,
                          type="counter"
                     )
                }
           },
           {
-          "Domain" :
+          "Barrier" :
                {
-                   "Infinate Void" :
+                   "Domain Expansion" :
                          Techniques(
-                             name="Infinate Void",
-                             level=5,
-                             act_speed=2,
-                             act_cost=600,
-                             act_body=("Right Arm"),
+                              name="Domain Expansion: Infinite Void",
+                              level=5,
+                              act_speed=2,
+                              act_cost=600,
+                              act_body=("Right Arm"),
                               aoe=10,
-                              strength=2000,
-                              speed=9999,
+                              strength=1000,
+                              speed=9000,
                               type="closed",
                               stun=99,
                               intern_strength=50,
@@ -1448,13 +1856,12 @@ limitless={
 "Rarity" : 3,
 "Six Eyes" : True
 }
+# endregion
 
-
-# region ### MBA
-
+# region Mythic Beast Amber
 mba={
      
-"Mythic Beast Amber" : # add self_dmg in checks
+"Mythic Beast Amber" :
      [
           {
                "Attack" : 
@@ -1472,7 +1879,7 @@ mba={
                             type="melee"
                         ),
 
-                    "Lighting Rod" : # requires cursed tool - add in checks
+                    "Lightning Rod" :
                         Techniques(
                             name="Lightning Rod",
                             level=3,
@@ -1483,7 +1890,7 @@ mba={
                             strength=1000,
                             speed=1200,
                             type="projectile",
-                            cooldown=3
+                            charge=3 # once the player.charge is set to 3 (3 rounds from start or use of tech) it is available to use
                          ),
 
                     "Corona Blast" : 
@@ -1506,7 +1913,7 @@ mba={
                "Defend": 
            
                {
-                    "Lighting Dash" : 
+                    "Lightning Dash" : 
                         Techniques(
                             name="Lightning Dash",
                             level=1,
@@ -1514,7 +1921,7 @@ mba={
                             act_cost=10,
                             act_body=("Full"),
                             aoe=1,
-                            strength=500,
+                            strength=100,
                             speed=900,
                             type="dodge"
                         ),
@@ -1537,10 +1944,9 @@ mba={
 "Rarity" : 7,
 "Activated" : False
 }
+# endregion
 
-
-# region ### Projection Sorcery
-
+# region Projection Sorcery
 projection_sorcery={
      
 "Projection Sorcery" :
@@ -1576,7 +1982,7 @@ projection_sorcery={
                             act_cost=50,
                             act_body=("Left Arm", "Right Arm"),
                             aoe=1,
-                            strength=400,
+                            strength=100,
                             speed=1200,
                             type="dodge"
                         ),
@@ -1595,22 +2001,43 @@ projection_sorcery={
                             stun=True
                         )
                }
+          },
+          {
+               "Barrier" :
+               {
+                   "Domain Expansion" :
+                         Techniques(
+                              name="Domain Expansion: Time Cell Moon Pallace",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="closed",
+                              intern_strength=30,
+                              extern_strength=30,
+                              sure_hit=True
+
+                         )
+               }
           }
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### Shrine
-
+# region Shrine
 shrine={
-     
+
 "Shrine" :
      [
           {
                "Attack" : 
                {
                     "Dismantle" : # need a visability attribute so it can't be seen by most sorcerers
+
                          Techniques(
                               name="Dismantle",
                               level=1,
@@ -1619,11 +2046,11 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=500,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
-                              visable=False
+                              invisible=True
                          ),
-                    
+
                     "Multi Dismantle" :
                         Techniques(
                               name="Multi Dismantle",
@@ -1633,9 +2060,9 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=3,
                               strength=500,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
-                              visable=False
+                              invisible=True
                          ),
 
                     "Cleave" :
@@ -1647,43 +2074,69 @@ shrine={
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=1500, # should be based off opponent hp - special case in battlechecks
-                              speed=1000,
+                              speed=0,
                               type="melee"
                          ),
 
                     "Encanted Dismantle" :
                          Techniques(
-                              name="Dismantle",
+                              name="Encanted Dismantle",
                               level=4,
-                              act_speed=2,
+                              act_speed=3,
                               act_cost=40,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=1000,
-                              speed=1000,
+                              speed=1200,
                               type="projectile",
-                              visable=False
+                              invisible=True
                          ),
                     
                     "Furnace" :
                          Techniques(
                               name="Furnace",
                               level=4,
-                              act_speed=3,
+                              act_speed=5,
                               act_cost=100,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=2000,
                               speed=500,
                               type="projectile"
+                         ),
+
+                    "World Cutting Slash" : # requires mahoraga
+                         Techniques(
+                              name="World Cutting Slash",
+                              level=5,
+                              act_speed=3,
+                              act_cost=80,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=9000,
+                              speed=1200,
+                              type="projectile",
+                              invisible=True,
+                              negates=True
                          )
                }
           },
 
           {
                "Defend": 
-           
                {
+                   "CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
                     "Cleave Spider Web" :
                          Techniques(
                               name="Cleave Spider Web",
@@ -1707,10 +2160,10 @@ shrine={
                               aoe=1,
                               strength=500,
                               speed=1000,
-                              type="counter"
+                              type="tank"
                          ),
 
-                    "Dismantle Glove" : # like parry but strong since it envelopes the hand
+                    "Dismantle Glove" : # like parry but strong since it envelops the hand
                          Techniques(
                               name="Dismantle Glove",
                               level=2,
@@ -1744,27 +2197,44 @@ shrine={
                               act_cost=50,
                               act_body=("full"),
                               aoe=1,
-                              strength=0,
+                              strength=100,
                               speed=1500,
                               type="dodge"
                          )
                }
           },
+          
           {
-          "Domain" :
+              
+               "Barrier" :
                {
-                   "Malevolent Shrine" :
+                   "Domain Expansion" :
                          Techniques(
-                              name="Malevolent Shrine",
+                              name="Domain Expansion: Malevolent Shrine",
                               level=5,
                               act_speed=2,
                               act_cost=300,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=20,
-                              strength=2000,
-                              speed=9999,
+                              strength=1000,
+                              speed=9000,
                               type="open",
                               sure_hit=True
+
+                         ),
+                    
+                    "Domain Amplification" :
+                         Techniques(
+                              name="Domain Amplification",
+                              level=5,
+                              act_speed=0,
+                              act_cost=50,
+                              act_body=("Full"),
+                              aoe=1,
+                              strength=0,
+                              speed=0,
+                              type="envelop",
+                              negates=True
 
                          )
                }
@@ -1773,9 +2243,9 @@ shrine={
 "Rarity" : 5,
 "Friction" : 0
 }
+# endregion
 
-
-# region ### Sky Manipulation
+# region Sky Manipulation
 
 sky_manip={
      
@@ -1797,7 +2267,7 @@ sky_manip={
                               type="projectile"
                          ),
 
-                    "Cloaked Attack" : # cloaks entire body to become virtually invisable
+                    "Cloaked Attack" : # cloaks entire body to become virtually invisible
                          Techniques(
                               name="Cloaked Attack",
                               level=3,
@@ -1808,15 +2278,27 @@ sky_manip={
                               strength=500,
                               speed=500,
                               type="melee",
-                              visable=False
+                              invisible=True
                          )
                }
           },
 
           {
                "Defend": 
+               {"CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
            
-               {
+               
                     "Redirect" : # redirects opponent attack back on themself
                          Techniques(
                               name="Redirect",
@@ -1825,33 +2307,32 @@ sky_manip={
                               act_cost=50,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=0, # pull attack dmg in checks?
+                              strength=500, # pull attack dmg in checks?
                               speed=1000,
-                              type="counter"
+                              type="reflect"
                          ),
 
-                    "Cloaked Dodge" :
+                    "Cloak Dodge" :
                          Techniques(
-                              name="Cloaked dodge",
+                              name="Cloak Dodge",
                               level=3,
                               act_speed=1,                              
                               act_cost=50,
                               act_body=("Full"),
                               aoe=1,
-                              strength=0, #?
+                              strength=100,
                               speed=500,
                               type="dodge",
-                              visable=False
+                              invisible=True
                          )
                }
-          }
+          },
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Star Rage
-
+# region Star Rage
 star_rage={
      
 "Star Rage" :
@@ -1893,10 +2374,10 @@ star_rage={
                               act_cost=500,
                               act_body=("Full"),
                               aoe=10,
-                              strength=9999,
+                              strength=9000,
                               speed=2000,
                               type="projectile",
-                              self_dmg=9999
+                              self_dmg=9000
                          )
                 }
             },
@@ -1905,6 +2386,18 @@ star_rage={
                "Defend": 
            
                {
+                   "CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
                     "It's Mass" : 
                          Techniques(
                               name="It's Mass",
@@ -1922,10 +2415,9 @@ star_rage={
      ],
 "Rarity" : 15
 }
+# endregion
 
-
-# region ### Straw Doll
-
+# region Straw Doll
 straw_doll={
      
 "Straw Doll" :
@@ -1959,19 +2451,20 @@ straw_doll={
                               type="projectile"
                          ),
                     
-                    "Reasonance" : 
+                    "Resonance" : 
                          Techniques(
-                              name="Reasonance",
+                              name="Resonance",
                               level=3,
                               act_speed=2,                              
                               act_cost=40,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
                               strength=800,
-                              speed=2000, # ???
+                              speed=0, # ???
                               type="melee", #melee on doll that links attack to target (effigy)
-                              soul=True, 
-                              sure_hit=True
+                              soul=400, 
+                              sure_hit=True,
+                              charge=1 # once the player.charge is set to 1, the technique is available
                          )
                          
                }
@@ -1981,6 +2474,18 @@ straw_doll={
                "Defend": 
            
                {
+                   "CE" : 
+                         Techniques(
+                              name="CE",
+                              level=2,
+                              act_speed=2,                             
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=400,
+                              speed=800,
+                              type="counter"
+                         ),
                     "Squeaky Hammer" :
                          Techniques(
                               name="Squeaky Hammer",
@@ -2011,10 +2516,9 @@ straw_doll={
      ],
 "Rarity" : 30
 }
+# endregion
 
-
-# region ### Ten Shadows
-
+# region Ten Shadows
 ten_shadows={
      
 "Ten Shadows" :
@@ -2022,37 +2526,48 @@ ten_shadows={
             {
                "Attack" : 
                {
-                    "Divine Dog Claw" : 
+                   "White Dog" : 
+                   Techniques(
+                       name="White Dog",
+                       level=1,
+                       act_speed=2,
+                       act_cost=50,
+                       act_body=("Left Arm", "Right Arm"),
+                       aoe=1,
+                       strength=0,
+                       speed=0,
+                       type="summon"
+                   ),
+
+                    "Black Dog" : 
                          Techniques(
-                              name="Divine Dog Claw",
+                              name="Black Dog",
                               level=1,
                               act_speed=2,                              
-                              act_cost=20,
+                              act_cost=50,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=400,
-                              speed=600,
+                              strength=0,
+                              speed=0,
                               type="summon",
-                              summon={"Divine Dogs" : {"Speed" : 600, "strength" : 400, "Max CE" : 100}}
                          ),
                     
-                    "Nue Lightning" : 
+                    "Nue" : 
                          Techniques(
-                              name="Nue Lightning",
+                              name="Nue",
                               level=1,
                               act_speed=2,                            
                               act_cost=25,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=400,
-                              speed=700,
+                              strength=0,
+                              speed=0,
                               type="summon",
-                              summon={"Nue" : {"Speed" : 700, "strength" : 400, "Max CE" : 100}}
                          ),
 
-                    "Great Serpent Choke" : 
+                    "Great Serpent" : 
                          Techniques(
-                              name="Great Serpent Choke",
+                              name="Great Serpent",
                               level=1,
                               act_speed=2,                             
                               act_cost=30,
@@ -2064,9 +2579,9 @@ ten_shadows={
                               summon={"Great Serpent" : {"Speed" : 600, "strength" : 500, "Max CE" : 100}}
                          ),
                     
-                    "Max Elephant Drop" : 
+                    "Max Elephant" : 
                          Techniques(
-                              name="Max Elephant Drop",
+                              name="Max Elephant",
                               level=1,
                               act_speed=3,                              
                               act_cost=35,
@@ -2080,7 +2595,7 @@ ten_shadows={
 
                     "Piercing Ox" : 
                          Techniques(
-                              name="Piercing Bull Charge",
+                              name="Piercing Ox",
                               level=2,
                               act_speed=3,
                               act_cost=50,
@@ -2113,6 +2628,18 @@ ten_shadows={
                "Defend": 
            
                {
+                   "CE" :
+                         Techniques(
+                              name="CE reinforcement",
+                              level=0,
+                              act_speed=0,
+                              act_cost=0,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=0,
+                              strength=0,
+                              speed=0, 
+                              type="tank"
+                         ),
                     "Rabbit Escape" : 
                          Techniques(
                               name="Rabbit Escape",
@@ -2127,9 +2654,9 @@ ten_shadows={
                               summon={"Rabbit Escape" : {"Speed" : 800, "strength" : 100, "Max CE" : 100}}
                          ),
                     
-                    "Toad Tongue" : 
+                    "Toad" : 
                          Techniques(
-                              name="Toad Tongue",
+                              name="Toad",
                               level=1,
                               act_speed=1,
                               act_cost=30,
@@ -2154,15 +2681,33 @@ ten_shadows={
                               type="summon",
                               summon={"Round Deer" : {"Speed" : 600, "strength" : 600, "Max CE" : 400}}
                          ),
-                }
-            }
-        ],
+               }
+          },
+          {
+          "Barrier" :
+               {
+                   "Domain Expansion" :
+                         Techniques(
+                              name="Domain Expansion: Chimera Shadow Garden",
+                              level=4,
+                              act_speed=2,
+                              act_cost=300,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=20,
+                              strength=1000,
+                              speed=8000,
+                              type="open",
+                              sure_hit=True
+
+                         )
+               }
+          }
+     ],
 "Rarity" : 5
 }
+# endregion
 
-
-# region ### TEMPLATE
-
+# region TEMPLATE
 # _={
      
 # "" :
@@ -2178,7 +2723,7 @@ ten_shadows={
 #                               act_cost=1,
 #                               act_body=("Left Arm", "Right Arm"),
 #                               aoe=1,
-#                               strength=0,
+#                               strength=100,
 #                               speed=0,
 #                               type=""
 #                          )
@@ -2196,7 +2741,7 @@ ten_shadows={
 #                               act_cost=1,
 #                               act_body=("Left Arm", "Right Arm"),
 #                               aoe=1,
-#                               strength=0,
+#                               strength=100,
 #                               speed=0,
 #                               type=""
 #                          )
@@ -2205,10 +2750,11 @@ ten_shadows={
 #         ],
 # "Rarity" : 100
 # }
+# endregion
 
-
-technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, body_hop, boogie_woogie, 
-                  ce_discharge, comedian, construction, copy, cursed_speech, 
-                  cursed_spirit_manip, hr_zero,ice_manip, idle_transfig, limitless, 
-                  mba, projection_sorcery, shrine, sky_manip, star_rage, straw_doll, 
-                  ten_shadows]
+technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, 
+                  body_hop, boogie_woogie, ce_discharge, comedian, 
+                  construction, copy, cursed_speech, cursed_spirit_manip, 
+                  disaster_flames, disaster_plants, disaster_tides, hr_zero, 
+                  ice_manip, idle_transfig, limitless, mba, projection_sorcery, 
+                  shrine, sky_manip, star_rage, straw_doll, ten_shadows]

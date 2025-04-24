@@ -1,170 +1,392 @@
 from techniques import Techniques
 
-enemy_techs = { "King Of Curses" :
-     [
-          {
-               "Attack" : 
-               {
-                    "Dismantle" : # need a visability attribute so it can't be seen by most sorcerers
-                         Techniques(
-                              name="Dismantle",
-                              level=1,
-                              act_speed=1,
-                              act_cost=20,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=500,
-                              speed=1000,
-                              type="projectile",
-                              visable=False
-                         ),
-                    
-                    "Multi Dismantle" :
-                        Techniques(
-                              name="Multi Dismantle",
-                              level=2,
-                              act_speed=1,
-                              act_cost=60,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=3,
-                              strength=500,
-                              speed=1000,
-                              type="projectile",
-                              visable=False
-                         ),
-
-                    "Cleave" :
-                         Techniques(
-                              name="Cleave",
-                              level=1,
-                              act_speed=1,
-                              act_cost=60, # should be based off opponent hp - special case in battlechecks
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1500, # should be based off opponent hp - special case in battlechecks
-                              speed=1000,
-                              type="melee"
-                         ),
-
-                    "Encanted Dismantle" :
-                         Techniques(
-                              name="Dismantle",
-                              level=4,
-                              act_speed=2,
-                              act_cost=40,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1000,
-                              speed=1000,
-                              type="projectile",
-                              visable=False
-                         ),
-                    
-                    "Furnace" :
-                         Techniques(
-                              name="Furnace",
-                              level=4,
-                              act_speed=3,
-                              act_cost=100,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=2000,
-                              speed=500,
-                              type="projectile"
-                         )
-               }
-          },
-
-          {
-               "Defend": 
-           
-               {
-                    "Cleave Spider Web" :
-                         Techniques(
-                              name="Cleave Spider Web",
-                              level=1,
-                              act_speed=2,
-                              act_cost=100,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1500,
-                              speed=1000, 
-                              type="counter"
-                         ),
-
-                    "Dismantle Parry" :
-                         Techniques(
-                              name="Dismantle Parry",
-                              level=2,
-                              act_speed=1,
-                              act_cost=20,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=500,
-                              speed=1000,
-                              type="counter"
-                         ),
-
-                    "Dismantle Glove" : # like parry but strong since it envelopes the hand
-                         Techniques(
-                              name="Dismantle Glove",
-                              level=2,
-                              act_speed=1,
-                              act_cost=20,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=1000,
-                              speed=1000,
-                              type="tank"
-                         ),
-
-                    "Dismantle Shield" : # creating a forcefield out of slashes
-                         Techniques(
-                              name="Dismantle Shield",
-                              level=4,
-                              act_speed=1,
-                              act_cost=100,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=5,
-                              strength=1000,
-                              speed=1000,
-                              type="tank"
-                         ),
-                    
-                    "Air Hop" : 
-                         Techniques(
-                              name="Air Hop",
-                              level=5,
-                              act_speed=2,
-                              act_cost=50,
-                              act_body=("full"),
-                              aoe=1,
-                              strength=0,
-                              speed=1500,
-                              type="dodge"
-                         )
-               }
-          },
-          {
-          "Domain" :
-               {
-                   "Malevolent Shrine" :
-                         Techniques(
-                              name="Malevolent Shrine",
-                              level=5,
-                              act_speed=2,
-                              act_cost=300,
-                              act_body=("Left Arm", "Right Arm"),
-                              aoe=20,
-                              strength=2000,
-                              speed=9999,
-                              type="open",
-                              sure_hit=True
-
-                         )
-               }
-          }
-     ],
+enemy_tech = {
+#region Divine Dog
+"Divine Dog" : 
+[
+    {'Attack' : 
+     {
+         "Divine Claw" : 
+         Techniques(
+             name="Divine Claw",
+             level=1,
+             act_speed=1,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=200,
+             speed=400,
+             type="melee"
+         ),
+         "Divine Bite":
+         Techniques(
+             name="Divine Bite",
+             level=2,
+             act_speed=2,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=300,
+             speed=300,
+             type="melee"
+        )
+    }},
+    {"Defense" : {
+        "Divine Claw" : 
+         Techniques(
+             name="Divine Claw",
+             level=1,
+             act_speed=1,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=200,
+             speed=400,
+             type="counter"
+         ),
+         "Divine Bite":
+         Techniques(
+             name="Divine Bite",
+             level=2,
+             act_speed=2,
+             act_cost=10,
+             act_body=("Head"),
+             aoe=1,
+             strength=300,
+             speed=300,
+             type="counter"
+        )  
+    }}
+],
+#endregion
+#region Rabbit Escape
+"Rabbit Escape" : 
+[
+    {'Attack' : 
+     {
+         "Rabbit Kung Fu" : 
+         Techniques(
+             name="Rabbit Kung Fu",
+             level=1,
+             act_speed=1,
+             act_cost=25,
+             act_body=("Full"),
+             aoe=1,
+             strength=10,
+             speed=500,
+             type="melee"
+         )
+     }},
+     {"Defense" : {
+       "Escape" : 
+       Techniques(
+            name="Escape",
+            level=1,
+            act_speed=1,
+            act_cost=25,
+            act_body=("Full"),
+            aoe=1,
+            strength=10,
+            speed=500,
+            type="dodge",
+            invisible=True
+       )
+     }}
+],
+#endregion
+#region Toad
+"Toad" : 
+[
+    {'Attack' : 
+     {
+         "Frog Grab" : 
+         Techniques(
+             name="Frog Grab",
+             level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="projectile",
+             stun=1
+         ),
+         "Frog Throw":
+         Techniques(
+             name="Frog Throw",
+             level=2,
+             act_speed=2,
+             act_cost=5,
+             act_body=("Head"),
+             aoe=2,
+             strength=200,
+             speed=600,
+             type="melee",
+             charge=True,
+         )
+     }},
+     {"Defense" : {
+       "Frog Grab" : 
+       Techniques(
+           name="Frog Grab",
+           level=1,
+             act_speed=1,
+             act_cost=30,
+             act_body=("Head"),
+             aoe=1,
+             strength=50,
+             speed=600,
+             type="counter",
+             stun=1,
+       ),
+       "Frog Hop" : 
+       Techniques(
+           name="Frog Hop",
+           level=1,
+           act_speed=1,
+           act_cost=5,
+           act_body=("Head"),
+           aoe=1,
+           strength=10,
+           speed=600,
+           type="dodge",
+       )  }}
+],
+#endregion
+#region Nue
+"Nue" : 
+[
+    {'Attack' : 
+     {
+         "Lighting Dive" : 
+         Techniques(
+             name="Lighting Dive",
+             level=1,
+             act_speed=2,
+             act_cost=50,
+             act_body=("Full"),
+             aoe=1,
+             strength=300,
+             speed=500,
+             type="melee"
+         )
+     }},
+     {"Defense" : {
+       "Hitch A Ride" : 
+       Techniques(
+            name="Hitch A Ride",
+            level=1,
+            act_speed=2,
+            act_cost=25,
+            act_body=("Full"),
+            aoe=1,
+            strength=10,
+            speed=500,
+            type="dodge"
+       )
+     }}
+],
+#endregion
+#region Great Serpent
+"Great Serpent" : 
+[
+    {'Attack' : 
+     {
+         "Choke" : 
+         Techniques(
+            name="Choke",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=300,
+            speed=500,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+       "Choke" : 
+         Techniques(
+            name="Choke",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=300,
+            speed=500,
+            type="counter"
+         )
+     }}
+],
+#endregion
+#region Max Elephant
+"Max Elephant" : 
+[
+    {'Attack' : 
+     {
+        "Water Flood" : 
+         Techniques(
+            name="Water Flood",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=5,
+            strength=300,
+            speed=500,
+            type="melee"
+         ),
+        "Certain Death From Above" : 
+         Techniques(
+            name="Certain Death From Above",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=800,
+            speed=500,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+        "Water Flood" : 
+         Techniques(
+            name="Water Flood",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=5,
+            strength=300,
+            speed=500,
+            type="counter"
+         ),
+        "Certain Death From Above" : 
+         Techniques(
+            name="Certain Death From Above",
+            level=1,
+            act_speed=2,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=1,
+            strength=800,
+            speed=500,
+            type="counter"
+         )
+     }}
+],
+#endregion 
+#region Piercing Ox
+"Piercing Ox" : 
+[
+    {'Attack' : 
+     {
+        "Charge" : 
+         Techniques(
+            name="Charge",
+            level=1,
+            act_speed=3,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=1,
+            strength=1500,
+            speed=200,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+        "Charge" : 
+         Techniques(
+            name="Charge",
+            level=1,
+            act_speed=3,
+            act_cost=50,
+            act_body=("Head"),
+            aoe=1,
+            strength=1500,
+            speed=200,
+            type="counter"
+         )
+     }}
+],
+#endregion
+#region Tiger Funeral
+# "Tiger Funeral" : 
+# [
+#     {'Attack' : 
+#      {
+#         "" : 
+#          Techniques(
+#             name="Water Flood",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Head"),
+#             aoe=1,
+#             strength=0,
+#             speed=0,
+#             type="melee"
+#          )
+#      }},
+#      {"Defense" : {
+#         "" : 
+#          Techniques(
+#             name="Water Flood",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Head"),
+#             aoe=1,
+#             strength=0,
+#             speed=0,
+#             type="melee"
+#          )
+#      }}
+# ],
+#endregion
+#region Round Deer
+"Round Deer" : 
+[
+    {'Attack' : 
+     {
+        "Positive Energy" : 
+         Techniques(
+            name="Positive Energy",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=10,
+            strength=100,
+            speed=1000,
+            type="projectile",
+            buff=("rct", 10), # heals 10% of player/teams hp per round
+            debuff=("negate techs", 10) # negates or weakens techs
+         )
+     }},
+     {"Defense" : {
+        "Positive Energy" : 
+         Techniques(
+            name="Positive Energy",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Full"),
+            aoe=10,
+            strength=100,
+            speed=1000,
+            type="counter",
+            buff=("rct", 10), # heals 10% of player/teams hp per round
+            debuff=("negate techs", 10) # negates or weakens techs
+         )
+     }}
+],
+#endregion
+#region Mahoraga
     "Mahoraga" : 
     [
         {"Attack" : 
@@ -213,6 +435,7 @@ enemy_techs = { "King Of Curses" :
                 )
 
             }},
+
             {
         "Defend" : 
         {
@@ -231,86 +454,165 @@ enemy_techs = { "King Of Curses" :
                 negates=True,
                 duration=5
                 )
-            } }
-    ],
-    "Anxious Ears" : 
-    [
-        {"Attack" : {
-            "Sound Clap" : Techniques(
-                name="Anxious Ears: Sound Clap",
-                level=1,
-                act_speed=1,
-                act_cost=50,
-                act_body=("head", "torso"),
-                aoe=1,
-                strength=300,
-                speed=300,
-                type="projectile",
-                stun=1
-            ),
-        }},
-        {"Defend" :
-         {
-             "Sound Reflection" : Techniques(
-                 "Anxious Ears: Sound Reflection",
-                 level=1,
-                    act_speed=1,
-                    act_cost=50,
-                    act_body=("head", "torso"),
-                    aoe=1,
-                    strength=300,
-                    speed=300,
-                    type="counter",
-                
-             )
-         } }
-    ],
-
-    "Soul Curse" : # Femhito - special grade
-        [
-            {"Attack" :
-                { "Callous Formation" : Techniques(
-                    name="Soul Manipulation: Callous Formation",
-                    level=1,
-                    act_speed=2,
-                    act_cost=50,
-                    act_body=("hands", "legs"),
-                    aoe=1,
-                    strength=1000,
-                    speed=600,
-                    type="melee",
-                    soul=200,
-                    buff=(1, "strength", 200)
-                    ),
-                "Soul Transmute" : Techniques( # change the form or nature of the soul (self) - will need sub techniques for separate abilities
-                    name="Soul Manipulation: Soul Transmute", 
-                    level=1,
-                    act_speed=1,
-                    act_cost=50,
-                    act_body=("full"),
-                    aoe=1,
-                    strength=600,
-                    speed=800,
-                    type="melee"
-                    )
-                }   
-            },
-            {"Defense" :
-                {"Body Morph" : Techniques( # will need sub techniques for separate abilities
-                    name="Soul Manipulation : Body Morph",
-                    level=1,
-                    act_speed=1,
-                    act_cost=50,
-                    act_body=("hands","legs", "torso", "head"),
-                    aoe=1,
-                    strength=600,
-                    speed=800,
-                    type="dodge" # wings/legs or smth
-                    )
-                }
-            }
-        ],
+            } },],
+#endregion
+#region Rika
+"Rika" : 
+[
+    {'Attack' : 
+     {
+        "Claw" : 
+         Techniques(
+            name="Claw",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Left Arm", "Right Arm"),
+            aoe=1,
+            strength=800,
+            speed=1000,
+            type="melee"
+         )
+     }},
+     {"Defense" : {
+        "Claw" : 
+         Techniques(
+            name="Claw",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Left Arm", "Right Arm"),
+            aoe=1,
+            strength=800,
+            speed=1000,
+            type="counter"
+         ),
         
+        "Hold" : # holds opponent for player to counter 
+         Techniques(
+            name="Hold",
+            level=1,
+            act_speed=1,
+            act_cost=50,
+            act_body=("Left Arm", "Right Arm"),
+            aoe=1,
+            strength=0,
+            speed=1000,
+            type="counter",
+            stun=1
+         )
+     }}
+],
+#endregion
+#region Garuda
+# "Garuda" : 
+# [
+#     {'Attack' : 
+#      {
+#         "" : 
+#          Techniques(
+#             name="",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Left Arm", "Right Arm"),
+#             aoe=1,
+#             strength=0,
+#             speed=1,
+#             type="melee"
+#          )
+#      }},
+#      {"Defense" : {
+#         "" : 
+#          Techniques(
+#             name="",
+#             level=1,
+#             act_speed=1,
+#             act_cost=1,
+#             act_body=("Left Arm", "Right Arm"),
+#             aoe=1,
+#             strength=0,
+#             speed=1,
+#             type="melee"
+#          )
+#      }}
+# ],
+#endregion
+#region Finger Bearer
+    "Finger Bearer" : 
+    [
+        {
+            "Atttack" : 
+            {
+                    "Energy Blast" : Techniques(
+                        name="Energy Blast",
+                        level=1,
+                        act_speed=5,
+                        act_cost=50,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=500,
+                    speed=500,
+                    type="projectile",
+                    ),
+                    "Claw Cleave": Techniques(
+                    name="Claw Cleave",
+                    level=1,
+                    act_speed=1,
+                    act_cost=100,
+                    act_body=("hands"),
+                    aoe=1,
+                    strength=700,
+                    speed=700,
+                    type="melee",
+                    
+                    )  
+            }
+        },
+        {
+            "Defense" : 
+            {
+                "Energy Shield" : Techniques(
+                    name="Energy Shield",
+                    level=1,
+                    act_speed=5,
+                    act_cost=50,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=500,
+                    speed=500,
+                    type="tank",
+                ),
+
+                "Self Heal" : Techniques(
+                    name="Self Heal",
+                    level=1,
+                    act_speed=5,
+                    act_cost=50,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=500,
+                    speed=500,
+                    type="heal",
+                    
+                ),
+                "Body Flicker" : Techniques(
+                    name="Body Flicker",
+                    level=1,
+                    act_speed=5,
+                    act_cost=150,
+                    act_body=("hands"),
+                    aoe=2,
+                    strength=000,
+                    speed=200,
+                    type="dodge"
+                )
+
+            }
+        }
+    ],
+#endregion
+#region Orbmaster
     "Orbmaster" : # grade 1
         [    
             {"Attack" : 
@@ -342,9 +644,10 @@ enemy_techs = { "King Of Curses" :
                     sure_hit=True
                     )
                 }
-            }
-        ],
-
+            }]
+        ,
+#endregion
+#region Charger
     "Charger" : 
         [ 
             {"Attack" :
@@ -388,7 +691,8 @@ enemy_techs = { "King Of Curses" :
                 }
             }
         ],
-
+#endregion
+#region Stinkaspore
     "Stinkaspore" : # grade 2
         [
             {"Attack" : 
@@ -436,7 +740,8 @@ enemy_techs = { "King Of Curses" :
                 }
             }
         ],
-
+#endregion
+#region Primate
     "Primate" : 
         [ 
             {"Attack" :
@@ -471,78 +776,8 @@ enemy_techs = { "King Of Curses" :
                 }
             }
         ],
-        "Finger Bearer" : 
-        [
-            {
-                "Atttack" : 
-                {
-                      "Energy Blast" : Techniques(
-                          name="Energy Blast",
-                          level=1,
-                          act_speed=5,
-                          act_cost=50,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="projectile",
-                      ),
-                      "Claw Cleave": Techniques(
-                        name="Claw Cleave",
-                        level=1,
-                        act_speed=1,
-                        act_cost=100,
-                        act_body=("hands"),
-                        aoe=1,
-                        strength=700,
-                        speed=700,
-                        type="melee",
-                      
-                      )  
-                }
-            },
-            {
-                "Defense" : 
-                {
-                    "Energy Shield" : Techniques(
-                        name="Energy Shield",
-                        level=1,
-                        act_speed=5,
-                        act_cost=50,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="tank",
-                    ),
-
-                    "Self Heal" : Techniques(
-                        name="Self Heal",
-                        level=1,
-                        act_speed=5,
-                        act_cost=50,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="heal",
-                        
-                    ),
-                    "Body Flicker" : Techniques(
-                        name="Body Flicker",
-                        level=1,
-                        act_speed=5,
-                        act_cost=150,
-                        act_body=("hands"),
-                        aoe=2,
-                        strength=000,
-                        speed=200,
-                        type="dodge"
-                    )
-
-                }
-            }
-        ],
+#endregion
+#region Furrpede
         "Furrpede" : 
         [
             {"Attack" : {
@@ -583,9 +818,40 @@ enemy_techs = { "King Of Curses" :
                 )
 
             }}
-        ]
-
-
-
-
+        ],
+#endregion
+#region Anxious Ears
+    "Anxious Ears" : 
+    [
+        {"Attack" : {
+            "Sound Clap" : Techniques(
+                name="Anxious Ears: Sound Clap",
+                level=1,
+                act_speed=1,
+                act_cost=50,
+                act_body=("head", "torso"),
+                aoe=1,
+                strength=300,
+                speed=300,
+                type="projectile",
+                stun=1
+            ),
+        }},
+        {"Defend" :
+         {
+             "Sound Reflection" : Techniques(
+                 "Anxious Ears: Sound Reflection",
+                 level=1,
+                    act_speed=1,
+                    act_cost=50,
+                    act_body=("head", "torso"),
+                    aoe=1,
+                    strength=300,
+                    speed=300,
+                    type="counter",
+                
+             )
+         } }
+    ],
+#endregion
 }
