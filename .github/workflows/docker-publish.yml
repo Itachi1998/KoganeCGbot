@@ -41,12 +41,6 @@ jobs:
     - name: Set up Cosign
       uses: sigstore/cosign-installer@v3
 
-    - name: Upload SBOM Artifact
-      uses: actions/upload-artifact@v4.6.2
-      with:
-        name: sbom.cdx.json
-        path: sbom.cdx.json
-
     - name: Sign SBOM with Cosign (OIDC)
       run: cosign attach sbom --sbom sbom.cdx.json -key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
 
