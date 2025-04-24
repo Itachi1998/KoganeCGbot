@@ -41,7 +41,7 @@ jobs:
 
     - name: Generate and Sign SBOM (Syft)
       id: sbom
-      uses: anchore/syft-action@v0.14.0
+      uses: anchore/sbom-action@v0.18.0
       with:
         image: ${{ steps.build-push.outputs.image }}
         output: cyclonedx-json
