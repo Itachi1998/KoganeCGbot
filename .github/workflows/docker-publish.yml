@@ -57,7 +57,7 @@ jobs:
       run: cosign attach sbom --sbom sbom.cdx.json -key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
 
     - name: Generate and Sign Attestation (SLSA Provenance)
-      uses: slsa-framework/slsa-github-generator/github-actions/provenance@v1.0.2
+      uses: slsa-framework/slsa-github-generator/github-actions/provenance@v2.1.0
       with:
         subject: ${{ steps.build-push.outputs.image }}
         upload: true # This will automatically sign and upload the provenance using OIDC
