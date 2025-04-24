@@ -8,6 +8,7 @@ on:
 permissions:
   id-token: write # Required for signing with OIDC
   contents: read # For actions/checkout
+  package: write
 
 jobs:
   build:
@@ -40,8 +41,6 @@ jobs:
         
     - name: Install Cosign
       uses: sigstore/cosign-installer@v3.8.1
-      with:
-        cosign-release: latest
         
     - name: Sign Image with Cosign using OIDC
       run: cosign sign ${{ steps.build-push.outputs.image }}
