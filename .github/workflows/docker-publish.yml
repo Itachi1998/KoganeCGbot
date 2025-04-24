@@ -41,14 +41,6 @@ jobs:
     - name: Set up Cosign
       uses: sigstore/cosign-installer@v3
 
-    - name: Generate and Sign SBOM (Syft) #might not need if build-push creates SBOM
-      id: sbom
-      uses: anchore/sbom-action@v0.18.0 
-      with:
-        image: ${{ steps.build-push.outputs.image }}
-        output: cyclonedx-json
-        file: sbom.cdx.json
-
     - name: Upload SBOM Artifact
       uses: actions/upload-artifact@v4.6.2
       with:
