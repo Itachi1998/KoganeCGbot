@@ -1,6 +1,74 @@
 from techniques import Techniques
 from random import randint
 
+# region Anti Gravity
+anti_gravity={
+"Anti Gravity" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Push Away" :
+                         Techniques(
+                              name="Push Away",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=50,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=0,
+                              speed=1000,
+                              type="projectile"
+                         ),
+                    "Reversal Pull Down" :
+                         Techniques(
+                              name="Reversal Pull Down",
+                              level=3,
+                              act_speed=2,                              
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=500,
+                              speed=2000,
+                              type="projectile"
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {    
+                   "Push Away" :
+                         Techniques(
+                              name="Push Away",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=50,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=0,
+                              speed=1000,
+                              type="counter"
+                         ),
+                    "Reversal Pull Down" :
+                         Techniques(
+                              name="Reversal Pull Down",
+                              level=3,
+                              act_speed=2,                              
+                              act_cost=100,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=500,
+                              speed=2000,
+                              type="counter"
+                         )
+                }
+            }
+        ],
+"Rarity" : 15
+}
+# endregion
+
 # region Auspicious Beasts Summon
 auspicious_beasts_summon={
 "Auspicious Beasts Summon" :
@@ -399,7 +467,7 @@ boogie_woogie = {
           }
      ],
 
-"Rarity" : 50
+"Rarity" : 30
 }
 # endregion
 
@@ -1315,6 +1383,95 @@ disaster_tides={
 }
 # endregion
 
+# region Explosive Flesh
+explosive_flesh={
+     
+"Explosive Flesh" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Exploding Fingers" :
+                         Techniques(
+                              name="Exploding Fingers",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=400,
+                              speed=800,
+                              type="projectile"
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Exploding Fingers" :
+                         Techniques(
+                              name="Exploding Fingers",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=20,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=400,
+                              speed=800,
+                              type="counter"
+                         )
+                }
+            }
+        ],
+"Rarity" : 50
+}
+#endregion
+
+# region Heavenly Restriction: Max
+hr_max={   
+"Heavenly Restriction: Max" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Mech Beam" :
+                         Techniques(
+                              name="Mech Beam",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=30,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=1000,
+                              type="projectile"
+                         )
+               }
+          },
+
+          {
+               "Defend": 
+               {
+                    "Mech Beam" :
+                         Techniques(
+                              name="Mech Beam",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=30,
+                              act_body=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=1000,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 15
+}
+# endregion
+
 # region Heavenly Restriction: Zero
 hr_zero={
 "Heavenly Restriction: Zero" : 
@@ -1682,7 +1839,7 @@ idle_transfig={
                }
           }
      ],
-"Rarity" : 15
+"Rarity" : 5
 }
 # endregion
 
@@ -1853,7 +2010,7 @@ limitless={
                }
           }
      ],
-"Rarity" : 3,
+"Rarity" : 5,
 "Six Eyes" : True
 }
 # endregion
@@ -1941,7 +2098,7 @@ mba={
                }
           }
      ],
-"Rarity" : 7,
+"Rarity" : 15,
 "Activated" : False
 }
 # endregion
@@ -2752,9 +2909,9 @@ ten_shadows={
 # }
 # endregion
 
-technique_list = [auspicious_beasts_summon, bird_manip, blood_manip, 
-                  body_hop, boogie_woogie, ce_discharge, comedian, 
-                  construction, copy, cursed_speech, cursed_spirit_manip, 
-                  disaster_flames, disaster_plants, disaster_tides, hr_zero, 
+technique_list = [anti_gravity, auspicious_beasts_summon, bird_manip, blood_manip, 
+                  body_hop, boogie_woogie, ce_discharge, comedian, construction, 
+                  copy, cursed_speech, cursed_spirit_manip, disaster_flames, 
+                  disaster_plants, disaster_tides, explosive_flesh, hr_max, hr_zero, 
                   ice_manip, idle_transfig, limitless, mba, projection_sorcery, 
                   shrine, sky_manip, star_rage, straw_doll, ten_shadows]
