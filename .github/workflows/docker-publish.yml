@@ -8,7 +8,7 @@ on:
 permissions:
   id-token: write # Required for signing with OIDC
   contents: read # For actions/checkout
-  package: write
+  packages: write
 
 jobs:
   build:
