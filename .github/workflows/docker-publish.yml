@@ -38,40 +38,6 @@ jobs:
         provenance: true
         sbom: true
 
-    - name: Build push output
-      run: |   
-          echo "Built image: ${{ steps.build-push.outputs.image }}" # Corrected outputs syntax
-
-    - name: Set up Cosign
-      uses: sigstore/cosign-installer@v3
-
-    - name: Generate SBOM (Syft)
-      id: sbom
-      uses: anchore/syft-action@v0.10.0
-      with:
-        image: ${{ steps.build-push.outputs.image }}
-        output: spdx-json
-        path: sbom.spdx
-
-    - name: Upload SBOM Artifact
-      uses: actions/upload-artifact@v4.6.2
-      with:
-        name: sbom.spdx
-        path: sbom.spdx
-
-    - name: Generate Shasum
-      id: shasum
+    - name: Sign Image with Cosign using OIDC
       run: |
-        echo "SHASUM=$(echo ${{ steps.build-push.outputs.image }} | cut -d':' -f2)" >> $GITHUB_OUTPUT
-        echo "Image: ${{ steps.build-push.outputs.image }}" # Debugging
-
-    - name: Sign SBOM with Cosign using OIDC
-      run: |
-           cosign attach sbom --oidc --sbom sbom.spdx ${{ steps.build-push.outputs.image }}
-
-    - name: Sign Shasum with Cosign using OIDC
-      run: |
-        cosign sign --oidc --annotation "shasum=${{ steps.shasum.outputs.SHASUM }}" ${{ steps.build-push.outputs.image }}
-
-  
-        
+        cosign sign --oidc ${{ steps.build-push.outputs.image }}
