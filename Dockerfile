@@ -97,5 +97,4 @@ ADD . /kogane
 # copy in the entrypoint script, and make it executable
 COPY requirements.txt ./ 
 COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN rm -f /bin/sh
 ENTRYPOINT ["entrypoint.sh"]
