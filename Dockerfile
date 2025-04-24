@@ -53,7 +53,8 @@ RUN set -eux; \
 # This is where you can build any deps
 
 ADD requirements.txt .
-
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 RUN set -eux; \
 	mkdir -p /deps; \
 	/python/bin/python -m pip install --no-compile --target=/deps -r requirements.txt; \
@@ -95,7 +96,6 @@ COPY --from=build-stage /deps /deps
 ADD . /kogane
 # copy in the entrypoint script, and make it executable
 COPY requirements.txt ./ 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN rm -f /bin/sh
 ENTRYPOINT ["entrypoint.sh"]
