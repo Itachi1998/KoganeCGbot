@@ -1766,76 +1766,69 @@ class Battle(commands.Cog):
 
 
 # #Example of a discord View class with decorators
-# class BattleButtons(discord.ui.View):  #creating the active battle buttons
+class BattleButtons(discord.ui.View):  #creating the active battle buttons
+    def __init__(self, bot,  player, enemy, next_targets, host_id, ct):
+        super().__init__(timeout=None)
+        self.bot = bot
+        self.player = player
+        self.enemy = enemy
+        self.next_targets = next_targets
+        self.host_id = host_id
+        self.ct = ct
+        self.technique.label = ct.name
+        self.technique.emoji = ct.emote
 
-#     def __init__(self, bot, msg, player, enemy, next_targets, host_id, ct):
-#         super().__init__(timeout=None)
-#         self.bot = bot
-#         self.msg = msg
-#         self.player = player
-#         self.enemy = enemy
-#         self.next_targets = next_targets
-#         self.host_id = host_id
-#         self.ct = ct
-#         self.technique.label = ct.name
-#         self.technique.emoji = ct.emote
+    @discord.ui.button(label="Physical",style=discord.ButtonStyle.green, emoji='🤜', row=1)
+    async def physical(self, interaction: discord.Interaction,
+                       button: discord.ui.Button):
+        id = check_id(interaction.user.id, self.player.user_id)
+        if not id:
+            await interaction.response.send_message(
+                content="It is not your turn yet")
+            button.disabled = False
+            await interaction.edit_original_response(view=BattleButtons(self.bot, self.msg, self.player, self.enemy,self.next_targets, self.host_id, self.ct))
+            return
 
-#     @discord.ui.button(label="Physical",
-#                        style=discord.ButtonStyle.green,
-#                        emoji='🤜',
-#                        row=1)
-#     async def physical(self, interaction: discord.Interaction,
-#                        button: discord.ui.Button):
-#         id = check_id(interaction.user.id, self.player.user_id)
-#         if not id:
-#             await interaction.response.send_message(
-#                 content="It is not your turn yet")
-#             button.disabled = False
-#             await self.msg.edit(
-#                 view=BattleButtons(self.bot, self.msg, self.player, self.enemy,
-#                                    self.next_targets, self.host_id, self.ct))
-#             return
+        await interaction.response.defer()
 
-#         await interaction.response.defer()
+        button.disabled = True
 
-#         button.disabled = True
+        await self.msg.edit(view=self)
 
-#         await self.msg.edit(view=self)
+        enemy = self.enemy
 
-#         enemy = self.enemy
+        player = self.player
 
-#         player = self.player
+        if player.ce >= 5 or player.technique == 'Heavenly Restriction':
+            results = self.player.fight(enemy)
+        else:
+            await interaction.followup.send(
+                f"You need at least 5 ce to use physical attacks!")
+            return
+        player.ce -= 5
+        dmg = results[0]
+        outcome = results[1]
+        killed = results[2]
+        tool = None
+        if len(results) > 3:
+            tool = results[3]
+        if killed:
+            await interaction.followup.send(
+                f"`You exorcised {enemy.name} with their physical prowess with {dmg} damage`",
+                ephemeral=True)
 
-#         if player.ce >= 5 or player.technique == 'Heavenly Restriction':
-#             results = self.player.fight(enemy)
-#         else:
-#             await interaction.followup.send(
-#                 f"You need at least 5 ce to use physical attacks!")
-#             return
-#         player.ce -= 5
-#         dmg = results[0]
-#         outcome = results[1]
-#         killed = results[2]
-#         tool = None
-#         if len(results) > 3:
-#             tool = results[3]
-#         if killed:
-#             await interaction.followup.send(
-#                 f"`You exorcised {enemy.name} with their physical prowess with {dmg} damage`",
-#                 ephemeral=True)
-
-#         elif outcome == "hit":
-#             await interaction.followup.send(
-#                 f"`You hit {enemy.name} for {dmg} damage!`", ephemeral=True)
-#         elif outcome == "missed":
-#             await interaction.followup.send(f"`You missed!`", ephemeral=True)
-#         elif outcome == "tanked":
-#             await interaction.followup.send(
-#                 f"`{enemy.name} tanked the attack!`", ephemeral=True)
-#         print(self.next_targets)
-#         await self.update_physical_info(player, enemy, dmg, outcome, killed,
-#                                         self.next_targets, tool,
-#                                         self.bot.user.avatar.url)
+        elif outcome == "hit":
+            await interaction.followup.send(
+                f"`You hit {enemy.name} for {dmg} damage!`", ephemeral=True)
+        elif outcome == "missed":
+            await interaction.followup.send(f"`You missed!`", ephemeral=True)
+        elif outcome == "tanked":
+            await interaction.followup.send(
+                f"`{enemy.name} tanked the attack!`", ephemeral=True)
+        print(self.next_targets)
+        await self.update_physical_info(player, enemy, dmg, outcome, killed,
+                                        self.next_targets, tool,
+                                        self.bot.user.avatar.url)
 
 #     @discord.ui.button(label="Technique",
 #                        style=discord.ButtonStyle.blurple,

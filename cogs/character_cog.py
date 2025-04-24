@@ -45,117 +45,88 @@ cursed_techs = [
 
 classes = {"Sorcerer" : 50, "Curse" : 30, "Reincarnate" : 15}
 
-def get_random_class(classlist=classes):
-    rarity = {"legend" : 5, "rare" : 15, "uncommon" : 30, "common" : 50}
+def weight_system(weight_dictionary: dict, target_list: list = None, target_dict: dict = None):
+    """
+    This function takes in the weights for each rarity and returns a dictionary with the weights.
+    example: weight_system({5, 15, 30, 50})   
+    choice = 5
+    everything with a rarity value above or equal to 5 is added to the list of targets 
+    random choice from list of targets
+
+    """
+    rarity= weight_dictionary
     sum = 0
-    value=0
+    value = 0
     for r in rarity:
         sum += rarity[r]
     choice = randint(1, sum)
-    while value==0:
-        choice = randint(1, sum)
+    while value == 0:
         for r in rarity:
             if choice <= rarity[r]:
                 value = choice
                 break
             choice -= rarity[r]
-    class_list = []
-    for c in classes:
-        if classes[c] >= choice:
-            class_list.append(c)
+    list_of_targets = []
+    
+    if target_list:
+        for t in target_list:
+            # for every target that is greater in rarity than the value, add it to the list of targets
+            if t['Rarity'] >= value:
+                list_of_targets.append(t)
 
-    class_pick = random.choice(class_list)
-    return class_pick
+    if target_dict:
+        for t in target_dict.keys():
+            # for every target that is greater in rarity than the value, add it to the list of targets
+            if target_dict[t] >= value:
+                list_of_targets.append(t)
+
+    pick = random.choice(list_of_targets)
+    return pick
+    
+
+                
+    
     
 
 
 
+
+
+
+
+
+def get_random_class(class_dict=classes):
+    rarity = {"rare" : 20, "uncommon" : 30, "common" : 50}
+    pick = weight_system(rarity, target_dict=class_dict)
+    return pick
+
 def get_random_sorcerer_tech(techlist=sorcerer_techs):
     rarity = {"legend" : 5, "rare" : 15, "uncommon" : 30, "common" : 50}
-    sum = 0
-    value=0
-    for r in rarity:
-        sum += rarity[r]
-    choice = randint(1, sum)
-    while value==0:
-        choice = randint(1, sum)
-        for r in rarity:
-            if choice <= rarity[r]:
-                value = choice
-                break
-            choice -= rarity[r]
-    print(f"Getting technique value: {value}")
-    ct_list = []
-    for t in techlist: 
-        if t['Rarity'] >= value:
-            ct_list.append(t)
-    tech = random.choice(ct_list)
-    tech_name = next(iter(tech))
-    print(f"Getting technique: {tech_name}, rarity level: {tech['Rarity']}")
+    pick = weight_system(rarity, target_list=techlist)
+    tech_name = next(iter(pick))
+    print(f"Getting technique: {tech_name}, rarity level: {pick['Rarity']}")
 
-    if "Six Eyes" in tech.keys():
-        if tech['Six Eyes'] != True:
+    if "Six Eyes" in pick.keys():
+        if pick['Six Eyes'] != True:
             six_values = random.randint(1, 2)
             if six_values == 1:
-                tech['Six Eyes'] = True
+                pick['Six Eyes'] = True
                 #cuz he not number 2
-
-    return tech
+    return pick
 
 def get_random_reincarnate_tech(techlist=reincarnated_techs):
     rarity = {"legend" : 5, "rare" : 15, "uncommon" : 30, "common" : 50}
-    sum = 0
-    value=0
-    for r in rarity:
-        sum += rarity[r]
-
-    while value==0:
-        choice = randint(1, sum)
-        for r in rarity:
-            if choice <= rarity[r]:
-                value = choice
-                break
-            choice -= rarity[r]
-        
-        print(f"Getting technique value: {value}")
-    ct_list=[]
-    for t in techlist: 
-        if t['Rarity'] >= value:
-            ct_list.append(t)
-    tech = random.choice(ct_list)
-    print(f"value: {value} technique list with greater rarity values: {ct_list}")
-    tech_name = next(iter(tech))
-    print(f"Getting technique: {tech_name}, rarity level: {tech['Rarity']}")
-    return tech
+    pick = weight_system(rarity, target_list=techlist)
+    tech_name = next(iter(pick))
+    print(f"Getting technique: {tech_name}, rarity level: {pick['Rarity']}")
+    return pick
 
 def get_random_curse_tech(techlist=cursed_techs):
     rarity = {"legend" : 5, "rare" : 15, "uncommon" : 30, "common" : 50}
-    sum = 0
-    value=0
-    for r in rarity:
-        sum += rarity[r]
-    choice = randint(0, sum)
-    #50
-    while value==0:
-        for r in rarity:
-            if choice <= rarity[r]:
-                value=choice
-            else:
-                choice -= rarity[r]
-    print(f"Getting technique value: {value}")
-    ct_list = []
-    for t in techlist: 
-        if t['Rarity'] >= value:
-            ct_list.append(t)
-        else:
-            value -= t['Rarity']
-
-    if len(ct_list) == 0:
-        ct_list = [t for t in techlist if t['Rarity'] >= rarity['uncommon']]
-    tech = random.choice(ct_list)
-    tech_name = next(iter(tech))
-    print(f"Getting technique: {tech_name}, rarity level: {tech['Rarity']}")
-    return tech
+    pick = weight_system(rarity, target_list=techlist)
+    tech_name = next(iter(pick))
+    print(f"Getting technique: {tech_name}, rarity level: {pick['Rarity']}")
+    return pick
 
 
 class Character_cog(commands.Cog):
@@ -249,11 +220,11 @@ class CreateButtons(discord.ui.View):
         self.bot = bot
         self.embed=embed
         self.playerdict=playerdict
-        self.welcome = "## `Welcome to Kogane Culling Games!`"
+        self.welcome = "## `Welcome to the Culling Games!`"
         self.user = user
 
 
-    @discord.ui.button(label="Spin", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Spin", style=discord.ButtonStyle.primary, emoji="🎰")
     async def spin(self, interaction: discord.Interaction, button: discord.Button):
         ce = random.randint(200, 2000)
         strength=random.randint(50, 200)
