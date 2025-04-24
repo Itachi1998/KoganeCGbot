@@ -33,6 +33,7 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_USER }}/koganehub:latest
+        --attest type=provenance,mode=[min,max]
         outputs: |
           image: ${{ steps.build-push.outputs.digest }}
 
