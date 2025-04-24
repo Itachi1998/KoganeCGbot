@@ -53,7 +53,7 @@ RUN set -eux; \
 # This is where you can build any deps
 
 ADD requirements.txt .
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY .../entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 RUN set -eux; \
 	mkdir -p /deps; \
@@ -95,6 +95,6 @@ COPY --from=build-stage /deps /deps
 # copy in your app code, as well as any native deps built in build stage here
 ADD . /kogane
 # copy in the entrypoint script, and make it executable
-COPY requirements.txt ./ 
+COPY requirements.txt .../ 
 COPY --from=build-stage /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
