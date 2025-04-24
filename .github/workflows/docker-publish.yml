@@ -42,7 +42,7 @@ jobs:
       uses: sigstore/cosign-installer@v3
 
     - name: Sign SBOM with Cosign (OIDC)
-      run: cosign attach sbom --sbom sbom.cdx.json -key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
+      run: cosign attach sbom --sbom sbom.cdx.json 
 
     - name: Generate Shasum
       id: shasum
@@ -50,4 +50,4 @@ jobs:
         echo "SHASUM=$(echo ${{ steps.build-push.outputs.image }} | cut -d':' -f2)" >> $GITHUB_OUTPUT
 
     - name: Sign Shasum with Cosign (OIDC)
-      run: cosign sign --annotation "shasum=${{ steps.shasum.outputs.SHASUM }}" -key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
+      run: cosign sign --annotation "shasum=${{ steps.shasum.outputs.SHASUM }}" 
