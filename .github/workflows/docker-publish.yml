@@ -1,9 +1,13 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Image with Cosign OIDC
 
 on:
   push:
     branches:
       - main
+
+permissions:
+  id-token: write # Required for signing with OIDC
+  contents: read # For actions/checkout
 
 jobs:
   build:
@@ -19,12 +23,49 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_USER}}
+        username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
     - name: Build and push Docker image
+      id: build-push
       uses: docker/build-push-action@v3
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKER_USER}}/koganehub:latest
+        tags: ${{ secrets.DOCKER_USER }}/koganehub:latest
+        outputs: |
+          image: ${{ steps.build-push.outputs.digest }}
+
+    - name: Set up Cosign
+      uses: sigstore/cosign-installer@v3
+
+    - name: Generate and Sign SBOM (Syft)
+      id: sbom
+      uses: anchore/syft-action@v0
+      with:
+        image: ${{ steps.build-push.outputs.image }}
+        output: cyclonedx-json
+        file: sbom.cdx.json
+
+    - name: Upload SBOM Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: sbom.cdx.json
+        path: sbom.cdx.json
+
+    - name: Sign SBOM with Cosign (OIDC)
+      run: cosign attach sbom --sbom sbom.cdx.json -key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
+
+    - name: Generate and Sign Attestation (SLSA Provenance)
+      uses: slsa-framework/slsa-github-generator/github-actions/provenance@v1.0.2
+      with:
+        subject: ${{ steps.build-push.outputs.image }}
+        upload: true # This will automatically sign and upload the provenance using OIDC
+
+    - name: Generate Shasum
+      id: shasum
+      run: |
+        echo "SHASUM=$(echo ${{ steps.build-push.outputs.image }} | cut -d':' -f2)" >> $GITHUB_OUTPUT
+
+    - name: Sign Shasum with Cosign (OIDC)
+      run: cosign sign --annotation "shasum=${{ steps.shasum.outputs.SHASUM }}" -key "github://${{ github.repository }}/${{ github.workflow_ref }}@v1" ${{ steps.build-push.outputs.image }}
