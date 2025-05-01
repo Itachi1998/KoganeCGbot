@@ -147,8 +147,10 @@ class Character_cog(commands.Cog):
         self.playerdict["colony"] = ctx.guild.id
         self.playerdict["name"] = name
         embed= discord.Embed(title="Create a character", description= self.welcstr + name +
-        "\n## The first step in creating your character, here you can spin for your player Class, Technique, and Cursed Energy!"
-        "\n* You may only spin once for each attribute!")
+        "\n## The first step in creating your character!"
+        "\n## Click the button to spin for your stats!")
+        embed.add_field(name="Stat Ranges", value="```python\n* HP: 100 - 300\n* CE: 200 - 2000\n* Strength: 50 - 200\n* Speed: 50 - 200"
+        "\n* Class: Sorcerer, Curse, Reincarnate ```")
         embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
         embed.set_thumbnail(url=self.bot.user.avatar)
         embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
@@ -303,11 +305,11 @@ class CreateButtons(discord.ui.View):
         )
         created = create_player(player)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
-        tech_rarity = next((k for k in rarity.keys() if rarity[k] == tech['Rarity']), None)
-        class_rarity = next((k for k in rarity.keys() if rarity[k] == classes[pclass]), None)
+        tech_rarity = next((k for k in rarity.keys() if rarity[k] >= tech['Rarity']), None)
+        class_rarity = next((k for k in rarity.keys() if rarity[k] >= classes[pclass]), None)
         if created:
             print ("Created technique: " + techname)
-            self.embed.description=f"* Name: {player.name}\n* Level: {player.level}\n* Technique: {techname}\n* HP: {hp}\n* CE: {ce}\n* Class: {pclass}\n* Six Eyes: {six_eyes}\n* Speed: {player.speed}\n* Strength: {player.strength}\n* Technique Rarity: {tech_rarity}\n* Class Rarity: {class_rarity}"
+            self.embed.description=f"* `Name:` " + "**" + player.name + "**" + f"\n* `Level:` **{player.level}**\n* `Technique:` **{techname}**\n* `HP:` **{hp}**\n* `CE:` **{ce}** \n* `Class:` **{pclass}**\n* `Six Eyes:` **{six_eyes}**\n* `Speed:` **{player.speed}**\n* `Strength:` **{player.strength}**\n* `Technique Rarity:` **{tech_rarity}**\n* `Class Rarity:` **{class_rarity}**"
             self.embed.set_footer(text="Use /profile to view your character!", icon_url=self.bot.user.avatar)
             await interaction.response.edit_message(embed=self.embed, view=None)
             return

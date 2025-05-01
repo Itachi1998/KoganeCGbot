@@ -7,7 +7,9 @@ yarn-error.log
 # Exclude Git-related files
 .git
 .gitignore
-
+venv/
+__pycache__/
+.git
 # Exclude Docker-related files
 .dockerignore
 Dockerfile

@@ -94,7 +94,8 @@ COPY --from=build-stage /deps /deps
 
 # copy in your app code, as well as any native deps built in build stage here
 ADD . /kogane
-# copy in the entrypoint script, and make it executable
+# copy in the entrypoint script that we stored as an executable, also copy over the requirements.txt
+# so it can be used in the container
 COPY requirements.txt ./ 
 COPY --from=build-stage /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]

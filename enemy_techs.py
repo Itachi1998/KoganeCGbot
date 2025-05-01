@@ -705,7 +705,7 @@ enemy_tech = {
                     aoe=5,
                     strength=150,
                     speed=100,
-                    type="pprojectile",
+                    type="projectile",
                     poison=(range(10, 20), 2)
                     ),
                 "Carbon Monoxide Disperse" : Techniques( # colorless odorless gas that can be fatal in high enough quantities
