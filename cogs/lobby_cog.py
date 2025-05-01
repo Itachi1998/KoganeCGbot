@@ -51,8 +51,9 @@ def remove_name(text, name):
     return re.sub(pattern, '', text)
 #endregion
 
-#region PVE embed
-def start_pve_embed(lobby, bot):
+
+#region Round embed
+def start_round_embed(lobby, bot, pve=False):
     # Create pve embed
     embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
     colony = read_colony(lobby.colony_id)
@@ -81,33 +82,34 @@ def start_pve_embed(lobby, bot):
             # If player data couldn't be retrieved, remove from lobby
             lobby.remove_player(p)
 
-    enemies = []
+    if pve:
+        enemies = []
 
-    for e in colony.enemies:
-        highest_level = max(p.level for p in playerlist)
-        if not e.killed:
-            e.level <= highest_level
-            enemies.append(e)
+        for e in colony.enemies:
+            highest_level = max(p.level for p in playerlist)
+            if not e.killed:
+                e.level <= highest_level
+                enemies.append(e)
 
-    if enemies:  # Make sure there are enemies to choose from
-        e_choice = random.choice(enemies)
-        enemy = None
-        for e  in Enemy.__subclasses__():
-            current_enemy = e()
-            if current_enemy.name == e_choice.name:
-                enemy = current_enemy
-                break
+        if enemies:  # Make sure there are enemies to choose from
+            e_choice = random.choice(enemies)
+            enemy = None
+            for e  in Enemy.__subclasses__():
+                current_enemy = e()
+                if current_enemy.name == e_choice.name:
+                    enemy = current_enemy
+                    break
 
-        enemy_list = [enemy]
-        # Handle multiple enemy spawns if quantity is set
-        if enemy.quantity and enemy.quantity > 1:
-                for e in range(enemy.quantity):
-                    enemy_clone = copy.deepcopy(enemy)
-                    print(enemy.name + " was cloned")
-                    enemy_list.append(enemy_clone)
+            enemy_list = [enemy]
+            # Handle multiple enemy spawns if quantity is set
+            if enemy.quantity and enemy.quantity > 1:
+                    for e in range(enemy.quantity):
+                        enemy_clone = copy.deepcopy(enemy)
+                        print(enemy.name + " was cloned")
+                        enemy_list.append(enemy_clone)
 
-        for e in enemy_list:
-                lobby.add_field(e) 
+            for e in enemy_list:
+                    lobby.add_field(e) 
     
     # Team display section
     if lobby.teamA and lobby.teamA['players']:
@@ -137,54 +139,6 @@ def start_pve_embed(lobby, bot):
     return embed, lobby
 #endregion
 
-#region PVP embed
-def start_pvp_embed(lobby, bot):
-    for p in lobby.players:
-        player = read_player(p, lobby.colony_id)
-        # Initialize real_player as None for safety
-        real_player = None
-        if player:
-            tech = player['techniques'][0]
-            player['technique'] = tech['name'] if isinstance(tech, dict) else tech.name
-            del player['techniques']
-            real_player = Player(**player)
-            # Only proceed with real_player logic if we have a valid player
-            if real_player in lobby.ready:
-                if real_player not in lobby.teamB['players'] and real_player.user_id not in lobby.teamA['players']:
-                        # Note: add_field should take a player object
-                        lobby.add_field(real_player)
-                else:
-                        lobby.add_spectator(real_player)
-            else:
-                    lobby.add_spectator(real_player)
-
-    embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) + "`")
-    
-    # Team display 
-    if lobby.teamA and lobby.teamA['players']:
-        teamname = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
-        teamAlist = [p.name for p in lobby.teamA['players']]
-        embed.add_field(name=teamname, value="\n".join(teamAlist) if teamAlist else "Empty")
-
-    if lobby.teamB and lobby.teamB['players']:
-        teamname = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
-        teamBlist = [p.name for p in lobby.teamB['players']]
-        embed.add_field(name=teamname, value="\n".join(teamBlist) if teamBlist else "Empty")
-    
-    if lobby.field:
-        field_list = [thing.name for thing in lobby.field.values()]
-        embed.add_field(name="Field", value="\n".join(field_list) if field_list else "Empty")
-
-    if lobby.spectators:
-        usernames=[]
-        for user in  lobby.spectators:
-            disc_user = bot.get_user(user)
-            usernames.append(disc_user.name)
-
-        embed.add_field(name="Spectators", value="\n".join(usernames) if usernames else "None")
-
-    return embed, lobby
-#endregion
 
 #region team embed
 def team_option_embed(lobby, bot, player):
@@ -666,7 +620,7 @@ class Lobby_Cog(commands.Cog):
                 thread = ctx.channel.id
                 lobby = self.lobbies[thread]['Lobby']
                 if ctx.author.id == lobby.owner:
-                        embed, new_lobby = start_pve_embed(lobby, self.bot)
+                        embed, new_lobby = start_round_embed(lobby, self.bot, pve=True)
                         if embed:
                             self.lobbies[ctx.channel.id]['Lobby'] = new_lobby
                             await ctx.send(embed=embed)
@@ -687,7 +641,7 @@ class Lobby_Cog(commands.Cog):
                 thread = ctx.channel.id
                 lobby = self.lobbies[thread]['Lobby']
                 if ctx.author.id == lobby.owner:
-                        embed, new_lobby = start_pvp_embed(lobby, self.bot)
+                        embed, new_lobby = start_round_embed(lobby, self.bot)
                         if embed:
                             self.lobbies[ctx.channel.id]['Lobby'] = new_lobby
                             await ctx.send(embed=embed)
