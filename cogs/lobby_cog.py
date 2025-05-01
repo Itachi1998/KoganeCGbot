@@ -56,25 +56,24 @@ def start_pve_embed(lobby, bot):
     # Create pve embed
     embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) +"`")
     colony = read_colony(lobby.colony_id)
+    if not colony:
+        return False
     # Populate the teamA and teamB list with players
+    playerlist = []
     for p in lobby.players:
         player = read_player(p, lobby.colony_id)
         # Initialize real_player as None for safety
         real_player = None
+        
         if player:
             tech = player['techniques'][0]
-            player['technique'] = tech['name'] if isinstance(tech, dict) else tech.name
+            player['technique'] = tech['name']
             del player['techniques']
             real_player = Player(**player)
+            playerlist.append(real_player)
             # Only proceed with real_player logic if we have a valid player
-            if real_player.user_id in lobby.ready:
-                if real_player.user_id in lobby.teamA['players']:
-                    lobby.teamA['players'].remove(real_player.user_id)
-                    lobby.add_teamA(real_player)
-                elif real_player.user_id in lobby.teamB['players']:
-                    lobby.teamB['players'].remove(real_player.user_id)
-                    lobby.add_teamB(real_player)
-                elif real_player.user_id not in lobby.teamB['players'] and real_player.user_id not in lobby.teamA['players']:
+            if real_player in lobby.ready:
+                if real_player not in lobby.teamB['players'] and real_player not in lobby.teamA['players']:
                     # Note: add_field should take a player object
                     lobby.add_field(real_player)
             else:
@@ -82,20 +81,16 @@ def start_pve_embed(lobby, bot):
         else:
             # If player data couldn't be retrieved, remove from lobby
             lobby.remove_player(p)
+
     enemies = []
 
-    if colony:
-        for e in colony.enemies:
-            if real_player.level >= e.level:
-                enemies.append(e)
-    else:
-        print("no colony found")
-        return
-
-    print(f"Enemies: \n{enemies}")
+    for e in colony.enemies:
+        highest_level = max(p.level for p in playerlist)
+        if not e.killed:
+            e.level <= highest_level
+            enemies.append(e)
 
     if enemies:  # Make sure there are enemies to choose from
-
         e_choice = random.choice(enemies)
         enemy = None
         for e  in Enemy.__subclasses__():
@@ -103,20 +98,18 @@ def start_pve_embed(lobby, bot):
             if current_enemy.name == e_choice.name:
                 enemy = current_enemy
                 break
+
         enemy_list = [enemy]
         # Handle multiple enemy spawns if quantity is set
         if enemy.quantity and enemy.quantity > 1:
                 for e in range(enemy.quantity):
-            
                     enemy_clone = copy.deepcopy(enemy)
                     print(enemy.name + " was cloned")
                     enemy_list.append(enemy_clone)
 
-
         for e in enemy_list:
                 lobby.add_field(e) 
     
-
     # Team display section
     if lobby.teamA and lobby.teamA['players']:
         teamname = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
@@ -141,8 +134,10 @@ def start_pve_embed(lobby, bot):
             embed.add_field(name="Spectators", value="\n".join(spectators) if spectators else "None")
         else:
             embed.add_field(name="Spectators", value="Empty")
+    embed.set_thumbnail(url=bot.user.avatar.url)
     return embed, lobby
 #endregion
+
 #region PVP embed
 def start_pvp_embed(lobby, bot):
     for p in lobby.players:
@@ -199,6 +194,7 @@ def start_pvp_embed(lobby, bot):
 
     return embed, lobby
 #endregion
+
 #region team embed
 def team_option_embed(lobby, bot, player):
     lobby.teamA['name'] = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
@@ -219,8 +215,7 @@ def team_option_embed(lobby, bot, player):
 
     elif player in lobby.spectators:
         current_team = "Spectator"
-    
-        
+
     embed.add_field(name="Current Team", 
                     value=current_team, 
                     inline=True)
@@ -245,7 +240,7 @@ class Lobby():
                 start_time=time.time(),
                 field: dict=None, 
                 graveyard: dict=None,
-                feed: list=None, 
+                feed: dict=None, 
                 spectators: list=None, 
                 status: int=None):
         
@@ -318,6 +313,8 @@ class Lobby():
         return True
     
     def add_teamA(self, player):
+        if len(self.teamA['players']) < 1:
+            self.teamA['leader'] = player
         if player in self.teamA['players']:
            return False
         if player in self.teamB['players']:
@@ -365,6 +362,8 @@ class Lobby():
         return True
     
     def add_teamB(self, player):
+         if len(self.teamB['players']) < 1:
+            self.teamB['leader'] = player
          if player in self.teamA['players']:
               self.teamA['players'].remove(player)
          if player.name in self.field.keys():
@@ -578,6 +577,7 @@ class Lobby_Cog(commands.Cog):
                                                      teamB={"name" : "Team B", "players" : [], "leader" : ""},
                                                     status=1,  ready=[], Round=0, start_time=datetime.now(),
                                                     field={}, graveyard=[], feed=[], spectators = []), "embed" : ""}
+        
         lobby = self.lobbies[thread.id]["Lobby"]
         embed = generate_lobby_embed(lobby, self.bot)
         self.lobbies[thread.id]["embed"] = embed
@@ -588,17 +588,21 @@ class Lobby_Cog(commands.Cog):
 
     @lobby.command(name="team")
     async def teama(self, ctx):
-        player = read_player(ctx.author.id, ctx.guild.id)
-        tech = player['techniques'][0]
-        player['technique'] = tech['name']
-        del player['techniques'] 
-        player = Player(**player)
-        embed = team_option_embed(self.lobbies[ctx.channel.id]['Lobby'], self.bot, player)
-        
-        msg = await ctx.send(embed=embed)
-        view = TeamSelectView(self.lobbies[ctx.channel.id]['Lobby'], self, player)
-        await msg.edit(view=view)
-        return
+        if ctx.author.id in self.lobby.players:
+            player
+            player_dict = read_player(ctx.author.id, ctx.guild.id)
+            tech = player['techniques'][0]
+            player['technique'] = tech['name']
+            del player['techniques'] 
+            player = Player(**player)
+            embed = team_option_embed(self.lobbies[ctx.channel.id]['Lobby'], self.bot, player)
+            msg = await ctx.send(embed=embed)
+            view = TeamSelectView(self.lobbies[ctx.channel.id]['Lobby'], self, player)
+            await msg.edit(view=view)
+            return
+        else:
+            await ctx.send("You are not in the lobby.")
+            return
     
     @lobby.command(name="kick")
     async def kick(self, ctx, member: discord.Member):
@@ -711,13 +715,13 @@ class Lobby_Cog(commands.Cog):
 #region TeamSelect View
 class TeamSelect(discord.ui.Select):
     def __init__(self, lobby, cog, player):
-        options = [
-discord.SelectOption(label=lobby.teamA['name'], value="teama"),
-discord.SelectOption(label=lobby.teamB['name'], value="teamb"),
-discord.SelectOption(label="Field", value="field"),
-discord.SelectOption(label="Spectator", value="spectator")
+        options= [
+discord.SelectOption(label=lobby.teamA['name'], value="teama", description=", ".join(p.name for p in lobby.teamA['players'])),
+discord.SelectOption(label=lobby.teamB['name'], value="teamb", description=", ".join(p.name for p in lobby.teamB['players'])),
+discord.SelectOption(label="Field", value="field", description=", ".join(v.name for v in lobby.field.values())),
+discord.SelectOption(label="Spectator", value="spectator", description=", ".join(p.name for p in lobby.spectators)),
         ]
-        super().__init__(placeholder='Choose your team', min_values=1,options=options)
+        super().__init__(placeholder='Choose your team', min_values=1, options=options)
 
         self.lobby = lobby
         self.cog = cog
@@ -729,8 +733,7 @@ discord.SelectOption(label="Spectator", value="spectator")
         selected_value = self.values[0]
         author = itx.user
         channel = itx.channel
-        if self.player not in self.lobby.players:
-
+        if self.player.user_id in self.lobby.players:
             if selected_value == "teama":
                 self.lobby.add_teamA(self.player)
                 teamA_name = self.lobby.teamA['name'] if self.lobby.teamA['name'] else "Team A"

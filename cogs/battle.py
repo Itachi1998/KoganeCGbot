@@ -110,35 +110,40 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                                         self.next_targets, tool,
                                         self.bot.user.avatar.url)
 
-
-
-def start_pvp_embed(lobby):
-    pass
-
-def pve_start(lobby, bot):
-    pass
-
-def pvp_start(lobby, bot):
-    pass
-
 class Battle(commands.Cog): 
-    def __init__(self, bot):
+    def __init__(self, bot, lobby):
         self.bot = bot
-        
     @commands.Cog.listener()
     async def on_ready(self):
         print("Battle cog is ready!")
 
-    @commands.hybrid_command(name="pve",with_app_command=True)
-    async def pve(self, ctx):
+    @commands.hybrid_command(name="attack", description="Choose an attack")
+    async def attack(self, ctx):
+        
+        embed = discord.Embed(title="Attack", description="Choose from your offense")
+            
+
+    @commands.hybrid_commmand(name="defense", description="Choose an defense") 
+    async def defend(self, ctx):
         pass
 
+    @commands.hybrid_command(name="vow", description="")
+    async def vow(self, ctx):
+        pass
 
+    @commands.hybrid_command(name="summon")
+    async def summon(self, ctx):
+        pass
+
+    @commands.hybrid_command(name="run")
+    async def run(self, ctx):
+        pass
+
+    
 
 # async def respawn_enemy(enemy, colony):
 #     await colonies.ai_respawn(enemy, colony)
 #     return
-
 
 # def turn(turn, lobby_data: dict):
 #     try:
@@ -246,12 +251,9 @@ class Battle(commands.Cog):
     #     traceback.print_exc()
 
 
-
-
 # def check_id(id1, id2):
 #     if id1 == id2:
 #         return True
-
 
 # def make_embed(title,
 #                description,

@@ -99,7 +99,7 @@ def create_colony(colony_data, enemies):
                           xp=e.xp,
                           colony_id=colony.colony_id,
                           killed=False,
-                          killcount=0 
+                          killcount=0
                             )
             session.add(enemy)
         
