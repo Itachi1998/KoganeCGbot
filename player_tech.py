@@ -1671,7 +1671,6 @@ ice_manip={
 
 # region Idle Transfiguration
 idle_transfig={
-     
 "Idle Transfiguration" :
      [
           {
@@ -2638,7 +2637,6 @@ straw_doll={
 
 # region Ten Shadows
 ten_shadows={
-     
 "Ten Shadows" :
         [
             {
@@ -2823,6 +2821,7 @@ ten_shadows={
      ],
 "Rarity" : 5
 }
+
 # endregion
 
 # region TEMPLATE

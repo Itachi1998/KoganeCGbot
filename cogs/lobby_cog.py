@@ -64,7 +64,6 @@ def start_pve_embed(lobby, bot):
         player = read_player(p, lobby.colony_id)
         # Initialize real_player as None for safety
         real_player = None
-        
         if player:
             tech = player['techniques'][0]
             player['technique'] = tech['name']
@@ -150,22 +149,14 @@ def start_pvp_embed(lobby, bot):
             del player['techniques']
             real_player = Player(**player)
             # Only proceed with real_player logic if we have a valid player
-            if real_player.user_id in lobby.ready:
-                if real_player.user_id in lobby.teamA['players']:
-                    lobby.teamA['players'].remove(real_player.user_id)
-                    lobby.add_teamA(real_player)
-
-                elif real_player.user_id in lobby.teamB['players']:
-                    lobby.teamB['players'].remove(real_player.user_id)
-                    lobby.add_teamB(real_player)
-
-                elif real_player.user_id not in lobby.teamB['players'] and real_player.user_id not in lobby.teamA['players']:
-                    # Note: add_field should take a player object
-                    lobby.add_field(real_player)
+            if real_player in lobby.ready:
+                if real_player not in lobby.teamB['players'] and real_player.user_id not in lobby.teamA['players']:
+                        # Note: add_field should take a player object
+                        lobby.add_field(real_player)
                 else:
-                    lobby.add_spectator(p)
+                        lobby.add_spectator(real_player)
             else:
-                lobby.add_spectator(p)
+                    lobby.add_spectator(real_player)
 
     embed = discord.Embed(title=lobby.name, description="# `ROUND " + str(lobby.round) + "`")
     
@@ -223,6 +214,7 @@ def team_option_embed(lobby, bot, player):
     embed.set_footer(text="Select a team to join")
     return embed
 #endregion
+
 
 #region Lobby class
 class Lobby():

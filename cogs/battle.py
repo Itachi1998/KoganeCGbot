@@ -1,5 +1,7 @@
 import discord, pagination, game, db, random
 from game import Player, Enemy
+from player_tech import technique_list
+from enemy_techs import enemy_tech
 from db import read_player, read_colony, update_player,  update_colony, update_enemy, update_technique, read_technique, read_enemy
 from discord.ext import commands
 from discord import Subscription, app_commands
@@ -32,26 +34,23 @@ def ce_bar(ce, max_ce):
     return bar
 
 
-def verify_players(players, colony):
-    print("Verifying players....")
-    verified_players = []
-    for p in players:
-        if p.colony_id == colony.colony_id and p.user_id in colony.players:
-            verified_players.append(p)
-    print("Verified players\n" + str(verified_players))
-    if len(verified_players) == len(players):
-        lob_players=[]
-        for p in verified_players:
-            player = read_player(p)
-            if player:
-                lob_players.append(p)
-            else:
-                print("Removing player: " + str(p))
-                players.remove(p)
-                verified_players.remove(p)            
-        return True
+def verify_player(user_id, colony):
+    player_dict = read_player(user_id, colony)
+    if player_dict:
+        tech = player_dict['techniques'][0]
+        del player_dict['techniques']
+        player_dict['technique'] = tech['name'] if isinstance(tech, dict) else tech.name
+        player = Player(**player_dict)
+        if player:
+          return player
+        else:
+            return False
     else:
-        return False
+        return False 
+
+
+    
+   
 
 class BattleButtons(discord.ui.View):  #creating the active battle buttons
     def __init__(self, bot,  player, enemy, next_targets, host_id, ct):
@@ -109,35 +108,128 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
         await self.update_physical_info(player, enemy, dmg, outcome, killed,
                                         self.next_targets, tool,
                                         self.bot.user.avatar.url)
-
+ 
 class Battle(commands.Cog): 
-    def __init__(self, bot, lobby):
+    def __init__(self, bot):
         self.bot = bot
+
     @commands.Cog.listener()
     async def on_ready(self):
         print("Battle cog is ready!")
 
     @commands.hybrid_command(name="attack", description="Choose an attack")
     async def attack(self, ctx):
-        
+        player = verify_player(ctx.author.id, ctx.guild.id)
+        tech = read_technique(player.technique, ctx.guild.id, ctx.author.id)
+        technique = None
+        name = None
+        if player:
+            for t in technique_list:
+                key = list(t.keys())[0]
+                if key == tech.name:
+                    technique = t
+                    name = key
+                    break
+        if technique is None or name not in technique:
+            await ctx.send("Technique not found.", ephemeral=True)
+            return
         embed = discord.Embed(title="Attack", description="Choose from your offense")
-            
+        value_string = ""
+        for key in technique[name][0]['Attack'].keys():
+            attack = technique[name][0]['Attack'][key]
+            fields = [
+                f"`Atk dmg:` **{attack.strength}**",
+                f"`Atk spd:` **{attack.speed}**",
+                f"`Atk lvl:` **{attack.level}**",
+                f"`Act spd:` **{attack.act_speed}**",
+                f"`Act cost:` **{attack.act_cost}**",
+                f"`Bodyparts:` **{', '.join(attack.act_body)}**",
+                f"`Max targets:` **{attack.aoe}**",
+                f"`Type:` **{attack.type}**"
+            ]
+            if attack.soul:
+                fields.append(f"`Soul dmg:` **{attack.soul}**")
+            # Optionally include other properties if needed and if length allows
+            value_string = "\n".join(fields) + "\n"
 
-    @commands.hybrid_commmand(name="defense", description="Choose an defense") 
+            embed.add_field(name=attack.name, value=value_string)
+
+        embed.set_thumbnail(url=self.bot.user.avatar.url)
+        await ctx.send(embed=embed, ephemeral=True)
+        return
+
+    @commands.hybrid_command(name="defense", description="Choose an defense") 
     async def defend(self, ctx):
-        pass
+
+        player = verify_player(ctx.author.id, ctx.guild.id)
+        tech = read_technique(player.technique, ctx.guild.id, ctx.author.id)
+        technique = None
+        name = None
+        if player:
+            for t in technique_list:
+                key = list(t.keys())[0]
+                if key == tech.name:
+                    technique = t
+                    name = key
+                    break
+        embed = discord.Embed(title="Attack", description="Choose from your offense")
+        value_string = ""
+        for key in technique[name][1]['Defend'].keys():
+            defense = technique[name][1]['Defend'][key]
+            value_string += "`Tech defense:` **" + str(defense.strength) + "** \n"
+            value_string += "`Tech speed:` **" + str(defense.speed) + "** \n"
+            value_string += "`Atk lvl:` **" + str(defense.level) + "** \n"
+            value_string += "`Activation speed`: **" + str(defense.act_speed) + "** \n"
+            value_string += "`Activation cost per turn:` **" + str(defense.act_cost) + "** \n"
+            value_string += "`Required bodyparts:` **" + ", ".join(defense.act_body) + "** \n"
+            value_string += "`Maximum targets:` **" + str(defense.aoe) + "** \n"
+            value_string += "`Type:` **" + defense.type + "** \n"
+
+            if defense.soul:
+                value_string += "`Soul defense:` **" + str(defense.soul) + "**\n"
+            
+            if defense.buff:
+                value_string += "`Buff attribute:` **" + defense.buff[0] + "**\n"
+                value_string += "`Buff strength:` **" + defense.buff[1] + "**\n"
+
+            if defense.debuff:
+                value_string += "`Debuff attribute:` **" + defense.debuff[0] + "**\n"
+                value_string += "`Debuff strength:` **" + defense.debuff[1] + "**\n"
+                
+            if defense.negates:
+                value_string += "`Negates attacks:` **Yes**\n"
+
+            if defense.stun:
+                value_string += "`Rounds stunned:` **" + str(defense.stun) + "**\n"
+
+            if defense.poison:
+                value_string += "`Poison damage:` **" + str(defense.poison[0]) + "**\n"
+                value_string += "`Poison duration:` **" + str(defense.poison[1]) + "**\n"
+            
+            if defense.charge:
+                value_string += "`Tech charge:` **" + str(defense.charge) + "**\n"
+            
+            if defense.stack:
+                value_string += "`Tech stack:` **" + str(defense.stack) + "**\n"
+
+        embed.add_field(name=defense.name, value=value_string)
+        await ctx.send(embed=embed, ephemeral=True)
+        return
+
 
     @commands.hybrid_command(name="vow", description="")
     async def vow(self, ctx):
-        pass
+        await ctx.send("Command under construction")
+        return
 
     @commands.hybrid_command(name="summon")
     async def summon(self, ctx):
-        pass
+        await ctx.send("Command under construction")
+        return
 
     @commands.hybrid_command(name="run")
     async def run(self, ctx):
-        pass
+        await ctx.send("Command under construction")
 
     
 
