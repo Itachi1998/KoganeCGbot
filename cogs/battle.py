@@ -111,33 +111,33 @@ class BattleButtons(discord.ui.View):  #creating the active battle buttons
                                         self.bot.user.avatar.url)
 
 class Battle(commands.Cog): 
-    def __init__(self, bot, lobby):
+    def __init__(self, bot):
         self.bot = bot
     @commands.Cog.listener()
     async def on_ready(self):
         print("Battle cog is ready!")
 
-    @commands.hybrid_command(name="attack", description="Choose an attack")
-    async def attack(self, ctx):
+    # @commands.hybrid_command(name="attack", description="Choose an attack")
+    # async def attack(self, ctx):
         
-        embed = discord.Embed(title="Attack", description="Choose from your offense")
-            
+    #     embed = discord.Embed(title="Attack", description="Choose from your offense")
+    #     pass    
 
-    @commands.hybrid_commmand(name="defense", description="Choose an defense") 
-    async def defend(self, ctx):
-        pass
+    # @commands.hybrid_commmand(name="defense", description="Choose an defense") 
+    # async def defend(self, ctx):
+    #     pass
 
-    @commands.hybrid_command(name="vow", description="")
-    async def vow(self, ctx):
-        pass
+    # @commands.hybrid_command(name="vow", description="")
+    # async def vow(self, ctx):
+    #     pass
 
-    @commands.hybrid_command(name="summon")
-    async def summon(self, ctx):
-        pass
+    # @commands.hybrid_command(name="summon")
+    # async def summon(self, ctx):
+    #     pass
 
-    @commands.hybrid_command(name="run")
-    async def run(self, ctx):
-        pass
+    # @commands.hybrid_command(name="run")
+    # async def run(self, ctx):
+    #     pass
 
     
 
