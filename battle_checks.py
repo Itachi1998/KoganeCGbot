@@ -945,8 +945,6 @@ test_player2= Player(
     grade=5,
     imbue=0
 )
-enemy = game.Grade1_Orbmaster()
-
 
 test_player3 = Player(
     name="Nobara",
@@ -972,8 +970,10 @@ test_player3 = Player(
 test_player2.defense = "Infinity"
 test_player3.defense = "Nail Storm"
 
+enemy = game.SpecialGrade_FingerBearer()
+
 #summon_check("Nue", "shikigami")
-results = battle_checks(enemy, test_player2, "Impending Doom", "Infinity")
+results = battle_checks(enemy, test_player2, "Energy Blast", "Infinity")
 
 print(results)
 #endregion
