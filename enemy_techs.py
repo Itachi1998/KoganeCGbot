@@ -542,7 +542,7 @@ enemy_tech = {
     "Finger Bearer" : 
     [
         {
-            "Atttack" : 
+            "Attack" : 
             {
                     "Energy Blast" : Techniques(
                         name="Energy Blast",
