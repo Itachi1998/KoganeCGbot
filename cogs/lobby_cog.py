@@ -51,9 +51,6 @@ def remove_name(text, name):
     return re.sub(pattern, '', text)
 #endregion
 
-
-    
-
 #region Round embed
 def start_round_embed(lobby, bot, pve=False):
     # Create pve embed
