@@ -101,7 +101,8 @@ def create_colony(colony_data, enemies):
                           killed=False,
                           killcount=0
                             )
-            session.add(enemy)
+            if int(enemy.level) >= 100:
+                session.add(enemy)
         
         session.commit()
         return colony
@@ -138,19 +139,19 @@ def create_technique(tech_data):
                 return technique 
             
 
-# Update check_relationship function
-def check_relationship():
-    with Session(engine) as session:
-        colonies = session.query(Colony).all()
-        for colony in colonies:
-            print(f"Colony: {colony.colony_name} (ID: {colony.colony_id})")
-            print(f"Players: {len(colony.players)}")
-            print(f"Enemies: {len(colony.enemies)}")
-            print(f"Shop items: {len(colony.shop)}")
+# # Update check_relationship function
+# def check_relationship():
+#     with Session(engine) as session:
+#         colonies = session.query(Colony).all()
+#         for colony in colonies:
+#             print(f"Colony: {colony.colony_name} (ID: {colony.colony_id})")
+#             print(f"Players: {len(colony.players)}")
+#             print(f"Enemies: {len(colony.enemies)}")
+#             print(f"Shop items: {len(colony.shop)}")
         
-        players = session.query(Player).all()
-        for player in players:
-            print(f"Player: {player.player_name} - Techniques: {len(player.techniques)}")
+#         players = session.query(Player).all()
+#         for player in players:
+#             print(f"Player: {player.player_name} - Techniques: {len(player.techniques)}")
 
 # Update read_technique function to match new model
 def read_technique(techname: str, colony_id: int, user_id: int, value=None):

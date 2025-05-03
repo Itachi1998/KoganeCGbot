@@ -1,6 +1,6 @@
 import os, dotenv, datetime
 from datetime import datetime
-from db import create_colony,read_colony, update_colony, check_relationship
+from db import create_colony,read_colony, update_colony
 from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
@@ -76,7 +76,6 @@ class Colonies(commands.Cog):
                 continue
 
             colony = create_colony(colony_data, enemies)
-            check_relationship()
             
             await ctx.send("Colony added: " + guild.name)
             print("Colony added: " + guild.name)
@@ -85,87 +84,6 @@ class Colonies(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Colonies(bot))
-
-
-
-
-#     @commands.command(name="colony", description="Update colony")
-#     async def colony(self, ctx):
-#         await ctx.defer()
-#         ai_pool = []
-#         for enemy_class in game.Enemy.__subclasses__():
-#                         enemy = enemy_class()
-#                         ai_pool.append(enemy.name)
-#         if ctx.author.id != 677718946270543882:
-#                         await ctx.send("You are not allowed to use this command.")
-#                         return
-#         else:
-#                     for guild in self.bot.guilds:
-#                         colony_data = dynamo.read_colony(guild.id)
-                            
-                            
-#                         if colony_data is None:
-#                                 colony = Colony(id=guild.id, name=guild.name, owner=guild.owner.id, members=[], ai=[ai_pool], xp=0, colony_color='gray')
-#                                 dynamo.save_colony(colony)
-#                                 colony_data = dynamo.read_colony(colony.id)
-#                                 await ctx.send(f"Saved colony {colony.name}")
-                                
-        
-#                         if colony_data:
-#                                 colony = Colony(**colony_data)
-#                                 colony_data['ai'] = ai_pool
-#                                 dynamo.save_colony(colony)
-#                                 colony_data = dynamo.read_colony(colony.id)
-#                                 await ctx.send(f"Saved colony {colony.name}")
-                                
-                                
-                                          
-
-    # @commands.hybrid_command(name='ui', description='Edit UI of your Colony')
-    # async def ui(self, ctx):
-    #     await ctx.defer()
-    #     colony_data = dynamo.read_colony(ctx.guild.id)
-    #     if colony_data:
-    #         if ctx.author.id == ctx.guild.owner.id or ctx.author.id == 677718946270543882:
-    #             embed = discord.Embed(title="Colony UI", description="Select an option to edit")
-    #             embed.add_field(name="1) Colony Name", value="Change the name of your colony", inline=False)
-    #             embed.add_field(name="2) UI Color", value="Change the color of your colonies UI", inline=False)
-    #             colony = ctx.guild 
-    #             await ctx.send(embed=embed, view=UIEdit(self.bot, ctx, colony))
-    #         else:
-    #             ctx.send("You are not the GameMaster of this colony")
-    #     else:
-    #         dynamo.save_colony(Colony(id=ctx.guild.id, name=ctx.guild.name, owner=ctx.guild.owner.id, members=[], ai=[], xp=0, colony_color='gray'))
-    #         embed = discord.Embed(title="Colony UI", description="New colony created!\nSelect an option to edit")
-    #         embed.add_field(name="1) Colony Name", value="Change the name of your colony")
-    #         embed.add_field(name="2) UI Color", value="Change the color of your colonies UI")
-    #         colony = ctx.guild
-    #         await ctx.send(embed=embed, view=UIEdit(self.bot, ctx, colony))
-        
-
-    # @commands.hybrid_command(name='remove', description='Remove a character from colony')
-    # async def remove(self, ctx, member: discord.Member=None):
-    #         player = None
-    #         if member:
-    #              if ctx.author.id == ctx.guild.owner.id or ctx.author.id==677718946270543882:
-    #                 player = dynamo.read_player(member.id, ctx.guild.id)
-    #              else:
-    #                 await ctx.send(f"Access denied. You dont have permission.")
-    #                 return
-    #         else:
-    #             member = await self.bot.fetch_user(ctx.author.id)
-    #             player = dynamo.read_player(member.id, ctx.guild.id)
-    #         if player:
-    #                         dynamo.delete_from_colony(ctx.guild.id, "members", ctx.author.id)
-    #                         await ctx.send(f"{ctx.author.mention} has been removed from the colony.")
-#     #                         return
-            
-#     #         else:
-#     #                 await ctx.send(f"Player not found")
-
-                
-                
-            
 
 
 # #____________VIEWS__________

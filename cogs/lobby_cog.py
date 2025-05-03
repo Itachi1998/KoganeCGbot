@@ -52,6 +52,8 @@ def remove_name(text, name):
 #endregion
 
 
+    
+
 #region Round embed
 def start_round_embed(lobby, bot, pve=False):
     # Create pve embed
@@ -387,9 +389,10 @@ class Lobby_Cog(commands.Cog):
         self.bot = bot
         self.lobbies = {}  # Dictionary to store active lobbies
         # Reference to the battle cog for starting battles
-        self.battle_cog = bot.get_cog('battle')
-
-
+        self.battle_cog = bot.get_cog("Battle")
+        if self.battle_cog is None:
+            raise ValueError("Battle_Cog not found. Ensure it is loaded before Lobby_Cog.")
+        
     @commands.Cog.listener()
     async def on_thread_member_join(self, member):
         thread = member.thread
@@ -533,19 +536,23 @@ class Lobby_Cog(commands.Cog):
         await ctx.send(f"Lobby created: {thread.mention}")
 
     @lobby.command(name="team")
-    async def teama(self, ctx):
-        if ctx.author.id in self.lobby.players:
-            player
-            player_dict = read_player(ctx.author.id, ctx.guild.id)
-            tech = player['techniques'][0]
-            player['technique'] = tech['name']
-            del player['techniques'] 
-            player = Player(**player)
-            embed = team_option_embed(self.lobbies[ctx.channel.id]['Lobby'], self.bot, player)
-            msg = await ctx.send(embed=embed)
-            view = TeamSelectView(self.lobbies[ctx.channel.id]['Lobby'], self, player)
-            await msg.edit(view=view)
-            return
+    async def team(self, ctx):
+        lobby = self.lobbies[ctx.channel.id]["Lobby"]
+        if lobby:
+            if ctx.author.id in lobby.players:
+                player_dict = read_player(ctx.author.id, ctx.guild.id)
+                tech = player_dict['techniques'][0]
+                player_dict['technique'] = tech['name']
+                del player_dict['techniques'] 
+                player = Player(**player_dict)
+                embed = team_option_embed(lobby, self.bot, player)
+                msg = await ctx.send(embed=embed)
+                view = TeamSelectView(lobby, self, player)
+                await msg.edit(view=view)
+                return
+            else:
+                await ctx.send("You are not in the lobby.")
+                return
         else:
             await ctx.send("You are not in the lobby.")
             return
@@ -717,6 +724,86 @@ class TeamSelectView(discord.ui.View):
         self.add_item(TeamSelect(lobby, cog, player))
 
 #endregion
+
+
+class BattleView(discord.ui.View):
+    def __init__(self, cog, lobby):
+        super().__init__()
+        self.cog = cog
+        self.lobby = lobby
+        self.timeout = 60
+
+    @discord.ui.button(label="Attack Options", style=discord.ButtonStyle.green)
+    async def attack_options(self, button: discord.ui.Button, itx: discord.Interaction):
+        player = verify_player(ctx.author.id, ctx.guild.id)
+        tech = read_technique(player.technique, ctx.guild.id, ctx.author.id)
+        technique = None
+        name = None
+        if player:
+            for t in technique_list:
+                key = list(t.keys())[0]
+                if key == tech.name:
+                    technique = t
+                    name = key
+                    break
+        if technique is None or name not in technique:
+            await ctx.send("Technique not found.", ephemeral=True)
+            return
+        embed = discord.Embed(title="Attack", description="Choose from your offense")
+        value_string = ""
+        for key in technique[name][0]['Attack'].keys():
+            attack = technique[name][0]['Attack'][key]
+            fields = [
+                f"`Atk dmg:` **{attack.strength}**",
+                f"`Atk spd:` **{attack.speed}**",
+                f"`Atk lvl:` **{attack.level}**",
+                f"`Act spd:` **{attack.act_speed}**",
+                f"`Act cost:` **{attack.act_cost}**",
+                f"`Bodyparts:` **{', '.join(attack.act_body)}**",
+                f"`Max targets:` **{attack.aoe}**",
+                f"`Type:` **{attack.type}**"
+            ]
+            if attack.soul:
+                fields.append(f"`Soul dmg:` **{attack.soul}**")
+            # Optionally include other properties if needed and if length allows
+            value_string = "\n".join(fields) + "\n"
+
+            embed.add_field(name=attack.name, value=value_string)
+
+        embed.set_thumbnail(url=self.bot.user.avatar.url)
+        await ctx.send(embed=embed, ephemeral=True)
+        return
+
+    @discord.ui.button(label="Defend Options", style=discord.ButtonStyle.blurple)
+    async def defend_options(self, button: discord.ui.Button, interaction: discord.Interaction):
+        pass
+
+    @discord.ui.button(label="Item Options", style=discord.ButtonStyle.red)
+    async def item_options(self, button: discord.ui.Button, interaction: discord.Interaction):
+        pass
+
+    @discord.ui.button(label="Summon Options", style=discord.ButtonStyle.gray)
+    async def summon_options(self, button: discord.ui.Button, interaction: discord.Interaction):
+        pass
+
+    @discord.ui.button(label="Surrender", style=discord.ButtonStyle.red)
+    async def surrender(self, button: discord.ui.Button, interaction: discord.Interaction):
+        # Logic to surrender
+        pass
+
+    @discord.ui.button(label="Flee", style=discord.ButtonStyle.red)
+    async def flee(self, button: discord.ui.Button, interaction: discord.Interaction):
+        # Logic to flee
+        pass
+
+    @discord.ui.button(label="End Turn", style=discord.ButtonStyle.gray)
+    async def end_turn(self, button: discord.ui.Button, interaction: discord.Interaction):
+        # Logic to end the turn
+        pass
+
+
+    
+
 
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))
