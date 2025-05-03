@@ -47,80 +47,6 @@ def verify_player(user_id, colony):
     else:
         return False 
     
-class BattleView(discord.ui.View):
-    def __init__(self, cog, lobby):
-        super().__init__()
-        self.cog = cog
-        self.lobby = lobby
-        self.timeout = 60
-
-    @discord.ui.button(label="Attack Options", style=discord.ButtonStyle.green)
-    async def attack_options(self, button: discord.ui.Button, itx: discord.Interaction):
-        player = verify_player(itx.author.id, itx.guild.id)
-        tech = read_technique(player.technique, itx.guild.id, itx.author.id)
-        technique = None
-        name = None
-        if player:
-            for t in technique_list:
-                key = list(t.keys())[0]
-                if key == tech.name:
-                    technique = t
-                    name = key
-                    break
-        if technique is None or name not in technique:
-            await itx.response.send_message(content="Technique not found.", ephemeral=True)
-            return
-        embed = discord.Embed(title="Attack", description="Choose from your offense")
-        value_string = ""
-        for key in technique[name][0]['Attack'].keys():
-            attack = technique[name][0]['Attack'][key]
-            fields = [
-                f"`Atk dmg:` **{attack.strength}**",
-                f"`Atk spd:` **{attack.speed}**",
-                f"`Atk lvl:` **{attack.level}**",
-                f"`Act spd:` **{attack.act_speed}**",
-                f"`Act cost:` **{attack.act_cost}**",
-                f"`Bodyparts:` **{', '.join(attack.act_body)}**",
-                f"`Max targets:` **{attack.aoe}**",
-                f"`Type:` **{attack.type}**"
-            ]
-            if attack.soul:
-                fields.append(f"`Soul dmg:` **{attack.soul}**")
-            # Optionally include other properties if needed and if length allows
-            value_string = "\n".join(fields) + "\n"
-
-            embed.add_field(name=attack.name, value=value_string)
-
-        embed.set_thumbnail(url=self.bot.user.avatar.url)
-        await itx.response.send_message(embed=embed, ephemeral=True)
-        return
-
-    @discord.ui.button(label="Defend Options", style=discord.ButtonStyle.blurple)
-    async def defend_options(self, button: discord.ui.Button, interaction: discord.Interaction):
-        pass
-
-    @discord.ui.button(label="Item Options", style=discord.ButtonStyle.red)
-    async def item_options(self, button: discord.ui.Button, interaction: discord.Interaction):
-        pass
-
-    @discord.ui.button(label="Summon Options", style=discord.ButtonStyle.gray)
-    async def summon_options(self, button: discord.ui.Button, interaction: discord.Interaction):
-        pass
-
-    @discord.ui.button(label="Surrender", style=discord.ButtonStyle.red)
-    async def surrender(self, button: discord.ui.Button, interaction: discord.Interaction):
-        # Logic to surrender
-        pass
-
-    @discord.ui.button(label="Flee", style=discord.ButtonStyle.red)
-    async def flee(self, button: discord.ui.Button, interaction: discord.Interaction):
-        # Logic to flee
-        pass
-
-    @discord.ui.button(label="End Turn", style=discord.ButtonStyle.gray)
-    async def end_turn(self, button: discord.ui.Button, interaction: discord.Interaction):
-        # Logic to end the turn
-        pass
 
 
 
@@ -193,10 +119,29 @@ class Battle(commands.Cog):
     async def on_ready(self):
         print("Battle cog is ready!")
 
-    @commands.hybrid_command(name="attack", description="Choose an attack")
-    async def attack(self, ctx):
+    @commands.hybrid_command(name="vow", description="")
+    async def vow(self, ctx):
         player = verify_player(ctx.author.id, ctx.guild.id)
-        tech = read_technique(player.technique, ctx.guild.id, ctx.author.id)
+        
+
+
+    @commands.hybrid_command(name="summon")
+    async def summon(self, ctx):
+        await ctx.send("Command under construction")
+        return
+
+
+class BattleView(discord.ui.View):
+    def __init__(self, cog, lobby):
+        super().__init__()
+        self.cog = cog
+        self.lobby = lobby
+        self.timeout = 30
+        
+    @discord.ui.button(label="Attack Options", style=discord.ButtonStyle.green)
+    async def attack_options(self, button: discord.ui.Button, itx: discord.Interaction):
+        player = verify_player(itx.author.id, itx.guild.id)
+        tech = read_technique(player.technique, itx.guild.id, itx.author.id)
         technique = None
         name = None
         if player:
@@ -207,7 +152,7 @@ class Battle(commands.Cog):
                     name = key
                     break
         if technique is None or name not in technique:
-            await ctx.send("Technique not found.", ephemeral=True)
+            await itx.response.send_message(content="Technique not found.", ephemeral=True)
             return
         embed = discord.Embed(title="Attack", description="Choose from your offense")
         value_string = ""
@@ -231,13 +176,13 @@ class Battle(commands.Cog):
             embed.add_field(name=attack.name, value=value_string)
 
         embed.set_thumbnail(url=self.bot.user.avatar.url)
-        await ctx.send(embed=embed, ephemeral=True)
+        await itx.response.send_message(embed=embed, ephemeral=True)
         return
 
-    @commands.hybrid_command(name="defense", description="Choose an defense") 
-    async def defend(self, ctx):
-        player = verify_player(ctx.author.id, ctx.guild.id)
-        tech = read_technique(player.technique, ctx.guild.id, ctx.author.id)
+    @discord.ui.button(label="Defend Options", style=discord.ButtonStyle.blurple)
+    async def defend_options(self, button: discord.ui.Button, itx: discord.Interaction):
+        player = verify_player(itx.author.id, itx.guild.id)
+        tech = read_technique(player.technique, itx.guild.id, itx.author.id)
         technique = None
         name = None
         if player:
@@ -248,7 +193,7 @@ class Battle(commands.Cog):
                     name = key
                     break
         if technique is None or name not in technique:
-            await ctx.send("Technique not found.", ephemeral=True)
+            await itx.response.send_message("Technique not found.", ephemeral=True)
             return
         embed = discord.Embed(title="Defend", description="Choose from your offense")
         value_string = ""
@@ -272,26 +217,32 @@ class Battle(commands.Cog):
             embed.add_field(name=defense.name, value=value_string)
 
         embed.set_thumbnail(url=self.bot.user.avatar.url)
-        await ctx.send(embed=embed, ephemeral=True)
-        return
-   
-
-
-    @commands.hybrid_command(name="vow", description="")
-    async def vow(self, ctx):
-        await ctx.send("Command under construction")
+        await itx.response.send_message(embed=embed, ephemeral=True)
         return
 
-    @commands.hybrid_command(name="summon")
-    async def summon(self, ctx):
-        await ctx.send("Command under construction")
-        return
+    @discord.ui.button(label="Item Options", style=discord.ButtonStyle.red)
+    async def item_options(self, button: discord.ui.Button, interaction: discord.Interaction):
+        pass
 
-    @commands.hybrid_command(name="run")
-    async def run(self, ctx):
-        await ctx.send("Command under construction")
+    @discord.ui.button(label="Summon Options", style=discord.ButtonStyle.gray)
+    async def summon_options(self, button: discord.ui.Button, interaction: discord.Interaction):
+        pass
 
-    
+    @discord.ui.button(label="Surrender", style=discord.ButtonStyle.red)
+    async def surrender(self, button: discord.ui.Button, interaction: discord.Interaction):
+        # Logic to surrender
+        pass
+
+    @discord.ui.button(label="Flee", style=discord.ButtonStyle.red)
+    async def flee(self, button: discord.ui.Button, interaction: discord.Interaction):
+        # Logic to flee
+        pass
+
+    @discord.ui.button(label="End Turn", style=discord.ButtonStyle.gray)
+    async def end_turn(self, button: discord.ui.Button, interaction: discord.Interaction):
+        # Logic to end the turn
+        pass
+
 
 # async def respawn_enemy(enemy, colony):
 #     await colonies.ai_respawn(enemy, colony)
