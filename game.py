@@ -118,7 +118,7 @@ class Enemy(Actor):
             self.equipped = equipped 
             self.xp = xp
             self.cgp = cgp
-            self.stacked = stack
+            self.stack = stack
             self.charged = charge
             self.stun = stun
             self.hi = hi
@@ -573,7 +573,7 @@ class Grade2_Primate(Enemy):
 class Grade1_Orbmaster(Enemy):
     def __init__(self ):
         super().__init__(
-             name="OrbMaster", 
+             name="Orbmaster", 
              level=40, 
              max_hp=400, 
              max_ce=500, 
@@ -618,7 +618,7 @@ class Grade1_Charger(Enemy):
 class SpecialGrade_FingerBearer(Enemy):
     def __init__(self):
           super().__init__(
-             name="Fingerbearer", 
+             name="Finger Bearer", 
              level=80, 
      
              max_hp=600, 
@@ -628,7 +628,7 @@ class SpecialGrade_FingerBearer(Enemy):
              speed=800,
              xp=600,
              cgp=1,
-             technique="Fingerbearer",
+             technique="Finger Bearer",
              playerclass="Curse",
              bodyparts=human_body_parts,
              timer=300,
