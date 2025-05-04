@@ -560,8 +560,8 @@ class Lobby_Cog(commands.Cog):
             await ctx.send("You are not in the lobby.")
             return
     
-    @lobby.command(name="name")
-    async def name(self, ctx, name: str):
+    @lobby.command(name="teamname")
+    async def teamname(self, ctx, name: str):
         thread = ctx.channel.id
         user = ctx.author.id
         embed = discord.Embed(title='Change Team Name', description='')
@@ -570,8 +570,18 @@ class Lobby_Cog(commands.Cog):
             if lobby:
                 teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
                 teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
-                leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
-                leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
+                # leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
+                # leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
+                # fixed error on line 586 (tried to get an attribute of a None Type if there was no team)
+                if lobby.teamA['leader']:
+                    leader_a = lobby.teamA['leader']
+                elif lobby.teamB['leader']:
+                    leader_b = lobby.teamB['leader']
+                else:
+                    embed.description = ("You are not in a team")
+                    await ctx.send(embed=embed, ephemeral=True)
+                    return
+                
                 if leader_a:
                     if ctx.author.id == leader_a.user_id:
                         if name == teamb:
@@ -590,7 +600,7 @@ class Lobby_Cog(commands.Cog):
                         embed.description = ("You are not the team leader")
                         await ctx.send(embed=embed, ephemeral=True)
                         return
-                    
+
                 elif leader_b:
                     if ctx.author.id == leader_b.user_id:
                         if name == teama:
@@ -598,18 +608,18 @@ class Lobby_Cog(commands.Cog):
                             await ctx.send(embed=embed, ephemeral=True)
                             return
                         if lobby.set_teamB_name(name):
-                            embed.description = ("Change team name to:", name)
+                            embed.description = ("Change team name to:" + name)
                             await ctx.send(embed=embed, ephemeral=True)
                             return
                         else: 
-                            embed.description = ("Error setting name to:", name)
+                            embed.description = ("Error setting name to:" + name)
                             await ctx.send(embed=embed, ephemeral=True)
                             return
                     else:
                         embed.description = ("You are not the team leader")
                         await ctx.send(embed=embed, ephemeral=True)
                         return
-
+            
             else:
                 embed.description = ("You are not in a lobby")
                 await ctx.send(embed=embed, ephemeral=True)
