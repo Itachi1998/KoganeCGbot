@@ -48,85 +48,89 @@ def verify_player(user_id, colony):
         return False 
     
 
+# class BattleButtons(discord.ui.View):  #creating the active battle buttons
+#     def __init__(self, bot,  player, enemy, next_targets, host_id, ct):
+#         super().__init__(timeout=None)
+#         self.bot = bot
+#         self.player = player
+#         self.enemy = enemy
+#         self.next_targets = next_targets
+#         self.host_id = host_id
+#         self.ct = ct
+#         self.technique.label = ct.name
+#         self.technique.emoji = ct.emote
 
-
-    
-   
-
-class BattleButtons(discord.ui.View):  #creating the active battle buttons
-    def __init__(self, bot,  player, enemy, next_targets, host_id, ct):
-        super().__init__(timeout=None)
-        self.bot = bot
-        self.player = player
-        self.enemy = enemy
-        self.next_targets = next_targets
-        self.host_id = host_id
-        self.ct = ct
-        self.technique.label = ct.name
-        self.technique.emoji = ct.emote
-
-    @discord.ui.button(label="Physical",style=discord.ButtonStyle.green, emoji='🤜', row=1)
-    async def physical(self, interaction: discord.Interaction,
-                       button: discord.ui.Button):
+#     @discord.ui.button(label="Physical",style=discord.ButtonStyle.green, emoji='🤜', row=1)
+#     async def physical(self, interaction: discord.Interaction,
+#                        button: discord.ui.Button):
       
-        await interaction.response.defer()
+#         await interaction.response.defer()
 
-        button.disabled = True
+#         button.disabled = True
 
-        await self.msg.edit(view=self)
+#         await self.msg.edit(view=self)
 
-        enemy = self.enemy
+#         enemy = self.enemy
 
-        player = self.player
+#         player = self.player
 
-        if player.ce >= 5 or player.technique == 'Heavenly Restriction':
-            results = self.player.fight(enemy)
-        else:
-            await interaction.followup.send(
-                f"You need at least 5 ce to use physical attacks!")
-            return
-        player.ce -= 5
-        dmg = results[0]
-        outcome = results[1]
-        killed = results[2]
-        tool = None
-        if len(results) > 3:
-            tool = results[3]
-        if killed:
-            await interaction.followup.send(
-                f"`You exorcised {enemy.name} with their physical prowess with {dmg} damage`",
-                ephemeral=True)
+#         if player.ce >= 5 or player.technique == 'Heavenly Restriction':
+#             results = self.player.fight(enemy)
+#         else:
+#             await interaction.followup.send(
+#                 f"You need at least 5 ce to use physical attacks!")
+#             return
+#         player.ce -= 5
+#         dmg = results[0]
+#         outcome = results[1]
+#         killed = results[2]
+#         tool = None
+#         if len(results) > 3:
+#             tool = results[3]
+#         if killed:
+#             await interaction.followup.send(
+#                 f"`You exorcised {enemy.name} with their physical prowess with {dmg} damage`",
+#                 ephemeral=True)
 
-        elif outcome == "hit":
-            await interaction.followup.send(
-                f"`You hit {enemy.name} for {dmg} damage!`", ephemeral=True)
-        elif outcome == "missed":
-            await interaction.followup.send(f"`You missed!`", ephemeral=True)
-        elif outcome == "tanked":
-            await interaction.followup.send(
-                f"`{enemy.name} tanked the attack!`", ephemeral=True)
-        print(self.next_targets)
-        await self.update_physical_info(player, enemy, dmg, outcome, killed,
-                                        self.next_targets, tool,
-                                        self.bot.user.avatar.url)
+#         elif outcome == "hit":
+#             await interaction.followup.send(
+#                 f"`You hit {enemy.name} for {dmg} damage!`", ephemeral=True)
+#         elif outcome == "missed":
+#             await interaction.followup.send(f"`You missed!`", ephemeral=True)
+#         elif outcome == "tanked":
+#             await interaction.followup.send(
+#                 f"`{enemy.name} tanked the attack!`", ephemeral=True)
+#         print(self.next_targets)
+#         await self.update_physical_info(player, enemy, dmg, outcome, killed,
+#                                         self.next_targets, tool,
+#                                         self.bot.user.avatar.url)
  
-class Battle(commands.Cog): 
-    def __init__(self, bot, lobbies: dict=None):
+class Battle(commands.Cog):
+    def __init__(self, bot):
         self.bot = bot
-        self.lobbies = lobbies
-
+        self.cog = bot.get_cog('Lobby_Cog')
+        
     @commands.Cog.listener()
     async def on_ready(self):
         print("Battle cog is ready!")
 
     @commands.hybrid_command(name="vow", description="")
     async def vow(self, ctx):
-        player = verify_player(ctx.author.id, ctx.guild.id)
         
-
 
     @commands.hybrid_command(name="summon")
     async def summon(self, ctx):
+        player = verify_player(ctx.author.id, ctx.guild.id)
+        lobby = self.cog.lobbies[ctx.channel.id]['Lobby']
+        if player:
+            if lobby and lobby.status > 1:           
+                if player.user_id in lobby['players']:
+                    embed = discord.Embed(title="Choose a  summon", description="")
+                    
+                else:
+                    await ctx.send("Not in a lobby.")
+            pass
+            
         await ctx.send("Command under construction")
         return
 

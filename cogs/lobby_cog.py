@@ -723,9 +723,5 @@ class TeamSelectView(discord.ui.View):
 #endregion
 
 
-
-    
-
-
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))

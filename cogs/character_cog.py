@@ -310,6 +310,7 @@ class CreateButtons(discord.ui.View):
         )
         created = create_player(player)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
+        inventory={"Summons": {}, "Tools": {}, "Vows":{}}
         tech_rarity = next((k for k in rarity.keys() if rarity[k] >= tech['Rarity']), None)
         class_rarity = next((k for k in rarity.keys() if rarity[k] >= classes[pclass]), None)
         if created:
