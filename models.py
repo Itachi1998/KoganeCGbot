@@ -15,16 +15,16 @@ engine = create_engine(db_url)
 
 class Base(DeclarativeBase):
     pass
-# class User(Base):
-#     __tablename__="user"
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     user_id: Mapped[int] = mapped_column(unique=True)
-#     players: Mapped[List["Player"]] = relationship("Player", back_populates="user_id", cascade="all, delete-orphan")
-#     cosmetics: Mapped[List] = relationship("Cosmetics", back_populates="user_id", cascade="all, delete-orphan")
+class User(Base):
+    __tablename__="user"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(unique=True)
+    players: Mapped[List["Player"]] = relationship("Player", back_populates="user", cascade="all, delete-orphan")
+    # cosmetics: Mapped[Optional[List]] = relationship("Cosmetics", back_populates="user_id", cascade="all, delete-orphan")
 
-#     __table_args__ = (
-#         UniqueConstraint('user_id', 'id', name='uq_user_id'),
-#     )
+    __table_args__ = (
+        UniqueConstraint('user_id', 'id', name='uq_user_id'),
+    )
 
 
 class Player(Base):
@@ -32,6 +32,7 @@ class Player(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.user_id"))
+    user: Mapped["User"] = relationship("User", back_populates="players")
     colony_id: Mapped[int] = mapped_column(ForeignKey("colony.colony_id"))
     colony: Mapped["Colony"] = relationship("Colony", back_populates="players")
     # rank: Mapped[Optional['Leaderboard']] = relationship("Leaderboard", back_populates="player", cascade="all, delete-orphan")
