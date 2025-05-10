@@ -222,8 +222,12 @@ class Lobby():
         if player in self.players:
             self.players.remove(player)
             if player in self.teamA['players']:
+                if player == self.teamA['leader']:
+                    self.teamA['leader'] = None
                 self.teamA['players'].remove(player)
             if player in self.teamB['players']:
+                if player == self.teamB['leader']:
+                    self.teamB['leader'] = None
                 self.teamB['players'].remove(player)
             if player in self.spectators:
              self.spectators.remove(player)
@@ -264,12 +268,13 @@ class Lobby():
         return True
     
     def add_teamA(self, player):
+
         if len(self.teamA['players']) < 1:
             self.teamA['leader'] = player
         if player in self.teamA['players']:
            return False
         if player in self.teamB['players']:
-              self.teamB['players'].remove(player)
+              self.remove_teamB(player)
         if player.name in self.field.keys():
                 del self.field[player.name]
         if player in self.spectators:
@@ -281,11 +286,42 @@ class Lobby():
     
     def remove_teamA(self, player):
         if player in self.teamA['players']:
-            self.teamA['players'].remove(player)
+            if player == self.teamA['leader']:
+                self.teamA['leader'] = None
+            teama = self.teamA['players']
+            teama.remove(player)  
+            self.teamA['players'] = teama
             return True
         else:
             return False
+        
+    def add_teamB(self, player):
+         if len(self.teamB['players']) < 1:
+            self.teamB['leader'] = player
+         if player in self.teamA['players']:
+              self.remove_teamA(player)
+         if player.name in self.field.keys():
+                del self.field[player.name]
+         if player in self.spectators:
+                self.spectators.remove(player)  
+         if player in self.teamB['players']:
+              return False
+         player_list = [p for p in self.teamB['players']]
+         player_list.append(player)
+         self.teamB['players'] = player_list 
+         return True
     
+    def remove_teamB(self, player):
+        if player in self.teamB['players']:
+            if player == self.teamB['leader']:
+                self.teamB['leader'] = None
+            teamb = self.teamA['players']
+            teamb.remove(player)  
+            self.teamB['players'] = teamb
+            return True
+        else:
+            return False
+        
     def add_field(self, thing):
         if not isinstance(thing, Player):
             if thing.name in self.field.keys():
@@ -298,8 +334,12 @@ class Lobby():
             if thing.name in self.field.keys():
                 return False
             if thing in self.teamA['players']:
+                if thing == self.teamA['leader']:
+                    self.teamA['leader'] = None
                 self.teamA['players'].remove(thing)
             if thing in self.teamB['players']:
+                if thing == self.teamB['leader']:
+                    self.teamB['leader'] = None
                 self.teamB['players'].remove(thing)
             if thing in self.spectators:
                 self.spectators.remove(thing)
@@ -312,22 +352,7 @@ class Lobby():
         self.teamB['name'] = name
         return True
     
-    def add_teamB(self, player):
-         if len(self.teamB['players']) < 1:
-            self.teamB['leader'] = player
-         if player in self.teamA['players']:
-              self.teamA['players'].remove(player)
-         if player.name in self.field.keys():
-                del self.field[player.name]
-         if player in self.spectators:
-                self.spectators.remove(player)  
-         if player in self.teamB['players']:
-              return False
-         player_list = [p for p in self.teamB['players']]
-         
-         player_list.append(player)
-         self.teamB['players'] = player_list 
-         return True
+
     
     def remove_teamB(self, player):
         if player in self.teamB['players']:
@@ -368,11 +393,13 @@ def generate_lobby_embed(lobby: Lobby, bot) -> discord.Embed:
         color=discord.Color.from_rgb(255, 251,  86)
     )
     owner_user = bot.get_user(lobby.owner)
+    teama_name = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
+    teamb_name = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
     embed.set_author(name="Lobby", icon_url=owner_user.avatar.url if owner_user else None)
     embed.set_thumbnail(url=bot.user.avatar.url)
     embed.add_field(name="Players", value="\n".join(f"<@{player}>" for player in lobby.players) or "No players", inline=False)
-    embed.add_field(name="Team A", value="\n".join(f"{player.name}" for player in lobby.teamA['players']) or "No players", inline=True)
-    embed.add_field(name="Team B", value="\n".join(f"{player.name}" for player in lobby.teamB['players']) or "No players", inline=True)
+    embed.add_field(name=teama_name, value="\n".join(f"{player.name}" for player in lobby.teamA['players']) or "No players", inline=True)
+    embed.add_field(name=teamb_name, value="\n".join(f"{player.name}" for player in lobby.teamB['players']) or "No players", inline=True)
     embed.add_field(name="Ready Players", value="\n".join(f"<@{player}>" for player in lobby.ready) or "No players", inline=False)
     embed.add_field(name="Spectators", value="\n".join(f"<@{player}>" for player in lobby.spectators) or "No spectators", inline=False)
     
@@ -560,21 +587,25 @@ class Lobby_Cog(commands.Cog):
             await ctx.send("You are not in the lobby.")
             return
     
-    @lobby.command(name="teamname")
-    async def teamname(self, ctx, name: str):
+    @lobby.command(name="name")
+    async def name(self, ctx, name: str):
         thread = ctx.channel.id
         user = ctx.author.id
         embed = discord.Embed(title='Change Team Name', description='')
         if thread in self.lobbies:
             lobby = self.lobbies[thread]['Lobby']
             if lobby:
+                if user == lobby.owner:
+                    embed.title = "Change Name"
+                    embed.description = "Choose to change your team name or your lobby's name to: " + name
+                    await ctx.send(embed=embed, view=OwnerLobbyView(lobby, self, name))
+                    return
                 teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
                 teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
                 leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
                 leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
-                
                 if leader_a:
-                    if ctx.author.id == leader_a.user_id:
+                    if user == leader_a.user_id:
                         if name == teamb:
                             embed.description = ("Cannot set " + name + "to " + teamb)
                             await ctx.send(embed=embed, ephemeral=True)
@@ -593,7 +624,7 @@ class Lobby_Cog(commands.Cog):
                         return
 
                 elif leader_b:
-                    if ctx.author.id == leader_b.user_id:
+                    if user == leader_b.user_id:
                         if name == teama:
                             embed.description = ("Cannot set " + name + "to " + teama)
                             await ctx.send(embed=embed, ephemeral=True)
@@ -624,6 +655,8 @@ class Lobby_Cog(commands.Cog):
             embed.description = ("There is no lobby")
             await ctx.send(embed=embed, ephemeral=True)
             return
+        
+
 
     @lobby.command(name="kick")
     async def kick(self, ctx, member: discord.Member):
@@ -733,6 +766,62 @@ class Lobby_Cog(commands.Cog):
 
 #endregion
 
+# region OwnerLobbyView
+class OwnerLobbyView(discord.ui.View):
+    def __init__(self, lobby, cog, name):
+        super().__init__()
+        self.lobby = lobby
+        self.cog = cog
+        self.name = name
+
+    @discord.ui.button(label="Team", style=discord.ButtonStyle.primary)
+    async def team_button(self,itx: discord.Interaction, btn: discord.ui.Button):
+        btn.disabled=True
+        user_id = itx.user.id
+        leader_a = self.lobby.teamA['leader'] if self.lobby.teamA['leader'] else None
+        leader_b = self.lobby.teamB['leader'] if self.lobby.teamB['leader'] else None
+
+        if leader_a:
+            if user_id == leader_a.user_id :
+                self.lobby.teamA['name'] = self.name
+                await itx.response.edit_message(content="Team name changed to: " + self.name)
+                embed = generate_lobby_embed(self.lobby, self.cog.bot)
+                channel = itx.channel
+                await channel.send(embed=embed)
+                return
+            
+        if leader_b:
+            if user_id == leader_b.user_id:
+                self.lobby.teamB['name'] = self.name
+                await itx.response.send_message(content="Team name changed to: " + self.name)
+                embed = generate_lobby_embed(self.lobby, self.cog.bot)
+                channel = itx.channel
+                await channel.send(embed=embed)
+                return
+        else:
+            await itx.response.send_message("You are not a leader of any team")
+            return
+            
+    @discord.ui.button(label="Lobby", style=discord.ButtonStyle.primary)
+    async def lobby_button(self, itx: discord.Interaction, btn: discord.ui.Button):
+        btn.disabled=True
+        user_id = itx.user.id
+        if user_id == self.lobby.owner:
+            self.lobby.name = self.name
+            embed = generate_lobby_embed(self.lobby, self.cog.bot)
+            self.lobby.embed = embed
+            embed.description = "Lobby name changed to: " + self.name
+            await itx.response.send_message(embed=embed)
+            return
+    
+        else:
+            await itx.response.send_message("You are not the owner of this lobby", view=self)
+            return
+          
+
+#endregion
+
+
 #region TeamSelect View
 class TeamSelect(discord.ui.Select):
     def __init__(self, lobby, cog, player):
@@ -761,11 +850,12 @@ discord.SelectOption(label="Spectator", value="spectator", description=", ".join
                 await channel.send(self.player.name + " has joined " + teamA_name)
       
             elif selected_value == "teamb":
+
                 self.lobby.add_teamB(self.player)
                 teamB_name = self.lobby.teamB['name'] if self.lobby.teamB['name'] else "Team B"
                 await channel.send(self.player.name + " has joined " + teamB_name)
+
             elif selected_value == "field":
-        
                 self.lobby.add_field(self.player)
                 await channel.send(self.player.name + "has joined the field")
             elif selected_value == "spectator":
@@ -792,10 +882,6 @@ class TeamSelectView(discord.ui.View):
         self.add_item(TeamSelect(lobby, cog, player))
 
 #endregion
-
-
-
-    
 
 
 async def setup(bot):

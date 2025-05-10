@@ -32,7 +32,7 @@ def create_player(player):
             level=1,
             name=player.name,
             equipped=player.equipped,
-            inventory=player.inventory,
+            # inventory=player.inventory,
             max_hp=player.max_hp,
             max_ce=player.max_ce,
             speed=player.speed,
@@ -44,11 +44,6 @@ def create_player(player):
             six_eyes=player.six_eyes
         )
         new_tech = Technique(name=player.technique,
-            level=1,
-            rct=False,
-            six_eyes=player.six_eyes,
-            user_id=player.user_id,
-            colony_id=player.colony,
             player=new_player
         )
         
@@ -69,7 +64,7 @@ def create_colony(colony_data, enemies):
         existing_colony = session.query(Colony).filter_by(colony_id=colony_data["colony id"]).first()
         if existing_colony:
             raise ValueError("Colony already exists")
-        
+
         # Create colony without players and enemies initially
         colony = Colony(
             colony_name=colony_data['name'],
@@ -79,7 +74,7 @@ def create_colony(colony_data, enemies):
             ce=colony_data['ce'],
             xp=colony_data['xp'],
             six_eyes=colony_data['six eyes'],
-            special_grades=colony_data.get('special_grades', [])
+            # special_grades=colony_data.get('special_grades', [])
         )
         
         session.add(colony)
@@ -127,32 +122,34 @@ def create_technique(tech_data):
             else:
                 technique = Technique(
                     name=tech_data['name'],
-                    level=tech_data['level'],
-                    rct=tech_data['rct'],
-                    six_eyes=tech_data['six eyes'],
+                    # level=tech_data['level'],
+                    # rct=tech_data['rct'],
+                    # six_eyes=tech_data['six eyes'],
                     user_id=tech_data['user id'],
-                    colony_id=tech_data['colony id']
+                #     colony_id=tech_data['colony id']
                 )
                 session.add(technique)
                 session.commit()
                 session.close()
                 return technique 
             
-
-# # Update check_relationship function
-# def check_relationship():
-#     with Session(engine) as session:
-#         colonies = session.query(Colony).all()
-#         for colony in colonies:
-#             print(f"Colony: {colony.colony_name} (ID: {colony.colony_id})")
-#             print(f"Players: {len(colony.players)}")
-#             print(f"Enemies: {len(colony.enemies)}")
-#             print(f"Shop items: {len(colony.shop)}")
-        
-#         players = session.query(Player).all()
-#         for player in players:
-#             print(f"Player: {player.player_name} - Techniques: {len(player.techniques)}")
-
+def create_vow(vow_data: dict):
+    with Session(engine) as session:
+        existing_vow = session.query(Technique).filter_by(name=vow_data["name"], user_id=vow_data["user_id"]).first()
+        if existing_vow:
+            raise ValueError("Vow already exists")
+        else:
+            vow = Technique(
+                name=vow_data['name'],
+                level=vow_data['level'],
+                rct=vow_data['rct'],
+                user_id=vow_data['user id'],
+                colony_id=vow_data['colony id']
+            )
+            session.add(vow)
+            session.commit()
+            session.close()
+            return vow
 # Update read_technique function to match new model
 def read_technique(techname: str, colony_id: int, user_id: int, value=None):
     with Session(engine) as session:
