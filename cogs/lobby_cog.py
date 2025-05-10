@@ -216,8 +216,12 @@ class Lobby():
         if player in self.players:
             self.players.remove(player)
             if player in self.teamA['players']:
+                if player == self.teamA['leader']:
+                    self.teamA['leader'] = None
                 self.teamA['players'].remove(player)
             if player in self.teamB['players']:
+                if player == self.teamB['leader']:
+                    self.teamB['leader'] = None
                 self.teamB['players'].remove(player)
             if player in self.spectators:
              self.spectators.remove(player)
