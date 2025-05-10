@@ -116,7 +116,7 @@ class Battle(commands.Cog):
 
     @commands.hybrid_command(name="vow", description="")
     async def vow(self, ctx):
-        
+        pass
 
     @commands.hybrid_command(name="summon")
     async def summon(self, ctx):

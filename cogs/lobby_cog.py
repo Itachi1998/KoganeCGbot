@@ -564,21 +564,25 @@ class Lobby_Cog(commands.Cog):
             await ctx.send("You are not in the lobby.")
             return
     
-    @lobby.command(name="teamname")
-    async def teamname(self, ctx, name: str):
+    @lobby.command(name="name")
+    async def name(self, ctx, name: str):
         thread = ctx.channel.id
         user = ctx.author.id
         embed = discord.Embed(title='Change Team Name', description='')
         if thread in self.lobbies:
             lobby = self.lobbies[thread]['Lobby']
             if lobby:
+                if user == lobby.owner:
+                    embed.title = "Change Name"
+                    embed.description = "Choose to change your team name or your lobby's name to: " + name
+                    await ctx.send(embed=embed, ephemeral=True, view=OwnerLobbyView(lobby, self, name))
+                    return
                 teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
                 teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
                 leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
                 leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
-                
                 if leader_a:
-                    if ctx.author.id == leader_a.user_id:
+                    if user == leader_a.user_id:
                         if name == teamb:
                             embed.description = ("Cannot set " + name + "to " + teamb)
                             await ctx.send(embed=embed, ephemeral=True)
@@ -597,7 +601,7 @@ class Lobby_Cog(commands.Cog):
                         return
 
                 elif leader_b:
-                    if ctx.author.id == leader_b.user_id:
+                    if user == leader_b.user_id:
                         if name == teama:
                             embed.description = ("Cannot set " + name + "to " + teama)
                             await ctx.send(embed=embed, ephemeral=True)
@@ -628,6 +632,9 @@ class Lobby_Cog(commands.Cog):
             embed.description = ("There is no lobby")
             await ctx.send(embed=embed, ephemeral=True)
             return
+        
+
+
 
     @lobby.command(name="kick")
     async def kick(self, ctx, member: discord.Member):
@@ -736,6 +743,47 @@ class Lobby_Cog(commands.Cog):
             return
 
 #endregion
+
+# region OwnerLobbyView
+class OwnerLobbyView(discord.ui.View):
+    def __init__(self, lobby, cog, name):
+        super().__init__()
+        self.lobby = lobby
+        self.cog = cog
+        self.name = name
+
+    @discord.ui.button(label="Team", style=discord.ButtonStyle.primary)
+    async def team_button(self, button: discord.ui.Button, itx: discord.Interaction):
+        user_id = itx.user.id
+        leader_a = self.lobby.teamA['leader'] if self.lobby.teamA['leader'] else None
+        leader_b = self.lobby.teamB['leader'] if self.lobby.teamB['leader'] else None
+        if user_id == leader_a.user_id:
+            self.lobby.teamA['name'] = self.name
+           
+        if user_id == leader_b.user_id:
+            self.lobby.teamB['name'] = self.name
+  
+        else:
+            await itx.response.send_message("You are not a leader of any team", ephemeral=True)
+            
+    @discord.ui.button(label="Lobby", style=discord.ButtonStyle.primary)
+    async def lobby_button(self, button: discord.ui.Button, itx: discord.Interaction):
+        button.disabled=True
+        await itx.response.edit_message(view=self)
+        user_id = itx.user.id
+        if user_id == self.lobby.owner:
+            self.lobby.name = self.name
+            embed = generate_lobby_embed(self.lobby, self.cog.bot)
+            self.lobby.embed = embed
+            embed.description = "Lobby name changed to: " + self.name
+            await itx.response.send_message(embed=embed, ephemeral=True)
+    
+        else:
+            await itx.response.send_message("You are not the owner of this lobby", ephemeral=True)
+          
+
+#endregion
+
 
 #region TeamSelect View
 class TeamSelect(discord.ui.Select):
