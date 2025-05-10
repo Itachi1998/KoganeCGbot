@@ -45,7 +45,6 @@ def create_player(player):
         )
         new_tech = Technique(name=player.technique,
             level=1,
-            rct=False,
             six_eyes=player.six_eyes,
             user_id=player.user_id,
             colony_id=player.colony,
