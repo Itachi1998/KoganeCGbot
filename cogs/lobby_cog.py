@@ -146,12 +146,18 @@ def team_option_embed(lobby, bot, player):
     embed = discord.Embed(title=lobby.name, description="Team Select")
     current_team = None
     if player in lobby.teamA['players']:
-        current_team = lobby.teamA['name']
+        leader = lobby.teamA['leader'] if lobby.teamA['leader'] else "None"
+        if player.user_id == leader.user_id:
+            current_team = "Leader of " + lobby.teamA['name']
+        
+        else:
+            current_team = lobby.teamB['name']
 
     elif player in lobby.teamB['players']:
         leader = lobby.teamB['leader'] if lobby.teamB['leader'] else "None"
-        if player.user_id == leader:
+        if player.user_id == leader.user_id:
             current_team = "Leader of " + lobby.teamB['name']
+        
         else:
             current_team = lobby.teamB['name']
     elif player.name in lobby.field.keys():
@@ -554,6 +560,71 @@ class Lobby_Cog(commands.Cog):
             await ctx.send("You are not in the lobby.")
             return
     
+    @lobby.command(name="teamname")
+    async def teamname(self, ctx, name: str):
+        thread = ctx.channel.id
+        user = ctx.author.id
+        embed = discord.Embed(title='Change Team Name', description='')
+        if thread in self.lobbies:
+            lobby = self.lobbies[thread]['Lobby']
+            if lobby:
+                teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
+                teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
+                leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
+                leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
+                
+                if leader_a:
+                    if ctx.author.id == leader_a.user_id:
+                        if name == teamb:
+                            embed.description = ("Cannot set " + name + "to " + teamb)
+                            await ctx.send(embed=embed, ephemeral=True)
+                            return
+                        if lobby.set_teamA_name(name):
+                            embed.description = ("Change team name to: " + name)
+                            await ctx.send(embed=embed, ephemeral=True)
+                            return
+                        else: 
+                            embed.description = ("Error setting name to: " + name)
+                            await ctx.send(embed=embed, ephemeral=True)
+                            return
+                    else:
+                        embed.description = ("You are not the team leader")
+                        await ctx.send(embed=embed, ephemeral=True)
+                        return
+
+                elif leader_b:
+                    if ctx.author.id == leader_b.user_id:
+                        if name == teama:
+                            embed.description = ("Cannot set " + name + "to " + teama)
+                            await ctx.send(embed=embed, ephemeral=True)
+                            return
+                        if lobby.set_teamB_name(name):
+                            embed.description = ("Change team name to:" + name)
+                            await ctx.send(embed=embed, ephemeral=True)
+                            return
+                        else: 
+                            embed.description = ("Error setting name to:" + name)
+                            await ctx.send(embed=embed, ephemeral=True)
+                            return
+                    else:
+                        embed.description = ("You are not the team leader")
+                        await ctx.send(embed=embed, ephemeral=True)
+                        return
+
+                else:
+                    embed.description = ("You are not in a team")
+                    await ctx.send(embed=embed, ephemeral=True)
+                    return
+
+            else:
+                embed.description = ("You are not in a lobby")
+                await ctx.send(embed=embed, ephemeral=True)
+                return
+        else:
+            embed.description = ("There is no lobby")
+            await ctx.send(embed=embed, ephemeral=True)
+            return
+
     @lobby.command(name="kick")
     async def kick(self, ctx, member: discord.Member):
         if ctx.channel.id in self.lobbies.keys():
