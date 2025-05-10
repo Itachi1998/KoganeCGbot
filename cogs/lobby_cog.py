@@ -570,17 +570,8 @@ class Lobby_Cog(commands.Cog):
             if lobby:
                 teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
                 teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
-                # leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
-                # leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
-                # fixed error on line 586 (tried to get an attribute of a None Type if there was no team)
-                if lobby.teamA['leader']:
-                    leader_a = lobby.teamA['leader']
-                elif lobby.teamB['leader']:
-                    leader_b = lobby.teamB['leader']
-                else:
-                    embed.description = ("You are not in a team")
-                    await ctx.send(embed=embed, ephemeral=True)
-                    return
+                leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
+                leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
                 
                 if leader_a:
                     if ctx.author.id == leader_a.user_id:
@@ -619,7 +610,12 @@ class Lobby_Cog(commands.Cog):
                         embed.description = ("You are not the team leader")
                         await ctx.send(embed=embed, ephemeral=True)
                         return
-            
+
+                else:
+                    embed.description = ("You are not in a team")
+                    await ctx.send(embed=embed, ephemeral=True)
+                    return
+
             else:
                 embed.description = ("You are not in a lobby")
                 await ctx.send(embed=embed, ephemeral=True)
