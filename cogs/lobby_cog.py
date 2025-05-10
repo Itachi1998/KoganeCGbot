@@ -174,7 +174,6 @@ def team_option_embed(lobby, bot, player):
     return embed
 #endregion
 
-
 #region Lobby class
 class Lobby():
     def __init__(self, 
@@ -239,7 +238,6 @@ class Lobby():
                 self.ready.remove(player)
             if player in self.field:
                 del self.field[player.name]
-
             # Check if the player is the owner
             if player == self.owner:
                 if self.players:  # If there are more players left
@@ -255,9 +253,9 @@ class Lobby():
         if player in self.spectators:
               return False
         if player in self.teamA['players']:
-               self.teamA['players'].remove(player)
+            self.remove_teamA(player)
         if player in self.teamB['players']:
-                self.teamB['players'].remove(player)     
+            self.remove_teamB(player)
         if player.name in self.field.keys():
                 del self.field[player.name]
         self.spectators.append(player)
@@ -268,7 +266,6 @@ class Lobby():
         return True
     
     def add_teamA(self, player):
-
         if len(self.teamA['players']) < 1:
             self.teamA['leader'] = player
         if player in self.teamA['players']:
@@ -334,13 +331,9 @@ class Lobby():
             if thing.name in self.field.keys():
                 return False
             if thing in self.teamA['players']:
-                if thing == self.teamA['leader']:
-                    self.teamA['leader'] = None
-                self.teamA['players'].remove(thing)
+                self.remove_teamA(thing)
             if thing in self.teamB['players']:
-                if thing == self.teamB['leader']:
-                    self.teamB['leader'] = None
-                self.teamB['players'].remove(thing)
+                self.remove_teamB(thing)
             if thing in self.spectators:
                 self.spectators.remove(thing)
             name = thing.name
@@ -722,44 +715,22 @@ class Lobby_Cog(commands.Cog):
              return
 
 
-    @lobby.command(name="pve")
-    async def pve(self, ctx):
-        if ctx.channel.id in self.lobbies:
-                thread = ctx.channel.id
-                lobby = self.lobbies[thread]['Lobby']
-                if ctx.author.id == lobby.owner:
-                        embed, new_lobby = start_round_embed(lobby, self.bot, pve=True)
-                        if embed:
-                            self.lobbies[ctx.channel.id]['Lobby'] = new_lobby
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            await ctx.send("Error starting PVE")
-                            return
-                else:       
-                    await ctx.send("You are not the lobby owner")
+    @lobby.command(name="start")
+    async def start(self, ctx):
+        lobby = self.lobbies[ctx.channel.id]["Lobby"]
+        if ctx.channel.id in self.lobbies.keys():
+            if ctx.author.id == lobby.owner:
+                if lobby.status == 1:
+                    embed, lobby = start_round_embed(lobby, self.bot)
+                    self.lobbies[ctx.channel.id]["embed"] = embed
+                    await ctx.send(embed=embed)
                     return
-        else:
-            await ctx.send("You are not in a lobby")
-            return
-    
-    @lobby.command(name="pvp")
-    async def pvp(self, ctx):
-        if ctx.channel.id in self.lobbies:
-                thread = ctx.channel.id
-                lobby = self.lobbies[thread]['Lobby']
-                if ctx.author.id == lobby.owner:
-                        embed, new_lobby = start_round_embed(lobby, self.bot)
-                        if embed:
-                            self.lobbies[ctx.channel.id]['Lobby'] = new_lobby
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            await ctx.send("Error starting PVP")
-                            return
                 else:
-                    await ctx.send("You are not the lobby owner")
+                    await ctx.send("`Lobby is already in battle`")
                     return
+            else:
+                await ctx.send("You are not the owner of this lobby")
+                return
         else:
             await ctx.send("You are not in a lobby")
             return
