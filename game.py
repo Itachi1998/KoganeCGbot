@@ -3,7 +3,6 @@ import datetime
 from typing import Union, List, Optional
 import enum, random, sys
 from copy import deepcopy
-import old_techniques
 
 
 #currencies:

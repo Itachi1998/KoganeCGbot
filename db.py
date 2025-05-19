@@ -1,5 +1,5 @@
 import os, json, models
-from models import Player, Colony, Technique, Enemy
+from models import Player, Colony, Technique, Enemy, User
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, joinedload
@@ -46,9 +46,21 @@ def create_player(player):
         new_tech = Technique(name=player.technique,
             player=new_player
         )
-        
+        existing_user = session.query(User).filter_by(user_id=player.user_id).first()
         session.add(new_player)
         session.add(new_tech)
+        if existing_user:
+            # If the user already exists, just append the new player to the existing user's players
+            existing_user.players.append(new_player)
+        else:   
+            new_user = User(
+                user_id = player.user_id,
+                players=[new_player]
+            )
+            session.add(new_user)
+            
+        
+        
         # Flush to get the ID for the new player
         session.flush()
         
@@ -113,6 +125,17 @@ def delete_player(colony_id, user_id):
         session.commit()
         session.close()
         return True
+    
+def delete_user(user_id):
+    with Session(engine) as session:
+        existing_user = session.query(User).filter_by(user_id=user_id).first()
+        if not existing_user:
+            raise ValueError("User does not exist")
+        # No need to manually update colony.players, SQLAlchemy relationships handle this
+        session.delete(existing_user)
+        session.commit()
+        session.close()
+        return True
 
 def create_technique(tech_data):
         with Session(engine) as session:
@@ -151,27 +174,43 @@ def create_vow(vow_data: dict):
             session.close()
             return vow
 # Update read_technique function to match new model
-def read_technique(techname: str, colony_id: int, user_id: int, value=None):
+def read_technique(player_id, value=None):
     with Session(engine) as session:
         existing_tech = session.query(Technique).filter_by(
-            name=techname, colony_id=colony_id, user_id=user_id
+            player_id = player_id
         ).first()
-        
-        if existing_tech:
-            if value:
-                tech_data = {
-                    column.name: getattr(existing_tech, column.name) 
-                    for column in existing_tech.__table__.columns
-                }
-                session.close()
-                return tech_data
-            else:
-                session.close()
-                return existing_tech
-        else:
-            session.close()
-            return False
+        if not existing_tech:
+             return False
+        tech_data = {
+            column.name: getattr(existing_tech, column.name)
+            for column in existing_tech.__table__.columns
+        }
+        return tech_data
+    
+def read_user(user_id: int, value=None):
+    with Session(engine) as session:
+        # filter by the actual column instead of Ellipsis
+        u = (
+            session.query(User)
+                   .options(joinedload(User.players))
+                   .filter_by(user_id=user_id)
+                   .first()
+        )
 
+        if not u:
+             return False
+
+        if value:
+             return {
+                **{c.name: getattr(u, c.name) for c in u.__table__.columns},
+                "players": [
+                   {c.name: getattr(p, c.name) for c in p.__table__.columns}
+                   for p in u.players
+                ]
+             }
+        else:
+             return u
+        
 def read_colony(colony_id: int, value=None):
             with Session(engine) as session:
                     existing_colony = session.query(Colony).options(
@@ -182,7 +221,6 @@ def read_colony(colony_id: int, value=None):
                                session.close()
                                return {column.name: getattr(existing_colony, column.name) for column in existing_colony.__table__.columns}
                          else:
-                               session.close()
                                return existing_colony
                     else:
                          session.close()
@@ -190,21 +228,29 @@ def read_colony(colony_id: int, value=None):
 
 def read_player(user_id, colony_id, value=None):
     with Session(engine) as session:
-        existing_player = session.query(Player).options(
-            joinedload(Player.techniques)
-        ).filter_by(user_id=user_id, colony_id=colony_id).first()
+        existing_player = session.query(Player)\
+                                 .options(joinedload(Player.techniques))\
+                                 .filter_by(user_id=user_id, colony_id=colony_id)\
+                                 .first()
         
         if existing_player:
-            # Always return a dictionary of the player data
-            player_dict = {column.name: getattr(existing_player, column.name) for column in existing_player.__table__.columns}
-            # Also include techniques data
-            player_dict['techniques'] = []
-            for tech in existing_player.techniques:
-                tech_dict = {column.name: getattr(tech, column.name) for column in tech.__table__.columns}
-                player_dict['techniques'].append(tech_dict)
-            del player_dict['id']
-            session.close()
-            return player_dict
+            if value:
+                player_dict = {column.name: getattr(existing_player, column.name) for column in existing_player.__table__.columns}
+                player_dict['techniques'] = [
+                    {column.name: getattr(tech, column.name) for column in tech.__table__.columns}
+                    for tech in existing_player.techniques
+                ]
+
+                session.close()
+                return player_dict
+            else:
+                player_dict = {column.name: getattr(existing_player, column.name) for column in existing_player.__table__.columns}
+                player_dict['techniques'] = [
+                    {column.name: getattr(tech, column.name) for column in tech.__table__.columns}
+                    for tech in existing_player.techniques
+                ]
+                session.close()
+                return player_dict
         else:
             session.close()
             return False
@@ -272,18 +318,7 @@ def update_enemy(colony_id, value=None):
             session.commit()
             session.close()
             return True
-def delete_colony_player(colony_id, user_id):
-    with Session(engine) as session:
-        existing_player = session.query(Player).filter_by(colony_id=colony_id, user_id=user_id).first()
-        if not existing_player:
-            raise ValueError("Player does not exist")
-        
-        session.delete(existing_player)
-        session.commit()
-        session.close()
-        return True
-        return True
-    
+
 def delete_enemy(colony_id, user_id):
     with Session(engine) as session:
         existing_enemy = session.query(Enemy).filter_by(colony_id=colony_id, tamed=user_id).first()
@@ -306,9 +341,9 @@ def delete_colony(colony_id, user_id):
           session.close()
           return True
      
-def delete_technique(colony_id, user_id):
+def delete_technique(player_id):
      with Session(engine) as session:
-          existing_tech= session.query(Technique).filter_by(colony_id=colony_id, user_id=user_id).first()
+          existing_tech= session.query(Technique).filter_by(player_id = player_id).first()
           if not existing_tech:
                return False
           session.delete(existing_tech)
