@@ -476,29 +476,21 @@ class Lobby_Cog(commands.Cog):
             
     @lobby.command(name="ready")
     async def ready(self, ctx):
-        user = ctx.author.id
-        channel = ctx.channel.id
-        lobby = self.lobbies[channel]['Lobby']
-        playerd = read_player(user, ctx.guild.id)
-        tech = playerd['techniques'][0]
-        del playerd['techniques']
-        del playerd['id']
-        playerd['technique'] = tech['name']
-        player = Player(**playerd)
-        if player and lobby:
-            if user in lobby.players:
-                ready = lobby.ready_up(user)
-                if ready:
-                    await ctx.send("Player " + player.name + " is ready")
-                    return True
+        lobby = self.lobbies[ctx.channel.id]["Lobby"]
+        if lobby:
+            user_id = ctx.author.id
+            if user_id in lobby.players:
+                if user_id in lobby.ready:
+                    lobby.ready.remove(user_id)
+                    embed = generate_lobby_embed(lobby, self.bot)
+                    self.lobbies[ctx.channel.id]["embed"] = embed
+                    await ctx.send(f"{ctx.author.mention} is no longer ready.")
                 else:
-                    await ctx.send("Error ready player")
-            else:
-                await ctx.send("You are not in this lobby")
-                return False
-        else:
-            await ctx.send("Error ready player")
-            return False
+                    lobby.ready.append(user_id)
+                    embed = generate_lobby_embed(lobby, self.bot)
+                    self.lobbies[ctx.channel.id]["embed"] = embed
+                    await ctx.send(f"{ctx.author.mention} is now ready.")
+
             
             
     @lobby.command(name="invite")
@@ -563,7 +555,7 @@ class Lobby_Cog(commands.Cog):
         self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=ctx.guild.id, private=True,
                                                      players=[ctx.author.id], invited=invited, teamA={"name" : "Team A", "players" : [], "leader" : ""}, 
                                                      teamB={"name" : "Team B", "players" : [], "leader" : ""},
-                                                    status=1,  ready=[], Round=0, start_time=datetime.now(),
+                                                    status=0,  ready=[], Round=0, start_time=datetime.now(),
                                                     field={}, graveyard=[], feed=[], spectators = []), "embed" : ""}
         
         lobby = self.lobbies[thread.id]["Lobby"]
@@ -724,21 +716,27 @@ class Lobby_Cog(commands.Cog):
              await ctx.send("`Error: lobby doesn't exist`")
              return
 
-
     @lobby.command(name="start")
     async def start(self, ctx):
         lobby = self.lobbies[ctx.channel.id]["Lobby"]
+        lobby.status = 1
+        lobby.ready = []
         if ctx.channel.id in self.lobbies.keys():
             if ctx.author.id == lobby.owner:
                 if lobby.status == 1:
+                    lobby.round = 0
                     embed, lobby = start_round_embed(lobby, self.bot)
                     battle_cog = self.bot.get_cog("Battle")
                     if battle_cog is None:
                         await ctx.send("Battle cog not found.")
                         await ctx.channel.send(embed=embed)
                         return
-                    self.lobbies[ctx.channel.id]["embed"] = embed
                     view = battle_cog.BattleView(lobby, self.bot)
+                    lobby.feed = [{
+                          'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                          'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                          'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
+                          }]
                     await ctx.send(embed=embed, view=view)
                     return
                 else:
@@ -747,6 +745,7 @@ class Lobby_Cog(commands.Cog):
             else:
                 await ctx.send("You are not the owner of this lobby")
                 return
+        
         else:
             await ctx.send("You are not in a lobby")
             return

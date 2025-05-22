@@ -81,14 +81,16 @@ class Actor:
 
 # region Enemy
 class Enemy(Actor):
-    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, playerclass,  xp: int, cgp: int, 
+    def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, 
+                 playerclass,  xp: int, cgp: int, 
                 stack=0, colony_id:int = None, defense: dict=None,
                 inventory: list = None, equipped: list = None,
                 poison: tuple=None,charge: int=None, 
                 stun: tuple=None,  hi: bool=None, hr: str=None,
-                prescience: int=None, tamed: bool=None,
+                prescience: int=None, tamed: int=None,
                 debuffed: list=None, buffed: list=None, summons: list=None, 
-                healed: int=None, bodyparts: dict=None, quantity: int=None, soul: int=None, status=None, timer=None, killed=None):
+                healed: int=None, bodyparts: dict=None, quantity: int=None, 
+                soul: int=None, status=None, timer=None, killed=None):
             
             super().__init__(
                 name, 

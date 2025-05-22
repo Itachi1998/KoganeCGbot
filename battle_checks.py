@@ -184,6 +184,8 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
                 is_player=True
             else:
                 tech = [t for t in technique_list if next(iter(t)) == player.technique]
+                print(f"Player {player.name} has {player.technique} technique")
+                print(tech[0][player.technique])
                 is_player=True
 
     if tools:
@@ -195,6 +197,7 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
         return new_tools
     
     if attack:
+        print(f"Setting attack '{attack}' for {player.name}")
         if "Domain" in attack or "Falling Blossom" in attack or "Hollow Wicker" in attack:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, attack=attack)
             return new_barrier
@@ -202,6 +205,8 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
         print(f"Setting attack '{attack}' for {player.name}")
 
         if is_player:
+            print(f"Player {player.name} is using {attack}")
+
             new_attack = tech[0][player.technique][0]['Attack'][attack]
             return new_attack
         
@@ -275,6 +280,7 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
         
 # region verify checks
 def attack_verify(player, target, attack, aoe=False):
+    print(f"Verifying attack '{attack}' for {player.name}")
     if aoe:
         attack = get_move(player, attack=attack, aoe=True)
     else:
