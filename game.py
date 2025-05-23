@@ -835,7 +835,7 @@ class Kashimo(Enemy):
                      speed=1800,
                      xp=1500,
                      cgp=5,
-                     technique="Kashimo",
+                     technique="Mythical Beast",
                      playerclass="Reincarnate",
                      stun=2,
                      soul={"strength" : 100},

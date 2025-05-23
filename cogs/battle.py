@@ -141,7 +141,7 @@ def target_embed(player, lobby, move, defense=False, attack=False, barrier=False
                 if hasattr(t, 'user_id') and t.user_id == player.user_id:
                     continue
                 if chosen:
-                    print("checkinf if target " + t.name + " is in targets")
+                    print("checking if target " + t.name + " is in targets")
                     print([tar.name for tar in chosen])
                     if t.name not in [tar.name for tar in chosen]:
                         targets.append(t)
@@ -168,6 +168,7 @@ def target_embed(player, lobby, move, defense=False, attack=False, barrier=False
 
 #endregion
 
+#region move embed
 
 def move_embed(player, move):
 
@@ -196,9 +197,12 @@ def move_embed(player, move):
         value="- **Strength:** " + str(move.soul))
     return embed
 
+#endregion
 
+#region sim embed
 def simulation_embed(lobby, player, target, feed):
     user_id = player.user_id
+    print(user_id)
     attacks = feed['attacks']
     defenses = feed['defenses']
     barriers = feed['barriers']
@@ -207,57 +211,62 @@ def simulation_embed(lobby, player, target, feed):
     field = lobby.field
     attack_str = None
     defense_str = None
+    print(f"Checking user_id: {user_id}")
+    print(f"Team A players: {[p.user_id for p in teama['players']]}")
+    print(f"Team B players: {[p.user_id for p in teamb['players']]}")
+    print(f"Field players: " + ", ". join(field.keys()))
+    print(f"Attacks: {attacks}")
+    print(f"Barriers: {barriers}")
+    p_feed = None
     if user_id in [p.user_id for p in teama['players']]:
-        if user_id in attacks[teama.name]:
+        if user_id in attacks.get(teama.name, {}):
             attack_str = attacks[teama.name][user_id]['move'].name
-        if user_id in barriers[teama.name]:
+        elif user_id in barriers.get(teama.name, {}):
             attack_str = barriers[teama.name][user_id]['move'].name
-    if user_id in [p.user_id for p in teamb['players']]:
-        if user_id in attacks[teamb.name]:
+    elif user_id in [p.user_id for p in teamb['players']]:
+        if user_id in attacks.get(teamb.name, {}):
             attack_str = attacks[teamb.name][user_id]['move'].name
-        if user_id in barriers[teamb.name]:
+        elif user_id in barriers.get(teamb.name, {}):
             attack_str = barriers[teamb.name][user_id]['move'].name
-    if user_id in [p for p in field.keys()]:
-        if user_id in attacks['Field']:
-            attack= attacks['Field'][user_id]['move']
+    elif player.name in field.keys():
+        if user_id in attacks.get('Field', {}):
+            attack = attacks['Field'][user_id]['move']
+            p_feed = attacks['Field'][user_id]
+            print(f"Attack move: {attack}")
             attack_str = attack.name
-        if user_id in barriers['Field']:
-            attack = barriers['Field'][user_id]['move']
-            attack_str = attack.name
+        elif user_id in barriers.get('Field', {}):
+            barrier = barriers['Field'][user_id]['move']
+            attack_str = barrier.name
+    else:
+        print("No matching condition found for user_id.")
 
     if hasattr(target, 'user_id'):
         if target.user_id in [p.user_id for p in teama['players']]:
             if target.user_id in defenses[teama.name]:
                 defense_str = defenses[teama.name][target.user_id]['move'].name
-            if target.user_id in barriers[teama.name]:
+            elif target.user_id in barriers[teama.name]:
                 defense_str = barriers[teama.name][target.user_id]['move'].name
         if target.user_id in [p.user_id for p in teamb['players']]:
             if target.user_id in defenses[teamb.name]:
                 defense_str = defenses[teamb.name][target.user_id]['move'].name
-            if target.user_id in barriers[teamb.name]:
+            elif target.user_id in barriers[teamb.name]:
                 defense_str = barriers[teamb.name][target.user_id]['move'].name
         if target.user_id in [p.user_id for p in field]:
             if target.user_id in defenses['Field']:
                 defense_str = defenses['Field'][target.user_id]['move'].name
-            if target.user_id in barriers['Field']:
+            elif target.user_id in barriers['Field']:
                 defense_str = barriers['Field'][target.user_id]['move'].name
     else:
         if target.tamed:
             if target.tamed in [p.user_id for p in teama['players']]:
                 if target.tamed in defenses[teama.name]:
                     defense_str = defenses[teama.name][target.tamed].name
-                if target.tamed in barriers[teama.name]:
-                    defense_str = barriers[teama.name][target.tamed].name
             if target.tamed in [p.user_id for p in teamb['players']]:
                 if target.tamed in defenses[teamb.name]:
                     defense_str = defenses[teamb.name][target.tamed]['move'].name
-                if target.tamed in barriers[teamb.name]:
-                    defense_str = barriers[teamb.name][target.tamed]['move'].name
             if target.tamed in [p.user_id for p in field]:
                 if target.tamed in defenses['Field']:
                     defense_str = defenses['Field'][target.tamed]['move'].name
-                if target.tamed in barriers['Field']:
-                    defense_str = barriers['Field'][target.tamed]['move'].name
         else:
             target_tech = None
             npc_tech=None
@@ -277,34 +286,38 @@ def simulation_embed(lobby, player, target, feed):
 
             if target_tech:
                 random_defense = [t for t in target_tech[name][1]['Defend'].keys()]
-                random_defense.append('Default')
-                defense_choice = random.choice(random_defense)
+                defense_str = random.choice(random_defense)
 
-                if defense_choice == "Default":
-                    defense_str = 'CE'
-                else:
-                    defense_str = defense_choice
 
             elif npc_tech:
                 random_defense = [t for t in npc_tech[1]['Defend'].keys()]
-                random_defense.append('Default')
                 defense_choice = random.choice(random_defense)
-
-                if defense_choice == "Default":
-                    defense_str = 'CE'
-                else:
-                    defense_str = defense_choice
-            else:
-                defense_str = 'CE'
-            
+                defense_str = defense_choice
+    
     results = battle_checks(player, target, attack_str, defense_str)
+    p_feed['results'] = results
+
+    result_str = "`" + player.name + ":` " + player.technique + " technique activation: " + attack_str + "\n" + "`" + target.name + ":` " +  target.technique + " technique activation: " + defense_str
+    if "dodge" in results:
+        result_str += "\n" + target.name + " dodged " + player.name + "'s attack"
+    elif "hit" in results:
+        result_str += "\n" + player.name + " hit " + target.name + " with " + attack_str
+    elif "tank" in results:
+        result_str += "\n" + target.name + " tanked " + str(results[1]) + " dmg from " + attack_str + " using " + defense_str
+    elif "counter" in results:
+        result_str += "\n" + target.name + " countered " + player.name + "'s attack with " + defense_str
+        if results[1] > 0:
+            result_str += "\n" + target.name + " dealt " + str(results[1]) + " damage to " + player.name + " using " + defense_str
+        else:
+            result_str += "\n" + target.name + "'s counter dealt no damage to " + player.name
+
+
     embed = discord.Embed(title="Simulation", description=f"**{player.name}** vs **{target.name}**")
     print("Simulation results for " + player.name + " vs " + target.name)
     print(results)
-    embed.add_field(name='Results', value=results)
+    embed.add_field(name='Results', value=result_str)
     return embed
-
-    
+#endregion
 
 
 #region Battle Cog
@@ -697,7 +710,7 @@ class TargetSelect(discord.ui.Select):
                 team_feed[self.player.user_id] = {
                     'move' : self.move,
                     'targets' : [self.targets[int(self.values[0])]],
-                    'charges': charges}
+                    'charges': charges, 'results' : None}
             else:
                 # Save the move for the player and update targets
                 team_feed[self.player.user_id]['move'] = self.move
