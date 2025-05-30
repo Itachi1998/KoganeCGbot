@@ -492,7 +492,6 @@ class Lobby_Cog(commands.Cog):
                     await ctx.send(f"{ctx.author.mention} is now ready.")
 
             
-            
     @lobby.command(name="invite")
     async def invite(self, ctx, member: discord.Member):
         # Check if the command is used in a thread context
@@ -565,6 +564,8 @@ class Lobby_Cog(commands.Cog):
         embed.set_footer(text="Lobby owner " + ctx.author.name + " created at " +  datetime.now().astimezone().strftime("%c"), icon_url=ctx.author.avatar.url)
         await thread.send(embed=embed)
         await ctx.send(f"Lobby created: {thread.mention}")
+        lobby_view = LobbyView(lobby, self.bot, self.lobbies)
+        await thread.send(view=lobby_view)
 
     @lobby.command(name="team")
     async def team(self, ctx):
@@ -600,7 +601,7 @@ class Lobby_Cog(commands.Cog):
                 if user == lobby.owner:
                     embed.title = "Change Name"
                     embed.description = "Choose to change your team name or your lobby's name to: " + name
-                    await ctx.send(embed=embed, view=OwnerLobbyView(lobby, self, name))
+                    await ctx.send(embed=embed, view=OwnerLobbyView(lobby, self.bot, name))
                     return
                 teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
                 teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
@@ -754,11 +755,11 @@ class Lobby_Cog(commands.Cog):
 
 # region OwnerLobbyView
 class OwnerLobbyView(discord.ui.View):
-    def __init__(self, lobby, cog, name):
+    def __init__(self, lobby, bot, name):
         super().__init__()
         self.lobby = lobby
-        self.cog = cog
         self.name = name
+        self.bot = bot
 
     @discord.ui.button(label="Team", style=discord.ButtonStyle.primary)
     async def team_button(self,itx: discord.Interaction, btn: discord.ui.Button):
@@ -771,7 +772,7 @@ class OwnerLobbyView(discord.ui.View):
             if user_id == leader_a.user_id :
                 self.lobby.teamA['name'] = self.name
                 await itx.response.edit_message(content="Team name changed to: " + self.name)
-                embed = generate_lobby_embed(self.lobby, self.cog.bot)
+                embed = generate_lobby_embed(self.lobby, self.bot)
                 channel = itx.channel
                 await channel.send(embed=embed)
                 return
@@ -780,9 +781,9 @@ class OwnerLobbyView(discord.ui.View):
             if user_id == leader_b.user_id:
                 self.lobby.teamB['name'] = self.name
                 await itx.response.send_message(content="Team name changed to: " + self.name)
-                embed = generate_lobby_embed(self.lobby, self.cog.bot)
+                embed = generate_lobby_embed(self.lobby, self.bot)
                 channel = itx.channel
-                await channel.send(embed=embed)
+                await channel.send(embed=embed, view=LobbyView())
                 return
         else:
             await itx.response.send_message("You are not a leader of any team")
@@ -794,7 +795,7 @@ class OwnerLobbyView(discord.ui.View):
         user_id = itx.user.id
         if user_id == self.lobby.owner:
             self.lobby.name = self.name
-            embed = generate_lobby_embed(self.lobby, self.cog.bot)
+            embed = generate_lobby_embed(self.lobby, self.bot)
             self.lobby.embed = embed
             embed.description = "Lobby name changed to: " + self.name
             await itx.response.send_message(embed=embed)
@@ -916,11 +917,240 @@ class TeamSelect(discord.ui.Select):
         embed = team_option_embed(self.lobby, self.cog.bot, self.player)
         embed.set_author(name="Lobby", icon_url=author.avatar.url if author else None)
         await itx.response.edit_message(embed=embed, view=self.view)
+
+
 class TeamSelectView(discord.ui.View):
     def __init__(self, lobby, cog, player):
         super().__init__() 
         self.add_item(TeamSelect(lobby, cog, player))
 #endregion
+
+
+#region LobbyView
+class LobbyView(discord.ui.View):
+    def __init__(self, lobby, bot, lobbies):
+        super().__init__()
+        self.lobby = lobby
+        self.lobbies = lobbies
+        self.bot = bot
+        
+
+    @discord.ui.button(label="Join Team", style=discord.ButtonStyle.green)
+    async def join_team(self, itx: discord.Interaction, btn: discord.ui.Button):
+        lobby = self.lobby
+        if lobby:
+            if itx.user.id in lobby.players:
+                player_dict = read_player(itx.user.id, itx.guild.id)
+                tech = player_dict['techniques'][0] if player_dict['techniques'] else None
+                player_dict['technique'] = tech['name'] if tech else None
+                del player_dict['techniques'] 
+                del player_dict['id']
+                player = Player(**player_dict)
+                view = TeamSelectView(lobby, Lobby_Cog(self.bot), player)
+                embed = team_option_embed(lobby, self.bot, player)
+                await itx.response.send_message(embed=embed, view=view, ephemeral=True)
+                return
+            else:
+                await itx.response.send_message("You are not in a lobby", ephemeral=True)
+        else:
+            await itx.response.send_message("Lobby doesn't exist", ephemeral=True)
+
+
+    @discord.ui.button(label="Ready Up", style=discord.ButtonStyle.green)
+    async def ready_up(self, itx: discord.Interaction, btn: discord.ui.Button): 
+        lobby = self.lobby
+        if lobby:
+            user_id = itx.user.id
+            if user_id in lobby.players:
+                if user_id in lobby.ready:
+                    lobby.ready.remove(user_id)
+                    embed = generate_lobby_embed(lobby, self.bot)
+                    await itx.response.send_message(f"{itx.user.mention} is no longer ready.")
+                else:
+                    lobby.ready.append(user_id)
+                    embed = generate_lobby_embed(lobby, self.bot)
+                    await itx.response.send_message(f"{itx.user.mention} is now ready.")
+            else:
+                await itx.response.send_message("You are not in a lobby", ephemeral=True)
+        else:
+            await itx.response.send_message("You are not in a lobby", ephemeral=True)
+
+
+    @discord.ui.button(label="Start Round", style=discord.ButtonStyle.green)
+    async def start_round(self, itx: discord.Interaction, btn: discord.ui.Button):
+        lobby = self.lobby
+        thread = itx.channel
+        lobby.status = 1
+        lobby.ready = []
+        if itx.channel.id == thread.id:
+            if itx.user.id == lobby.owner:
+                if lobby.status == 1:
+                    lobby.round = 0
+                    embed, lobby = start_round_embed(lobby, self.bot)
+                    battle_cog = self.bot.get_cog("Battle")
+                    if battle_cog is None:
+                        await itx.response.send_message("Battle cog not found.")
+                        return
+                    view = battle_cog.BattleView(lobby, self.bot)
+                    lobby.feed = [{
+                          'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                          'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                          'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
+                          }]
+                    await itx.response.send_message(embed=embed, view=view)
+                    return
+                else:
+                    await itx.response.send_message("`Lobby is already in battle`", ephemeral=True)
+                    return
+            else:
+                await itx.response.send_message("You are not the owner of this lobby", ephemeral=True)
+                return
+        
+        else:
+            await itx.response.send_message("You are not in a lobby", ephemeral=True)
+            return
+    
+
+    @discord.ui.button(label="Change Name", style=discord.ButtonStyle.blurple)
+    async def change_name(self, itx: discord.Interaction, btn: discord.ui.Button):   
+        lobby = self.lobby
+        user = itx.user.id
+        await itx.response.send_modal(NameModal(lobby, user, self.bot))
+        
+
+    #kick player
+
+
+
+    #leave lobby
+
+
+
+    #disband lobby
+    @discord.ui.button(label="Disband Lobby", style=discord.ButtonStyle.red)
+    async def disband(self, itx: discord.Interaction, btn: discord.ui.Button):
+        lobby = self.lobby
+        thread = itx.channel
+        if itx.user.id == lobby.owner:
+            del(lobby)
+            del(self.lobbies[itx.channel.id])
+            await itx.response.send_message("`Lobby Disbanded`")
+            await thread.send("`Channel Archived` at " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
+            await thread.edit(locked=True)
+            await thread.edit(archived=True)
+            return
+    
+        else:
+            await itx.response.send_message("You are not the owner")
+    
+
+
+    # #invite player - can't pass discord.Member through the button interaction
+    # @discord.ui.button(label="Invite Players")
+    # async def invite_players(self, itx: discord.Interaction, btn: discord.ui.Button):
+    #     lobby = self.lobby
+    #     thread = itx.channel
+    #     # Check if the command is used in a thread context
+    #     if not isinstance(itx.channel, discord.Thread):
+    #         await itx.send("This command can only be used in a thread.", ephemeral=True)
+    #         return
+    #     # Check if the thread is a private thread
+    #     thread_type = self.thread_check(itx)
+    #     if thread_type != "private":
+    #         await itx.response.send_message("This command can only be used in private threads.", ephemeral=True)
+    #         return
+    #     # Check if the current channel is a private thread and if it exists in the lobbies
+    #     if itx.channel.id in thread.id:
+    #         # Ensure the lobby is private
+    #         if not lobby.private:
+    #             await itx.response.send_message("This command can only be used in private lobbies.", ephemeral=True)
+    #             return
+    #         # Check if the user issuing the command is the lobby owner
+    #         if itx.user.id != lobby.owner:
+    #             await itx.response.send_message("Only the lobby owner can invite players.", ephemeral=True)
+    #             return
+    #         # Check if the member is already in the lobby
+    #         if member.id in lobby.invited:
+    #             await itx.response.send_message(f"{member.mention} is already in invited.", ephemeral=True)
+    #             return
+    #         # Add the member to the invited list and the thread
+    #         lobby.invited.append(member.id)
+    #         lobby.add_player(member.id)
+    #         await thread.add_user(member)
+    #         await itx.response.send_message(f"{member.mention} has been invited to the lobby.")
+    #         # Update the embed
+    #         embed = generate_lobby_embed(lobby, self.bot)
+    #         await itx.response.send_message(embed=embed)
+    #         return
+    #     else:
+    #         await itx.response.send_message("This channel is not associated with a lobby.", ephemeral=True)
+    #         return
+    
+#endregion
+
+
+#region Modal
+class NameModal(discord.ui.Modal):
+    def __init__(self, lobby, user, bot):
+        super().__init__(title="Change Name")
+        self.lobby = lobby
+        self.user = user
+        self.bot = bot
+        self.name = discord.ui.TextInput(label="Name", style=discord.TextStyle.short, placeholder="Enter New Name")
+        self.add_item(self.name)
+
+    async def on_submit(self, itx: discord.Interaction):
+        name = self.name.value
+        embed = discord.Embed(title='Change Team Name', description='')
+        await itx.response.defer()
+
+        user = self.user
+        lobby = self.lobby
+
+        if user == lobby.owner:
+            embed.title = "Change Name"
+            embed.description = "Choose to change your team name or your lobby's name to: " + name
+            await itx.followup.send(embed=embed, view=OwnerLobbyView(lobby, self.bot, name))
+            return
+        teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
+        teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
+        leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
+        leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
+        if leader_a:
+            if user == leader_a.user_id:
+                if name == teamb:
+                    embed.description = ("Cannot set " + name + "to " + teamb)
+                    await itx.followup.send(embed=embed, ephemeral=True)
+                    return
+                if lobby.set_teamA_name(name):
+                    embed.description = ("Change team name to: " + name)
+                    await itx.followup.send(embed=embed, ephemeral=True)
+                    return
+                else: 
+                    embed.description = ("Error setting name to: " + name)
+                    await itx.followup.send(embed=embed, ephemeral=True)
+                    return
+            
+        elif leader_b:
+            if user == leader_b.user_id:
+                if name == teama:
+                    embed.description = ("Cannot set " + name + "to " + teama)
+                    await itx.followup.send(embed=embed, ephemeral=True)
+                    return
+                if lobby.set_teamB_name(name):
+                    embed.description = ("Change team name to:" + name)
+                    await itx.followup.send(embed=embed, ephemeral=True)
+                    return
+                else: 
+                    embed.description = ("Error setting name to:" + name)
+                    await itx.followup.send(embed=embed, ephemeral=True)
+                    return
+
+        else:
+            embed.description = ("You are not in a team")
+            await itx.followup.send(embed=embed, ephemeral=True)
+            return
+
 
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))
