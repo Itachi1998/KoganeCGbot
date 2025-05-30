@@ -396,13 +396,13 @@ class Grade4_Bugfly(Enemy):
         
             },
             timer=0,
-            killed=False
+            killed=False,
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
 
 #endregion
-
+Grade4_Bugfly.grade = 1
 #region FloatJelly      
 class  Grade4_Floatjelly(Enemy):
     def __init__(self):
@@ -427,7 +427,7 @@ class  Grade4_Floatjelly(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
 #endregion
-
+Grade4_Floatjelly.grade = 1
 #region Flymouth
 class Grade4_Flymouth(Enemy):
     min_level= 1
@@ -448,10 +448,10 @@ class Grade4_Flymouth(Enemy):
              bodyparts={"Head": BodyPart(name="Head", max_hp=15, max_ce=20)},
              timer=0,
              killed=False)
-    
           self.hp = self.max_hp
           self.ce = self.max_ce
 #endregion
+Grade4_Flymouth.grade = 1
 
 #region Barehand
 class Grade3_Barehand(Enemy):
@@ -472,8 +472,10 @@ class Grade3_Barehand(Enemy):
  bodyparts= {"Head" : BodyPart(name='Head', max_hp=150 * 20// 100, max_ce=100 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=150 * 50 // 100, max_ce=100 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=150 * 30 // 100, max_ce = 150 * 30 //100)},
  timer=60,
  killed=False)
+          self.hp = self.max_hp
+          self.ce = self.max_ce
 # endregion
-
+Grade3_Barehand.grade = 2
 #region  Furrpede
 class Grade3_Furrpede(Enemy):
     def __init__(self):
@@ -498,7 +500,7 @@ class Grade3_Furrpede(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 #endregion
-
+Grade3_Furrpede.grade = 2
 #region AnxiousEars
 class Grade3_AnxiousEars(Enemy):
     def __init__(self):
@@ -517,11 +519,10 @@ class Grade3_AnxiousEars(Enemy):
              bodyparts={"Head" : BodyPart(name='Head', max_hp=250 * 20// 100, max_ce=200 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=250 * 50 // 100, max_ce=200 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=250 * 30 // 100, max_ce = 200 * 30 //100)}
              , timer=60,
              killed=False)
-
         self.hp = self.max_hp
         self.ce = self.max_ce
 #endregion
-
+Grade3_AnxiousEars.grade = 2
 #region Stinkaspor
 class Grade2_Stinkaspor(Enemy):
     def __init__(self):
@@ -541,10 +542,9 @@ class Grade2_Stinkaspor(Enemy):
              ,
              timer=60,
              killed=False)
- 
         self.hp = self.max_hp
         self.ce = self.max_ce
-
+Grade2_Stinkaspor.grade = 3
 #endregion
 
 #region Primate
@@ -569,7 +569,7 @@ class Grade2_Primate(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 #endregion
-
+Grade2_Primate.grade = 3
 #region Orbmaster
 class Grade1_Orbmaster(Enemy):
     def __init__(self ):
@@ -590,6 +590,7 @@ class Grade1_Orbmaster(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 #endregion
+Grade1_Orbmaster.grade = 4
 
 #region Charger
 class Grade1_Charger(Enemy):
@@ -614,7 +615,7 @@ class Grade1_Charger(Enemy):
             self.hp = self.max_hp
             self.ce = self.max_ce
 #endregion
-
+Grade1_Charger.grade = 4
 #region FingerBearer
 class SpecialGrade_FingerBearer(Enemy):
     def __init__(self):
@@ -637,7 +638,7 @@ class SpecialGrade_FingerBearer(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
 #endregion
-
+SpecialGrade_FingerBearer.grade = 5
 #region DisasterFlames
 class SpecialGrade_DisasterFlames(Enemy):
         def __init__(self):
@@ -661,7 +662,7 @@ class SpecialGrade_DisasterFlames(Enemy):
             self.hp = self.max_hp
             self.ce = self.max_ce
 #endregion
-
+SpecialGrade_DisasterFlames.grade = 5
 #region NatureSpirit
 class SpecialGrade_NatureSpirit(Enemy):
         def __init__(self):
@@ -681,11 +682,10 @@ class SpecialGrade_NatureSpirit(Enemy):
                        timer=300,
                        killed=False
                        )
-   
             self.hp = self.max_hp
             self.ce = self.max_ce
 #endregion
-
+SpecialGrade_NatureSpirit.grade = 5
 #region TideCurse
 class SpecialGrade_TideCurse(Enemy):
        def __init__(self):
@@ -708,6 +708,7 @@ class SpecialGrade_TideCurse(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 #endregion
+SpecialGrade_TideCurse.grade = 5
 
 #region SoulCurse
 class SpecialGrade_SoulCurse(Enemy):
@@ -730,11 +731,10 @@ class SpecialGrade_SoulCurse(Enemy):
                    timer=300,
                    killed=False
                    )
-     
         self.hp = self.max_hp
         self.ce = self.max_ce
 #endregion
-
+SpecialGrade_SoulCurse.grade = 5
 #region Toji
 class Toji(Enemy):
            def __init__(self):
@@ -755,7 +755,7 @@ class Toji(Enemy):
             self.hp = self.max_hp
             self.ce = self.max_ce
 #endregion
-
+Toji.grade = 5
 #region Reggie
 class Reggie(Enemy):
         def __init__(self):
@@ -773,11 +773,10 @@ class Reggie(Enemy):
                            timer=300,
                            killed=False
                 )
-
                 self.hp = self.max_hp
                 self.ce = self.max_ce
 #endregion
-
+Reggie.grade = 4
 #region Uro
 class Uro(Enemy):
         def __init__(self):
@@ -800,6 +799,7 @@ class Uro(Enemy):
                         self.hp = self.max_hp
                         self.ce = self.max_ce
 #endregion
+Uro.grade = 4
 
 #region Ryu
 class Ryu(Enemy): 
@@ -822,7 +822,7 @@ class Ryu(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
 #endregion
-
+Ryu.grade=5
 #region Kashimo
 class Kashimo(Enemy):
      def __init__(self):
@@ -846,15 +846,13 @@ class Kashimo(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
 #endregion
-
+Kashimo.grade = 5
 #region KingOfCurses
 class KingOfCurses(Enemy):                  
         def __init__(self, **kwargs):
                 super().__init__(name="King Of Curses", 
-                           level=150, 
-                      
+                           level=150,
                            max_hp=7000, 
-                   
                            max_ce=4000, 
                            strength=5000, 
                            speed=5000, 
@@ -868,7 +866,10 @@ class KingOfCurses(Enemy):
                            )
                 self.hp = self.max_hp
                 self.ce = self.max_ce
+KingOfCurses.grade = 5
 #endregion
+
+
 
 #region Kenjaku
 class Kenjaku(Enemy):
@@ -890,5 +891,6 @@ class Kenjaku(Enemy):
                      )                
                 self.hp = self.max_hp
                 self.ce = self.max_ce
+Kenjaku.grade = 5
              
 #endregion

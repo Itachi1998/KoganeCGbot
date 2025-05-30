@@ -172,8 +172,6 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
     tech=None 
     is_player=False
     is_enemy=False
-    npc_tech = None
-    player_tech = None
     if isinstance(player, Enemy):
         if player.name in enemy_tech:
             list_tech = [v for k, v in enemy_tech.items() if k == player.name]

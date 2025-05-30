@@ -81,29 +81,6 @@ class Colony(Base):
     # Remove redundant JSON leaderboard column
 
 
-# class Vow(Base):
-#     __tablename__ = "vow"
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     name: Mapped[str]
-#     attack_vow: Mapped[Optional[bool]]
-#     defense_vow: Mapped[Optional[bool]]
-#     barrier_vow: Mapped[Optional[bool]]
-#     ce_amount: Mapped[Optional[int]]
-#     body_part: Mapped[Optional[List[str]]]
-#     reduce: Mapped[Optional[bool]]
-#     increase: Mapped[Optional[bool]]
-#     tech_strength: Mapped[Optional[int]]
-#     tech_speed: Mapped[Optional[int]]
-#     tech_target: Mapped[Optional[str]]
-#     tech_name: Mapped[Optional[str]]
-#     barrier: Mapped[Optional[str]]
-#     barrier_strength: Mapped[Optional[str]]
-#     barrier_speed: Mapped[Optional[str]]
-#     player_id: Mapped[int] = mapped_column(ForeignKey("player.id"))
-#     player: Mapped["Player"] = relationship("Player", back_populates="techniques")
-#     __table_args__ = (
-#         UniqueConstraint('player_id', 'id', name='uq_vow_id'),
-#     )
 
 
 # class Shop(Base):

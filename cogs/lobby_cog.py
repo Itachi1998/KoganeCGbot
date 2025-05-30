@@ -499,12 +499,6 @@ class Lobby_Cog(commands.Cog):
         if not isinstance(ctx.channel, discord.Thread):
             await ctx.send("This command can only be used in a thread.", ephemeral=True)
             return
-        # Check if the thread is a private thread
-        thread_type = self.thread_check(ctx)
-        if thread_type != "private":
-            await ctx.send("This command can only be used in private threads.", ephemeral=True)
-            return
-        # Check if the current channel is a private thread and if it exists in the lobbies
         if ctx.channel.id in self.lobbies.keys():
             lobby = self.lobbies[ctx.channel.id]["Lobby"]
             thread = ctx.channel
@@ -718,6 +712,8 @@ class Lobby_Cog(commands.Cog):
 
     @lobby.command(name="start")
     async def start(self, ctx):
+        channel = ctx.channel
+        channel.send("<:1000001330:1354469798230102258>")
         lobby = self.lobbies[ctx.channel.id]["Lobby"]
         lobby.status = 1
         lobby.ready = []
