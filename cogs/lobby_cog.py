@@ -507,7 +507,7 @@ class Lobby_Cog(commands.Cog):
         # Check if the current channel is a private thread and if it exists in the lobbies
         if ctx.channel.id in self.lobbies.keys():
             lobby = self.lobbies[ctx.channel.id]["Lobby"]
-            thread = ctx.channel
+            #thread = ctx.channel
             # Ensure the lobby is private
             if not lobby.private:
                 await ctx.send("This command can only be used in private lobbies.", ephemeral=True)
@@ -1011,14 +1011,19 @@ class LobbyView(discord.ui.View):
         user = itx.user.id
         await itx.response.send_modal(NameModal(lobby, user, self.bot))
 
-    @discord.ui.button(label="Invite Players", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label="Invite Players", disabled=True, style=discord.ButtonStyle.blurple) #DISABLED
     async def invite_players(self, itx: discord.Interaction, btn: discord.ui.Button):
         lobby = self.lobby
         thread = itx.channel
         bot = self.bot
-        await itx.response.send_modal(InviteModal(thread, lobby, bot))
+        #await itx.response.send_modal(InviteModal(thread, lobby, bot))
 
-    #kick player - can't test it on myself, I think the original command works
+    @discord.ui.button(label="Kick Player", disabled=True, style=discord.ButtonStyle.red) #DISABLED
+    async def kick_player(self, itx: discord.Interaction, btn: discord.ui.Button):
+        lobby = self.lobby
+        embed = self.lobbies[itx.channel.id]["embed"] #?
+        thread = itx.channel
+        #await itx.response.send_modal(KickModal(thread, lobby))
 
     @discord.ui.button(label="Leave Lobby", style=discord.ButtonStyle.red)
     async def leave_lobby(self, itx: discord.Interaction, btn: discord.ui.Button):
@@ -1047,7 +1052,7 @@ class LobbyView(discord.ui.View):
             del(lobby)
             del(self.lobbies[itx.channel.id]) #KeyError after leaving/reopening lobby then trying to disband (prob deleted the lobby id from the lobbies dict)
             await itx.response.send_message("`Lobby Disbanded`")
-            await thread.send("`Channel Archived` at " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
+            await thread.send("`Channel Archived at` " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
             await thread.edit(locked=True)
             await thread.edit(archived=True)
             return
@@ -1122,37 +1127,57 @@ class NameModal(discord.ui.Modal):
 
 
 #region InviteModal
-class InviteModal(discord.ui.Modal):
-    def __init__(self, thread, lobby, bot):
-        super().__init__(title="Invite Players")
-        self.thread = thread
-        self.lobby = lobby
-        self.bot = bot
-        self.invited = discord.ui.TextInput(label="Invite Players", style=discord.TextStyle.short, placeholder="Enter the user_id of the member you'd like to invite")
-        self.add_item(self.invited)
+# class InviteModal(discord.ui.Modal):
+#     def __init__(self, thread, lobby, bot):
+#         super().__init__(title="Invite Players")
+#         self.thread = thread
+#         self.lobby = lobby
+#         self.bot = bot
+#         self.invited = discord.ui.TextInput(label="Invite Players", style=discord.TextStyle.short, placeholder="Enter the user_id of the member you'd like to invite")
+#         self.add_item(self.invited)
 
-    async def on_submit(self, itx: discord.Interaction):
-        invited = self.invited.value
-        guild = itx.guild
-        member = guild.get_member(invited) #returning NONE Type when I test it with my user_id 
-        thread = self.thread
-        lobby = self.lobby
+#     async def on_submit(self, itx: discord.Interaction):
+#         invited = self.invited.value
+#         guild = itx.guild
+#         member = guild.get_member(invited) #returning NONE Type when I test it with my user_id 
+#         thread = self.thread
+#         lobby = self.lobby
 
-        if itx.user.id != lobby.owner:
-            await itx.response.send_message("Only the lobby owner can invite players.", ephemeral=True)
-            return
+#         if itx.user.id != lobby.owner:
+#             await itx.response.send_message("Only the lobby owner can invite players.", ephemeral=True)
+#             return
         
-        if member.id in lobby.invited:
-            await itx.response.send_message(f"{member.mention} is already in invited.", ephemeral=True)
-            return
+#         if member.id in lobby.invited:
+#             await itx.response.send_message(f"{member.mention} is already in invited.", ephemeral=True)
+#             return
         
-        lobby.invited.append(member.id)
-        lobby.add_player(member.id)
-        await thread.add_user(member)
-        await itx.response.send_message(f"{member.mention} has been invited to the lobby.")
-        embed = generate_lobby_embed(lobby, self.bot)
-        await itx.response.send_message(embed=embed)
-        return
+#         lobby.invited.append(member.id)
+#         lobby.add_player(member.id)
+#         await thread.add_user(member)
+#         await itx.response.send_message(f"{member.mention} has been invited to the lobby.")
+#         embed = generate_lobby_embed(lobby, self.bot)
+#         await itx.response.send_message(embed=embed)
+#         return
+#endregion
+
+
+#region KickModal
+# class KickModal(discord.ui.Modal):
+#     def __init__(self, thread, lobby):
+#         super().__init__()
+#         self.thread = thread
+#         self.lobby = lobby
+    
+#     async def on_submit():
+#         user = self.bot.get_user(member.id)        
+#         lobby.remove_player(member.id)
+#         embed = generate_lobby_embed(lobby, self.bot)
+#         embed.description = "Player removed from lobby: " + user.mention
+#         self.lobbies[ctx.channel.id]["embed"] = embed
+#         await thread.remove_user(member)
+#         await thread.send(f"{member.id} removed from lobby")
+#         await ctx.send(embed=embed)
+#endregion
 
 
 async def setup(bot):
