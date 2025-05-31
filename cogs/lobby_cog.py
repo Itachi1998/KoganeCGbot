@@ -435,7 +435,7 @@ class Lobby_Cog(commands.Cog):
     @commands.Cog.listener()
     async def on_thread_member_join(self, member):
         thread = member.thread
-        user= self.bot.get_user(member.id)
+        user = self.bot.get_user(member.id)
         if thread.id in self.lobbies:
             lobby = self.lobbies[thread.id]["Lobby"]
         else:
@@ -493,15 +493,17 @@ class Lobby_Cog(commands.Cog):
            
     @lobby.command(name="invite")
     async def invite(self, ctx, member: discord.Member):
+        thread = ctx.channel
         # Check if the command is used in a thread context
         if not isinstance(ctx.channel, discord.Thread):
             await ctx.send("This command can only be used in a thread.", ephemeral=True)
             return
+        
         # Check if the thread is a private thread
-        thread_type = self.thread_check(ctx)
-        if thread_type != "private":
-            await ctx.send("This command can only be used in private threads.", ephemeral=True)
-            return
+        # if thread.type != "private_thread": #thread.type by default is "private_thread" - it's progging even though it's private
+        #     await ctx.send("This command can only be used in private threads.", ephemeral=True)
+        #     return
+
         # Check if the current channel is a private thread and if it exists in the lobbies
         if ctx.channel.id in self.lobbies.keys():
             lobby = self.lobbies[ctx.channel.id]["Lobby"]
@@ -779,7 +781,7 @@ class OwnerLobbyView(discord.ui.View):
                 await itx.response.send_message(content="Team name changed to: " + self.name)
                 embed = generate_lobby_embed(self.lobby, self.bot)
                 channel = itx.channel
-                await channel.send(embed=embed, view=LobbyView())
+                await channel.send(embed=embed)
                 return
         else:
             await itx.response.send_message("You are not a leader of any team")
