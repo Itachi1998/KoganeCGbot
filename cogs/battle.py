@@ -49,7 +49,14 @@ def verify_player(user_id, colony):
             return False
     else:
         return False 
-    
+def generate_round_embed(lobby):
+    embed = discord.Embed(title="Round " + str(lobby.round), description="Round " + str(lobby.round) + " has started!")
+    embed.add_field(name=lobby.teamA['name'], value="\n".join(p.name for p in lobby.teamA['players']))
+    embed.add_field(name=lobby.teamB['name'], value="\n".join(p.name for p in lobby.teamB['players']))
+    embed.add_field(name="Field", value="\n".join(p.name for p in lobby.field.values()))
+    embed.set_author(name=lobby.name)
+    return embed
+
 def check_ready_players(lobby):
     players = []
     ready_players = 0
@@ -246,6 +253,7 @@ def format_battle_result(attacker, target, attack_move, defense_move, results):
         result_str += "`" + attacker.name +  "` hit `" + target.name + "` for "  + str(results[1]) + " damage!\n"
         if killed:
             result_str += "`" + target.name + "` has been defeated!\n"
+
     elif result == 'dodge':
         result_str += "`" + target.name + "` dodged the attack!\n"
         result_str += "Attack speed: " + str(attack_move.speed) + "\n"
@@ -259,12 +267,20 @@ def format_battle_result(attacker, target, attack_move, defense_move, results):
     elif result == 'counter':
         result_str += "`" + target.name + "`" + " countered the attack!\n"
         result_str += "Counter damage: " + str(results[1]) + "\n"
-
+        result_str += "`" + target.name + "`" + " hits " + "`" + attacker.name + "`" + " for " + str(results[1]) + " damage!\n"
 
     return result_str
 
 def set_player_defense(player, feed):
     defense = None
+    default = None
+    for tech in technique_list:
+        if player.technique in tech:
+            if next(iter(tech.keys())) == player.technique:
+                default_defense_name = next(iter(tech[player.technique][1]['Defend'].keys()))
+                default = tech[player.technique][1]['Defend'][default_defense_name]
+                break
+
     for team_name, team_actions in feed['defenses'].items():
         if player.user_id in team_actions.keys():
             defense = team_actions[player.user_id]['move']
@@ -274,7 +290,9 @@ def set_player_defense(player, feed):
 
         return defense.name, defense
     else:
-         return None, None
+        player.defense = default.name if default else "None"
+        return default.name, default
+         
 
 #region sim embed
 def simulation_embed(lobby, round_num):
@@ -478,7 +496,7 @@ class BattleView(discord.ui.View):
                     embed.add_field(name=attack.name, value=value_string)
                 
                 embed.set_thumbnail(url=self.bot.user.avatar.url)
-                select_view = MoveView(player, technique, self.lobby, attack=True)
+                select_view = MoveView(player, self.bot, technique, self.lobby, attack=True)
                 # t_embed, targets = target_embed(player, lobby)
                 # # await itx.channel.send(embed=t_embed)
                 # # view = TargetSelectView(player, targets, lobby)
@@ -530,7 +548,7 @@ class BattleView(discord.ui.View):
                 embed.add_field(name=defense.name, value=value_string)
 
             embed.set_thumbnail(url=self.bot.user.avatar.url)
-            view = MoveView(player, technique, self.lobby, defense=True)
+            view = MoveView(player, self.bot, technique, self.lobby, defense=True)
             await itx.response.send_message(embed=embed, view=view, ephemeral=True)
             return
         
@@ -601,7 +619,7 @@ class BattleView(discord.ui.View):
                 embed.add_field(name=barrier.name, value=value_string)
 
             embed.set_thumbnail(url=self.bot.user.avatar.url)
-            view = MoveView(player, technique, self.lobby, barrier=True)
+            view = MoveView(player, self.bot, technique, self.lobby, barrier=True)
             await itx.response.send_message(embed=embed, view=view, ephemeral=True)
             return
         
@@ -625,19 +643,20 @@ class BattleView(discord.ui.View):
         pass
 
 class MoveView(discord.ui.View):
-    def __init__(self, player, technique, lobby, attack=False, defense=False, barrier=False):
+    def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         super().__init__()
         if attack:
-            self.add_item(MoveSelect(player, technique, lobby, attack=True))
+            self.add_item(MoveSelect(player, bot, technique, lobby, attack=True))
         if defense:
-            self.add_item(MoveSelect(player, technique, lobby, defense=True))
+            self.add_item(MoveSelect(player, bot, technique, lobby, defense=True))
         if barrier:
-            self.add_item(MoveSelect(player, technique, lobby, barrier=True))
+            self.add_item(MoveSelect(player, bot, technique, lobby, barrier=True))
     
 class MoveSelect(discord.ui.Select):
-    def __init__(self, player, technique, lobby, attack=False, defense=False, barrier=False):
+    def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         print(technique)
         moves = []
+        self.bot = bot
         techname = next(iter(technique.keys()))
         if attack:
             moves = [technique[techname][0]['Attack'][move] for move in technique[techname][0]['Attack'].keys()]
@@ -692,22 +711,23 @@ class MoveSelect(discord.ui.Select):
                 await itx.followup.send("No targets available.", ephemeral=True)
                 return
             
-            view = TargetSelectView(self.player, targets, self.lobby, move, attack=self.attack, defense=self.defense, barrier=self.barrier)
+            view = TargetSelectView(self.bot, self.player, targets, self.lobby, move, attack=self.attack, defense=self.defense, barrier=self.barrier)
             
             await itx.followup.send(embeds=[embed, t_embed], view=view, ephemeral=True)
             return
            
 #region TargetSelect
 class TargetSelectView(discord.ui.View):
-    def __init__(self, player, targets, lobby, move, attack=False, defense=False, barrier=False):
+    def __init__(self, bot, player, targets, lobby, move, attack=False, defense=False, barrier=False):
         super().__init__()
-        self.add_item(TargetSelect(player, targets, lobby, move, attack=attack, defense=defense, barrier=barrier))
+        self.add_item(TargetSelect(bot, player, targets, lobby, move, attack=attack, defense=defense, barrier=barrier))
 
 class TargetSelect(discord.ui.Select):
-    def __init__(self, player, targets, lobby, move, attack=False, defense=False, barrier=False):
+    def __init__(self, bot, player, targets, lobby, move, attack=False, defense=False, barrier=False):
         options = [discord.SelectOption(label=f"{i+1}: {t.name}", value=str(i)) for i, t in enumerate(targets)]
         super().__init__(placeholder='Choose your target', min_values=1, options=options)
         self.lobby = lobby
+        self.bot = bot
         self.player = player
         self.targets = targets
         self.move = move
@@ -808,7 +828,7 @@ class TargetSelect(discord.ui.Select):
                         msg_text = "attack targets"
                     elif self.barrier:
                         msg_text = "barrier targets"
-                    view = TargetSelectView(self.player, targets, self.lobby, self.move, attack=self.attack, defense=self.defense, barrier=self.barrier)
+                    view = TargetSelectView(self.bot, self.player, targets, self.lobby, self.move, attack=self.attack, defense=self.defense, barrier=self.barrier)
                     # Update the embed with the selected targets
                     aoe = self.move.aoe
                     await itx.followup.send(
@@ -832,6 +852,17 @@ class TargetSelect(discord.ui.Select):
                 if ready:
                     embed = simulation_embed(self.lobby, self.lobby.round)
                     await itx.followup.send(embed=embed)
+                    channel = itx.channel
+                    self.lobby.round += 1
+                    self.lobby.ready = []
+                    self.lobby.feed.append({'round' : self.lobby.round,
+                        'attacks': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                        'defenses': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                        'barriers': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}}
+                    })
+                    round_embed = generate_round_embed(self.lobby)
+                    await channel.send(embed=round_embed, view=BattleView(self.lobby, self.bot))
+                    return
                 return
         
 #endregion

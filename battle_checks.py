@@ -541,7 +541,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
     if attack_negated:
         dmg = 0
         print(f"{defense.name} negates {attack.name}. Effectively countered")
-        #return ("negate", dmg, target.hp<=0, target.max_hp<=0)
+        return ("negate", dmg, target.hp<=0, target.max_hp<=0)
 
     if defense.act_speed > attack.act_speed and dmg !=0:
         speed_diff = max(defense_speed - speed, 0)
@@ -561,20 +561,19 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
         print(f"Attack negated {defense.name} dealing {dmg} dmg")
         return ("hit", dmg, target.hp <= 0, target.max_hp <=0)
     
-    else:
-        counter_dmg = defense_strength
-        counter_soul = 0
+   
+    counter_dmg = defense_strength
+    counter_soul = 0
 
-        if target.equipped:
+    if target.equipped:
             items=[item for item in target.equipped]
             for item in items:
                 counter_dmg += item.strength
                 counter_soul = item.soul + defense.soul
                 print(f"{item.name} adds {item.strength} to counter damage")
-
-        target_hp, target_maxhp, body_dmg = damage_target(target=player, defense=defense, dmg=counter_dmg, soul=counter_soul)
-        print(f"{defense.name} was able to counter {attack.name} for {counter_dmg} damage")
-        return ("counter", body_dmg, player.hp <=0, player.max_hp <=0)
+    target_hp, target_maxhp, body_dmg = damage_target(target=player, defense=defense, dmg=counter_dmg, soul=counter_soul)
+    print(f"{defense.name} was able to counter {attack.name} for {counter_dmg} damage")
+    return ("counter", body_dmg, player.hp <=0, player.max_hp <=0)
 # endregion
 
 
@@ -935,7 +934,7 @@ test_player1 = Player(
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Shrine",
+    technique="Ten Shadows",
     playerclass="sorcerer",
     colony_id=1,
     xp=0,
@@ -993,9 +992,7 @@ test_player3.defense = "Nail Storm"
 
 enemy = game.SpecialGrade_FingerBearer()
 
-#summon_check("Nue", "shikigami")
-results = battle_checks(enemy, test_player2, "Energy Blast", "Infinity")
-print(results)
-
+shiki = summon_check("Nue", "shikigami")
+results = battle_checks(shiki, test_player2, "Lightning Dive", "Infinity")
 print(results)
 #endregion

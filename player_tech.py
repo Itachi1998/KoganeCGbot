@@ -922,7 +922,7 @@ cursed_speech={
                {
                     "Freeze" : 
                          Techniques(
-                              name="Freeze!", 
+                              name="Freeze", 
                               level=1, 
                               act_speed=10, 
                               act_cost=100,
@@ -937,7 +937,7 @@ cursed_speech={
 
                     "Blast Away" :
                          Techniques(
-                              name="Blast Away!",
+                              name="Blast Away",
                               level=1,
                               act_speed=10,
                               act_cost=100,
@@ -951,7 +951,7 @@ cursed_speech={
 
                     "Plummet" : 
                          Techniques(
-                              name="Plummet!",
+                              name="Plummet",
                               level=3,
                               act_speed=10,
                               act_cost=100,
@@ -971,7 +971,7 @@ cursed_speech={
                          
                     "Freeze" : 
                          Techniques(
-                              name="Freeze!", 
+                              name="Freeze", 
                               level=1, 
                               act_speed=10, 
                               act_cost=100,
@@ -986,7 +986,7 @@ cursed_speech={
                     
                     "Blast Away" :
                          Techniques(
-                              name="Blast Away!",
+                              name="Blast Away",
                               level=1,
                               act_speed=10,
                               act_cost=100,
@@ -2093,7 +2093,7 @@ projection_sorcery={
                {
                     "Projection Dodge" : 
                         Techniques(
-                            name="Projection dodge",
+                            name="Projection Dodge",
                             level=1,
                             act_speed=1,
                             act_cost=50,
@@ -2122,7 +2122,7 @@ projection_sorcery={
           {
                "Barrier" :
                {
-                   "Domain Expansion" :
+                   "Domain Expansion: Time Cell Moon Pallace" :
                          Techniques(
                               name="Domain Expansion: Time Cell Moon Pallace",
                               level=4,
@@ -2402,9 +2402,10 @@ sky_manip={
 
           {
                "Defend": 
-               {"CE" :
+               {
+                   "CE" :
                          Techniques(
-                              name="CE reinforcement",
+                              name="CE",
                               level=0,
                               act_speed=0,
                               act_cost=0,
@@ -2424,9 +2425,9 @@ sky_manip={
                               act_cost=50,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=500, # pull attack dmg in checks?
+                              strength=500,
                               speed=1000,
-                              type="reflect"
+                              type="counter"
                          ),
 
                     "Cloak Dodge" :
@@ -2601,7 +2602,7 @@ straw_doll={
                               aoe=3,
                               strength=400,
                               speed=800,
-                              type="counter"
+                              type="tank"
                          ),
                     "Squeaky Hammer" :
                          Techniques(

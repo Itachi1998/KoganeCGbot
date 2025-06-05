@@ -572,7 +572,7 @@ class Lobby_Cog(commands.Cog):
                 del player_dict['id']
                 player = Player(**player_dict)
                 embed = team_option_embed(lobby, self.bot, player)
-                msg = await ctx.send(embed=embed)
+                msg = await ctx.send(embed=embed, ephemeral=True)
                 view = TeamSelectView(lobby, self, player)
                 await msg.edit(view=view)
                 return
