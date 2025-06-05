@@ -254,55 +254,54 @@ class CreateButtons(discord.ui.View):
         hp = random.randint(100, 300)
         pclass= get_random_class()
         tech = None
-        six_eyes = False
-        # if pclass== "Sorcerer":
-        #     strength += 100
-        #     speed += 100
-        #     hp += 100
-        #     ce += 50
-        #     tech= get_random_sorcerer_tech()
 
-        # if pclass == "Reincarnate":
-        #     ce += 100
-        #     tech =  get_random_reincarnate_tech()      
-        #     strength+= 120
-        #     speed += 120
-        #     hp += 150
+        if pclass== "Sorcerer":
+            strength += 100
+            speed += 100
+            hp += 100
+            ce += 50
+            tech= get_random_sorcerer_tech()
 
-        # if pclass == "Curse":
-        #     ce += 200
-        #     strength += 150
-        #     speed += 150
-        #     hp += 150
-        #     tech = get_random_curse_tech()
+        if pclass == "Reincarnate":
+            ce += 100
+            tech =  get_random_reincarnate_tech()      
+            strength+= 120
+            speed += 120
+            hp += 150
 
-        # six_eyes=False
+        if pclass == "Curse":
+            ce += 200
+            strength += 150
+            speed += 150
+            hp += 150
+            tech = get_random_curse_tech()
 
-        # techname= next(iter(tech))
-        # print(f"rolled {techname}")
+        six_eyes=False
 
-        # if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
-        #     print("Added 6 eyes ce: 1000 to " +  str(ce))
-        #     ce += 1000
-        #     hp += 300
-        #     six_eyes=True
+        techname= next(iter(tech))
+        print(f"rolled {techname}")
 
-        # if any(keyword in techname.lower() for keyword in ['copy', 'shrine', 'limitless']):
-        #     print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
-        #     ce += 1000
-        #     hp += 100
+        if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
+            print("Added 6 eyes ce: 1000 to " +  str(ce))
+            ce += 1000
+            hp += 300
+            six_eyes=True
 
-        # if techname == "Shrine":
-        #     ce += 2000
-        #     hp += 200
+        if any(keyword in techname.lower() for keyword in ['copy', 'shrine', 'limitless']):
+            print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
+            ce += 1000
+            hp += 100
 
-        # if 'zero' in techname.lower():
-        #     strength += 200
-        #     speed += 200
-        #     hp += 300
-        #     ce = 0
-        tech = [t for t in sorcerer_techs if next(iter(t)) == "Limitless"]
-        techname="Limitless"
+        if techname == "Shrine":
+            ce += 2000
+            hp += 200
+
+        if 'zero' in techname.lower():
+            strength += 200
+            speed += 200
+            hp += 300
+            ce = 0
+
         entered = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         player = Player(
             name=self.playerdict['name'],
@@ -311,7 +310,7 @@ class CreateButtons(discord.ui.View):
             max_ce=ce,
             speed=speed,
             strength=strength,
-            technique="Limitless",
+            technique=techname,
             playerclass=pclass,
             colony_id=self.playerdict['colony'],
             xp=0,
@@ -322,14 +321,15 @@ class CreateButtons(discord.ui.View):
             entered=entered
         )
         player.grade = 1
+
         created = create_player(player)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
-        # inventory={"Summons": {}, "Tools": {}, "Vows":{}}
-        # tech_rarity = next((k for k in rarity.keys() if rarity[k] >= tech['Rarity']), None)
-        # class_rarity = next((k for k in rarity.keys() if rarity[k] >= classes[pclass]), None)
+        inventory={"Summons": {}, "Tools": {}, "Vows":{}}
+        tech_rarity = next((k for k in rarity.keys() if rarity[k] >= tech['Rarity']), None)
+        class_rarity = next((k for k in rarity.keys() if rarity[k] >= classes[pclass]), None)
         if created:
             print ("Created technique: " + techname)
-            self.embed.description=f"* `Name:` " + "**" + player.name + "**" + f"\n* `Level:` **{player.level}**\n* `Technique:` **{techname}**\n* `HP:` **{hp}**\n* `CE:` **{ce}** \n* `Class:` **{pclass}**\n* `Six Eyes:` **{six_eyes}**\n* `Speed:` **{player.speed}**\n* `Strength:` **{player.strength}**\n"
+            self.embed.description=f"* `Name:` " + "**" + player.name + "**" + f"\n* `Level:` **{player.level}**\n* `Technique:` **{techname}**\n* `HP:` **{hp}**\n* `CE:` **{ce}** \n* `Class:` **{pclass}**\n* `Six Eyes:` **{six_eyes}**\n* `Speed:` **{player.speed}**\n* `Strength:` **{player.strength}**\n* `Technique Rarity:` **{tech_rarity}**\n* `Class Rarity:` **{class_rarity}**"
             self.embed.set_footer(text="Use /profile to view your character!", icon_url=self.bot.user.avatar)
             await interaction.response.edit_message(embed=self.embed, view=None)
             return
