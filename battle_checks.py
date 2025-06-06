@@ -5,9 +5,13 @@ from player_tech import technique_list
 from enemy_techs import enemy_tech
 from cursed_tools import cursed_tools
 
+
+#region Damage Target
 def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
-#region defense vow distribution
     initial_hp = target.hp
+
+
+#region defense vow distribution
     if def_vow:
         #check if total defense vow ce is greater than target ce
         total_def_ce = sum(def_vow.values())
@@ -117,7 +121,7 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
 
         #region ce checks    
         elif bp.ce and bp.ce > 0:
-            print(f"Bodypart ce enforcement reducing damage by {bp.ce}")
+            print(f"Bodypart ce enforcement reducing damage to {max(part_damage - bp.ce, 0)} for {bp.name}")
             print(f"Pre ce check damage {part_damage}")
 
             # Apply the damage with CE protection
@@ -167,8 +171,10 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     return target.hp, target.max_hp, body_dmg
     #endregion
     
+
+# region Get Move
 def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=False):
-# region get move
+
     tech=None 
     is_player=False
     is_enemy=False
@@ -177,24 +183,28 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
             list_tech = [v for k, v in enemy_tech.items() if k == player.name]
             tech = list_tech[0]
             print(f"Enemy {player.name} has {player.technique} technique")
+            #print(tech)
             is_enemy=True
         else:
             list_tech =[t for t in technique_list if next(iter(t)) == player.technique]
             tech = list_tech[0]
             print(f"Enemy {player.name} has {player.technique} technique")
-            print(tech)
+            #print(tech)
             is_enemy=True
 
     elif isinstance(player, Player):
             if aoe:
                 list_tech = [t for t in technique_list if next(iter(t)) == target.technique]
                 tech = list_tech[0]
+                print(f"Player {player.name} has {player.technique} technique")
+                #print(tech)
                 is_player=True
             else:
                 list_tech = [t for t in technique_list if next(iter(t)) == player.technique]
                 tech = list_tech[0]
                 print(f"Player {player.name} has {player.technique} technique")
-                print(tech[player.technique])
+                #print(tech[player.technique])
+                #print(tech)
                 is_player=True
 
     if tools:
@@ -207,35 +217,32 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
     
     if attack:
         print(f"Setting attack '{attack}' for {player.name}")
+
         if "Domain" in attack or "Falling Blossom" in attack or "Hollow Wicker" in attack:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, attack=attack)
             return new_barrier
-        
-        print(f"Setting attack '{attack}' for {player.name}")
 
         if is_player:
-            print(f"Player {player.name} is using {attack}")
-            print(tech)
-
+            #print(f"Player {player.name} is using {attack}")
+            #print(tech)
             new_attack = tech[player.technique][0]['Attack'][attack]
             return new_attack
         
         if is_enemy:
-            print(f"Enemy {player.name} is using {attack}")
-            print(tech)
+            #print(f"Enemy {player.name} is using {attack}")
+            #print(tech)
             new_attack = tech[0]['Attack'][attack]
             return new_attack
     
     if defense:
-        
+        print(f"Setting defense '{defense}' for {player.name}")
+
         if "Domain" in defense or "Falling Blossom" in defense or "Hollow Wicker" in defense:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, defense=defense)
             return new_barrier
-        
-        print(f"Setting defense '{defense}' for {player.name}")
 
         if is_player:
-            print(f"Player {player.name} is using {defense}")
+            #print(f"Player {player.name} is using {defense}")
             if aoe:
                 new_defense = tech[target.technique][1]['Defend'][defense]
                 player.defense = new_defense
@@ -264,15 +271,16 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
         if is_enemy:
             if isinstance(tech, list):
                 new_defense = tech[1]['Defend'][defense]
-                print(f"Enemy {player.name} is using {defense}")
+                #print(f"Enemy {player.name} is using {defense}")
                 return new_defense
             else:
                 new_defense = tech[player.technique][1]['Defend'][defense]
-                print(f"Enemy {player.name} is using {defense}")
+                #print(f"Enemy {player.name} is using {defense}")
                 return new_defense
 #endregion
 
-#region get_barrier
+
+#region Get Barrier
 def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
 
     if attack:
@@ -297,9 +305,10 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
             return new_defense
 #endregion
         
-# region verify checks
+
+# region Verify Checks
 def attack_verify(player, target, attack, aoe=False):
-    print(f"Verifying attack '{attack}' for {player.name}")
+    #print(f"Verifying attack '{attack}' for {player.name}")
     if aoe:
         attack = get_move(player, attack=attack, aoe=True)
     else:
@@ -332,7 +341,7 @@ def attack_verify(player, target, attack, aoe=False):
     
 
 def defense_verify(target, player, defense, aoe=False):
-    print("Verifying defense '" + defense + "' for " + target.name)
+    #print("Verifying defense '" + defense + "' for " + target.name)
     defense = get_move(target, defense=defense)
 
     # if target.ce < defense.act_cost:
@@ -359,11 +368,11 @@ def defense_verify(target, player, defense, aoe=False):
     else:
         print("Defense verified!")
         target.ce -= defense.act_cost + target.imbue
-        return defense
-    
+        return defense   
 # endregion
 
-# region type increment
+
+# region Type Increment
 def type_increment(player, attack=None, defense=None, tools=None):
 
     if attack:
@@ -406,8 +415,9 @@ def type_increment(player, attack=None, defense=None, tools=None):
 
         return defense_strength, defense_speed
 #endregion
-      
-# region visibility checks
+
+
+# region Visibility Checks
 def attack_visibility(target, attack):
     if attack:
         print(f"Accessing {target.name}'s visibility of incoming attack...")
@@ -444,7 +454,8 @@ def defense_visibility(player, target, attack, defense):
                 return True
 #endregion
 
-# region negate checks
+
+# region Negate Checks
 def negate_check(target, dmg, defense_strength, attack=None, defense=None):
     print("Checking for negation...")
     # needs rework
@@ -457,7 +468,8 @@ def negate_check(target, dmg, defense_strength, attack=None, defense=None):
         return ("negate", dmg, target.hp<=0, target.max_hp <=0)
 # endregion
 
-# region joke check
+
+# region Joke Check
 # def joke_check(player, target, answer1, answer2, answer3, choice, dmg, defense=None, attack=None):
 #     if player.technique or target.technique == "Comedian":
 #         if defense:
@@ -469,7 +481,8 @@ def negate_check(target, dmg, defense_strength, attack=None, defense=None):
 #                 return("tank", total_dmg, target.hp <=0, target.max_hp <=0)
 #endregion
 
-# region tank check
+
+# region Tank Check
 def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=0):
     if targ_invis:
         dmg = 0
@@ -515,7 +528,8 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
         return ("tank", dmg-total_dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
-# region counter check
+
+# region Counter Check
 def counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
     
     if defense.type == 'counter reflect':
@@ -579,7 +593,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
 # endregion
 
 
-# region dodge check
+# region Dodge Check
 def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated):
     
     if attack_negated:  
@@ -653,7 +667,8 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
             return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
 #endregion
 
-# region summon check
+
+# region Summon Check
 def summon_check(name, type, tamed=False):
     print("Summoning " + name)
     if type == "shikigami":
@@ -666,7 +681,8 @@ def summon_check(name, type, tamed=False):
         return None
 #endregion
 
-# region domain clash
+
+# region Domain Clash
 def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
 
     domain_type = attack.type
@@ -691,7 +707,8 @@ def domain_clash(target, player, defense, attack, dmg, speed, defense_strength, 
         return results
    #endregion 
 
-# region barrier checks
+
+# region Barrier Checks
 def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength):
         
         t_amp = False
@@ -741,6 +758,7 @@ def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength
             return ("hit", dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
+
 #region Battle AOE
 def battle_aoe_check(player, targets, attack_str=None, defense=None):
     target_amount = len(targets)
@@ -762,9 +780,9 @@ def battle_aoe_check(player, targets, attack_str=None, defense=None):
             print(f"{target.name}'s defense set to {target.defense}")
             return defense
             
-    return results
-    
+    return results    
 #endregion
+
 
 #region Battle Checks
 def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=False):      
@@ -927,7 +945,8 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
         #endregion
 #endregion
 
-# region test players
+
+# region Test Players
 test_player1 = Player(
     name="Sukuna",
     entered="2023-10-01",
@@ -946,8 +965,6 @@ test_player1 = Player(
     grade=5,
     imbue=0
 )
-
-#test_player1.inventory['Technique Inv']['Charges'] = {"" : 1}
 
 test_player2= Player(
     name="Gojo",
@@ -987,14 +1004,15 @@ test_player3 = Player(
     imbue=0
 )
 
+#test_player1.inventory['Technique Inv']['Charges'] = {"" : 1}
 #test_player3.inventory['Technique Inv']['Charges'] = {"Gojo" : 1}
 
-test_player2.defense = "Infinity"
-test_player3.defense = "Nail Storm"
+#test_player2.defense = "Infinity"
+#test_player3.defense = "Nail Storm"
 
-enemy = game.SpecialGrade_FingerBearer()
+#enemy = game.SpecialGrade_FingerBearer()
+#shiki = summon_check("Nue", "shikigami")
 
-shiki = summon_check("Nue", "shikigami")
 results = battle_checks(test_player3, test_player1, "Nails", "Redirect")
 print(results)
 #endregion
