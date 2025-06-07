@@ -121,7 +121,7 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
 
         #region ce checks    
         elif bp.ce and bp.ce > 0:
-            print(f"Bodypart ce enforcement reducing damage to {max(part_damage - bp.ce, 0)} for {bp.name}")
+            #print(f"Bodypart ce enforcement reducing damage to {max(part_damage - bp.ce, 0)} for {bp.name}")
             print(f"Pre ce check damage {part_damage}")
 
             # Apply the damage with CE protection
@@ -167,7 +167,8 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     target.max_hp = total_maxhp
     body_dmg = initial_hp - total_hp # part of returning body_dmg
     print("Total hp left: " + str(total_hp))
-    print("Total maxhp left: " + str(total_maxhp))    
+    print("Total maxhp left: " + str(total_maxhp))
+    assert body_dmg >= 0, "var 'body_dmg' is negative in func 'damage_target'"
     return target.hp, target.max_hp, body_dmg
     #endregion
     
@@ -512,11 +513,11 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
         total_dmg = dmg - reduction_multiplier
       
         target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
-        print(f"{defense.name} was not able to activate in time to tank {attack.name}")
+        print(f"{defense.name} was not able to activate in time to tank {attack.name} took reduced damage of {body_dmg}")
         return ("hit", body_dmg, target_hp <= 0, target_maxhp <=0)
     
     else:
-        print(f"dmg {dmg} defense {defense_strength}")
+        #print(f"dmg {dmg} defense {defense_strength}")
         total_dmg = max(dmg - defense_strength, 0)
         if total_dmg > 0:
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
@@ -525,7 +526,7 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
             target_maxhp = target.max_hp
             body_dmg = 0
         print(f"{defense.name} was able to activate in time to tank {attack.name}. {body_dmg} damage dealt, {dmg - total_dmg} damage tanked")
-        return ("tank", dmg-total_dmg, target_hp <=0, target_maxhp <=0)
+        return ("tank", body_dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
 
@@ -588,7 +589,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
                 counter_soul = item.soul + defense.soul
                 print(f"{item.name} adds {item.strength} to counter damage")
     target_hp, target_maxhp, body_dmg = damage_target(target=player, defense=defense, dmg=counter_dmg, soul=counter_soul)
-    print(f"{defense.name} was able to counter {attack.name} for {counter_dmg} damage")
+    print(f"{defense.name} was able to counter {attack.name} for {body_dmg} damage")
     return ("counter", body_dmg, player.hp <=0, player.max_hp <=0)
 # endregion
 
@@ -645,7 +646,7 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
         return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
 
     else: 
-        print(f"Defense activated before attack\nCalculating speed diff between {attack.name} and {defense.name}")
+        print(f"Defense activated at the same time or before attack\nCalculating speed diff between {attack.name} and {defense.name}")
                         #100        #1200     
         speed_gap = max(defense_speed - speed, 0)
                         #0//5
@@ -657,13 +658,13 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
                             # 50 - 24
             total_dmg = (reduced_dmg * attack.level)
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
-            print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {total_dmg}")
+            print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {body_dmg}")
             return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
         
         else:
             reduced_dmg = dmg - defense_strength
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=reduced_dmg, soul=attack.soul)
-            print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {total_dmg}")
+            print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {body_dmg}")
             return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
 #endregion
 
@@ -803,7 +804,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             return False
         if not defense:
             return False
-        print('Starting battle checks...')
+        #print('Starting battle checks...')
         stack=player.stack
         defense_negated=False
         attack_negated=False
@@ -906,7 +907,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             player.stack = stack
         
         # print other move stats
-        print(f"Defense activaton speed: {defense.act_speed}\nAttack activation speed: {attack.act_speed}")
+        print(f"Attack activation speed: {attack.act_speed}\nDefense activaton speed: {defense.act_speed}")
         print(f"{attack.name}'s type is {attack.type}\n{defense.name}'s type is {defense.type}")
     
         # domain clash/attack check - if we don't have a separate domain clash func we can check for just tank/counter/dodge and melee/projectile then have an else for barrier checks
@@ -955,7 +956,7 @@ test_player1 = Player(
     max_ce=4000,
     strength=100,
     speed=100,
-    technique="Sky Manipulation",
+    technique="Shrine",
     playerclass="sorcerer",
     colony_id=1,
     xp=0,
@@ -1013,6 +1014,6 @@ test_player3 = Player(
 #enemy = game.SpecialGrade_FingerBearer()
 #shiki = summon_check("Nue", "shikigami")
 
-results = battle_checks(test_player3, test_player1, "Nails", "Redirect")
+results = battle_checks(test_player2, test_player1, "Red", "Air Hop")
 print(results)
 #endregion
