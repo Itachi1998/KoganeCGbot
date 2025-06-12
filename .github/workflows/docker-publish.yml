@@ -35,7 +35,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: {{ secrets.DOCKER_USER }}/koganehub:sha256-1177ebc1204e3306396fd40cc623c6cd8c4d243354720c15ea3d9f34f33f9a16.sig
+        tags: {{ secrets.DOCKER_USER }}/koganehub:latest
         provenance: true
         sbom: true
         
@@ -44,4 +44,6 @@ jobs:
       uses: sigstore/cosign-installer@v3.8.1
         
     - name: Sign Image with Cosign using OIDC
-      run: cosign sign --yes ${{ secrets.DOCKER_USER }}/koganehub:sha256-1177ebc1204e3306396fd40cc623c6cd8c4d243354720c15ea3d9f34f33f9a16.sig
+      run: cosign sign --yes ${{ steps.build-push.outputs.digest }}
+
+
