@@ -320,6 +320,8 @@ class CreateButtons(discord.ui.View):
             six_eyes=six_eyes,
             entered=entered
         )
+        player.grade = 1
+
         created = create_player(player)
         rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
         inventory={"Summons": {}, "Tools": {}, "Vows":{}}
