@@ -44,6 +44,7 @@ jobs:
       uses: sigstore/cosign-installer@v3.8.1
         
     - name: Sign Image with Cosign using OIDC
-      run: cosign sign --yes ${{ steps.build-push.outputs.digest }}
-
-
+      env:
+         IMAGE: ${{ secrets.DOCKER_USER }}/koganehub
+         DIGEST: ${{ steps.build-push.outputs.digest }}
+      run: cosign sign --yes ${IMAGE}@${DIGEST}
