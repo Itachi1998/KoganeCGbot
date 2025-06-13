@@ -55,11 +55,10 @@ RUN set -eux; \
 ADD requirements.txt .
 ADD . /kogane_build_temp
 
-ADD . /kogane-build-temp
-RUN set -eux; \
-  /python/bin/python -v /kogane_build_temp/models.py 2>&1 || exit 1
+  
   
 RUN set -eux; \
+/python/bin/python -v /kogane_build_temp/models.py 2>&1 || exit 1; \
 	mkdir -p /deps; \
 	/python/bin/python -m pip install --no-compile --target=/deps -r requirements.txt; \
 	/python/bin/python -m pip uninstall -y setuptools wheel; \
