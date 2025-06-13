@@ -53,18 +53,19 @@ RUN set -eux; \
 # This is where you can build any deps
 
 ADD requirements.txt .
+ADD . /kogane_build_temp
 
-
+ADD . /kogane-build-temp
+RUN set -eux; \
+  /python/bin/python -v /kogane_build_temp/models.py 2>&1 || exit 1
+  
 RUN set -eux; \
 	mkdir -p /deps; \
 	/python/bin/python -m pip install --no-compile --target=/deps -r requirements.txt; \
 	/python/bin/python -m pip uninstall -y setuptools wheel; \
 	rm -r /python/lib/python3.12/bin/pip*; \
 	rm -r /python/lib/python3.12/lib/python3.12/site-packages/pip*/**
-ADD . /kogane-build-temp
-RUN set -eux; \
-    /python/bin/python -v /kogane_build_temp/models.py 2>&1 || exit 1
- 
+
 # We use base, not static, despite indygreg's and later astral's
 # work on ensuring these dependencies are included for python
 # because many extensions may not statically link the few things included additionally
