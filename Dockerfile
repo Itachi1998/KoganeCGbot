@@ -95,4 +95,4 @@ ADD . /kogane
 # copy in the entrypoint script that we stored as an executable, also copy over the requirements.txt
 # so it can be used in the container
 COPY requirements.txt ./
-ENTRYPOINT ["/python/lib/python3.12", "/kogane/main.py"]
+ENTRYPOINT ["/python/bin/python3", "/kogane/main.py"]
