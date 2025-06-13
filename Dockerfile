@@ -77,8 +77,8 @@ FROM gcr.io/distroless/base-debian12:nonroot as final_stage
 # Various envioronment settings neccessary
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
-ENV PYTHONHOME /python/lib/python3.12
-ENV PYTHONPATH /python/lib/python3.12:/deps
+ENV PYTHONHOME /lib/python3.12
+ENV PYTHONPATH /lib/python3.12:/deps
 # Various desirable environment settings
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONOPTIMIZE 1
