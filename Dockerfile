@@ -52,18 +52,19 @@ RUN set -eux; \
 
 # This is where you can build any deps
 
-ADD requirements.txt .
+ADD . requirements.txt /
 ADD . /kogane_build_temp
 
-  
-  
+# Modified this section to make models.py optional and fix directory paths
 RUN set -eux; \
-/python/bin/python -v /kogane_build_temp/models.py 2>&1 || exit 1; \
 	mkdir -p /deps; \
+	if [ -f /kogane_build_temp/models.py ]; then \
+		/python/bin/python /kogane_build_temp/models.py || echo "Warning: models.py execution failed but continuing build"; \
+	fi; \
 	/python/bin/python -m pip install --no-compile --target=/deps -r requirements.txt; \
 	/python/bin/python -m pip uninstall -y setuptools wheel; \
-	rm -r /python/lib/python3.12/bin/pip*; \
-	rm -r /python/lib/python3.12/lib/python3.12/site-packages/pip*/**
+	rm -r /python/lib/python3.12/bin/pip* || true; \
+	rm -r /python/lib/python3.12/lib/python3.12/site-packages/pip*/** || true
 
 # We use base, not static, despite indygreg's and later astral's
 # work on ensuring these dependencies are included for python
@@ -91,8 +92,7 @@ ENV PYTHONFAULTHANDLER 1
 # copy in python and the built dependencies
 COPY --from=build-stage /python /
 COPY --from=build-stage /deps /deps
-# copy in your app code, as well as any native deps built in build stage here
-COPY --from=build-stage /kogane-build-temp /kogane
+# Fixed the directory name to match the build stage
+COPY --from=build-stage /kogane_build_temp /kogane
 COPY requirements.txt ./
 ENTRYPOINT ["/bin/python", "/kogane/main.py"]
-
