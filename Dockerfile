@@ -98,4 +98,4 @@ ADD . /kogane
 # so it can be used in the container
 COPY requirements.txt ./ 
 COPY --from=build-stage /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
