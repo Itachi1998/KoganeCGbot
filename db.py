@@ -4,11 +4,6 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, joinedload
 
-from dotenv import find_dotenv, load_dotenv
-dotfile = find_dotenv('.env')
-loaded = load_dotenv(dotfile)
-passw = os.getenv('PASS')
-
 db_url = "sqlite:///database.db"
 
 engine = create_engine(db_url)
