@@ -90,4 +90,4 @@ COPY --from=build-stage /deps /deps
 # copy in your app code, as well as any native deps built in build stage here
 ADD . /kogane
 COPY requirements.txt ./
-ENTRYPOINT ["/python/bin/python3", "/kogane/main.py"]
+ENTRYPOINT ["/bin/python3", "/kogane/main.py"]
