@@ -51,24 +51,21 @@ RUN set -eux; \
     rm -f get-pip.py
 
 # This is where you can build any deps
-ADD . requirements.txt /
 
-# Modified this section to make models.py optional and fix directory paths
+# Copy requirements and install dependencies
+COPY requirements.txt /
 RUN set -eux; \
     mkdir -p /deps; \
-    /python/bin/python -m pip install --no-compile --target=/deps -r requirements.txt; \
+    /python/bin/python -m pip install --no-compile --target=/deps -r /requirements.txt; \
     /python/bin/python -m pip uninstall -y setuptools wheel; \
     rm -r /python/lib/python3.12/bin/pip* || true; \
     rm -r /python/lib/python3.12/lib/python3.12/site-packages/pip*/** || true
 
-RUN mkdir -p /kogane
-COPY . /kogane
+# Create app directory and copy files
+RUN mkdir -p /kogane/cogs
+COPY . /kogane/
 
 FROM gcr.io/distroless/base-debian12:nonroot as final_stage
-
-# Note: there is a shell. python's os.system, popen, etc will **not** work without one
-# you can change this to :nonroot instead of :debug-nonroot and remove the busybox shell
-# so long as you don't use it in your application code.
 
 # Various environment settings necessary
 ENV LANG C.UTF-8
@@ -81,11 +78,14 @@ ENV PYTHONOPTIMIZE 1
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONFAULTHANDLER 1
 
+# Set working directory
+WORKDIR /kogane
+
 # copy in python and the built dependencies
 COPY --from=build-stage /python /
 COPY --from=build-stage /deps /deps
-COPY --from=build-stage /kogane /kogane
-# Copy application code and create necessary directories
-COPY requirements.txt ./
 
-ENTRYPOINT ["/bin/python", "/kogane/main.py"]
+# Copy application code from build stage
+COPY --from=build-stage /kogane /kogane
+
+ENTRYPOINT ["python", "main.py"]
