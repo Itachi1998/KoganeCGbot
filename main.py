@@ -13,7 +13,7 @@ if os.path.exists(env_path):
                 os.environ[key] = value
 
 log_channel = os.getenv("LOGCHANNEL")
-disc_token = os.getenv('TOKEN')
+token = os.getenv('TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True
