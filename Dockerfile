@@ -53,6 +53,8 @@ RUN set -eux; \
 # This is where you can build any deps
 
 ADD . requirements.txt /
+ADD . /kogane_temp
+COPY cogs /kogane_temp/cogs
 
 # Modified this section to make models.py optional and fix directory paths
 RUN set -eux; \
@@ -84,8 +86,7 @@ COPY --from=build-stage /python /
 COPY --from=build-stage /deps /deps
 
 # Copy application code and create necessary directories
-COPY . /kogane
-COPY cogs /kogane/cogs
+COPY /kogane_temp /kogane
 COPY requirements.txt ./
 
 ENTRYPOINT ["/bin/python", "/kogane/main.py"]
