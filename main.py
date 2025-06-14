@@ -3,8 +3,8 @@ from db import read_player, read_enemy, read_colony # Import general dependencie
 from game import Player, Enemy
 from discord.ext import commands
 
-log_channel = os.environ.get['LOGCHANNEL']
-token = os.environ.get['TOKEN']
+log_channel = os.environ.get('LOGCHANNEL')
+token = os.environ.get('TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True
