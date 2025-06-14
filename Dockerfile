@@ -85,6 +85,7 @@ COPY --from=build-stage /deps /deps
 
 # Copy application code and create necessary directories
 COPY . /kogane
+COPY cogs /kogane/cogs
 COPY requirements.txt ./
 
 ENTRYPOINT ["/bin/python", "/kogane/main.py"]
