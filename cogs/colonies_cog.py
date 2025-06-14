@@ -1,4 +1,4 @@
-import os, dotenv, datetime
+import os, datetime
 from datetime import datetime
 from db import create_colony,read_colony, update_colony
 import discord, asyncio, json
