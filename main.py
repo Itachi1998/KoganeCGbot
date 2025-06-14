@@ -3,8 +3,18 @@ from db import read_player, read_enemy, read_colony # Import general dependencie
 from game import Player, Enemy
 from discord.ext import commands
 
-log_channel = os.environ['LOGCHANNEL']
-token = os.environ['TOKEN']
+env_path = ".env"
+
+if os.path.exists(env_path):
+    with open(env_path, 'r') as f:
+        for line in f:
+            if '=' in line and not line.startswith('#'):
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+
+log_channel = os.getenv("LOGCHANNEL")
+disc_token = os.getenv('TOKEN')
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
