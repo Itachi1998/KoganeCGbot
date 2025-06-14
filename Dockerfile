@@ -58,9 +58,6 @@ ADD . /kogane_build_temp
 # Modified this section to make models.py optional and fix directory paths
 RUN set -eux; \
 	mkdir -p /deps; \
-	if [ -f /kogane_build_temp/models.py ]; then \
-		/python/bin/python /kogane_build_temp/models.py || echo "Warning: models.py execution failed but continuing build"; \
-	fi; \
 	/python/bin/python -m pip install --no-compile --target=/deps -r requirements.txt; \
 	/python/bin/python -m pip uninstall -y setuptools wheel; \
 	rm -r /python/lib/python3.12/bin/pip* || true; \
