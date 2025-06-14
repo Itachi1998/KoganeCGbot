@@ -51,10 +51,7 @@ RUN set -eux; \
     rm -f get-pip.py
 
 # This is where you can build any deps
-RUN mkdir /kogane_temp
 ADD . requirements.txt /
-ADD . /kogane_temp
-COPY cogs /kogane_temp/cogs
 
 # Modified this section to make models.py optional and fix directory paths
 RUN set -eux; \
@@ -63,6 +60,9 @@ RUN set -eux; \
     /python/bin/python -m pip uninstall -y setuptools wheel; \
     rm -r /python/lib/python3.12/bin/pip* || true; \
     rm -r /python/lib/python3.12/lib/python3.12/site-packages/pip*/** || true
+
+RUN mkdir -p /kogane
+COPY . /kogane
 
 FROM gcr.io/distroless/base-debian12:nonroot as final_stage
 
@@ -84,9 +84,8 @@ ENV PYTHONFAULTHANDLER 1
 # copy in python and the built dependencies
 COPY --from=build-stage /python /
 COPY --from=build-stage /deps /deps
-
+COPY --from=build-stage /kogane /kogane
 # Copy application code and create necessary directories
-COPY /kogane_temp /kogane
 COPY requirements.txt ./
 
 ENTRYPOINT ["/bin/python", "/kogane/main.py"]
