@@ -51,7 +51,7 @@ RUN set -eux; \
     rm -f get-pip.py
 
 # This is where you can build any deps
-
+RUN mkdir /kogane_temp
 ADD . requirements.txt /
 ADD . /kogane_temp
 COPY cogs /kogane_temp/cogs
