@@ -2,9 +2,18 @@ import discord, os, traceback, db, enemy_techs
 from db import read_player, read_enemy, read_colony # Import general dependencies 
 from game import Player, Enemy
 from discord.ext import commands
+env_path = ".env"
 
-log_channel = os.getenv('LOGCHANNEL')
-token = os.getenv('TOKEN')
+if os.path.exists(env_path):
+    with open(env_path, 'r') as f:
+        for line in f:
+            if '=' in line and not line.startswith('#'):
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+
+log_channel = os.getenv("LOGCHANNEL")
+disc_token = os.getenv('TOKEN')
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -53,6 +62,6 @@ async def sync(ctx):
         await channel.send(fstring)
         print(fstring)
 
-bot.run(token)
+bot.run(disc_token)
 
 

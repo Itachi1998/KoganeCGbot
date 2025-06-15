@@ -159,7 +159,7 @@ enemy_tech = {
 [
     {'Attack' : 
      {
-         "Lightning Dive" : 
+         "Lighting Dive" : 
          Techniques(
              name="Lighting Dive",
              level=1,
