@@ -169,7 +169,6 @@ def team_option_embed(lobby, bot, player):
     return embed
 #endregion
 
-
 #region Lobby class
 class Lobby():
     def __init__(self, 
@@ -435,7 +434,7 @@ class Lobby_Cog(commands.Cog):
     @commands.Cog.listener()
     async def on_thread_member_join(self, member):
         thread = member.thread
-        user = self.bot.get_user(member.id)
+        user= self.bot.get_user(member.id)
         if thread.id in self.lobbies:
             lobby = self.lobbies[thread.id]["Lobby"]
         else:
@@ -473,41 +472,50 @@ class Lobby_Cog(commands.Cog):
             "\n### /lobby disband\n* Disband a lobby in queue status if owner")
             
             await ctx.send(embed=embed, ephemeral=True)
-  
+
+            
     @lobby.command(name="ready")
     async def ready(self, ctx):
-        lobby = self.lobbies[ctx.channel.id]["Lobby"]
-        if lobby:
-            user_id = ctx.author.id
-            if user_id in lobby.players:
-                if user_id in lobby.ready:
-                    lobby.ready.remove(user_id)
-                    embed = generate_lobby_embed(lobby, self.bot)
-                    self.lobbies[ctx.channel.id]["embed"] = embed
-                    await ctx.send(f"{ctx.author.mention} is no longer ready.")
+        user = ctx.author.id
+        channel = ctx.channel.id
+        lobby = self.lobbies[channel]['Lobby']
+        playerd = read_player(user, ctx.guild.id)
+        tech = playerd['techniques'][0]
+        del playerd['techniques']
+        del playerd['id']
+        playerd['technique'] = tech['name']
+        player = Player(**playerd)
+        if player and lobby:
+            if user in lobby.players:
+                ready = lobby.ready_up(user)
+                if ready:
+                    await ctx.send("Player " + player.name + " is ready")
+                    return True
                 else:
-                    lobby.ready.append(user_id)
-                    embed = generate_lobby_embed(lobby, self.bot)
-                    self.lobbies[ctx.channel.id]["embed"] = embed
-                    await ctx.send(f"{ctx.author.mention} is now ready.")
-           
+                    await ctx.send("Error ready player")
+            else:
+                await ctx.send("You are not in this lobby")
+                return False
+        else:
+            await ctx.send("Error ready player")
+            return False
+            
+            
     @lobby.command(name="invite")
     async def invite(self, ctx, member: discord.Member):
-        thread = ctx.channel
         # Check if the command is used in a thread context
         if not isinstance(ctx.channel, discord.Thread):
             await ctx.send("This command can only be used in a thread.", ephemeral=True)
             return
-        
         # Check if the thread is a private thread
-        # if thread.type != "private_thread": #thread.type by default is "private_thread" - it's progging even though it's private
-        #     await ctx.send("This command can only be used in private threads.", ephemeral=True)
-        #     return
-
+        thread_type = self.thread_check(ctx)
+        if thread_type != "private":
+            await ctx.send("This command can only be used in private threads.", ephemeral=True)
+            return
         # Check if the current channel is a private thread and if it exists in the lobbies
         if ctx.channel.id in self.lobbies.keys():
             lobby = self.lobbies[ctx.channel.id]["Lobby"]
-            #thread = ctx.channel
+            thread = ctx.channel
             # Ensure the lobby is private
             if not lobby.private:
                 await ctx.send("This command can only be used in private lobbies.", ephemeral=True)
@@ -534,6 +542,7 @@ class Lobby_Cog(commands.Cog):
             await ctx.send("This channel is not associated with a lobby.", ephemeral=True)
             return
 
+
     @lobby.command(name='create')
     async def create(self, ctx, name: str=None):
         if name is None:
@@ -554,7 +563,7 @@ class Lobby_Cog(commands.Cog):
         self.lobbies[thread.id] ={ "Lobby" :  Lobby(name=name, owner=ctx.author.id, colony_id=ctx.guild.id, private=True,
                                                      players=[ctx.author.id], invited=invited, teamA={"name" : "Team A", "players" : [], "leader" : ""}, 
                                                      teamB={"name" : "Team B", "players" : [], "leader" : ""},
-                                                    status=0,  ready=[], Round=0, start_time=datetime.now(),
+                                                    status=1,  ready=[], Round=0, start_time=datetime.now(),
                                                     field={}, graveyard=[], feed=[], spectators = []), "embed" : ""}
         
         lobby = self.lobbies[thread.id]["Lobby"]
@@ -564,9 +573,6 @@ class Lobby_Cog(commands.Cog):
         embed.set_footer(text="Lobby owner " + ctx.author.name + " created at " +  datetime.now().astimezone().strftime("%c"), icon_url=ctx.author.avatar.url)
         await thread.send(embed=embed)
         await ctx.send(f"Lobby created: {thread.mention}")
-    #region LobbyView INIT
-        lobby_view = LobbyView(lobby, self.bot, self.lobbies)
-        await thread.send(view=lobby_view)
 
     @lobby.command(name="team")
     async def team(self, ctx):
@@ -602,7 +608,7 @@ class Lobby_Cog(commands.Cog):
                 if user == lobby.owner:
                     embed.title = "Change Name"
                     embed.description = "Choose to change your team name or your lobby's name to: " + name
-                    await ctx.send(embed=embed, view=OwnerLobbyView(lobby, self.bot, name))
+                    await ctx.send(embed=embed, view=OwnerLobbyView(lobby, self, name))
                     return
                 teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
                 teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
@@ -638,10 +644,12 @@ class Lobby_Cog(commands.Cog):
                             await ctx.send(embed=embed, ephemeral=True)
                             return
 
+
                 else:
                     embed.description = ("You are not in a team")
                     await ctx.send(embed=embed, ephemeral=True)
                     return
+
             else:
                 embed.description = ("You are not in a lobby")
                 await ctx.send(embed=embed, ephemeral=True)
@@ -651,6 +659,8 @@ class Lobby_Cog(commands.Cog):
             await ctx.send(embed=embed, ephemeral=True)
             return
         
+
+
     @lobby.command(name="kick")
     async def kick(self, ctx, member: discord.Member):
         if ctx.channel.id in self.lobbies.keys():
@@ -667,7 +677,7 @@ class Lobby_Cog(commands.Cog):
             await ctx.send(embed=embed)
 
         else:
-            await ctx.send("You are not the owner of any lobby or the member is not in the lobby.")
+                await ctx.send("You are not the owner of any lobby or the member is not in the lobby.")
                 
     @lobby.command(name='disband')
     async def disband(self, ctx):
@@ -696,46 +706,39 @@ class Lobby_Cog(commands.Cog):
             if ctx.author.id == lobby.owner:
                 await thread.send("`Owner Leaving Lobby, New Owner Will Be Selected`")
             player_removed = lobby.remove_player(ctx.author.id)
-            if player_removed:
-                await ctx.send(f"{ctx.author.mention} has left the lobby.")
-                embed = generate_lobby_embed(lobby, self.bot)
-                self.lobbies[ctx.channel.id]["embed"] = embed
-                embed.description = "Player left lobby: " + ctx.author.mention
-                await ctx.send("`Lobby updated`")
-                await thread.send(embed=embed)
-                return
-            else:
+            if player_removed == "delete_lobby":
                 await thread.send("`No New Owner Found Lobby Will Be Deleted`")
                 del self.lobbies[ctx.channel.id]
                 await ctx.send("`Channel Archived` at " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
                 await thread.edit(locked=True)
                 await thread.edit(archived=True)
                 return
+            await ctx.send(f"{ctx.author.mention} has left the lobby.")
+            embed = generate_lobby_embed(lobby, self.bot)
+            self.lobbies[ctx.channel.id]["embed"] = embed
+            embed.description = "Player left lobby: " + ctx.author.mention
+            await ctx.send("`Lobby updated`")
+            await thread.send(embed=embed)
+            return
         else:
              await ctx.send("`Error: lobby doesn't exist`")
              return
 
+
     @lobby.command(name="start")
     async def start(self, ctx):
         lobby = self.lobbies[ctx.channel.id]["Lobby"]
-        lobby.status = 1
-        lobby.ready = []
         if ctx.channel.id in self.lobbies.keys():
             if ctx.author.id == lobby.owner:
                 if lobby.status == 1:
-                    lobby.round = 0
                     embed, lobby = start_round_embed(lobby, self.bot)
                     battle_cog = self.bot.get_cog("Battle")
                     if battle_cog is None:
                         await ctx.send("Battle cog not found.")
                         await ctx.channel.send(embed=embed)
                         return
+                    self.lobbies[ctx.channel.id]["embed"] = embed
                     view = battle_cog.BattleView(lobby, self.bot)
-                    lobby.feed = [{
-                          'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
-                          }]
                     await ctx.send(embed=embed, view=view)
                     return
                 else:
@@ -744,7 +747,6 @@ class Lobby_Cog(commands.Cog):
             else:
                 await ctx.send("You are not the owner of this lobby")
                 return
-        
         else:
             await ctx.send("You are not in a lobby")
             return
@@ -753,11 +755,11 @@ class Lobby_Cog(commands.Cog):
 
 # region OwnerLobbyView
 class OwnerLobbyView(discord.ui.View):
-    def __init__(self, lobby, bot, name):
+    def __init__(self, lobby, cog, name):
         super().__init__()
         self.lobby = lobby
+        self.cog = cog
         self.name = name
-        self.bot = bot
 
     @discord.ui.button(label="Team", style=discord.ButtonStyle.primary)
     async def team_button(self,itx: discord.Interaction, btn: discord.ui.Button):
@@ -770,7 +772,7 @@ class OwnerLobbyView(discord.ui.View):
             if user_id == leader_a.user_id :
                 self.lobby.teamA['name'] = self.name
                 await itx.response.edit_message(content="Team name changed to: " + self.name)
-                embed = generate_lobby_embed(self.lobby, self.bot)
+                embed = generate_lobby_embed(self.lobby, self.cog.bot)
                 channel = itx.channel
                 await channel.send(embed=embed)
                 return
@@ -779,7 +781,7 @@ class OwnerLobbyView(discord.ui.View):
             if user_id == leader_b.user_id:
                 self.lobby.teamB['name'] = self.name
                 await itx.response.send_message(content="Team name changed to: " + self.name)
-                embed = generate_lobby_embed(self.lobby, self.bot)
+                embed = generate_lobby_embed(self.lobby, self.cog.bot)
                 channel = itx.channel
                 await channel.send(embed=embed)
                 return
@@ -793,7 +795,7 @@ class OwnerLobbyView(discord.ui.View):
         user_id = itx.user.id
         if user_id == self.lobby.owner:
             self.lobby.name = self.name
-            embed = generate_lobby_embed(self.lobby, self.bot)
+            embed = generate_lobby_embed(self.lobby, self.cog.bot)
             self.lobby.embed = embed
             embed.description = "Lobby name changed to: " + self.name
             await itx.response.send_message(embed=embed)
@@ -811,10 +813,10 @@ class OwnerLobbyView(discord.ui.View):
 class TeamSelect(discord.ui.Select):
     def __init__(self, lobby, cog, player):
         options= [
-            discord.SelectOption(label=lobby.teamA['name'], value="teama", description=", ".join(p.name for p in lobby.teamA['players'])),
-            discord.SelectOption(label=lobby.teamB['name'], value="teamb", description=", ".join(p.name for p in lobby.teamB['players'])),
-            discord.SelectOption(label="Field", value="field", description=", ".join(v.name for v in lobby.field.values())),
-            discord.SelectOption(label="Spectator", value="spectator", description=", ".join(p.name for p in lobby.spectators)),
+discord.SelectOption(label=lobby.teamA['name'], value="teama", description=", ".join(p.name for p in lobby.teamA['players'])),
+discord.SelectOption(label=lobby.teamB['name'], value="teamb", description=", ".join(p.name for p in lobby.teamB['players'])),
+discord.SelectOption(label="Field", value="field", description=", ".join(v.name for v in lobby.field.values())),
+discord.SelectOption(label="Spectator", value="spectator", description=", ".join(p.name for p in lobby.spectators)),
         ]
         super().__init__(placeholder='Choose your team', min_values=1, options=options)
 
@@ -915,270 +917,11 @@ class TeamSelect(discord.ui.Select):
         embed = team_option_embed(self.lobby, self.cog.bot, self.player)
         embed.set_author(name="Lobby", icon_url=author.avatar.url if author else None)
         await itx.response.edit_message(embed=embed, view=self.view)
-
-
 class TeamSelectView(discord.ui.View):
     def __init__(self, lobby, cog, player):
         super().__init__() 
         self.add_item(TeamSelect(lobby, cog, player))
 #endregion
-
-
-#region LobbyView
-class LobbyView(discord.ui.View):
-    def __init__(self, lobby, bot, lobbies):
-        super().__init__()
-        self.lobby = lobby
-        self.lobbies = lobbies
-        self.bot = bot
-        
-    @discord.ui.button(label="Join Team", style=discord.ButtonStyle.green)
-    async def join_team(self, itx: discord.Interaction, btn: discord.ui.Button):
-        lobby = self.lobby
-        if lobby:
-            if itx.user.id in lobby.players:
-                player_dict = read_player(itx.user.id, itx.guild.id)
-                tech = player_dict['techniques'][0] if player_dict['techniques'] else None
-                player_dict['technique'] = tech['name'] if tech else None
-                del player_dict['techniques'] 
-                del player_dict['id']
-                player = Player(**player_dict)
-                view = TeamSelectView(lobby, Lobby_Cog(self.bot), player)
-                embed = team_option_embed(lobby, self.bot, player)
-                await itx.response.send_message(embed=embed, view=view, ephemeral=True)
-                return
-            else:
-                await itx.response.send_message("You are not in a lobby", ephemeral=True)
-        else:
-            await itx.response.send_message("Lobby doesn't exist", ephemeral=True)
-
-    @discord.ui.button(label="Ready Up", style=discord.ButtonStyle.green)
-    async def ready_up(self, itx: discord.Interaction, btn: discord.ui.Button): 
-        lobby = self.lobby
-        if lobby:
-            user_id = itx.user.id
-            if user_id in lobby.players:
-                if user_id in lobby.ready:
-                    lobby.ready.remove(user_id)
-                    embed = generate_lobby_embed(lobby, self.bot) #NOT NEEDED?
-                    await itx.response.send_message(f"{itx.user.mention} is no longer ready.")
-                else:
-                    lobby.ready.append(user_id)
-                    embed = generate_lobby_embed(lobby, self.bot) #NOT NEEDED?
-                    await itx.response.send_message(f"{itx.user.mention} is now ready.")
-            else:
-                await itx.response.send_message("You are not in a lobby", ephemeral=True)
-        else:
-            await itx.response.send_message("You are not in a lobby", ephemeral=True)
-
-    @discord.ui.button(label="Start Round", style=discord.ButtonStyle.green)
-    async def start_round(self, itx: discord.Interaction, btn: discord.ui.Button):
-        lobby = self.lobby
-        thread = itx.channel
-        lobby.status = 1
-        lobby.ready = []
-        if itx.channel.id == thread.id:
-            if itx.user.id == lobby.owner:
-                if lobby.status == 1:
-                    lobby.round = 0
-                    embed, lobby = start_round_embed(lobby, self.bot)
-                    battle_cog = self.bot.get_cog("Battle")
-                    if battle_cog is None:
-                        await itx.response.send_message("Battle cog not found.")
-                        return
-                    view = battle_cog.BattleView(lobby, self.bot)
-                    lobby.feed = [{
-                          'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
-                          }]
-                    await itx.response.send_message(embed=embed, view=view)
-                    return
-                else:
-                    await itx.response.send_message("`Lobby is already in battle`", ephemeral=True)
-                    return
-            else:
-                await itx.response.send_message("You are not the owner of this lobby", ephemeral=True)
-                return
-        
-        else:
-            await itx.response.send_message("You are not in a lobby", ephemeral=True)
-            return
-    
-    @discord.ui.button(label="Change Name", style=discord.ButtonStyle.blurple)
-    async def change_name(self, itx: discord.Interaction, btn: discord.ui.Button):   
-        lobby = self.lobby
-        user = itx.user.id
-        await itx.response.send_modal(NameModal(lobby, user, self.bot))
-
-    @discord.ui.button(label="Invite Players", disabled=True, style=discord.ButtonStyle.blurple) #DISABLED
-    async def invite_players(self, itx: discord.Interaction, btn: discord.ui.Button):
-        lobby = self.lobby
-        thread = itx.channel
-        bot = self.bot
-        #await itx.response.send_modal(InviteModal(thread, lobby, bot))
-
-    @discord.ui.button(label="Kick Player", disabled=True, style=discord.ButtonStyle.red) #DISABLED
-    async def kick_player(self, itx: discord.Interaction, btn: discord.ui.Button):
-        lobby = self.lobby
-        embed = self.lobbies[itx.channel.id]["embed"] #?
-        thread = itx.channel
-        #await itx.response.send_modal(KickModal(thread, lobby))
-
-    @discord.ui.button(label="Leave Lobby", style=discord.ButtonStyle.red)
-    async def leave_lobby(self, itx: discord.Interaction, btn: discord.ui.Button):
-        lobby = self.lobby
-        thread = itx.channel
-        if itx.user.id == lobby.owner:
-            await thread.send("`Owner Leaving Lobby, New Owner Will Be Selected`")
-        player_removed = lobby.remove_player(itx.user.id)
-        if player_removed:
-            await itx.response.send_message(f"{itx.user.mention} has left the lobby.")
-            await itx.response.send_message("`Lobby updated`")
-            return
-        else:
-            await thread.send("`No New Owner Found Lobby Will Be Deleted`")
-            del self.lobbies[thread.id]
-            await itx.response.send_message("`Channel Archived at` " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
-            await thread.edit(locked=True)
-            await thread.edit(archived=True)
-            return
-
-    @discord.ui.button(label="Disband Lobby", style=discord.ButtonStyle.red)
-    async def disband(self, itx: discord.Interaction, btn: discord.ui.Button):
-        lobby = self.lobby
-        thread = itx.channel
-        if itx.user.id == lobby.owner:
-            del(lobby)
-            del(self.lobbies[itx.channel.id]) #KeyError after leaving/reopening lobby then trying to disband (prob deleted the lobby id from the lobbies dict)
-            await itx.response.send_message("`Lobby Disbanded`")
-            await thread.send("`Channel Archived at` " + "`"  + datetime.now().astimezone().strftime('%c') + "`")
-            await thread.edit(locked=True)
-            await thread.edit(archived=True)
-            return
-    
-        else:
-            await itx.response.send_message("You are not the owner")
-#endregion
-
-
-#region NameModal
-class NameModal(discord.ui.Modal):
-    def __init__(self, lobby, user, bot):
-        super().__init__(title="Change Name")
-        self.lobby = lobby
-        self.user = user
-        self.bot = bot
-        self.name = discord.ui.TextInput(label="Name", style=discord.TextStyle.short, placeholder="Enter New Name")
-        self.add_item(self.name)
-
-    async def on_submit(self, itx: discord.Interaction):
-        name = self.name.value
-        embed = discord.Embed(title='Change Team Name', description='')
-        await itx.response.defer()
-
-        user = self.user
-        lobby = self.lobby
-
-        if user == lobby.owner:
-            embed.title = "Change Name"
-            embed.description = "Choose to change your team name or your lobby's name to: " + name
-            await itx.followup.send(embed=embed, view=OwnerLobbyView(lobby, self.bot, name))
-            return
-        teama = lobby.teamA['name'] if lobby.teamA['name'] else "Team A"
-        teamb = lobby.teamB['name'] if lobby.teamB['name'] else "Team B"
-        leader_a = lobby.teamA['leader'] if lobby.teamA['leader'] else None
-        leader_b = lobby.teamB['leader'] if lobby.teamB['leader'] else None
-        if leader_a:
-            if user == leader_a.user_id:
-                if name == teamb:
-                    embed.description = ("Cannot set " + name + "to " + teamb)
-                    await itx.followup.send(embed=embed, ephemeral=True)
-                    return
-                if lobby.set_teamA_name(name):
-                    embed.description = ("Change team name to: " + name)
-                    await itx.followup.send(embed=embed, ephemeral=True)
-                    return
-                else: 
-                    embed.description = ("Error setting name to: " + name)
-                    await itx.followup.send(embed=embed, ephemeral=True)
-                    return
-            
-        elif leader_b:
-            if user == leader_b.user_id:
-                if name == teama:
-                    embed.description = ("Cannot set " + name + "to " + teama)
-                    await itx.followup.send(embed=embed, ephemeral=True)
-                    return
-                if lobby.set_teamB_name(name):
-                    embed.description = ("Change team name to:" + name)
-                    await itx.followup.send(embed=embed, ephemeral=True)
-                    return
-                else: 
-                    embed.description = ("Error setting name to:" + name)
-                    await itx.followup.send(embed=embed, ephemeral=True)
-                    return
-
-        else:
-            embed.description = ("You are not in a team")
-            await itx.followup.send(embed=embed, ephemeral=True)
-            return
-#endregion
-
-
-#region InviteModal
-# class InviteModal(discord.ui.Modal):
-#     def __init__(self, thread, lobby, bot):
-#         super().__init__(title="Invite Players")
-#         self.thread = thread
-#         self.lobby = lobby
-#         self.bot = bot
-#         self.invited = discord.ui.TextInput(label="Invite Players", style=discord.TextStyle.short, placeholder="Enter the user_id of the member you'd like to invite")
-#         self.add_item(self.invited)
-
-#     async def on_submit(self, itx: discord.Interaction):
-#         invited = self.invited.value
-#         guild = itx.guild
-#         member = guild.get_member(invited) #returning NONE Type when I test it with my user_id 
-#         thread = self.thread
-#         lobby = self.lobby
-
-#         if itx.user.id != lobby.owner:
-#             await itx.response.send_message("Only the lobby owner can invite players.", ephemeral=True)
-#             return
-        
-#         if member.id in lobby.invited:
-#             await itx.response.send_message(f"{member.mention} is already in invited.", ephemeral=True)
-#             return
-        
-#         lobby.invited.append(member.id)
-#         lobby.add_player(member.id)
-#         await thread.add_user(member)
-#         await itx.response.send_message(f"{member.mention} has been invited to the lobby.")
-#         embed = generate_lobby_embed(lobby, self.bot)
-#         await itx.response.send_message(embed=embed)
-#         return
-#endregion
-
-
-#region KickModal
-# class KickModal(discord.ui.Modal):
-#     def __init__(self, thread, lobby):
-#         super().__init__()
-#         self.thread = thread
-#         self.lobby = lobby
-    
-#     async def on_submit():
-#         user = self.bot.get_user(member.id)        
-#         lobby.remove_player(member.id)
-#         embed = generate_lobby_embed(lobby, self.bot)
-#         embed.description = "Player removed from lobby: " + user.mention
-#         self.lobbies[ctx.channel.id]["embed"] = embed
-#         await thread.remove_user(member)
-#         await thread.send(f"{member.id} removed from lobby")
-#         await ctx.send(embed=embed)
-#endregion
-
 
 async def setup(bot):
     await bot.add_cog(Lobby_Cog(bot))

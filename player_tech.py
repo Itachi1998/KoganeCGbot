@@ -1978,7 +1978,7 @@ limitless={
 # region Mythic Beast Amber
 mba={
      
-"Mythical Beast":
+"Mythic Beast Amber" :
      [
           {
                "Attack" : 
