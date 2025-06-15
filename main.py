@@ -56,6 +56,6 @@ async def sync(ctx):
         await channel.send(fstring)
         print(fstring)
 
-bot.run(disc_token)
+bot.run(token)
 
 
