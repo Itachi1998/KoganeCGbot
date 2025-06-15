@@ -2,17 +2,10 @@ import discord, os, traceback, db, enemy_techs
 from db import read_player, read_enemy, read_colony # Import general dependencies 
 from game import Player, Enemy
 from discord.ext import commands
-env_path = ".env"
 
-if os.path.exists(env_path):
-    with open(env_path, 'r') as f:
-        for line in f:
-            if '=' in line and not line.startswith('#'):
-                key, value = line.strip().split('=', 1)
-                os.environ[key] = value
+log_channel = os.environ.get('LOGCHANNEL')
+token = os.environ.get('TOKEN')
 
-log_channel = os.getenv("LOGCHANNEL")
-disc_token = os.getenv('TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -25,8 +18,9 @@ def random_pve_enemy(colony_id, lobby):
     
 
 async def load():
+    await bot.load_extension('cogs.battle')
     for filename in os.listdir('cogs'):
-        if filename.endswith('.py'):
+        if filename.endswith('.py') and filename != 'battle.py':
             cog = filename[:-3]
             await bot.load_extension(f'cogs.{cog}')
             print(f'Cog loaded: {cog}')
