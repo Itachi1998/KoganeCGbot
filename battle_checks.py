@@ -5,6 +5,16 @@ from player_tech import technique_list
 from enemy_techs import enemy_tech
 from cursed_tools import cursed_tools
 
+def heal_target(bodyparts: list, heal_amount, soul_heal=0):
+    for bp in bodyparts:
+        bp.hp += heal_amount
+        if soul_heal > 0:
+            bp.max_hp += soul_heal
+    return bodyparts
+    
+
+
+
 def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
 #region defense vow distribution
     initial_hp = target.hp
@@ -161,7 +171,7 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
         #endregion
     target.hp = total_hp
     target.max_hp = total_maxhp
-    body_dmg = initial_hp - total_hp # part of returning body_dmg
+    body_dmg = max(initial_hp - total_hp,0) # part of returning body_dmg
     print("Total hp left: " + str(total_hp))
     print("Total maxhp left: " + str(total_maxhp))    
     return target.hp, target.max_hp, body_dmg
@@ -185,7 +195,6 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
             else:
                 tech = [t for t in technique_list if next(iter(t)) == player.technique]
                 is_player=True
-
     if tools:
         new_tools_dict = [(k, v) for k, v in cursed_tools.items() if k in tools]
         new_tools = []
@@ -526,7 +535,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
                         # 1200 / 20
         reduction_multiplier = speed_diff//attack_speed
                     # 50 - 24
-        total_dmg = dmg - reduction_multiplier
+        total_dmg = max(dmg - reduction_multiplier, 0)
         
         target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
         print(f"{defense.name} was too slow to counter {attack.name}")
@@ -575,11 +584,13 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
     if defense_negated:
         defense_strength=0
         print(f"{attack.name} negated {defense.name}. Target can still dodge")
-
+        if target.speed//2 > attack_speed:
+            return ("dodge", body_dmg, target.hp<=0, target.max_hp<=0)
+        else:
+            return ("hit", dmg, target.hp<=0, target.max_hp<=0)
     if defense_speed == 0:
         print(f"{defense.name} is 0 and was not able to dodge {attack.name}\n{dmg} damage taken")
         return ("hit", dmg, target.hp<=0, target.max_hp <=0)
-    
     else:
         dmg = max(dmg - defense_strength, 0)
 
@@ -588,6 +599,7 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
         return ("dodge", dmg, target.hp<=0, target.max_hp<=0)
     
     if defense.act_speed > attack.act_speed:
+        
         print(f"Attack activated before defense\nCalculating speed diff of {defense.name} and {attack.name}\nDefense speed: {defense_speed}\nAttack speed: {dmg}")
         speed_gap = max(defense_speed - speed, 0)
                         # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
@@ -616,16 +628,17 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
 
             reduced_dmg = (dmg - defense_strength) // attack_speed
                             # 50 - 24
-            total_dmg = (reduced_dmg * attack.level)
+            total_dmg = max(reduced_dmg * attack.level, 0)
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
             print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {total_dmg}")
             return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
-        
         else:
-            reduced_dmg = dmg - defense_strength
+            reduced_dmg = max(dmg - defense_strength, 0)
+            
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=reduced_dmg, soul=attack.soul)
             print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {total_dmg}")
             return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
+        
 #endregion
 
 # region summon check

@@ -6,6 +6,7 @@ from discord.ext import commands
 log_channel = os.environ.get('LOGCHANNEL')
 token = os.environ.get('TOKEN')
 
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -55,6 +56,6 @@ async def sync(ctx):
         await channel.send(fstring)
         print(fstring)
 
-bot.run(token)
+bot.run(disc_token)
 
 
