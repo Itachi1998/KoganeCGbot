@@ -27,7 +27,7 @@ sorcerer_techs = [
     player_tech.ten_shadows
     ]
 
-reincarnated_techs = [
+reincarnate_techs = [
     player_tech.blood_manip, 
     player_tech.body_hop, 
     player_tech.ce_discharge, 
@@ -41,7 +41,7 @@ reincarnated_techs = [
     player_tech.ten_shadows
     ]
 
-cursed_techs = [
+curse_techs = [
     player_tech.disaster_flames, 
     player_tech.disaster_plants, 
     player_tech.disaster_tides,
@@ -50,7 +50,6 @@ cursed_techs = [
     ]
 
 classes = {"Sorcerer" : 50, "Curse" : 30, "Reincarnate" : 15}
-
 #endregion
 
 #region Weight Randomizer
@@ -91,11 +90,6 @@ def weight_system(weight_dictionary: dict, target_list: list = None, target_dict
 
     pick = random.choice(list_of_targets)
     return pick
-    
-
-                
-    
-    
 #endregion
 
 
@@ -117,17 +111,17 @@ def get_random_sorcerer_tech(techlist=sorcerer_techs):
             six_values = random.randint(1, 2)
             if six_values == 1:
                 pick['Six Eyes'] = True
-                #cuz he not number 2
+                #cuz he not number 2 - real
     return pick
 
-def get_random_reincarnate_tech(techlist=reincarnated_techs):
+def get_random_reincarnate_tech(techlist=reincarnate_techs):
     rarity = {"legend" : 5, "rare" : 15, "uncommon" : 30, "common" : 50}
     pick = weight_system(rarity, target_list=techlist)
     tech_name = next(iter(pick))
     print(f"Getting technique: {tech_name}, rarity level: {pick['Rarity']}")
     return pick
 
-def get_random_curse_tech(techlist=cursed_techs):
+def get_random_curse_tech(techlist=curse_techs):
     rarity = {"legend" : 5, "rare" : 15, "uncommon" : 30, "common" : 50}
     pick = weight_system(rarity, target_list=techlist)
     tech_name = next(iter(pick))
@@ -160,7 +154,25 @@ class Character_cog(commands.Cog):
         embed.set_thumbnail(url=self.bot.user.avatar)
         embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
         embed.color=discord.Color.from_rgb(255, 0, 0)
-        await ctx.send(embed= embed, view=CreateButtons(embed, self.bot, self.playerdict, user=ctx.author.id))
+        await ctx.send(embed= embed, view=CreateButton(embed, self.bot, self.playerdict, user=ctx.author.id))
+        return
+    
+    @commands.hybrid_command(name="custom", description="Create your player in the culling games! (only one player per colony)")
+    async def custom(self, ctx, name: str=None, pclass: str=None, tech: str=None):
+        if not name:
+            name=ctx.author.display_name
+        self.playerdict["colony"] = ctx.guild.id
+        self.playerdict["name"] = name
+        embed= discord.Embed(title="Create a character", description= self.welcstr + name +
+        "\n## The first step in creating your character!"
+        "\n## Click the button to spin for your stats!")
+        embed.add_field(name="Stat Ranges", value="```python\n* HP: 100 - 300\n* CE: 200 - 2000\n* Strength: 50 - 200\n* Speed: 50 - 200"
+        "\n* Class: Sorcerer, Curse, Reincarnate ```")
+        embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
+        embed.set_thumbnail(url=self.bot.user.avatar)
+        embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
+        embed.color=discord.Color.from_rgb(255, 0, 0)
+        await ctx.send(embed= embed, view=CustomCreateButton(pclass, tech, embed, self.bot, self.playerdict, user=ctx.author.id))
         return
     
     @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
@@ -235,8 +247,9 @@ class Character_cog(commands.Cog):
             return
 #endregion
 
+
 # region Create Button
-class CreateButtons(discord.ui.View):
+class CreateButton(discord.ui.View):
     def __init__(self, embed, bot, playerdict: dict, user: int, timeout=30):
         super().__init__(timeout=timeout)
         self.bot = bot
@@ -336,6 +349,123 @@ class CreateButtons(discord.ui.View):
             return
         
 #endregion
+
+
+# region Custom Create Button
+class CustomCreateButton(discord.ui.View):
+    def __init__(self, pclass, tech, embed, bot, playerdict: dict, user: int, timeout=30):
+        super().__init__(timeout=timeout)
+        self.pclass = pclass
+        self.tech = tech
+        self.bot = bot
+        self.embed=embed
+        self.playerdict=playerdict
+        self.welcome = "## `Welcome to the Culling Games!`"
+        self.user = user
+
+
+    @discord.ui.button(label="Spin", style=discord.ButtonStyle.primary, emoji="<a:slots:1364792630155804722>")
+    async def spin(self, interaction: discord.Interaction, button: discord.Button):
+        ce = random.randint(200, 2000)
+        strength=random.randint(50, 200)
+        speed=random.randint(50, 200)
+        hp = random.randint(100, 300)
+        pclass = self.pclass
+        tech = self.tech
+
+        if pclass== "Sorcerer":
+            strength += 100
+            speed += 100
+            hp += 100
+            ce += 50
+            for t in sorcerer_techs:
+                for k in t.keys():
+                    if k == tech:
+                        tech = t
+
+        if pclass == "Reincarnate":
+            ce += 100    
+            strength+= 120
+            speed += 120
+            hp += 150
+            for t in reincarnate_techs:
+                for k in t.keys():
+                    if k == tech:
+                        tech = t
+
+        if pclass == "Curse":
+            ce += 200
+            strength += 150
+            speed += 150
+            hp += 150
+            for t in curse_techs:
+                for k in t.keys():
+                    if k == tech:
+                        tech = t
+
+        six_eyes=False
+
+        techname= next(iter(tech))
+        print(f"rolled {techname}")
+
+        if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
+            print("Added 6 eyes ce: 1000 to " +  str(ce))
+            ce += 1000
+            hp += 300
+            six_eyes=True
+
+        if any(keyword in techname.lower() for keyword in ['copy', 'shrine', 'limitless']):
+            print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
+            ce += 1000
+            hp += 100
+
+        if techname == "Shrine":
+            ce += 2000
+            hp += 200
+
+        if 'zero' in techname.lower():
+            strength += 200
+            speed += 200
+            hp += 300
+            ce = 0
+
+        entered = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        player = Player(
+            name=self.playerdict['name'],
+            level=1,
+            max_hp=hp,
+            max_ce=ce,
+            speed=speed,
+            strength=strength,
+            technique=techname,
+            playerclass=pclass,
+            colony_id=self.playerdict['colony'],
+            xp=0,
+            cgp=0,
+            skp=0,
+            user_id=interaction.user.id,
+            six_eyes=six_eyes,
+            entered=entered
+        )
+        player.grade = 1
+
+        created = create_player(player)
+        rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
+        inventory={"Summons": {}, "Tools": {}, "Vows":{}}
+        tech_rarity = next((k for k in rarity.keys() if rarity[k] >= tech['Rarity']), None)
+        class_rarity = next((k for k in rarity.keys() if rarity[k] >= classes[pclass]), None)
+        if created:
+            print ("Created technique: " + techname)
+            self.embed.description=f"* `Name:` " + "**" + player.name + "**" + f"\n* `Level:` **{player.level}**\n* `Technique:` **{techname}**\n* `HP:` **{hp}**\n* `CE:` **{ce}** \n* `Class:` **{pclass}**\n* `Six Eyes:` **{six_eyes}**\n* `Speed:` **{player.speed}**\n* `Strength:` **{player.strength}**\n* `Technique Rarity:` **{tech_rarity}**\n* `Class Rarity:` **{class_rarity}**"
+            self.embed.set_footer(text="Use /profile to view your character!", icon_url=self.bot.user.avatar)
+            await interaction.response.edit_message(embed=self.embed, view=None)
+            return
+        else:
+            await interaction.response.send_message("You cannot create more than one player per colony")
+            return
+        
+#endregion
+
 
 async def setup(bot):
     await bot.add_cog(Character_cog(bot))

@@ -503,6 +503,9 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
 # region counter check
 def counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
     
+    if defense.type == 'counter reflect':
+        defense_strength = dmg
+
     if attack.sure_hit:
         if attack_negated:
             dmg = 0
@@ -900,7 +903,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             return results
         
         # counter check
-        if defense.type == 'counter':
+        if 'counter' in defense.type:
             print(f"{defense.name} 'counter check' against {attack.name}...")
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
             return results

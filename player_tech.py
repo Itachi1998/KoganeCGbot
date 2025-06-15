@@ -447,9 +447,9 @@ boogie_woogie = {
                               act_cost=50,
                               act_body=("Head", "Torso", "Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=100,
+                              strength=0,
                               speed=2000,
-                              type="reflect"
+                              type="counter reflect"
                               ),
                     "Vibra Swap" : 
                          Techniques(
@@ -2424,9 +2424,9 @@ sky_manip={
                               act_cost=50,
                               act_body=("Left Arm", "Right Arm"),
                               aoe=1,
-                              strength=500, # pull attack dmg in checks?
+                              strength=0,
                               speed=1000,
-                              type="reflect"
+                              type="counter reflect"
                          ),
 
                     "Cloak Dodge" :
