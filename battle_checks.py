@@ -503,6 +503,9 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
 # region counter check
 def counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated):
     
+    if defense.type == 'counter reflect':
+        defense_strength = dmg
+
     if attack.sure_hit:
         if attack_negated:
             dmg = 0
@@ -546,9 +549,9 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
         print(f"Attack negated {defense.name} dealing {dmg} dmg")
         return ("hit", dmg, target.hp <= 0, target.max_hp <=0)
     
-    else:
-        counter_dmg = defense_strength
-        counter_soul = 0
+
+    counter_dmg = defense_strength
+    counter_soul = 0
 
         if target.equipped:
             items=[item for item in target.equipped]
@@ -900,7 +903,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             return results
         
         # counter check
-        if defense.type == 'counter':
+        if 'counter' in defense.type:
             print(f"{defense.name} 'counter check' against {attack.name}...")
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
             return results
@@ -985,8 +988,7 @@ test_player3.defense = "Nail Storm"
 
 enemy = game.SpecialGrade_FingerBearer()
 
-#summon_check("Nue", "shikigami")
-results = battle_checks(enemy, test_player2, "Energy Blast", "Infinity")
-
+shiki = summon_check("Nue", "shikigami")
+results = battle_checks(test_player3, test_player1, "Nails", "Redirect")
 print(results)
 #endregion
