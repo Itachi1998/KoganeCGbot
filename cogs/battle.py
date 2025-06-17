@@ -30,8 +30,8 @@ def ce_bar(ce, max_ce):
     dashes = "<:1000001330:1354469798230102258>" * filled_dashes
     percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
     if remainder > 0:
-        dashes += "<:1000001331:1354469804741959680>"
-    bar = f"{dashes}{percent}"
+        dashes += "<:1000001331:1354469803112403078>"
+    bar = f"{dashes} {percent}"
     return bar
 
 def verify_player(user_id, colony):
@@ -296,13 +296,9 @@ def set_player_defense(player, feed):
 
 #region sim embed
 def simulation_embed(lobby, round_num):
-    print(f"TeamA players: {[(p.user_id, p.name) for p in lobby.teamA['players']]}")
-    print(f"TeamB players: {[(p.user_id, p.name) for p in lobby.teamB['players']]}")
-    print(f"Field players: {[(p.user_id, p.name) for p in lobby.field.values() if hasattr(p, 'user_id')]}")
     """Generate simulation embed for all actions in the current round."""
     embed = discord.Embed(title=f"Round {round_num} Simulation", description="Battle Results")
     round_feed = lobby.feed[round_num]
-    
     # Get references to the feed sections
     attacks = round_feed.get('attacks', {})
     defenses = round_feed.get('defenses', {})
@@ -311,89 +307,123 @@ def simulation_embed(lobby, round_num):
     # Track all simulations for this round
     simulations = []
     results = None
-    # Process all attacks
-    for team_name, team_actions in attacks.items():
-        print(f"Feed team '{team_name}' has player IDs: {list(team_actions.keys())}")
+    
+    for team_name, team_actions in defenses.items():
         for player_id, action_data in team_actions.items():
-            # Find the player object
-            player = None
-            if team_name == lobby.teamA['name']:
-                for p in lobby.teamA['players']:
-                    if p.user_id == player_id:
-                        player = p
-                        break
-            elif team_name == lobby.teamB['name']:
-                for p in lobby.teamB['players']:
-                    if p.user_id == player_id:
-                        player = p
-                        break
-            elif team_name == 'Field':
-                for p in lobby.field.values():
-                    if hasattr(p, 'user_id') and p.user_id == player_id:
-                        player = p
-                        break
-            
-            if player:
-
-                move = action_data.get('move')
-                print(move)
-                targets = action_data.get('targets', [])
-                print(targets)
-                for target in targets:
-                    if hasattr(target, 'user_id'):
-                        defense_name, defense_move = set_player_defense(target, round_feed)
-                        results = battle_checks(player, target, move.name, defense_name)
-                        print("Defense: " + str(defense_move))
-                        print("Results: " + str(results))
-                    else:
-                        # NPC target - get random defense
-                        defense_name, defense_move = get_npc_random_defense(target)
-                        results = battle_checks(player, target, move.name, defense_name)
-                    
-                    # Format and store the result
-                    result_str = format_battle_result(player, target, move, defense_move, results)
-                    simulations.append(result_str)
-                    # Store results in the feed
-                    action_data['results'] = results
-
-    for team_name, team_actions in barriers.items():
-        for player_id, action_data in team_actions.items():
-            player = None
-            results = None
-            if team_name == lobby.teamA['name']:
+                if team_name == lobby.teamA['name']:
                     for p in lobby.teamA['players']:
                         if p.user_id == player_id:
                             player = p
                             break
-            elif team_name == lobby.teamB['name']:
+                elif team_name == lobby.teamB['name']:
+                     for p in lobby.teamB['players']:
+                          if p.user_id == player_id:
+                               player = p
+                               break
+                elif team_name == 'Field':
+                     for p in lobby.field.values():
+                          if hasattr(p, 'user_id') and p.user_id == player_id:
+                               player = p
+                               break
+                if player:
+                    move = action_data.get('move')
+                    print(move.name + " selected")
+                    targets = action_data.get('targets', [])
+                    for t in targets:
+                         if t.defense == None:
+                            t.defense = move
+                         else:
+                              break
+                         print("Target defense set to: " + t.defense.name)
+                    player.defense = move
+                    print("Player defense set to: " + player.defense.name)
+  
+    for team_name, team_actions in attacks.items():
+            print(f"Feed team '{team_name}' has player IDs: {list(team_actions.keys())}")
+            for player_id, action_data in team_actions.items():
+                # Find the player object
+                player = None
+                if team_name == lobby.teamA['name']:
+                    for p in lobby.teamA['players']:
+                        if p.user_id == player_id:
+                            player = p
+                            break
+                elif team_name == lobby.teamB['name']:
                     for p in lobby.teamB['players']:
                         if p.user_id == player_id:
                             player = p
                             break
-            elif team_name == 'Field':
+                elif team_name == 'Field':
                     for p in lobby.field.values():
                         if hasattr(p, 'user_id') and p.user_id == player_id:
                             player = p
                             break
-        
-            if player:
-                    move = action_data.get('move')
-                    targets = action_data.get('targets', [])
+                
+                if player:
 
+                    move = action_data.get('move')
+                    print(move)
+                    targets = action_data.get('targets', [])
+                    print(targets)
                     for target in targets:
                         if hasattr(target, 'user_id'):
-                            defense_str, defense = set_player_defense(target, round_feed)
-                            results = battle_checks(player, target, move.name, defense_str)
-
+                            defense_name, defense_move = set_player_defense(target, round_feed)
+                            results = battle_checks(player, target, move.name, defense_name)
+                            print("Defense: " + str(defense_move))
+                            print("Results: " + str(results))
                         else:
-
-                            defense_str, defense = get_npc_random_defense(target)
-                            results = battle_checks(player, target, move.name, defense_str)
-                            
-                        result_str = format_battle_result(player, target, move, defense, results)
-
+                            # NPC target - get random defense
+                            defense_name, defense_move = get_npc_random_defense(target)
+                            results = battle_checks(player, target, move.name, defense_name)
+                        
+                        # Format and store the result
+                        result_str = format_battle_result(player, target, move, defense_move, results)
                         simulations.append(result_str)
+                        # Store results in the feed
                         action_data['results'] = results
+
+    for team_name, team_actions in barriers.items():
+            for player_id, action_data in team_actions.items():
+                player = None
+                results = None
+                if team_name == lobby.teamA['name']:
+                        for p in lobby.teamA['players']:
+                            if p.user_id == player_id:
+                                player = p
+                                break
+                elif team_name == lobby.teamB['name']:
+                        for p in lobby.teamB['players']:
+                            if p.user_id == player_id:
+                                player = p
+                                break
+                elif team_name == 'Field':
+                        for p in lobby.field.values():
+                            if hasattr(p, 'user_id') and p.user_id == player_id:
+                                player = p
+                                break
+            
+                if player:
+                        move = action_data.get('move')
+                        targets = action_data.get('targets', [])
+
+                        for target in targets:
+                            if hasattr(target, 'user_id'):
+                                defense_str, defense = set_player_defense(target, round_feed)
+                                results = battle_checks(player, target, move.name, defense_str)
+
+                            else:
+
+                                defense_str, defense = get_npc_random_defense(target)
+                                results = battle_checks(player, target, move.name, defense_str)
+                                
+                            result_str = format_battle_result(player, target, move, defense, results)
+
+                            simulations.append(result_str)
+                            action_data['results'] = results
+    
+
+
+
 
     if simulations:
         embed.description = "\n".join(simulations)
@@ -532,13 +562,12 @@ class BattleView(discord.ui.View):
             for key in technique[name][1]['Defend'].keys():
                 defense = technique[name][1]['Defend'][key]
                 fields = [
-                    f"`Def dmg:` **{defense.strength}**",
-                    f"`Def spd:` **{defense.speed}**",
+                    f"`Def strength:` **{defense.strength}**",
+                    f"`Def speedd:` **{defense.speed}**",
                     f"`Bodyparts:` **{', '.join(defense.act_body)}**",
                     f"`Max targets:` **{defense.aoe}**",
                     f"`Type:` **{defense.type}**"
-                ]
-
+                ]                     
                 if defense.soul:
                     fields.append(f"`Soul defense` **{defense.soul}**")
 
@@ -557,9 +586,18 @@ class BattleView(discord.ui.View):
             return
         
     @discord.ui.button(label="Item Options", style=discord.ButtonStyle.red)
-    async def item_options(self, button: discord.ui.Button, interaction: discord.Interaction):
-        pass
-
+    async def item_options(self, button: discord.ui.Button, itx: discord.Interaction):
+        lobby = self.lobby
+        if lobby:
+            player, id = verify_player(itx.user_id, itx.guild.id)
+            tools = [t for t in technique_list if t.get(player.technique) and 'Item' in t[player.technique][2]]
+            if not tools:
+                await itx.response.send_message("No items available from your technique.", ephemeral=True)
+                return
+            
+                
+                 
+                 
     @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
     async def summon_options(self, button: discord.ui.Button, itx: discord.Interaction):
         lobby = self.lobby
