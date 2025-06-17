@@ -12,7 +12,7 @@ __pycache__/
 .git
 # Exclude Docker-related files
 .dockerignore
-
+Dockerfile
 
 # Exclude editor and OS-specific files
 *.swp
