@@ -553,7 +553,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
     counter_dmg = defense_strength
     counter_soul = 0
 
-        if target.equipped:
+    if target.equipped:
             items=[item for item in target.equipped]
             for item in items:
                 counter_dmg += item.strength
