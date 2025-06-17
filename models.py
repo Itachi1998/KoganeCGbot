@@ -4,10 +4,6 @@ from typing import List, Optional
 from sqlalchemy import create_engine, String, JSON, UniqueConstraint, ForeignKey, CheckConstraint
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, relationship
 
-from dotenv import find_dotenv, load_dotenv
-dotfile = find_dotenv('.env')
-loaded = load_dotenv(dotfile)
-passw = os.getenv('PASS')
 
 db_url = "sqlite:///database.db"
 
