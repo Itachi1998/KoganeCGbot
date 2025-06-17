@@ -9,7 +9,7 @@ import game
 # GLOBAL VARIABLES
 
 
-log_channel = os.environ("LOGCHANNEL")
+log_channel = os.getenv("LOGCHANNEL")
 
 # Update after postgres database is set up
 
