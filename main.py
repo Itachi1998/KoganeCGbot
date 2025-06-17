@@ -3,10 +3,8 @@ from db import read_player, read_enemy, read_colony # Import general dependencie
 from game import Player, Enemy
 from discord.ext import commands
 
-log_channel = os.environ.get('LOGCHANNEL')
-token = os.environ.get('TOKEN')
-
-
+log_channel = os.getenv('LOGCHANNEL')
+token = os.getenv('TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -18,9 +16,8 @@ def random_pve_enemy(colony_id, lobby):
     
 
 async def load():
-    await bot.load_extension('cogs.battle')
     for filename in os.listdir('cogs'):
-        if filename.endswith('.py') and filename != 'battle.py':
+        if filename.endswith('.py'):
             cog = filename[:-3]
             await bot.load_extension(f'cogs.{cog}')
             print(f'Cog loaded: {cog}')
