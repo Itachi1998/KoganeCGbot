@@ -1,4 +1,4 @@
-import os, datetime
+import os, dotenv, datetime
 from datetime import datetime
 from db import create_colony,read_colony, update_colony
 import discord, asyncio, json
@@ -7,7 +7,9 @@ import game
 #from old_techniques import get_cursed_technique
 #import game, time, asyncio
 # GLOBAL VARIABLES
-log_channel = os.environ.get("LOGCHANNEL")
+
+
+log_channel = os.getenv("LOGCHANNEL")
 
 # Update after postgres database is set up
 
