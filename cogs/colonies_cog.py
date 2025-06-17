@@ -1,7 +1,6 @@
 import os, dotenv, datetime
 from datetime import datetime
 from db import create_colony,read_colony, update_colony
-from dotenv import load_dotenv, find_dotenv
 import discord, asyncio, json
 from discord.ext import commands
 import game
@@ -9,10 +8,8 @@ import game
 #import game, time, asyncio
 # GLOBAL VARIABLES
 
-dotenv = find_dotenv()
-load_dotenv(dotenv)
 
-log_channel = os.getenv("LOGCHANNEL")
+log_channel = os.environ("LOGCHANNEL")
 
 # Update after postgres database is set up
 
