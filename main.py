@@ -19,7 +19,7 @@ async def load():
     for filename in os.listdir('cogs'):
         await bot.load_extension("cogs.battle")
     for filename in os.listdir('cogs'):
-        if filename.endswith('.py') and filename != 'battle.py':
+        if filename.endswith('.py') and filename[-3] != 'battle':
             cog = filename[:-3]
             await bot.load_extension(f'cogs.{cog}')
             print(f'Cog loaded: {cog}')
