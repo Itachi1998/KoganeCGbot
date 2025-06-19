@@ -2,7 +2,6 @@ import discord
 # import old_techniques, game
 # from cogs import colonies
 from discord.ext import commands
-from PIL import ImageDraw, Image, ImageFont
 from io import BytesIO
 
 
