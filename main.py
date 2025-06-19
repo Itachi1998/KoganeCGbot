@@ -18,8 +18,11 @@ def random_pve_enemy(colony_id, lobby):
 async def load():
     await bot.load_extension('cogs.battle')
     for filename in os.listdir('cogs'):
-        if filename.endswith('.py') and filename[-3] != 'battle':
+        if filename.endswith('.py'):
+            
             cog = filename[:-3]
+            if cog == 'battle':
+                continue
             await bot.load_extension(f'cogs.{cog}')
             print(f'Cog loaded: {cog}')
         
