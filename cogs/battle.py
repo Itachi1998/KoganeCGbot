@@ -205,7 +205,7 @@ def move_embed(player, move):
     required_ce = move.act_cost
     aoe = move.aoe
     move_type = move.type
-    required_bodyparts = move.act_body
+    required_bodyparts = move.act_req
     activation_speed = move.act_speed
     soul = move.soul if move.soul else None
     embed = discord.Embed(title=name, description="## " + name + " selected")
@@ -484,7 +484,7 @@ class BattleView(discord.ui.View):
                     fields = [
                         f"`Atk dmg:` **{attack.strength}**",
                         f"`Atk spd:` **{attack.speed}**",
-                        f"`Bodyparts:` **{', '.join(attack.act_body)}**",
+                        f"`Bodyparts:` **{', '.join(attack.act_req)}**",
                         f"`Max targets:` **{attack.aoe}**",
                         f"`Type:` **{attack.type}**"
                     ]
@@ -534,7 +534,7 @@ class BattleView(discord.ui.View):
                 fields = [
                     f"`Def dmg:` **{defense.strength}**",
                     f"`Def spd:` **{defense.speed}**",
-                    f"`Bodyparts:` **{', '.join(defense.act_body)}**",
+                    f"`Bodyparts:` **{', '.join(defense.act_req)}**",
                     f"`Max targets:` **{defense.aoe}**",
                     f"`Type:` **{defense.type}**"
                 ]
@@ -605,7 +605,7 @@ class BattleView(discord.ui.View):
                 fields = [
                     f"`Barrier dmg:` **{barrier.strength}**",
                     f"`Barrier spd:` **{barrier.speed}**",
-                    f"`Bodyparts:` **{', '.join(barrier.act_body)}**",
+                    f"`Bodyparts:` **{', '.join(barrier.act_req)}**",
                     f"`Max targets:` **{barrier.aoe}**",
                     f"`Type:` **{barrier.type}**"
                 ]
