@@ -207,16 +207,18 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
     
     if attack:
         print(f"Setting attack '{attack}' for {player.name}")
+
         if "Domain" in attack or "Falling Blossom" in attack or "Hollow Wicker" in attack:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, attack=attack)
             return new_barrier
         
-        print(f"Setting attack '{attack}' for {player.name}")
+        if "Heal" in attack:
+            print("You can't heal on an attack move")
+            return None
 
         if is_player:
             print(f"Player {player.name} is using {attack}")
             print(tech)
-
             new_attack = tech[player.technique][0]['Attack'][attack]
             return new_attack
         
@@ -227,12 +229,16 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
             return new_attack
     
     if defense:
-        
+        print(f"Setting defense '{defense}' for {player.name}")
+
         if "Domain" in defense or "Falling Blossom" in defense or "Hollow Wicker" in defense:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, defense=defense)
             return new_barrier
         
-        print(f"Setting defense '{defense}' for {player.name}")
+        if "Heal" in defense:
+            new_defense = tech[player.technique][3]['RCT'][defense]
+            player.defense = new_defense
+            return new_defense
 
         if is_player:
             print(f"Player {player.name} is using {defense}")
@@ -276,8 +282,6 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
 def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
 
     if attack:
-        print(f"Setting '{attack}' for {player.name}")
-
         if is_player:
             new_attack = tech[0][player.technique][2]['Barrier'][attack]
             return new_attack
@@ -287,8 +291,6 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
             return new_attack
 
     if defense:
-        print(f"Setting '{defense}' for {player.name}")
-
         if is_player:
             new_defense= tech[0][player.technique][2]['Barrier'][defense]
             return new_defense
@@ -913,12 +915,17 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             print(f"{defense.name} 'counter check' against {attack.name}...")
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
             return results
+        
         # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
             results = dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
             return results   
         
+        # heal check
+        if defense.type == 'rct' or defense.type == 'regen':
+            print(f"{defense.name} 'heal check' against {attack.name}...")
+            
         # domain defense check
         else:
             print(f"{defense.name} 'barrier check' with attack {attack.name}...")    
@@ -995,6 +1002,6 @@ test_player3.defense = "Nail Storm"
 enemy = game.SpecialGrade_FingerBearer()
 
 shiki = summon_check("Nue", "shikigami")
-results = battle_checks(test_player3, test_player1, "Nails", "Redirect")
+results = battle_checks(test_player3, test_player2, "Nails", "Heal")
 print(results)
 #endregion

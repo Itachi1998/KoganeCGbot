@@ -1538,11 +1538,11 @@ hr_zero={
                }
           },
           {
-          "Heal" :
+          "RCT" :
                {
-                    "Regen" :
+                    "Heal" :
                          Techniques(
-                              name="Regen",
+                              name="Heal",
                               level=1,
                               act_speed=1,
                               act_cost=1,
