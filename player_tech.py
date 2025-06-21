@@ -1550,8 +1550,8 @@ hr_zero={
                               aoe=1,
                               strength=200,
                               speed=1000,
-                              type="regen",
-                              self_heal=200
+                              type="heal",
+                              #self_heal=200
                          )
                }
           }
@@ -2000,8 +2000,8 @@ limitless={
                               aoe=1,
                               strength=500,
                               speed=1000,
-                              type="rct",
-                              self_heal=500
+                              type="heal",
+                              #self_heal=500
                          )
                }
           }
