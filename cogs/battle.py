@@ -18,20 +18,21 @@ def healthbar(health, max_health):
     percent = f"`{round((health / max_health) * 100)}%`"
     if '-' in percent:
         percent = "`0%`"
-    bar = f"{dashes}{percent}"
+    bar = f"{dashes} {percent}"
     return bar
 
 def ce_bar(ce, max_ce):
-    max_dashes = 4
-    dash_ratio = max_ce / max_dashes
-    filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio)
-
-    remainder = (ce / dash_ratio) - filled_dashes if ce > 0 else 0
-    dashes = "<:1000001330:1354469798230102258>" * filled_dashes
-    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`"
-    if remainder > 0:
-        dashes += "<:1000001331:1354469804741959680>"
-    bar = f"{dashes}{percent}"
+    
+    max_dashes = 4 # max 4
+    dash_ratio = max_ce / max_dashes # maximum ce / 4 = 1000 ce = 250 ce per dash
+    filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
+    remainder = max_dashes - filled_dashes if ce > 0 else 0 # 1000 / 250 = 4 dashes - 3 = 1 remainder 
+    dashes = "<:1000001330:1354469798230102258>" * filled_dashes # emoji times number of dashes
+    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`" # 853 / 1000 = 0.853 * 100 = 85.3% rounded to 85%
+    if remainder > 0: # if remainder is greater than 0, add a half dash
+        dashes += "<:IMG_44021:1394503076223783043>" # Add a half-ce emoji
+    bar = f"{dashes} {percent}" # return the bar with dashes and percent
+    print(dashes)
     return bar
 
 def verify_player(user_id, colony):
@@ -242,15 +243,15 @@ def get_npc_random_defense(target):
     return defense_str, defense
 
 def format_battle_result(attacker, target, attack_move, defense_move, results):
-    """Format the battle result for display."""
+    # Format the battle result for display.
     result_str = "`" + attacker.name + ":` " + attack_move.name + "\n"
     result_str += "`" + target.name + ":` " + defense_move.name + "\n"
-
-
+    # results structure : ("name", damage, killed, soul_damage)
     result = results[0]
     killed = results[2]
+    damage = results[1]
     if result == 'hit':
-        result_str += "`" + attacker.name +  "` hit `" + target.name + "` for "  + str(results[1]) + " damage!\n"
+        result_str += "`" + attacker.name +  "` hit `" + target.name + "`\n" + "Damage taken: " + str(damage) + "\n"
         if killed:
             result_str += "`" + target.name + "` has been defeated!\n"
 
@@ -258,16 +259,22 @@ def format_battle_result(attacker, target, attack_move, defense_move, results):
         result_str += "`" + target.name + "` dodged the attack!\n"
         result_str += "Attack speed: " + str(attack_move.speed) + "\n"
         result_str += "Defense speed: " + str(defense_move.speed) + "\n"
+        if damage > 0:
+            if killed:
+                 
+                 result_str += "`" + target.name + "`" + " attempted to dodge, but took too much damage and was defeated!\n" + "Damage taken: " + str(damage) + "\n"
+
+            result_str += "`" + target.name + "`" + " was able to dodge but still took  damage!\n" + "Damage taken: " + str(damage) + "\n"
 
     elif result == 'tank':
         result_str += "`" + target.name + "` tanked the attack!\n"
-        result_str += "Damage tanked: " + str(results[1]) + "\n"
+        result_str += "Damage tanked: " + str(damage) + "\n"
 
         
     elif result == 'counter':
         result_str += "`" + target.name + "`" + " countered the attack!\n"
-        result_str += "Counter damage: " + str(results[1]) + "\n"
-        result_str += "`" + target.name + "`" + " hits " + "`" + attacker.name + "`" + " for " + str(results[1]) + " damage!\n"
+        result_str += "Counter damage: " + str(damage) + "\n"
+        result_str += "`" + target.name + "`" + " hits " + "`" + attacker.name + "` \n" + "Damage taken: " + str(damage) + "\n"
 
     return result_str
 
@@ -300,14 +307,17 @@ def simulation_embed(lobby, round_num):
     print(f"TeamB players: {[(p.user_id, p.name) for p in lobby.teamB['players']]}")
     print(f"Field players: {[(p.user_id, p.name) for p in lobby.field.values() if hasattr(p, 'user_id')]}")
     """Generate simulation embed for all actions in the current round."""
-    embed = discord.Embed(title=f"Round {round_num} Simulation", description="Battle Results")
-    round_feed = lobby.feed[round_num]
+    embed = discord.Embed(title=f"Round {round_num} Simulation", description="Battle Results") # initialize embed
+    round_feed = lobby.feed[round_num] # get the feed for the current round
     
     # Get references to the feed sections
-    attacks = round_feed.get('attacks', {})
+    # round feed dictionary structure:
+    # { "round" : { "attacks" : {"team_a" : { "player_id" : {"move" : {}, "targets" : []}}, "team_b" : {}, "field" : {}}, "barriers" : {}, "defenses" : {}}}
+    attacks = round_feed.get('attacks', {}) # get the value from round_feed or default it to empty
+    barriers = round_feed.get('barriers', {}) 
     defenses = round_feed.get('defenses', {})
-    barriers = round_feed.get('barriers', {})
-    
+    if defenses:
+        print("Defenses found in round feed.")
     # Track all simulations for this round
     simulations = []
     results = None
@@ -317,6 +327,7 @@ def simulation_embed(lobby, round_num):
         for player_id, action_data in team_actions.items():
             # Find the player object
             player = None
+            # get current player
             if team_name == lobby.teamA['name']:
                 for p in lobby.teamA['players']:
                     if p.user_id == player_id:
@@ -331,10 +342,9 @@ def simulation_embed(lobby, round_num):
                 for p in lobby.field.values():
                     if hasattr(p, 'user_id') and p.user_id == player_id:
                         player = p
-                        break
-            
-            if player:
+                        break   
 
+            if player:
                 move = action_data.get('move')
                 print(move)
                 targets = action_data.get('targets', [])
@@ -353,8 +363,6 @@ def simulation_embed(lobby, round_num):
                     # Format and store the result
                     result_str = format_battle_result(player, target, move, defense_move, results)
                     simulations.append(result_str)
-                    # Store results in the feed
-                    action_data['results'] = results
 
     for team_name, team_actions in barriers.items():
         for player_id, action_data in team_actions.items():
@@ -435,6 +443,7 @@ class Battle(commands.Cog):
         return
 #endregion
 
+#region BattleView
 class BattleView(discord.ui.View):
     def __init__(self, lobby, bot):
         super().__init__()
@@ -641,7 +650,7 @@ class BattleView(discord.ui.View):
     async def end_turn(self, button: discord.ui.Button, interaction: discord.Interaction):
         # Logic to end the turn
         pass
-
+# endregion
 class MoveView(discord.ui.View):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         super().__init__()
@@ -749,7 +758,7 @@ class TargetSelect(discord.ui.Select):
             attacks = self.lobby.feed[round]['attacks']
             defenses = self.lobby.feed[round]['defenses']
             barriers = self.lobby.feed[round]['barriers']
-           
+            channel = itx.channel
             # Determine which team the player is on
             team = None
             move_type = None
@@ -779,34 +788,31 @@ class TargetSelect(discord.ui.Select):
             if self.attack:
                 if team_name not in attacks:
                     attacks[team_name] = {}
-                else:
-                    team_feed = attacks[team_name]
+                team_feed = attacks[team_name]
 
             elif self.defense:
                 if team_name not in defenses:
                     defenses[team_name] = {}
-                else:
-                    team_feed = defenses[team_name]
+                team_feed = defenses[team_name]
 
             elif self.barrier:
                 if team_name not in barriers:
                     barriers[team_name] = {}
-                else:
-                    team_feed = barriers[team_name]
+                team_feed = barriers[team_name]
             else:
                 await itx.followup.send("Invalid move type.", ephemeral=True)
                 return
             
-            print("Team feed: " + str(team_feed) + " for team: " + team_name)
+            # print("Team feed: " + str(team_feed) + " for team: " + team_name)
             selected_target = self.targets[int(self.values[0])]
             print("Selected target: " + selected_target.name)
 
             if self.player.user_id not in team_feed.keys():
                 team_feed[self.player.user_id] = {
-                    'move': self.move,
-                    'targets': [selected_target],
-                    'charges': charges,
-                    'results': None
+                    'move': self.move, # save technique to feed
+                    'targets': [selected_target], # initialize targets
+                    'charges': charges, # initialize charges
+                    'results': None # initialize results
                 }
 
             else:
@@ -818,7 +824,7 @@ class TargetSelect(discord.ui.Select):
             
             selected_targets = len(team_feed[self.player.user_id]['targets'])
 
-            if self.move.aoe > 1 and len(team_feed[self.player.user_id]['targets']) < self.move.aoe:
+            if self.move.aoe > 1 and  selected_targets < self.move.aoe:
                 results = target_embed(self.player, self.lobby, move_type)
                 if results:
                     embed, targets = results
@@ -844,7 +850,18 @@ class TargetSelect(discord.ui.Select):
                         ready = check_ready_players(self.lobby)
                         if ready:
                             embed = simulation_embed(self.lobby, self.lobby.round)
-                            await itx.followup.send(embed=embed, ephemeral=True)                          
+                            await itx.followup.send(embed=embed, ephemeral=True)
+                            self.lobby.round += 1
+                            self.lobby.ready = []
+                            self.lobby.feed.append({'round' : self.lobby.round,
+                                'attacks': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                                'defenses': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                                'barriers': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}}
+                            })
+                            round_embed = generate_round_embed(self.lobby)
+                            await channel.send(embed=round_embed, view=BattleView(self.lobby, self.bot))
+                            return      
+                        await itx.followup.send("Move selected for this round, wait for players to finish selecting moves.", ephemeral=True)
                         return
             else:
                 self.lobby.ready.append(self.player.user_id)
@@ -852,7 +869,7 @@ class TargetSelect(discord.ui.Select):
                 if ready:
                     embed = simulation_embed(self.lobby, self.lobby.round)
                     await itx.followup.send(embed=embed)
-                    channel = itx.channel
+                    
                     self.lobby.round += 1
                     self.lobby.ready = []
                     self.lobby.feed.append({'round' : self.lobby.round,
@@ -863,6 +880,8 @@ class TargetSelect(discord.ui.Select):
                     round_embed = generate_round_embed(self.lobby)
                     await channel.send(embed=round_embed, view=BattleView(self.lobby, self.bot))
                     return
+                
+                await itx.followup.send("You have selected your target. Wait for others to finish selecting", ephemeral=True)
                 return
         
 #endregion
