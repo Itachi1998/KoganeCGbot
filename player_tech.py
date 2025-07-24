@@ -1950,7 +1950,7 @@ limitless={
           {
           "Barrier" :
                {
-                   "Domain Expansion" :
+                   "Domain Expansion: Infinite Void" : #needs to match name to work
                          Techniques(
                               name="Domain Expansion: Infinite Void",
                               level=5,

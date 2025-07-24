@@ -52,9 +52,9 @@ def verify_player(user_id, colony):
         return False 
     
 def verify_move(technique, name):
+    #verify player has barrier in tech
     try:
         barrier = technique[name][2]['Barrier']
-        print(barrier)
     except IndexError:
          return False
     else:

@@ -279,7 +279,7 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
         print(f"Setting '{attack}' for {player.name}")
 
         if is_player:
-            new_attack = tech[0][player.technique][2]['Barrier'][attack]
+            new_attack = tech[player.technique][2]['Barrier'][attack]
             return new_attack
         
         if is_enemy:
@@ -290,7 +290,7 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
         print(f"Setting '{defense}' for {player.name}")
 
         if is_player:
-            new_defense= tech[0][player.technique][2]['Barrier'][defense]
+            new_defense= tech[player.technique][2]['Barrier'][defense]
             return new_defense
         if is_enemy:
             new_defense = tech[1]['Barrier'][defense]
@@ -700,6 +700,7 @@ def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength
         t_basket = False
         t_domain = False
 
+        print("Setting defense barrier type...")
         if defense.type == "amp":
             t_amp = True
         if defense.type == "simple":
@@ -708,37 +709,42 @@ def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength
             t_blossom = True
         if defense.type == "basket":
             t_basket = True
-        if defense.type == "open" or "close":
+        if defense.type == "open" or defense.type == "close":
             t_domain = True
-
+        
+        print("Calculating dmg...")
         if attack.type == "amp":
             dmg -= defense_strength
-            target_hp, target_maxhp= damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
-            return ("hit", dmg, target_hp <=0, target_maxhp <=0)
+            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
+            return ("hit", body_dmg, target_hp <=0, target_maxhp <=0)
         
-        if attack.type == "close" or "open":
+        if attack.type == "closed" or attack.type == "open":
             if t_domain:
-                pass #domain clash
-
-            if t_basket:
-                return("negate", dmg, target.hp<=0, target.max_hp <=0)
+                print("Domain clash (NOP)")
+                # results = domain_clash()
+                # return results
             
-            if t_amp:
-                return ("negate", dmg, target.hp <=0, target.max_hp <=0)
+            elif t_basket:
+                return("negate", body_dmg, target.hp<=0, target.max_hp <=0)
             
-            if t_blossom:
+            elif t_amp:
+                return ("negate", body_dmg, target.hp <=0, target.max_hp <=0)
+            
+            elif t_blossom:
                 dmg-= defense_strength + defense.speed
-                target_hp, target_maxhp = damage_target(target, dmg, attack.soul, defense)
-
-            if t_simple:
-                return ("negate", dmg, target.hp<=0, target.max_hp <=0)
+                target_hp, target_maxhp, body_dmg = damage_target(target, dmg, attack.soul, defense)
+                return ("negate", body_dmg, target_hp<=0, target_maxhp <=0)
             
-            target_hp, target_maxhp = damage_target(target, dmg, attack.soul, defense)
-            return ("hit", dmg, target_hp <=0, target_maxhp <=0)
+            elif t_simple:
+                return ("negate", dmg==0, target.hp<=0, target.max_hp <=0)
+
+            else:  
+                target_hp, target_maxhp, body_dmg = damage_target(target, dmg, attack.soul, defense)
+                return ("hit", body_dmg, target_hp <=0, target_maxhp <=0)
         
-        if attack.type == "simple":
-            target_hp, target_maxhp = damage_target(target, dmg, attack.soul, defense)
-            return ("hit", dmg, target_hp <=0, target_maxhp <=0)
+        # if attack.type == "simple":
+        #     target_hp, target_maxhp, body_dmg = damage_target(target, dmg, attack.soul, defense)
+        #     return ("hit", body_dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
 #region Battle AOE
