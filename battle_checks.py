@@ -742,18 +742,18 @@ def barrier_checks(player, target, attack, dmg, speed, defense, defense_strength
             
             elif t_blossom:
                 dmg-= defense_strength + defense.speed
-                target_hp, target_maxhp, body_dmg = damage_target(target, dmg, attack.soul, defense)
+                target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
                 return ("negate", body_dmg, target_hp<=0, target_maxhp <=0)
             
             elif t_simple:
                 return ("negate", dmg==0, target.hp<=0, target.max_hp <=0)
 
             else:  
-                target_hp, target_maxhp, body_dmg = damage_target(target, dmg, attack.soul, defense)
+                target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
                 return ("hit", body_dmg, target_hp <=0, target_maxhp <=0)
         
         # if attack.type == "simple":
-        #     target_hp, target_maxhp, body_dmg = damage_target(target, dmg, attack.soul, defense)
+        #     target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=dmg, soul=attack.soul)
         #     return ("hit", body_dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
