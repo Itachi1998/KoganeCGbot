@@ -22,7 +22,6 @@ def healthbar(health, max_health):
     return bar
 
 def ce_bar(ce, max_ce):
-    
     max_dashes = 4 # max 4
     dash_ratio = max_ce / max_dashes # maximum ce / 4 = 1000 ce = 250 ce per dash
     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
@@ -50,9 +49,8 @@ def verify_player(user_id, colony):
             return False
     else:
         return False 
-    
-def verify_move(technique, name):
-    #verify player has barrier in tech
+
+def verify_barrier(technique, name):
     try:
         barrier = technique[name][2]['Barrier']
     except IndexError:
@@ -575,11 +573,12 @@ class BattleView(discord.ui.View):
             await itx.response.send_message("Error not in a lobby")
             return
         
-    @discord.ui.button(label="Item Options", disabled=True, style=discord.ButtonStyle.red)
+    @discord.ui.button(label="Item Options", style=discord.ButtonStyle.red)
     async def item_options(self, itx:discord.Interaction, btn:discord.ui.Button):
+        
         pass
 
-    @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray) #BROKEN
+    @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
     async def summon_options(self, itx:discord.Interaction, btn:discord.ui.Button):
         lobby = self.lobby
         if lobby:
@@ -617,7 +616,7 @@ class BattleView(discord.ui.View):
                                 await itx.response.send_message("You have already selected a defense for this round.", ephemeral=True)
                                 return
 
-            if verify_move(technique, name):
+            if verify_barrier(technique, name):
                 embed = discord.Embed(title="Barrier", description="Choose from your barrier")
                 value_string = ""
                 for key in technique[name][2]['Barrier'].keys():
@@ -658,13 +657,14 @@ class BattleView(discord.ui.View):
 
     @discord.ui.button(label="Flee", disabled=True, style=discord.ButtonStyle.red)
     async def flee(self, itx:discord.Interaction, btn:discord.ui.Button):
-        # Logic to flee
+        #logic to flee - should the player have to be faster than the enemies?
         pass
 
     @discord.ui.button(label="End Turn", disabled=True, style=discord.ButtonStyle.gray)
     async def end_turn(self, itx:discord.Interaction, btn:discord.ui.Button):
         # Logic to end the turn
         pass
+
 # endregion
 class MoveView(discord.ui.View):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
