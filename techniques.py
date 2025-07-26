@@ -4,7 +4,7 @@ class Techniques():
                 level: int, # 1-5
                 act_speed: int, # activation speed of technique: 1-5 (can be changed with binding vows) 
                 act_cost: int,
-                act_body: tuple, # activation cost per turn of activating this technique: can be changed with binding vows
+                act_req: tuple, # activation cost per turn of activating this technique: can be changed with binding vows
                 aoe: int, # amount of players targetable (can be changed with binding vows)
                 strength: int, # strength of attack or defense (will be used in attack vs defense checks, can be changed with binding vows)
                 speed: int, # speed of attack or defense (will be used in attack vs defense checks, can be changed with binding vows) 
@@ -33,7 +33,7 @@ class Techniques():
             self.level=level
             self.act_speed = act_speed
             self.act_cost = act_cost
-            self.act_body= act_body
+            self.act_req= act_req
             self.aoe = aoe
             self.strength = strength
             self.speed = speed
@@ -66,7 +66,7 @@ class CursedTools():
                 broken: bool, 
                 hp: int, 
                 max_hp: int,
-                act_body: tuple,
+                act_req: tuple,
                 aoe: int,
                 strength: int,
                 speed: int,
@@ -87,7 +87,7 @@ class CursedTools():
             self.broken=broken
             self.hp=hp
             self.max_hp=max_hp
-            self.act_body=act_body
+            self.act_req=act_req
             self.aoe=aoe
             self.strength=strength
             self.speed=speed

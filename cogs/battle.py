@@ -22,8 +22,6 @@ def healthbar(health, max_health):
     return bar
 
 def ce_bar(ce, max_ce):
-    print("ce: " + str(ce))
-    print("max_ce: " + str(max_ce))
     max_dashes = 4 # max 4
     dash_ratio = max_ce / max_dashes # maximum ce / 4 = 1000 ce = 250 ce per dash
     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
@@ -51,6 +49,15 @@ def verify_player(user_id, colony):
             return False
     else:
         return False 
+
+def verify_barrier(technique, name):
+    try:
+        barrier = technique[name][2]['Barrier']
+    except IndexError:
+         return False
+    else:
+         return True
+
 def generate_round_embed(lobby):
     embed = discord.Embed(title="Round " + str(lobby.round), description="Round " + str(lobby.round) + " has started!")
     embed.add_field(name=lobby.teamA['name'], value="\n".join(p.name for p in lobby.teamA['players']))
@@ -207,7 +214,7 @@ def move_embed(player, move):
     required_ce = move.act_cost
     aoe = move.aoe
     move_type = move.type
-    required_bodyparts = move.act_body
+    required_bodyparts = move.act_req
     activation_speed = move.act_speed
     soul = move.soul if move.soul else None
     embed = discord.Embed(title=name, description="## " + name + " selected")
@@ -453,7 +460,7 @@ class BattleView(discord.ui.View):
         self.timeout = 30
         
     @discord.ui.button(label="Attack Options", style=discord.ButtonStyle.green)
-    async def attack_options(self, itx: discord.Interaction, btn: discord.ui.Button):
+    async def attack_options(self, itx:discord.Interaction, btn:discord.ui.Button):
         lobby = self.lobby
         if lobby:
                 teama = lobby.teamA
@@ -494,7 +501,7 @@ class BattleView(discord.ui.View):
                     fields = [
                         f"`Atk dmg:` **{attack.strength}**",
                         f"`Atk spd:` **{attack.speed}**",
-                        f"`Bodyparts:` **{', '.join(attack.act_body)}**",
+                        f"`Bodyparts:` **{', '.join(attack.act_req)}**",
                         f"`Max targets:` **{attack.aoe}**",
                         f"`Type:` **{attack.type}**"
                     ]
@@ -518,7 +525,7 @@ class BattleView(discord.ui.View):
             return
 
     @discord.ui.button(label="Defend Options", style=discord.ButtonStyle.blurple)
-    async def defend_options(self,  itx: discord.Interaction, btn:discord.ui.Button):
+    async def defend_options(self, itx:discord.Interaction, btn:discord.ui.Button):
         lobby = self.lobby
         if lobby:
             player, id = verify_player(itx.user.id, itx.guild.id)
@@ -544,7 +551,7 @@ class BattleView(discord.ui.View):
                 fields = [
                     f"`Def dmg:` **{defense.strength}**",
                     f"`Def spd:` **{defense.speed}**",
-                    f"`Bodyparts:` **{', '.join(defense.act_body)}**",
+                    f"`Bodyparts:` **{', '.join(defense.act_req)}**",
                     f"`Max targets:` **{defense.aoe}**",
                     f"`Type:` **{defense.type}**"
                 ]
@@ -566,12 +573,13 @@ class BattleView(discord.ui.View):
             await itx.response.send_message("Error not in a lobby")
             return
         
-    @discord.ui.button(label="Item Options", style=discord.ButtonStyle.red)
-    async def item_options(self, button: discord.ui.Button, interaction: discord.Interaction):
+    @discord.ui.button(label="Item Options", disabled=True, style=discord.ButtonStyle.red)
+    async def item_options(self, itx:discord.Interaction, btn:discord.ui.Button):
+        #logic to select items
         pass
 
     @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
-    async def summon_options(self, button: discord.ui.Button, itx: discord.Interaction):
+    async def summon_options(self, itx:discord.Interaction, btn:discord.ui.Button):
         lobby = self.lobby
         if lobby:
             player, id = verify_player(itx.user.id, itx.guild.id)
@@ -607,50 +615,56 @@ class BattleView(discord.ui.View):
                                 print("Player " + str(player.user_id) + " already selected an attack")
                                 await itx.response.send_message("You have already selected a defense for this round.", ephemeral=True)
                                 return
-                    
-            embed = discord.Embed(title="Barrier", description="Choose from your barrier")
-            value_string = ""
-            for key in technique[name][3]['Barrier'].keys():
-                barrier = technique[name][3]['Barrier'][key]
-                fields = [
-                    f"`Barrier dmg:` **{barrier.strength}**",
-                    f"`Barrier spd:` **{barrier.speed}**",
-                    f"`Bodyparts:` **{', '.join(barrier.act_body)}**",
-                    f"`Max targets:` **{barrier.aoe}**",
-                    f"`Type:` **{barrier.type}**"
-                ]
 
-                if barrier.soul:
-                    fields.append(f"`Soul barrier` **{barrier.soul}**")
+            if verify_barrier(technique, name):
+                embed = discord.Embed(title="Barrier", description="Choose from your barrier")
+                value_string = ""
+                for key in technique[name][2]['Barrier'].keys():
+                    barrier = technique[name][2]['Barrier'][key]
+                    fields = [
+                        f"`Barrier dmg:` **{barrier.strength}**",
+                        f"`Barrier spd:` **{barrier.speed}**",
+                        f"`Bodyparts:` **{', '.join(barrier.act_req)}**",
+                        f"`Max targets:` **{barrier.aoe}**",
+                        f"`Type:` **{barrier.type}**"
+                    ]
 
-                # Optionally include other properties if needed and if length allows
-                value_string = "\n".join(fields) + "\n"
+                    if barrier.soul:
+                        fields.append(f"`Soul barrier` **{barrier.soul}**")
 
-                embed.add_field(name=barrier.name, value=value_string)
+                    # Optionally include other properties if needed and if length allows
+                    value_string = "\n".join(fields) + "\n"
 
-            embed.set_thumbnail(url=self.bot.user.avatar.url)
-            view = MoveView(player, self.bot, technique, self.lobby, barrier=True)
-            await itx.response.send_message(embed=embed, view=view, ephemeral=True)
-            return
+                    embed.add_field(name=barrier.name, value=value_string)
+
+                embed.set_thumbnail(url=self.bot.user.avatar.url)
+                view = MoveView(player, self.bot, technique, self.lobby, barrier=True)
+                await itx.response.send_message(embed=embed, view=view, ephemeral=True)
+                return
+            
+            else:
+                 await itx.response.send_message("You do not have a barrier move in your technique")
+                 return
         
         else:
             await itx.response.send_message("Error not in a lobby")
             return
 
-    @discord.ui.button(label="Surrender", style=discord.ButtonStyle.red)
-    async def surrender(self, button: discord.ui.Button, interaction: discord.Interaction):
+    @discord.ui.button(label="Surrender", disabled=True, style=discord.ButtonStyle.red)
+    async def surrender(self, itx:discord.Interaction, btn:discord.ui.Button):
         # Logic to surrender
         pass
 
-    @discord.ui.button(label="Flee", style=discord.ButtonStyle.red)
-    async def flee(self, button: discord.ui.Button, interaction: discord.Interaction):
-        # Logic to flee
+    @discord.ui.button(label="Flee", disabled=True, style=discord.ButtonStyle.red)
+    async def flee(self, itx:discord.Interaction, btn:discord.ui.Button):
+        #logic to flee - should the player have to be faster than the enemies?
         pass
 
-    @discord.ui.button(label="End Turn", style=discord.ButtonStyle.gray)
-    async def end_turn(self, button: discord.ui.Button, interaction: discord.Interaction):
+    @discord.ui.button(label="End Turn", disabled=True, style=discord.ButtonStyle.gray)
+    async def end_turn(self, itx:discord.Interaction, btn:discord.ui.Button):
         # Logic to end the turn
         pass
+
 # endregion
 class MoveView(discord.ui.View):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
