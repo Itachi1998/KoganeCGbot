@@ -457,7 +457,7 @@ class BattleView(discord.ui.View):
         super().__init__()
         self.lobby = lobby
         self.bot = bot
-        self.timeout = 30
+        self.timeout = 300 #TIMOUT SET LONGER FOR TESTING
         
     @discord.ui.button(label="Attack Options", style=discord.ButtonStyle.green)
     async def attack_options(self, itx:discord.Interaction, btn:discord.ui.Button):
