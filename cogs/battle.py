@@ -573,9 +573,9 @@ class BattleView(discord.ui.View):
             await itx.response.send_message("Error not in a lobby")
             return
         
-    @discord.ui.button(label="Item Options", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="Item Options", disabled=True, style=discord.ButtonStyle.red)
     async def item_options(self, itx:discord.Interaction, btn:discord.ui.Button):
-        
+        #logic to select items
         pass
 
     @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
@@ -624,7 +624,7 @@ class BattleView(discord.ui.View):
                     fields = [
                         f"`Barrier dmg:` **{barrier.strength}**",
                         f"`Barrier spd:` **{barrier.speed}**",
-                        f"`Bodyparts:` **{', '.join(barrier.act_body)}**",
+                        f"`Bodyparts:` **{', '.join(barrier.act_req)}**",
                         f"`Max targets:` **{barrier.aoe}**",
                         f"`Type:` **{barrier.type}**"
                     ]
