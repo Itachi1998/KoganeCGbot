@@ -627,7 +627,7 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
                  # 50 - 24
         # print(f"Reduced multiplier: {reduced_multiplier}")
         total_dmg = dmg - reduced_multiplier
-        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=reduced_dmg, soul=attack.soul)
+        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
         return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
 
     else: 
@@ -635,11 +635,11 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
                         #100        #1200     
         speed_gap = max(defense_speed - speed, 0)
                         #0//5
-        attack_speed = speed_gap/target.grade    
+        attack_speed = speed_gap/target.grade
 
         if attack_speed != 0:
-
-            reduced_dmg = (dmg - defense_strength) // attack_speed
+            
+            reduced_dmg = max(dmg - defense_strength, 0) // attack_speed
                             # 50 - 24
             total_dmg = (reduced_dmg * attack.level)
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
@@ -647,7 +647,7 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
             return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)
         
         else:
-            reduced_dmg = dmg - defense_strength
+            reduced_dmg = max(dmg - defense_strength, 0)
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=reduced_dmg, soul=attack.soul)
             print(f"{defense.name} was able to dodge {attack.name}. There was a difference of {speed_gap} resulting in some damage of {total_dmg}")
             return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0)

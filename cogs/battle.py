@@ -22,7 +22,8 @@ def healthbar(health, max_health):
     return bar
 
 def ce_bar(ce, max_ce):
-    
+    print("ce: " + str(ce))
+    print("max_ce: " + str(max_ce))
     max_dashes = 4 # max 4
     dash_ratio = max_ce / max_dashes # maximum ce / 4 = 1000 ce = 250 ce per dash
     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
