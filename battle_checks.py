@@ -207,35 +207,41 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
     
     if attack:
         print(f"Setting attack '{attack}' for {player.name}")
+
         if "Domain" in attack or "Falling Blossom" in attack or "Hollow Wicker" in attack:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, attack=attack)
             return new_barrier
         
-        print(f"Setting attack '{attack}' for {player.name}")
+        if "Heal" in attack:
+            print("You can't heal on an attack move")
+            return None
 
         if is_player:
-            print(f"Player {player.name} is using {attack}")
-            print(tech)
-
+            #print(f"Player {player.name} is using {attack}")
+            #print(tech)
             new_attack = tech[player.technique][0]['Attack'][attack]
             return new_attack
         
         if is_enemy:
-            print(f"Enemy {player.name} is using {attack}")
-            print(tech)
+            #print(f"Enemy {player.name} is using {attack}")
+            #print(tech)
             new_attack = tech[0]['Attack'][attack]
             return new_attack
     
     if defense:
-        
+        print(f"Setting defense '{defense}' for {player.name}")
+
         if "Domain" in defense or "Falling Blossom" in defense or "Hollow Wicker" in defense:
             new_barrier = get_barrier(player, is_player, is_enemy, tech, defense=defense)
             return new_barrier
         
-        print(f"Setting defense '{defense}' for {player.name}")
+        if "Heal" in defense:
+            new_defense = tech[player.technique][3]['RCT'][defense]
+            player.defense = new_defense
+            return new_defense
 
         if is_player:
-            print(f"Player {player.name} is using {defense}")
+            #print(f"Player {player.name} is using {defense}")
             if aoe:
                 new_defense = tech[target.technique][1]['Defend'][defense]
                 player.defense = new_defense
@@ -276,8 +282,6 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
 def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
 
     if attack:
-        print(f"Setting '{attack}' for {player.name}")
-
         if is_player:
             new_attack = tech[player.technique][2]['Barrier'][attack]
             return new_attack
@@ -287,8 +291,6 @@ def get_barrier(player, is_player, is_enemy, tech, attack=None, defense=None):
             return new_attack
 
     if defense:
-        print(f"Setting '{defense}' for {player.name}")
-
         if is_player:
             new_defense= tech[player.technique][2]['Barrier'][defense]
             return new_defense
@@ -504,15 +506,23 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
     
     else:
         print(f"dmg {dmg} defense {defense_strength}")
-        total_dmg = max(dmg - defense_strength, 0)
-        if total_dmg > 0:
-            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+
+        if defense.type == 'heal' and defense_strength > dmg: #integrate healing into damage_target for bodyparts
+            total_heal = (defense_strength - dmg)
+            target.hp += total_heal
+            print(f"{defense.name} was able to activate in time to tank {attack.name}. '{defense.name}' healed through {dmg} damage and healed {total_heal} hp to the defender")
+            return ("tank", 0, target.hp <=0, target.max_hp <=0)
+        
         else:
-            target_hp = target.hp
-            target_maxhp = target.max_hp
-            body_dmg = 0
-        print(f"{defense.name} was able to activate in time to tank {attack.name}. {body_dmg} damage dealt, {dmg - total_dmg} damage tanked")
-        return ("tank", dmg-total_dmg, target_hp <=0, target_maxhp <=0)
+            total_dmg = max(dmg - defense_strength, 0)
+            if total_dmg > 0:
+                target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+            else:
+                target_hp = target.hp
+                target_maxhp = target.max_hp
+                body_dmg = 0
+            print(f"{defense.name} was able to activate in time to tank {attack.name}. {body_dmg} damage dealt, {dmg - total_dmg} damage tanked")
+            return ("tank", body_dmg, target_hp <=0, target_maxhp <=0)
 #endregion
 
 # region counter check
@@ -897,7 +907,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
         print(f"Defense activaton speed: {defense.act_speed}\nAttack activation speed: {attack.act_speed}")
         print(f"{attack.name}'s type is {attack.type}\n{defense.name}'s type is {defense.type}")
     
-        # domain clash/attack check - if we don't have a separate domain clash func we can check for just tank/counter/dodge and melee/projectile then have an else for barrier checks
+        # barrier clash/attack check
         if attack.type == 'open' or attack.type == 'closed':
             if defense.type == 'open' or defense.type == 'closed':
                 print(f"{defense.name} 'domain clash' against {attack.name}...")    
@@ -909,7 +919,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
                 return results
         
         # tank check
-        if defense.type == 'tank':
+        if defense.type == 'tank' or defense.type == 'heal':
             print(f"{defense.name} 'tank check' against {attack.name}...")
             results = tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=soul_defense)
             return results
@@ -919,13 +929,14 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             print(f"{defense.name} 'counter check' against {attack.name}...")
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
             return results
+        
         # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
             results = dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
             return results   
         
-        # domain defense check
+        # barrier defense check
         else:
             print(f"{defense.name} 'barrier check' with attack {attack.name}...")    
             results = barrier_checks(player, target, attack, dmg, speed, defense, defense_strength)
@@ -1001,6 +1012,6 @@ test_player3.defense = "Nail Storm"
 enemy = game.SpecialGrade_FingerBearer()
 
 shiki = summon_check("Nue", "shikigami")
-results = battle_checks(test_player3, test_player1, "Nails", "Redirect")
+results = battle_checks(test_player3, test_player2, "Nails", "Infinity")
 print(results)
 #endregion
