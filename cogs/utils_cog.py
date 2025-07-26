@@ -6,8 +6,7 @@ from discord.ext import commands
 class Utils_cog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        #self.log_channel = int(os.getenv('LOGCHANNEL'))
-        self.log_channel = 1358680860488106030
+        self.log_channel = int(os.getenv('LOGCHANNEL'))
         self.channel = bot.get_channel(self.log_channel)
         self.avatar = bot.user.avatar
         self.botname = bot.user.name
@@ -145,11 +144,6 @@ class Utils_cog(commands.Cog):
          await pagination.navegate()
 
 
-        
-        
-
-        
-
     @learn.command(name='battle', description='Learn how to battle')
     async def battle(self, ctx):
 
@@ -183,10 +177,6 @@ class Utils_cog(commands.Cog):
             return
         pagination = Pagination(ctx.interaction, get_page)
         await pagination.navegate()
-
-    
-
-
     
 
 async def setup(bot):
