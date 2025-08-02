@@ -3,8 +3,8 @@ from db import read_player, read_enemy, read_colony # Import general dependencie
 from game import Player, Enemy
 from discord.ext import commands
 
-log_channel = os.getenv('LOGCHANNEL')
-token = os.getenv('TOKEN')
+log_channel = 1358680860488106030 #os.getenv('LOGCHANNEL')
+token = "MTM0MzA0NDYyMjA5OTgwODI3Ng.GICZRQ.Las5Oq3yM_LiOaBSfVYrUSHvg6rZP49L0pUuJM" #os.getenv('TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
