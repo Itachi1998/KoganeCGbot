@@ -493,31 +493,32 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
         dmg = 0
         print(f"{defense.name} negates {attack.name}")
         return ("hit", dmg, target.hp <= 0, target.max_hp <=0)
-    
-    if defense.act_speed > attack.act_speed:
-        speed_diff = max(defense_speed - speed, 0)
-                        # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
-        attack_speed = speed/target.grade            
-                            # 1200 / 20
-        reduction_multiplier = speed_diff//attack_speed
-                    # 50 - 24
-        total_dmg = dmg - reduction_multiplier
-      
-        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
-        print(f"{defense.name} was not able to activate in time to tank {attack.name}")
-        return ("hit", body_dmg, target_hp <= 0, target_maxhp <=0)
-    
-    else:
-        print(f"dmg {dmg} defense {defense_strength}")
 
-        if defense.type == 'heal' and defense_strength > dmg: #integrate healing into damage_target for bodyparts
+    if defense.type == 'heal' and defense_strength > dmg: #integrate healing into damage_target for bodyparts
             total_heal = (defense_strength - dmg)
             target.hp += total_heal
             print(f"{defense.name} was able to activate in time to tank {attack.name}. '{defense.name}' healed through {dmg} damage and healed {total_heal} hp to the defender")
-            return ("tank", 0, target.hp <=0, target.max_hp <=0)
-        
+            return ("rct", 0, target.hp <=0, target.max_hp <=0)
+    
+    if defense.act_speed >= attack.act_speed:
+        # speed_diff = max(defense_speed - speed, 0)
+        #                 # 100 / 1 (grade 4) = 100 but 100 // 5 (special grade) = 20    
+        # attack_speed = speed/target.grade            
+        #                     # 1200 / 20
+        # reduction_multiplier = speed_diff//attack_speed
+                    # 50 - 24
+        total_dmg = max(dmg - defense_strength, 0)
+
+        if total_dmg > 0:
+            target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+            return ("hit", body_dmg, target_hp <= 0, target_maxhp <=0)
         else:
+            return("tank", dmg, target_hp<=0, target_maxhp <=0)
+    
+    else:
+            activation_difference = attack.act_speed - defense.act_speed
             total_dmg = max(dmg - defense_strength, 0)
+            total_dmg = total_dmg * (activation_difference//target.grade)
             if total_dmg > 0:
                 target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
             else:
