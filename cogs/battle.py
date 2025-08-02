@@ -243,6 +243,7 @@ def get_npc_random_defense(target):
         defense = enemy_tech[target.technique][1]['Defend'][defense_str]
     return defense_str, defense
 
+#region battle format
 def format_battle_result(attacker, target, attack_move, defense_move, results):
     # Format the battle result for display.
     result_str = "`" + attacker.name + ":` " + attack_move.name + "\n"
@@ -276,9 +277,13 @@ def format_battle_result(attacker, target, attack_move, defense_move, results):
         result_str += "`" + target.name + "`" + " countered the attack!\n"
         result_str += "Counter damage: " + str(damage) + "\n"
         result_str += "`" + target.name + "`" + " hits " + "`" + attacker.name + "` \n" + "Damage taken: " + str(damage) + "\n"
+        if killed:
+             result_str += "`" + attacker.name + "` was defeated by `" + target.name + "`\n"
 
     return result_str
+#endregion 
 
+#region player defense
 def set_player_defense(player, feed):
     defense = None
     default = None
@@ -300,7 +305,7 @@ def set_player_defense(player, feed):
     else:
         player.defense = default.name if default else "None"
         return default.name, default
-         
+#endregion
 
 #region sim embed
 def simulation_embed(lobby, round_num):

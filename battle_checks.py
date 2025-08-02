@@ -118,7 +118,7 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
         #region ce checks    
         elif bp.ce and bp.ce > 0:
             print(f"Bodypart ce enforcement reducing damage by {bp.ce}")
-            print(f"Pre ce check damage {part_damage}")
+            print(f"Pre damage ce check for {bp.name}: dmg={part_damage} - bp.ce={bp.ce}")
 
             # Apply the damage with CE protection
             reduced_dmg = max(part_damage - bp.ce, 0)
@@ -314,10 +314,13 @@ def attack_verify(player, target, attack, aoe=False):
     
     if attack.charge:
         if target.name in player.inventory['Technique Inv']['Charges'].keys():
+                print("checking charges")
                 charge = player.inventory['Technique Inv']['Charges'][target.name]
                 if charge > 0:
+                    print("reducing charge by 1")
                     charge -= 1
                 if charge <= 0:
+                   print("insufficient charge")
                    del player.inventory['Technique Inv']['Charges'][target.name]
                 print("Attack verified!")
                 return attack
