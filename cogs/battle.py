@@ -12,9 +12,9 @@ def healthbar(health, max_health):
     dash_ratio = max_health / max_dashes
     filled_dashes = 0 if health <= 0 else int(health / dash_ratio)
     remainder = (health / dash_ratio) - filled_dashes if health > 0 else 0
-    dashes = "<:1000001328:1354469784724570172>" * filled_dashes
+    dashes = "<:fullheart:1401327640018944070>" * filled_dashes
     if remainder > 0:
-        dashes += "<:1000001329:1354469791724736745>"  # Add a half-heart emoji
+        dashes += "<:halfheart:1401327657060270160>"  # Add a half-heart emoji
     percent = f"`{round((health / max_health) * 100)}%`"
     if '-' in percent:
         percent = "`0%`"
@@ -26,10 +26,10 @@ def ce_bar(ce, max_ce):
     dash_ratio = max_ce / max_dashes # maximum ce / 4 = 1000 ce = 250 ce per dash
     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
     remainder = max_dashes - filled_dashes if ce > 0 else 0 # 1000 / 250 = 4 dashes - 3 = 1 remainder 
-    dashes = "<:1000001330:1354469798230102258>" * filled_dashes # emoji times number of dashes
+    dashes = "<:fullce:1401327669328740405>" * filled_dashes # emoji times number of dashes
     percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`" # 853 / 1000 = 0.853 * 100 = 85.3% rounded to 85%
     if remainder > 0: # if remainder is greater than 0, add a half dash
-        dashes += "<:IMG_44021:1394503076223783043>" # Add a half-ce emoji
+        dashes += "<:halfce:1401327682540666951>" # Add a half-ce emoji
     bar = f"{dashes} {percent}" # return the bar with dashes and percent
     print(dashes)
     return bar
