@@ -497,8 +497,10 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
     if defense.type == 'heal' and defense_strength > dmg: #integrate healing into damage_target for bodyparts
             total_heal = (defense_strength - dmg)
             target.hp += total_heal
+            if target.hp > target.max_hp:
+                target.hp = target.max_hp
             print(f"{defense.name} was able to activate in time to tank {attack.name}. '{defense.name}' healed through {dmg} damage and healed {total_heal} hp to the defender")
-            return ("rct", 0, target.hp <=0, target.max_hp <=0)
+            return ("rct", total_heal, target.hp <=0, target.max_hp <=0)
     
     if defense.act_speed >= attack.act_speed:
         # speed_diff = max(defense_speed - speed, 0)
@@ -843,15 +845,16 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             results = barrier_checks(player, target, defense, attack, dmg)
         
         else:
+            print(f"Attack {attack.name} has a base damage of {attack.strength} and base speed of {attack.speed}")
             dmg, speed = type_increment(player, attack=attack)
-            print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
+            print(f"Attack {attack.name} has a incremented damage of {dmg} and incremented speed of {speed}")
 
         # target increment
         if target_tools:
             defense_strength, defense_speed, items = type_increment(defense=defense, tools=target_tools)
          
             for item in items:
-                print(f"Defense {defense.name} has a base damage of {defense_strength} and speed of {defense_speed} with item {item.name}")
+                print(f"Defense {defense.name} has a base damage of {defense.strength} and speed of {defense.speed} with item {item.name}")
                 if item.negates:
                     attack_negated=True
                     print(f"{item.name} negates any attacks from {attack.name}")
@@ -861,12 +864,13 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
 
         if defense.type == 'amp':
             defense_strength, defense_speed = type_increment(target, defense=defense)
-            print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}")
+            print(f"Defense {defense.name} has an incremented defense of {defense_strength} and incremented speed of {defense_speed}")
             results = barrier_checks(player, target, attack, dmg, speed, defense, defense_strength)
         
         else:
+            print(f"Defense {defense.name} has a base defense of {defense.strength} and base speed of {defense.speed}")
             defense_strength, defense_speed = type_increment(target, defense=defense)
-            print(f"Defense {defense.name} has a base defense of {defense_strength} and speed of {defense_speed}") 
+            print(f"Defense {defense.name} has a incremented defense of {defense_strength} and incremented speed of {defense_speed}") 
     #endregion
 
     # region conditional checks
@@ -1016,6 +1020,6 @@ test_player3.defense = "Nail Storm"
 enemy = game.SpecialGrade_FingerBearer()
 
 shiki = summon_check("Nue", "shikigami")
-results = battle_checks(test_player3, test_player2, "Nails", "Infinity")
+results = battle_checks(test_player3, test_player2, "Nails", "Heal")
 print(results)
 #endregion

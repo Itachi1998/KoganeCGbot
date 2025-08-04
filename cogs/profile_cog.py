@@ -13,15 +13,12 @@ from discord.ext import commands
 class Profile(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print(f'{self.bot.user.name} is ready')   
+  
     # @commands.hybrid_command(name="level", description = "Check your current level stats")
     # async def level(self, ctx, member: discord.Member=None):
-    #     if member is None:
-    #         member = ctx.author.id
-    #     player_stats = dynamo.read_player(member, ctx.guild.id)
+    # if member is None:
+    #     member = ctx.author.id
+    # player_stats = dynamo.read_player(member, ctx.guild.id)
     #     if player_stats is None:
     #         await ctx.send("Player not found.")
     #     colony = player_stats['colony']
@@ -42,12 +39,6 @@ class Profile(commands.Cog):
     #             embed.add_field(name="**LEVEL UP**", value=f"**You leveld up!**\n**New Level:** `{char.level}`")
     #             await msg.edit(embed=embed)
             
-            
-            
-            
-            
-    
-    
     # @commands.hybrid_command(name="profile", description="View your profile")
     # async def profile(self, ctx, member: discord.Member = None):
     #     try:
@@ -104,8 +95,6 @@ class Profile(commands.Cog):
     #         traceback.print_exc()
     #         return
                 
-            
-
 # class ProfileView(discord.ui.View):
 #     def __init__(self, msg, player):
 #         super().__init__(timeout=False)
@@ -113,7 +102,6 @@ class Profile(commands.Cog):
 #         self.add_item(Store(msg, player))
 #         self.add_item(Skills(msg, player))
 #         self.add_item(Victory(msg, player))
-
 
 # class Equip(discord.ui.Button):
 #     def __init__(self, msg, player):
@@ -140,8 +128,6 @@ class Profile(commands.Cog):
 #                 ct_str += ' **Negs:** `Yes`'
 #             else:
 #                 ct_str += ' **Negs:** `No`'
-    
-
 #         for bv in bv_list:
 #             vow = old_techniques.get_BV(bv)
 #             bv_str += f'{vow.name}\n**Description:** `{vow.description}`'
@@ -309,7 +295,6 @@ class Profile(commands.Cog):
 #     def __init__(self, msg, player):
 #         super().__init__(timeout=None)
 #         self.add_item(SkillSelect(msg, player))
-
 
 
 # class SkillSelect(discord.ui.Select):
