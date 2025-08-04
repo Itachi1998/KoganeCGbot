@@ -255,16 +255,14 @@ class C_Tool_Select(discord.ui.Select):
         tool = cursed_tools[name]
 
         price = tool.cost
-
-        player = read_player(itx.user.id, itx.user.guild.id, value=None)
-        print(player)
         
-        player = Player(**read_player(itx.user.id, itx.user.guild.id, value=None))
+        player_dict, techlist = read_player(itx.user.id, itx.user.guild.id, value=None)
+
+        player = Player(**player_dict)
 
         if player is None:
 
-            await itx.followup.send(content="Player not found",
-                                            ephemeral=True)
+            await itx.followup.send(content="Player not found", ephemeral=True)
 
             return
 
