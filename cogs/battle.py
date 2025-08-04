@@ -35,20 +35,8 @@ def ce_bar(ce, max_ce):
     return bar
 
 def verify_player(user_id, colony):
-    player_dict = read_player(user_id, colony)
-    if player_dict:
-        tech = player_dict['techniques'][0]
-        player_id = player_dict['id']
-        del player_dict['techniques']
-        del player_dict['id']
-        player_dict['technique'] = tech['name'] if isinstance(tech, dict) else tech.name
-        player = Player(**player_dict)
-        if player:
-          return player, player_id
-        else:
-            return False
-    else:
-        return False 
+    player, techlist = read_player(user_id, colony)
+    return player
 
 def verify_barrier(technique, name):
     try:
