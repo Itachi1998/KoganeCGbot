@@ -580,7 +580,7 @@ class BattleView(discord.ui.View):
         
     @discord.ui.button(label="Item Options", disabled=True, style=discord.ButtonStyle.red)
     async def item_options(self, itx:discord.Interaction, btn:discord.ui.Button):
-        #logic to select items
+        #logic to select items - make shop before
         pass
 
     @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
@@ -657,12 +657,12 @@ class BattleView(discord.ui.View):
 
     @discord.ui.button(label="Surrender", disabled=True, style=discord.ButtonStyle.red)
     async def surrender(self, itx:discord.Interaction, btn:discord.ui.Button):
-        # Logic to surrender
+        # Logic to surrender (give up all cgp)
         pass
 
     @discord.ui.button(label="Flee", disabled=True, style=discord.ButtonStyle.red)
     async def flee(self, itx:discord.Interaction, btn:discord.ui.Button):
-        #logic to flee - should the player have to be faster than the enemies?
+        #logic to flee
         pass
 
     @discord.ui.button(label="End Turn", disabled=True, style=discord.ButtonStyle.gray)
