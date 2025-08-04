@@ -89,13 +89,9 @@ def create_colony(colony_data, enemies):
         
         # Add enemies to colony
         for e in enemies:
-            existing_enemy = session.query(Enemy).filter_by(
-                colony_id=colony_data['colony id'], name=e.name
-            ).first()
-            
+            existing_enemy = session.query(Enemy).filter_by(colony_id=colony_data['colony id'], name=e.name).first()
             if existing_enemy:
                 raise ValueError("Enemy already exists")
-            
             enemy = Enemy(name=e.name,
                           level=e.level,
                           xp=e.xp,
@@ -252,7 +248,8 @@ def read_player(user_id, colony_id, value=None):
                 session.close()
                 del player_dict['id']
                 techlist = player_dict['techniques']
-                player_dict['techniques'] = techlist[0]
+                del player_dict['techniques']
+                player_dict['technique'] = techlist[0]['name']
                 return player_dict, techlist
         else:
             session.close()

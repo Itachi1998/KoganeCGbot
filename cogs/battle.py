@@ -1,4 +1,5 @@
 import discord, pagination, game, db, random, battle_checks
+from player_tech import technique_list
 from battle_checks import battle_checks
 from game import Player, Enemy
 from player_tech import technique_list
@@ -36,7 +37,9 @@ def ce_bar(ce, max_ce):
 
 def verify_player(user_id, colony):
     player, techlist = read_player(user_id, colony)
-    return player
+    p = Player(**player)
+
+    return p
 
 def verify_barrier(technique, name):
     try:
@@ -168,9 +171,10 @@ def target_embed(player, lobby, type):
     for t in targets:
         if hasattr(t, 'user_id') and t.user_id == player.user_id:
             targets.remove(t)
-    
+    file=None
     if len(targets) == 0:
         return False
+   
     else:
         value_string = ""
         for i, t in enumerate(targets):
@@ -189,7 +193,10 @@ def target_embed(player, lobby, type):
 
             value_string += f"`{i+1}: {name}`\n" + healthbar(health, max_health) + "\n" + ce_bar(ce, max_ce) + "\n"
             embed.add_field(name=name, value=value_string)
-            return embed, targets
+            if hasattr(t, 'image_path') and t.image_path:
+                file = discord.File(t.image_path, filename="image.png")
+    
+    return embed, targets, file
         
 #region move embed
 
@@ -459,15 +466,15 @@ class BattleView(discord.ui.View):
                 teama = lobby.teamA
                 teamb = lobby.teamB
                 field = lobby.field
-                
-                player, id = verify_player(itx.user.id, itx.guild.id)
-                tech = read_technique(id)
+                player = verify_player(itx.user.id, itx.guild.id)
                 technique = None
                 name = None
                 if player:
                     for t in technique_list:
                         key = list(t.keys())[0]
-                        if key == tech['name']:
+                        print(f"Player= {player}")
+                        print(f"Checking for {player.technique}")
+                        if key == player.technique:
                             technique = t
                             name = key
                             break
@@ -696,6 +703,7 @@ class MoveSelect(discord.ui.Select):
         self.teamb = lobby.teamB
 
     async def callback(self, itx: discord.Interaction):
+        channel = itx.channel
         if itx.user.id != self.player.user_id:
             await itx.response.send_message("You did not invoke this prompt", ephemeral=True)
         else:
@@ -718,8 +726,9 @@ class MoveSelect(discord.ui.Select):
             results = target_embed(self.player, self.lobby, move_type)
             t_embed = None
             targets = None
+            file=None
             if results:
-                t_embed, targets = results
+                t_embed, targets, file = results
             else:
                 t_embed = discord.Embed(title="No targets available", description="No targets available.")
                 targets = False
@@ -729,8 +738,12 @@ class MoveSelect(discord.ui.Select):
                 return
             
             view = TargetSelectView(self.bot, self.player, targets, self.lobby, move, attack=self.attack, defense=self.defense, barrier=self.barrier)
-            
-            await itx.followup.send(embeds=[embed, t_embed], view=view, ephemeral=True)
+            if file:
+                await itx.followup.send(embeds=[embed, t_embed], view=view, ephemeral=True)
+                await channel.send(file=file)
+            else:
+                 await itx.followup.send(embeds=[embed, t_embed], view=view, ephemeral=True)
+                 
             return
            
 #region TargetSelect
@@ -835,7 +848,7 @@ class TargetSelect(discord.ui.Select):
             if self.move.aoe > 1 and  selected_targets < self.move.aoe:
                 results = target_embed(self.player, self.lobby, move_type)
                 if results:
-                    embed, targets = results
+                    embed, targets, file = results
                     if self.defense:
                         msg_text = "defense targets"
                     elif self.attack:
@@ -845,12 +858,21 @@ class TargetSelect(discord.ui.Select):
                     view = TargetSelectView(self.bot, self.player, targets, self.lobby, self.move, attack=self.attack, defense=self.defense, barrier=self.barrier)
                     # Update the embed with the selected targets
                     aoe = self.move.aoe
-                    await itx.followup.send(
-                        content=f"Selected {selected_targets} out of {aoe} {msg_text}. You may choose more targets.",
-                        embeds=[embed],
-                        view=view,
-                        ephemeral=True
-                    )
+                    if not file:
+                        await itx.followup.send(
+                            content=f"Selected {selected_targets} out of {aoe} {msg_text}. You may choose more targets.",
+                            embeds=[embed],
+                            view=view,
+                            ephemeral=True
+                        )
+                    else:
+                         await itx.followup.send(
+                            content=f"Selected {selected_targets} out of {aoe} {msg_text}. You may choose more targets.",
+                            embeds=[embed],
+                            view=view,
+                            ephemeral=True, file=file
+                        )
+                         
                     return
                 else:
                         await itx.followup.send("No more targets available.", ephemeral=True)

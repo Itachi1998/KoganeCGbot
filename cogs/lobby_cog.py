@@ -50,7 +50,53 @@ def remove_name(text, name):
     pattern = re.escape(name)
     return re.sub(pattern, '', text)
 #endregion
+#generate npc enemies
+def add_npc_enemies(lobby):
+    colony = read_colony(lobby.colony_id)
+    if not colony:
+        return False
+    enemies = []
+    user_ids = lobby.players
+    plist = []
+    for i in user_ids:
+        player, techlist = read_player(i, lobby.colony_id)
+        real_player = Player(**player)
+        plist.append(real_player)
 
+    highest_level = max(p.level for p in plist)
+    print(f"Highest lobby level: {highest_level}")
+    for e in Enemy.__subclasses__():
+        e = e()
+        if hasattr(e, 'playerclass') and e.playerclass == "summon":
+            continue
+
+        if e.min_level >= highest_level:
+            enemies.append(e)
+            print(f"added  {e.name} to enemy list")
+
+    if enemies:  # Make sure there are enemies to choose from
+            choice = random.choice(enemies)
+            print(f"Random enemy picked {choice.name}")
+            enemy = None
+            for e  in Enemy.__subclasses__():
+                current_enemy = e()
+                print(f"checking if {current_enemy.name} is equal to {choice.name}")
+                if current_enemy.name == choice.name:
+                    enemy = current_enemy
+                    break
+
+            enemy_list = [enemy]
+            print(f"Checking quantity of {enemy.name}")
+            # Handle multiple enemy spawns if quantity is set
+            if enemy.quantity and enemy.quantity > 1:
+                    for e in range(enemy.quantity):
+                        enemy_clone = copy.deepcopy(enemy)
+                        print(enemy.name + " was cloned")
+                        enemy_list.append(enemy_clone)
+            return enemy_list
+    else:
+        return None
+    
 #region Round embed
 def start_round_embed(lobby, bot):
     # Create pve embed
@@ -61,14 +107,10 @@ def start_round_embed(lobby, bot):
     # Populate the teamA and teamB list with players
     playerlist = []
     for p in lobby.players:
-        player = read_player(p, lobby.colony_id)
+        player,techlist = read_player(p, lobby.colony_id)
         # Initialize real_player as None for safety
         real_player = None
         if player:
-            tech = player['techniques'][0] if player['techniques'] else None
-            player['technique'] = tech['name']
-            del player['techniques']
-            del player['id']
             real_player = Player(**player)
             playerlist.append(real_player)
             if all(real_player.user_id != p.user_id for p in lobby.teamB['players']) and all(real_player.user_id != p.user_id for p in lobby.teamA['players']):
@@ -76,34 +118,12 @@ def start_round_embed(lobby, bot):
         else:
             # If player data couldn't be retrieved, remove from lobby
             lobby.remove_player(p)
-            
-        enemies = []
+    
+    enemy_list = add_npc_enemies(lobby)
 
-        for e in colony.enemies:
-            highest_level = max(p.level for p in playerlist)
-            if not e.killed:
-                e.level <= highest_level
-                enemies.append(e)
-
-        if enemies:  # Make sure there are enemies to choose from
-            e_choice = random.choice(enemies)
-            enemy = None
-            for e  in Enemy.__subclasses__():
-                current_enemy = e()
-                if current_enemy.name == e_choice.name:
-                    enemy = current_enemy
-                    break
-
-            enemy_list = [enemy]
-            # Handle multiple enemy spawns if quantity is set
-            if enemy.quantity and enemy.quantity > 1:
-                    for e in range(enemy.quantity):
-                        enemy_clone = copy.deepcopy(enemy)
-                        print(enemy.name + " was cloned")
-                        enemy_list.append(enemy_clone)
-
-            for e in enemy_list:
-                    lobby.add_field(e) 
+    for e in enemy_list:
+        lobby.add_field(e)
+        
     
     # Team display section
     if lobby.teamA and lobby.teamA['players']:
@@ -718,7 +738,6 @@ class Lobby_Cog(commands.Cog):
     @lobby.command(name="start")
     async def start(self, ctx):
         channel = ctx.channel
-        channel.send("<:1000001330:1354469798230102258>")
         lobby = self.lobbies[ctx.channel.id]["Lobby"]
         lobby.status = 1
         lobby.ready = []

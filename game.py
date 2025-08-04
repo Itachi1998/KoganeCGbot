@@ -1,4 +1,4 @@
-import json, traceback
+import traceback, os
 import datetime
 from typing import Union, List, Optional
 import enum, random, sys
@@ -53,7 +53,7 @@ human_body_parts = {"Head" : BodyPart('Head', 0, 0),
 class Actor:
     def __init__(self,
             name: str, 
-            level:int,
+            level: int,
             max_hp,
             max_ce: int,
             strength: int, 
@@ -61,17 +61,17 @@ class Actor:
             technique: str, 
             playerclass: str, colony_id
             ):
-        self.name=name
-        self.level=level
-        self.max_hp=max_hp
-        self.max_ce=max_ce
-        self.strength=strength
-        self.speed=speed
-        self.technique=technique
-        self.playerclass=playerclass
-        self.colony_id=colony_id
-        self.hp=max_hp
-        self.ce=max_ce
+        self.name = name
+        self.level = level
+        self.max_hp = max_hp
+        self.max_ce = max_ce
+        self.strength = strength
+        self.speed = speed
+        self.technique = technique
+        self.playerclass = playerclass
+        self.colony_id = colony_id
+        self.hp = max_hp
+        self.ce = max_ce
 
 
     def __repr__(self):
@@ -91,7 +91,6 @@ class Enemy(Actor):
                 debuffed: list=None, buffed: list=None, summons: list=None, 
                 healed: int=None, bodyparts: dict=None, quantity: int=None, 
                 soul: int=None, status=None, timer=None, killed=None):
-            
             super().__init__(
                 name, 
                 level, 
@@ -102,7 +101,6 @@ class Enemy(Actor):
                 technique, 
                 playerclass, 
                 colony_id)
-
             inventory = {"Tools" : {}, "Technique Inv" : {}, "Summon" : {}}
             self.name = name
             self.ce = max_ce
@@ -374,11 +372,19 @@ class Player(Actor):
 #      save_player(self) #the imported save_player method from the database file
 
 #endregion
-        
+def check_for_image(name):
+    if not os.path.isdir('images'):
+          print("No image found for: " + name)
+          return None
+    else:
+         imagedir = os.listdir('images')
+         for i in imagedir:
+              if i == name + ".png":
+                   path = "images/" + i
+                   return path
 #region Bugfly
 class Grade4_Bugfly(Enemy):
     def __init__(self):
-        
         super().__init__(
              name="Bugfly", 
              level=1,
@@ -400,9 +406,13 @@ class Grade4_Bugfly(Enemy):
              )
         self.hp = self.max_hp
         self.ce = self.max_ce
+image = check_for_image("bugfly_spirit")
+if image is not None:
+    Grade4_Bugfly.image_path = image
 
 #endregion
 Grade4_Bugfly.grade = 1
+Grade4_Bugfly.min_level = 1
 #region FloatJelly      
 class  Grade4_Floatjelly(Enemy):
     def __init__(self):
@@ -426,14 +436,18 @@ class  Grade4_Floatjelly(Enemy):
              killed=False)
           self.hp = self.max_hp
           self.ce = self.max_ce
+image = check_for_image("flaotjelly_spirit")
+if image:
+     Grade4_Floatjelly.image_path = image
 #endregion
 Grade4_Floatjelly.grade = 1
+Grade4_Floatjelly.min_level=1
 #region Flymouth
-class Grade4_Flymouth(Enemy):
+class Grade4_Mouthbat(Enemy):
     min_level= 1
     def __init__(self):
           super().__init__(
-             name="Flymouth", 
+             name="Mouthbat", 
              level="1", 
              max_hp=30, 
              max_ce=20, 
@@ -451,7 +465,12 @@ class Grade4_Flymouth(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
 #endregion
-Grade4_Flymouth.grade = 1
+Grade4_Mouthbat.grade = 1
+Grade4_Mouthbat.min_level=1
+
+image = check_for_image("mouthbat_spirit")
+if image:
+     Grade4_Mouthbat.image_path = image
 
 #region Barehand
 class Grade3_Barehand(Enemy):
@@ -476,6 +495,12 @@ class Grade3_Barehand(Enemy):
           self.ce = self.max_ce
 # endregion
 Grade3_Barehand.grade = 2
+Grade3_Barehand.min_level=1
+
+image = check_for_image("barehand_curse")
+if image:
+     Grade3_Barehand.image_path = image
+
 #region  Furrpede
 class Grade3_Furrpede(Enemy):
     def __init__(self):
@@ -501,6 +526,11 @@ class Grade3_Furrpede(Enemy):
         self.ce = self.max_ce
 #endregion
 Grade3_Furrpede.grade = 2
+Grade3_Furrpede.min_level=1
+
+image = check_for_image("furrpede_spirit")
+if image:
+     Grade3_Furrpede.image_path = image
 #region AnxiousEars
 class Grade3_AnxiousEars(Enemy):
     def __init__(self):
@@ -523,6 +553,11 @@ class Grade3_AnxiousEars(Enemy):
         self.ce = self.max_ce
 #endregion
 Grade3_AnxiousEars.grade = 2
+Grade3_AnxiousEars.min_level=1
+image = check_for_image("anxious_ears")
+if image:
+     Grade3_AnxiousEars.image_path = image
+
 #region Stinkaspor
 class Grade2_Stinkaspor(Enemy):
     def __init__(self):
@@ -545,6 +580,10 @@ class Grade2_Stinkaspor(Enemy):
         self.hp = self.max_hp
         self.ce = self.max_ce
 Grade2_Stinkaspor.grade = 3
+Grade2_Stinkaspor.min_level=1
+image = check_for_image("stinkaspore")
+if image:
+     Grade2_Stinkaspor.image_path = image
 #endregion
 
 #region Primate
@@ -568,8 +607,13 @@ class Grade2_Primate(Enemy):
               killed=False)
         self.hp = self.max_hp
         self.ce = self.max_ce
+
 #endregion
 Grade2_Primate.grade = 3
+Grade2_Primate.min_level=1
+image = check_for_image("primate")
+if image:
+     Grade2_Primate.image_path = image
 #region Orbmaster
 class Grade1_Orbmaster(Enemy):
     def __init__(self ):
@@ -591,6 +635,10 @@ class Grade1_Orbmaster(Enemy):
         self.ce = self.max_ce
 #endregion
 Grade1_Orbmaster.grade = 4
+Grade1_Orbmaster.min_level=20
+image = check_for_image("orbmaster")
+if image:
+     Grade1_Orbmaster.image_path = image
 
 #region Charger
 class Grade1_Charger(Enemy):
@@ -616,15 +664,17 @@ class Grade1_Charger(Enemy):
             self.ce = self.max_ce
 #endregion
 Grade1_Charger.grade = 4
+Grade1_Charger.min_level=30
+image = check_for_image("charger_spirit")
+if image:
+     Grade1_Charger.image_path = image
 #region FingerBearer
 class SpecialGrade_FingerBearer(Enemy):
     def __init__(self):
-          super().__init__(
+        super().__init__(
              name="Finger Bearer", 
              level=80, 
-     
              max_hp=600, 
-   
              max_ce=600, 
              strength=700,
              speed=800,
@@ -635,10 +685,15 @@ class SpecialGrade_FingerBearer(Enemy):
              bodyparts=human_body_parts,
              timer=300,
              killed=False)
-          self.hp = self.max_hp
-          self.ce = self.max_ce
+        self.hp = self.max_hp
+        self.ce = self.max_ce
+
 #endregion
 SpecialGrade_FingerBearer.grade = 5
+SpecialGrade_FingerBearer.min_level=50
+image = check_for_image("fingerer")
+if image:
+     SpecialGrade_FingerBearer.image_path = image
 #region DisasterFlames
 class SpecialGrade_DisasterFlames(Enemy):
         def __init__(self):
@@ -663,6 +718,10 @@ class SpecialGrade_DisasterFlames(Enemy):
             self.ce = self.max_ce
 #endregion
 SpecialGrade_DisasterFlames.grade = 5
+SpecialGrade_DisasterFlames.min_level=50
+image = check_for_image("joga")
+if image:
+     SpecialGrade_DisasterFlames.image_path = image
 #region NatureSpirit
 class SpecialGrade_NatureSpirit(Enemy):
         def __init__(self):
@@ -686,6 +745,10 @@ class SpecialGrade_NatureSpirit(Enemy):
             self.ce = self.max_ce
 #endregion
 SpecialGrade_NatureSpirit.grade = 5
+SpecialGrade_NatureSpirit.min_level=50
+image = check_for_image("hanam")
+if image:
+     SpecialGrade_NatureSpirit.image_path = image
 #region TideCurse
 class SpecialGrade_TideCurse(Enemy):
        def __init__(self):
@@ -709,6 +772,10 @@ class SpecialGrade_TideCurse(Enemy):
         self.ce = self.max_ce
 #endregion
 SpecialGrade_TideCurse.grade = 5
+SpecialGrade_TideCurse.min_level=50
+image = check_for_image("dagon_womb")
+if image:
+     SpecialGrade_TideCurse.image_path = image
 
 #region SoulCurse
 class SpecialGrade_SoulCurse(Enemy):
@@ -733,8 +800,12 @@ class SpecialGrade_SoulCurse(Enemy):
                    )
         self.hp = self.max_hp
         self.ce = self.max_ce
+SpecialGrade_SoulCurse.min_level=50
 #endregion
 SpecialGrade_SoulCurse.grade = 5
+image = check_for_image("femhito")
+if image:
+     SpecialGrade_SoulCurse.image_path = image
 #region Toji
 class Toji(Enemy):
            def __init__(self):
@@ -756,6 +827,7 @@ class Toji(Enemy):
             self.ce = self.max_ce
 #endregion
 Toji.grade = 5
+Toji.min_level=100
 #region Reggie
 class Reggie(Enemy):
         def __init__(self):
@@ -777,6 +849,7 @@ class Reggie(Enemy):
                 self.ce = self.max_ce
 #endregion
 Reggie.grade = 4
+Reggie.min_level=100
 #region Uro
 class Uro(Enemy):
         def __init__(self):
@@ -800,7 +873,10 @@ class Uro(Enemy):
                         self.ce = self.max_ce
 #endregion
 Uro.grade = 4
-
+Uro.min_level=100
+image = check_for_image("uro")
+if image:
+     Uro.image_path = image
 #region Ryu
 class Ryu(Enemy): 
      def __init__(self):
@@ -823,11 +899,15 @@ class Ryu(Enemy):
           self.ce = self.max_ce
 #endregion
 Ryu.grade=5
+Ryu.min_level=100
+image = check_for_image("ryu")
+if image:
+     Ryu.image_path = image
 #region Kashimo
 class Kashimo(Enemy):
      def __init__(self):
           super().__init__(
-                    name="Kashimo",
+                    name="Kashima",
                     level=150,
                      max_hp=1500,
                      max_ce=1600,
@@ -845,8 +925,12 @@ class Kashimo(Enemy):
                      )
           self.hp = self.max_hp
           self.ce = self.max_ce
+Kashimo.min_level=150
 #endregion
 Kashimo.grade = 5
+image = check_for_image("kashima")
+if image:
+     Kashimo.image_path = image
 #region KingOfCurses
 class KingOfCurses(Enemy):                  
         def __init__(self, **kwargs):
@@ -867,8 +951,11 @@ class KingOfCurses(Enemy):
                 self.hp = self.max_hp
                 self.ce = self.max_ce
 KingOfCurses.grade = 5
+KingOfCurses.min_level=150
 #endregion
-
+image = check_for_image("kingofcurses")
+if image:
+     KingOfCurses.image_path = image
 
 
 #region Kenjaku
@@ -891,6 +978,12 @@ class Kenjaku(Enemy):
                      )                
                 self.hp = self.max_hp
                 self.ce = self.max_ce
+                
 Kenjaku.grade = 5
-             
+Kenjaku.min_level=150
+image = check_for_image("kenny")
+if image:
+     Kenjaku.image_path = image
+
+     
 #endregion
