@@ -177,7 +177,7 @@ class Character_cog(commands.Cog):
     
     @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
     async def delete(self, ctx):
-        existing_player = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
+        existing_player, technlist = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
         existing_user = db.read_user(user_id=ctx.author.id)
         if not existing_user:
             await ctx.send("You do not have a player in this colony")
@@ -186,7 +186,7 @@ class Character_cog(commands.Cog):
             if existing_player:
                 playername = existing_player['name']
                 db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
-                db.delete_technique(player_id=existing_player['id'])
+                db.delete_technique(player_id=existing_player['user_id'])
                 if len(existing_user.players) <= 0:
                     db.delete_user(user_id=ctx.author.id)
                 embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
@@ -248,31 +248,28 @@ class Character_cog(commands.Cog):
 
 
     @commands.hybrid_command(name="mod", description="Modify player stats")
-    async def mod(self, ctx, stat: str=None, amount: int=None, user: discord.User=None):
+    async def mod(self, ctx, stat: str=None, amount: int=None):
 
-        if not user:
-            user = ctx.author
+        user = ctx.author
 
-        colony = ctx.guild
-        player_dict, techlist = db.read_player(user.id, colony.id)
+        colony = ctx.guild.id
+        player_dict, techlist = db.read_player(user.id, colony)
         player = Player(**player_dict)
 
         if not player:
             await ctx.send("Player does not exist")
             return
-    
-        colony = db.read_colony(colony.id)
         
         if not colony:
             await ctx.send("You are not in a colony")
             return
         
-        if player.colony != colony.colony_id:
+        if player.colony != colony:
             await ctx.send("You are not in this colony")
             return
         
         if player:
-            embed = discord.Embed(title=f"Player Profile", description="## Colony: `" + colony.colony_name + "`\n## " + player.name)
+            embed = discord.Embed(title=f"Player Profile", description="## Colony: `" + "`\n## " + player.name)
             embed.add_field(name="Level", value="`" + str(player.level) + "`", inline=True)
             embed.add_field(name="Health", value="`" + str(player.hp) + "`", inline=True)
             embed.add_field(name="Energy", value="`" + str(player.ce) + "`", inline=True)
@@ -536,10 +533,10 @@ class ModView(discord.ui.View):
         colony = self.colony
         user = self.user
         
-        setattr(player, stat, amount)
-        update_player(user.id, colony.id)
+        player_dict = update_player(user.id, colony, value={stat : amount})
+        player = Player(**player_dict)
 
-        embed = discord.Embed(title=f"Player Profile", description="## Colony: `" + colony.colony_name + "`\n## " + player.name)
+        embed = discord.Embed(title=f"Player Profile", description="## Colony: `" + "`\n## " + player.name)
         embed.add_field(name="Level", value="`" + str(player.level) + "`", inline=True)
         embed.add_field(name="Health", value="`" + str(player.hp) + "`", inline=True)
         embed.add_field(name="Energy", value="`" + str(player.ce) + "`", inline=True)

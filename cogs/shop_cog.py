@@ -268,8 +268,9 @@ class C_Tool_Select(discord.ui.Select):
 
         if player.cgp >= price:
             player.cgp -= price
-            player.inventory.append(name)
+            player.inventory["Tools"][name]=tool 
             player.save_to_db()
+            print(player.inventory)
 
             await itx.followup.send(
                 content=f"You bought {name} for {price} points")
