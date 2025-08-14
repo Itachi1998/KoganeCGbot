@@ -515,7 +515,7 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
             return ("hit", body_dmg, target_hp <= 0, target_maxhp <=0)
         else:
-            return("tank", dmg, target_hp<=0, target_maxhp <=0)
+            return("tank", dmg, target.hp<=0, target.max_hp <=0)
     
     else:
             activation_difference = attack.act_speed - defense.act_speed
