@@ -60,8 +60,4 @@ async def sync(ctx):
         print(fstring)
 
         
-<<<<<<< HEAD
-bot.run("MTIwOTM3MjI1NTI3NzAzMTQ0NA.GRlXZ5.BzCHWeeyzZ0cefpxXqr1j7s10owW12-n88-8ds")
-=======
 bot.run(token)
->>>>>>> e44204a1d8fd796c759005769dfc486337ae0d3d

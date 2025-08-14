@@ -177,22 +177,23 @@ class Character_cog(commands.Cog):
     
     @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
     async def delete(self, ctx):
-        existing_player = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
-        existing_user = db.read_user(user_id=ctx.author.id)
-        if not existing_user:
-            await ctx.send("You do not have a player in this colony")
-            return
-        else:
-            if existing_player:
+        results = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
+        if results == False:
+            return await ctx.send("You do not have a player in this colony")
+        existing_player, techlsit = results
+        # existing_user = db.read_user(user_id=ctx.author.id)
+        # if not existing_user:
+        #     await ctx.send("You do not have a player in this colony")
+        #     return
+    
+        if existing_player:
                 playername = existing_player['name']
                 db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
                 db.delete_technique(player_id=existing_player['id'])
-                if len(existing_user.players) <= 0:
-                    db.delete_user(user_id=ctx.author.id)
                 embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
                 await ctx.send(embed=embed, ephemeral=True)
                 return
-            else:
+        else:
                 await ctx.send("You do not have a player in this colony")
                 return
 
@@ -203,8 +204,8 @@ class Character_cog(commands.Cog):
         if not user:
             user = ctx.author
 
-        player_dict = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
-        technique = player_dict['techniques'][0]
+        player_dict, techlist = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
+        technique = techlist[0]
         techname = technique['name']
         del player_dict['techniques']
         del player_dict['id']
