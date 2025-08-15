@@ -186,7 +186,6 @@ class Character_cog(commands.Cog):
             if existing_player:
                 playername = existing_player['name']
                 db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
-                db.delete_technique(player_id=existing_pl)
                 embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
                 await ctx.send(embed=embed, ephemeral=True)
                 return
