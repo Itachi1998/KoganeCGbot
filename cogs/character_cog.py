@@ -177,25 +177,20 @@ class Character_cog(commands.Cog):
     
     @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
     async def delete(self, ctx):
-        results = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
-        if results == False:
-            return await ctx.send("You do not have a player in this colony")
-        existing_player, techlist = results
-        # existing_user = db.read_user(user_id=ctx.author.id)
-        # if not existing_user:
-        #     await ctx.send("You do not have a player in this colony")
-        #     return
-    
-        if existing_player:
+        existing_player, techlist = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
+        existing_user = db.read_user(user_id=ctx.author.id)
+        if not existing_user:
+            await ctx.send("You do not have a player in this colony")
+            return
+        else:
+            if existing_player:
                 playername = existing_player['name']
                 db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
-                db.delete_technique(player_id=existing_player['id'])
                 embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
                 await ctx.send(embed=embed, ephemeral=True)
                 return
-        else:
+            else:
                 await ctx.send("You do not have a player in this colony")
-                return
 
 
     @commands.hybrid_command(name="profile", description="View your player profile, or someone else's!")
@@ -207,8 +202,6 @@ class Character_cog(commands.Cog):
         player_dict, techlist = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
         technique = techlist[0]
         techname = technique['name']
-        del player_dict['techniques']
-        del player_dict['id']
         player_dict['technique'] = techname
         player = Player(**player_dict)
 
