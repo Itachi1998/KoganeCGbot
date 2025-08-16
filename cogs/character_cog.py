@@ -180,7 +180,7 @@ class Character_cog(commands.Cog):
         results = db.read_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
         if results == False:
             return await ctx.send("You do not have a player in this colony")
-        existing_player, techlsit = results
+        existing_player, techlist = results
         # existing_user = db.read_user(user_id=ctx.author.id)
         # if not existing_user:
         #     await ctx.send("You do not have a player in this colony")

@@ -236,7 +236,10 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
             return new_barrier
         
         if "Heal" in defense:
-            new_defense = tech[player.technique][3]['RCT'][defense]
+            if is_player:
+                new_defense = tech[player.technique][3]['RCT'][defense]
+            elif is_enemy:
+                new_defense=tech[3]['RCT'][defense]
             player.defense = new_defense
             return new_defense
 

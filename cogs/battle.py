@@ -230,6 +230,8 @@ def move_embed(player, move):
 #endregion
 def get_npc_random_defense(target):
     defenses = []
+    defense_str = None
+    defense = None
     if target.technique not in enemy_tech:
         for tech in technique_list:
             if target.technique in tech:
@@ -528,14 +530,14 @@ class BattleView(discord.ui.View):
     async def defend_options(self, itx:discord.Interaction, btn:discord.ui.Button):
         lobby = self.lobby
         if lobby:
-            player, id = verify_player(itx.user.id, itx.guild.id)
-            tech = read_technique(id)
+            player = verify_player(itx.user.id, itx.guild.id)
+            tech= player.technique
             technique = None
             name = None
             if player:
                 for t in technique_list:
                     key = list(t.keys())[0]
-                    if key == tech['name']:
+                    if key == tech:
                         technique = t
                         name = key
                         break
@@ -898,6 +900,7 @@ class TargetSelect(discord.ui.Select):
                 ready = check_ready_players(self.lobby)
                 if ready:
                     embed = simulation_embed(self.lobby, self.lobby.round)
+                    print("Final round feed: " + str(self.lobby.feed))
                     await itx.followup.send(embed=embed)
                     
                     self.lobby.round += 1
