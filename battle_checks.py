@@ -557,8 +557,8 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
     
     if targ_invis:
         dmg = 0
-        print(f"{defense.name} (invisible) was able to dodge {attack.name}")
-        return ("hit", dmg, target.hp<=0, target.max_hp<=0)
+        target_hp, max_hp, body_dmg = damage_target(target=target, defense=defense, dmg=defense_strength, soul=counter_soul)
+        return ("counter", dmg, target.hp<=0, target.max_hp<=0)
 
     if attack_negated:
         dmg = 0
