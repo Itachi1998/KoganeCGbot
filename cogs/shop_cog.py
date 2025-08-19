@@ -1,8 +1,10 @@
 import discord
-# import old_techniques, game
-# from cogs import colonies
+from game import Player
+from db import read_colony, read_player
+from cursed_tools import cursed_tools
+#from .colonies_cog import Colonies
 from discord.ext import commands
-from io import BytesIO
+#from io import BytesIO
 
 
 class Shop_cog(commands.Cog):
@@ -104,63 +106,65 @@ async def setup(bot):
 #     return image_file
 
 
-# def cursed_tool_shop():
+def cursed_tool_shop():
 
-#     cursed_tool_items = list(old_techniques.cursed_tools.items())
+    cursed_tool_items = list(cursed_tools.items())
 
-#     name = ""
+    name = ""
 
-#     price = ""
+    price = ""
 
-#     for key, value in cursed_tool_items:
-#         price += f"   {value.cost}\n\n"
-#         name += f"{value.name}\n\n"
+    for key, value in cursed_tool_items:
+        price += f"{value.cost}\n\n"
+        name += f"{value.name}\n\n"
 
-#     return name, price
-
-
-# class Shop(commands.Cog):
-
-#      def __init__(self, bot):
-#          self.bot = bot
-
-#      @commands.hybrid_command(name="shop", description="Shows the shop")
-#      async def shop(self, ctx):
-#          await ctx.defer()
-#          colony_Data = dynamo.read_colony(ctx.guild.id)
-#          if colony_Data is None:
-#              await ctx.send("You are not in a colony")
-#              return
-
-#         colony = colonies.Colony(**colony_Data)  #instantiate colony
-
-#         color = colony.colony_color  #set color variable depending on the colony the shop command was used in
-
-#         image = shop_color(color)
-
-#         await ctx.send(
-#             "Welcome to the shop! Buy cursed tools, vows, and rules here to help you achieve your goals!"
-#         )
-
-#         name, price = cursed_tool_shop()
-
-#         title = 'Cursed Tool Shop'
-
-#         img = get_image(image, name, price, title)
-
-#         msg = await ctx.send(file=img)
-
-#         await msg.edit(view=CursedToolView(msg, ctx.author.id, self.bot, color)
-#               )
+    return name, price
 
 
-# class CursedToolView(discord.ui.View):
+class Shop(commands.Cog):
 
-#     def __init__(self, msg, id, bot, color):
-#         super().__init__(timeout=None)
-#         self.add_item(Vow(msg, id, bot, color))
-#         self.add_item(Rule(msg, id, bot, color))
-#         self.add_item(C_Tool_Select(msg, id, bot, color))
+     def __init__(self, bot):
+         self.bot = bot
+
+     @commands.hybrid_command(name="shop", description="Shows the shop")
+     async def shop(self, ctx):
+        await ctx.defer()
+        colony_Data = read_colony(ctx.guild.id)
+        if colony_Data is None:
+            await ctx.send("You are not in a colony")
+            return
+
+        #colony = Colonies(**colony_Data)  #instantiate colony
+
+        #color = colony.colony_color  #set color variable depending on the colony the shop command was used in
+
+        #image = shop_color(color)
+
+        msg = await ctx.send(
+            "Welcome to the shop! Buy cursed tools, vows, and rules here to help you achieve your goals!"
+        )
+
+        # name, price = cursed_tool_shop()
+
+        # title = 'Cursed Tool Shop'
+
+        await msg.edit(view=CursedToolView(msg, ctx.author.id, self.bot))
+        
+        # img = get_image(image, name, price, title)
+
+        # msg = await ctx.send(file=img)
+
+        # await msg.edit(view=CursedToolView(msg, ctx.author.id, self.bot, color)
+        #       )
+
+
+class CursedToolView(discord.ui.View):
+
+    def __init__(self, msg, id, bot):
+        super().__init__(timeout=None)
+        # self.add_item(Vow(msg, id, bot, color))
+        # self.add_item(Rule(msg, id, bot, color))
+        self.add_item(CursedToolSelect(msg, id, bot))
 
 
 # class BvView(discord.ui.View):
@@ -183,99 +187,101 @@ async def setup(bot):
 
 # class Cursedtool(discord.ui.Button):
 
-#     def __init__(self, msg, id, bot, color):
+#     def __init__(self, msg, id, bot):
 #         super().__init__(label="Cursed Tool Shop",
 #                          style=discord.ButtonStyle.blurple)
 #         self.bot = bot
 #         self.msg = msg
 #         self.id = id
-#         self.color = color
+#         #self.color = color
 
-#     async def callback(self, interaction: discord.Interaction):
-#         await interaction.response.defer()
+#     async def callback(self, itx: discord.Interaction):
+#         await itx.response.defer()
 #         self.disabled = True
 
-#         id = check_id(interaction.user.id, self.id)
-#         if not id:
-#             await interaction.response.send_message(
-#                 content="It is not your turn yet", ephemeral=True)
+        # id = check_id(itx.user.id, self.id)
+        # if not id:
+        #     await itx.response.send_message(
+        #         content="It is not your turn yet", ephemeral=True)
 
-#             return
+        #     return
 
-#         name, price = cursed_tool_shop()
+        # name, price = cursed_tool_shop()
 
-#         title = 'Cursed Tool Shop'
+        # title = 'Cursed Tool Shop'
 
-#         image = shop_color(self.color)
+        # image = shop_color(self.color)
 
-#         img = get_image(image, name, price, title)
+        # img = get_image(image, name, price, title)
 
-#         msg = await self.msg.edit(attachments=[img])
+        # msg = await self.msg.edit(attachments=[img])
 
-#         await msg.edit(view=CursedToolView(msg, self.id, self.bot, self.color))
+        # await msg.edit(view=CursedToolView(msg, self.id, self.bot, self.color))
 
 
-# class C_Tool_Select(discord.ui.Select):
+class CursedToolSelect(discord.ui.Select):
 
-#     def __init__(self, msg, id, bot, color):
-#         self.msg = msg
-#         self.id = id
-#         self.bot = bot
-#         self.color = color
-#         cursed_tool_items = list(old_techniques.cursed_tools.values())
+    def __init__(self, msg, id, bot):
+        self.msg = msg
+        self.id = id
+        self.bot = bot
+        #self.color = color
+        cursed_tool_items = list(cursed_tools.values())
 
-#         options = [
-#             discord.SelectOption(
-#                 label=f"{tool_obj.name}    Price: {tool_obj.cost}",
-#                 value=tool_obj.name,
-#                 description=
-#                 f"Atk: {tool_obj.attack} Pen: {tool_obj.pen} Neg: {tool_obj.negate} Dur:  {tool_obj.max_hp}",
-#                 emoji=tool_obj.emote) for tool_obj in cursed_tool_items
-#         ]
+        options = [
+            discord.SelectOption(
+                label=f"{tool_obj.name}",
+                value=tool_obj.name,
+                description=
+                f"Price: {tool_obj.cost}, Strength: {tool_obj.strength}, Negates: {tool_obj.negates}, Durability: {tool_obj.max_hp}"
+                ) for tool_obj in cursed_tool_items
+        ]
 
-#         super().__init__(placeholder="Choose a cursed tool...",
-#                          options=options)
+        super().__init__(placeholder="Choose a cursed tool...",
+                         options=options)
 
-#     async def callback(self, interaction: discord.Interaction):
-#         await interaction.response.defer()
+    async def callback(self, itx: discord.Interaction):
+        await itx.response.defer()
 
-#         id = check_id(interaction.user.id, self.id)
-#         if not id:
-#             await interaction.response.send_message(
-#                 content="It is not your turn yet", ephemeral=True)
+        # id = check_id(itx.user.id, self.id)
+        # if not id:
+        #     await itx.response.send_message(
+        #         content="It is not your turn yet", ephemeral=True)
 
-#             return
+        #     return
 
-#         name = self.values[0]
+        name = self.values[0]
 
-#         tool = old_techniques.cursed_tools[name]
+        tool = cursed_tools[name]
 
-#         price = tool.cost
+        price = tool.cost
+        
+        player_dict, techlist = read_player(itx.user.id, itx.user.guild.id, value=None)
 
-#         player = self.bot.load_character(self.id, interaction.guild.id)
+        player = Player(**player_dict)
 
-#         if player is None:
+        if player is None:
 
-#             await interaction.followup.send(content="Player not found",
-#                                             ephemeral=True)
+            await itx.followup.send(content="Player not found", ephemeral=True)
 
-#             return
+            return
 
-#         if player.cgp >= price:
-#             player.cgp -= price
-#             player.inventory.append(name)
-#             player.save_to_db()
+        if player.cgp >= price:
+            player.cgp -= price
+            player.inventory["Tools"][name]=tool 
+            player.save_to_db()
+            print(player.inventory)
 
-#             await interaction.followup.send(
-#                 content=f"You bought {name} for {price} points")
-#             await self.msg.edit(
-#                 view=CursedToolView(self.msg, self.id, self.bot, self.color))
-#             return
-#         else:
-#             await interaction.followup.send(
-#                 content=f"You don't have enough points to buy {name}.",
-#                 ephemeral=True)
-#             return
+            await itx.followup.send(
+                content=f"You bought {name} for {price} points")
+            await self.msg.edit(
+                view=CursedToolView(self.msg, self.id, self.bot))
+            return
+        else:
+            await itx.followup.send(
+                content=f"You don't have enough points to buy {name}.",
+                ephemeral=True)
+            return
 
 
 # class Vow(discord.ui.Button):
@@ -297,11 +303,11 @@ async def setup(bot):
 #         return name, price
 
 #     async def callback(self, interaction: discord.Interaction):
-#         await interaction.response.defer()
+#         await itx.response.defer()
 
-#         id = check_id(interaction.user.id, self.id)
+#         id = check_id(itx.user.id, self.id)
 #         if not id:
-#             await interaction.response.send_message(
+#             await itx.response.send_message(
 #                 content="It is not your turn yet", ephemeral=True)
 
 #         title = '  Binding Vow Shop'
@@ -333,27 +339,27 @@ async def setup(bot):
 #         self.color = color
 
 #     async def callback(self, interaction: discord.Interaction):
-#         await interaction.response.defer()
-#         if interaction.user.id != self.id:
-#             await interaction.followup.send(
+#         await itx.response.defer()
+#         if itx.user.id != self.id:
+#             await itx.followup.send(
 #                 content="You did not use this command", ephemeral=True)
 #             return
 #         name = self.values[0]
 #         vow = old_techniques.BVs[name]
 #         price = vow.cost
-#         player = self.bot.load_character(self.id, interaction.guild.id)
+#         player = self.bot.load_character(self.id, itx.guild.id)
 #         if player.cgp >= price:
 #             player.cgp -= price
 #             player.inventory.append(name)
 #             player.save_to_db()
-#             await interaction.followup.send(
+#             await itx.followup.send(
 #                 content=f"You bought {name} for {price} points.")
 #             await self.msg.edit(
 #                 view=BvView(self.msg, self.id, self.bot, self.color))
 #             return
 
 #         else:
-#             await interaction.followup.send(
+#             await itx.followup.send(
 #                 content=f"You don't have enough points to buy {name}.",
 #                 ephemeral=True)
 #             await self.msg.edit(
@@ -380,9 +386,9 @@ async def setup(bot):
 #         return name, price
 
 #     async def callback(self, interaction: discord.Interaction):
-#         await interaction.response.defer()
-#         if interaction.user.id != self.id:
-#             await interaction.response.send_message(
+#         await itx.response.defer()
+#         if itx.user.id != self.id:
+#             await itx.response.send_message(
 #                 content="You did not use this command", ephemeral=True)
 #             return
 #         title = "        Rule Shop"
@@ -413,12 +419,12 @@ async def setup(bot):
 #         super().__init__(placeholder="Select a rule", options=options)
 
 #     async def callback(self, interaction: discord.Interaction):
-#         await interaction.response.defer()
-#         if interaction.user.id != self.id:
-#             await interaction.followup.send(
+#         await itx.response.defer()
+#         if itx.user.id != self.id:
+#             await itx.followup.send(
 #                 content="You did not use this command", ephemeral=True)
 #             return
-#         player = self.bot.load_character(self.id, interaction.guild.id)
+#         player = self.bot.load_character(self.id, itx.guild.id)
 #         name = self.values[0]
 #         rule = old_techniques.rules[name]
 #         price = rule.cost
@@ -426,17 +432,17 @@ async def setup(bot):
 #             player.cgp -= price
 #             player.inventory.append(name)
 #             player.save_to_db()
-#             await interaction.followup.send(
+#             await itx.followup.send(
 #                 content=f"You bought {name} for {price} points.",
 #                 view=RuleView(self.msg, self.id, self.bot, self.color))
 #             await self.msg.edit(
 #                 view=RuleView(self.msg, self.id, self.bot, self.color))
 #             return
 #         else:
-#             await interaction.followup.send(
+#             await itx.followup.send(
 #                 content=f"You don't have enough points to buy {name}.",
 #                 ephemeral=True)
 
 
-# async def setup(bot: commands.Bot):
-#     await bot.add_cog(Shop(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Shop(bot))

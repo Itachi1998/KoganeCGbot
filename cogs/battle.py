@@ -13,12 +13,12 @@ def healthbar(health, max_health):
     dash_ratio = max_health / max_dashes
     filled_dashes = 0 if health <= 0 else int(health / dash_ratio)
     remainder = (health / dash_ratio) - filled_dashes if health > 0 else 0
-    dashes = "<:1000001328:1354469784724570172>" * filled_dashes
+    dashes = "<:fullheart:1401327640018944070>" * filled_dashes
     if remainder > 0:
-        dashes += "<:1000001329:1354469791724736745>"  # Add a half-heart emoji
-    percent = f"`{round((health / max_health) * 100)}%`"
-    if '-' in percent:
-        percent = "`0%`"
+        dashes += "<:halfheart:1401327657060270160>"  # Add a half-heart emoji
+    percent = f"`{max(round((health / max_health) * 100), 0)}%`"
+    # if '-' in percent:
+    #     percent = "`0%`"
     bar = f"{dashes} {percent}"
     return bar
 
@@ -27,10 +27,10 @@ def ce_bar(ce, max_ce):
     dash_ratio = max_ce / max_dashes # maximum ce / 4 = 1000 ce = 250 ce per dash
     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
     remainder = max_dashes - filled_dashes if ce > 0 else 0 # 1000 / 250 = 4 dashes - 3 = 1 remainder 
-    dashes = "<:1000001330:1354469798230102258>" * filled_dashes # emoji times number of dashes
+    dashes = "<:fullce:1401327669328740405>" * filled_dashes # emoji times number of dashes
     percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`" # 853 / 1000 = 0.853 * 100 = 85.3% rounded to 85%
     if remainder > 0: # if remainder is greater than 0, add a half dash
-        dashes += "<:IMG_44021:1394503076223783043>" # Add a half-ce emoji
+        dashes += "<:halfce:1401327682540666951>" # Add a half-ce emoji
     bar = f"{dashes} {percent}" # return the bar with dashes and percent
     print(dashes)
     return bar
@@ -575,10 +575,49 @@ class BattleView(discord.ui.View):
             await itx.response.send_message("Error not in a lobby")
             return
         
-    @discord.ui.button(label="Item Options", disabled=True, style=discord.ButtonStyle.red)
-    async def item_options(self, itx:discord.Interaction, btn:discord.ui.Button):
-        #logic to select items
-        pass
+    @discord.ui.button(label="Tool Options", style=discord.ButtonStyle.red) # Work in progress
+    async def tool_options(self, itx:discord.Interaction, btn:discord.ui.Button):
+        lobby = self.lobby
+        if lobby:
+            player = verify_player(itx.user.id, itx.guild.id)
+            name = None
+            if player:
+                embed = discord.Embed(title="Tools", description="Choose from your tools")
+                value_string = ""
+                tool_list = [t for t in player.inventory["Tools"]]
+                if tool_list:
+                    for tool in tool_list:
+                        fields = [
+                            f"`Def dmg:` **{tool.strength}**",
+                            f"`Def spd:` **{tool.speed}**",
+                            f"`Bodyparts:` **{', '.join(tool.act_req)}**",
+                            f"`Max targets:` **{tool.aoe}**",
+                            f"`Type:` **{tool.type}**"
+                        ]
+
+                    if tool.soul:
+                        fields.append(f"`Soul defense` **{tool}.soul**")
+
+                else:
+                     await itx.response.send_message("You have no tools")
+                     return
+                
+                # Optionally include other properties if needed and if length allows
+                value_string = "\n".join(fields) + "\n"
+
+                embed.add_field(name=tool.name, value=value_string)
+
+                embed.set_thumbnail(url=self.bot.user.avatar.url)
+                view = MoveView(player, self.bot, tool_list, self.lobby, defense=True) #new view for tool lists?
+                await itx.response.send_message(embed=embed, view=view, ephemeral=True)
+                return
+            
+            else:
+                 await itx.response.send_message("Error player doesn't exist")
+                 return
+        else:
+            await itx.response.send_message("Error not in a lobby")
+            return
 
     @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
     async def summon_options(self, itx:discord.Interaction, btn:discord.ui.Button):
@@ -654,20 +693,21 @@ class BattleView(discord.ui.View):
 
     @discord.ui.button(label="Surrender", disabled=True, style=discord.ButtonStyle.red)
     async def surrender(self, itx:discord.Interaction, btn:discord.ui.Button):
-        # Logic to surrender
+        # Logic to surrender (give up all cgp)
         pass
 
     @discord.ui.button(label="Flee", disabled=True, style=discord.ButtonStyle.red)
     async def flee(self, itx:discord.Interaction, btn:discord.ui.Button):
-        #logic to flee - should the player have to be faster than the enemies?
+        #logic to flee
         pass
 
     @discord.ui.button(label="End Turn", disabled=True, style=discord.ButtonStyle.gray)
     async def end_turn(self, itx:discord.Interaction, btn:discord.ui.Button):
         # Logic to end the turn
         pass
-
 # endregion
+
+#region MoveView
 class MoveView(discord.ui.View):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         super().__init__()
@@ -677,7 +717,9 @@ class MoveView(discord.ui.View):
             self.add_item(MoveSelect(player, bot, technique, lobby, defense=True))
         if barrier:
             self.add_item(MoveSelect(player, bot, technique, lobby, barrier=True))
-    
+#endregion
+
+#region MoveSelect    
 class MoveSelect(discord.ui.Select):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         print(technique)
@@ -747,7 +789,8 @@ class MoveSelect(discord.ui.Select):
                  await itx.followup.send(embeds=[embed, t_embed], view=view, ephemeral=True)
                  
             return
-           
+#endregion
+   
 #region TargetSelect
 class TargetSelectView(discord.ui.View):
     def __init__(self, bot, player, targets, lobby, move, attack=False, defense=False, barrier=False):
