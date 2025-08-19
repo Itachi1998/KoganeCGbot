@@ -59,6 +59,23 @@ async def sync(ctx):
         # await channel.send(fstring)
         print(fstring)
 
-        
+
+class Layout(discord.ui.LayoutView):
+    actionrow = discord.ui.ActionRow()
+    @actionrow.button(label='Click Me!')
+    async def action_row_button(self, itx: discord.Interaction, btn: discord.ui.Button):
+        await itx.response.send_message("Hi!", ephemeral=True)
+
+    container = discord.ui.Container(
+        discord.ui.TextDisplay(
+            content="Click button for a very special message!"
+        ),
+        accent_color=discord.Colour.blurple()
+    )
+
+@bot.command()
+async def layout(ctx: commands.Context):
+    await ctx.send(view=Layout())
+
   
 bot.run("MTIwOTM3MjI1NTI3NzAzMTQ0NA.GBdXG6.VdmhoXv05A5yF-GJbx6NA7GnK7N4vZ0luZ8gOY")

@@ -100,7 +100,15 @@ def get_player_feed(player, team, lobby, type):
         return False
     
 def get_valid_targets(feed, team, player, lobby):
-        chosen_enemies = feed[player.user_id]['targets'] if player.user_id in feed else []
+        is_npc = False
+        is_player = False
+        chosen_enemies = None
+        if hasattr(player, "user_id"):
+             is_player = True
+        if is_player:
+            chosen_enemies = feed[player.user_id]['targets'] if player.user_id in feed else []
+        if is_npc:
+             chosen_enemies = feed[player.name]['targets'] if player.name in feed else []
         targets = []
         teamA = lobby.teamA
         teamB = lobby.teamB
@@ -110,8 +118,7 @@ def get_valid_targets(feed, team, player, lobby):
                 if team['name'] == teamA['name']:
                         for p in teamB['players']:
                             if not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                                    targets.append(p)
-
+                                        targets.append(p)
                 elif team['name'] == teamB['name']:
                         for p in teamA['players']:
                             if not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
@@ -119,33 +126,56 @@ def get_valid_targets(feed, team, player, lobby):
 
                 for p in lobby.field.values():
                     print("Checking target: " + str(p))
-                    if hasattr(p, 'user_id') and p.user_id == player.user_id:
-                        continue
-                    elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                        targets.append(p)
+                    if is_player:
+                        if hasattr(p, 'user_id') and p.user_id == player.user_id:
+                            continue
+                        elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
+                            targets.append(p)
+
+                    elif is_npc:
+                        if p.name == player.name:
+                              continue
+                        elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
+                             targets.append(p) 
+                         
+                    
                 return targets
         
         else:
             for p in lobby.field.values():
                     print("Checking target: " + str(p))
-                    if hasattr(p, 'user_id') and p.user_id == player.user_id:
-                        continue
-                    elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                        targets.append(p)
+                    if is_player:
+                        if hasattr(p, 'user_id') and p.user_id == player.user_id:
+                            continue
+                        elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
+                            targets.append(p)
+                    if is_npc:
+                        if p.name == player.name:
+                              continue
+                        else:
+                            if not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
+                                 targets.append(p) 
 
                     for tar in teamA['players'] :
-                        if tar.user_id == player.user_id:
-                            continue
+                        if is_player:
+                            if tar.user_id == player.user_id:
+                                continue
 
-                        elif not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
-                                targets.append(tar)
+                            elif not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
+                                    targets.append(tar)
+                        if is_npc:
+                             if not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
+                                  targets.append(tar)
 
                     for tar in teamB['players']:
-                        if tar.user_id == player.user_id:
-                                continue
-                        elif not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
-                            targets.append(tar)
-
+                        if is_player:
+                            if tar.user_id == player.user_id:
+                                    continue
+                            elif not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
+                                targets.append(tar)
+                        if is_npc:
+                            if not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
+                                 targets.append(tar)
                     return targets
 
 
@@ -227,7 +257,33 @@ def move_embed(player, move):
         value="- **Strength:** " + str(move.soul))
     return embed
 
-#endregion
+
+def get_npc_random_attack(lobby):
+    attack_field_feed = lobby.feed[lobby.round]['attacks']['Field']
+    attack_ready = False
+    for enemy_name, enemy_player in lobby.field.items():
+        if hasattr(enemy_player, "user_id"):
+              continue
+              
+        else:
+            targets = get_valid_targets(attack_field_feed, lobby.field, enemy_player, lobby)
+            rand_targ = random.choice(targets)
+            attack_field_feed[enemy_name] = {'target' : rand_targ}
+            technique=None
+            for tech in enemy_tech:
+                if tech.name == enemy_player.technique:
+                      technique = tech
+            for ptec in technique_list:
+                if ptec.name == enemy_player.technique:
+                     technique=ptec
+            # think about summons and joining all the techniques in one file
+            # different summon techniques should have different abilities
+            # partial summons for higher levels
+            attack_field_feed[enemy_name]['move'] = technique 
+            attack_ready = True
+    return attack_ready
+
+#endregion 
 def get_npc_random_defense(target):
     defenses = []
     defense_str = None
@@ -256,6 +312,7 @@ def format_battle_result(attacker, target, attack_move, defense_move, results):
     result = results[0]
     killed = results[2]
     damage = results[1]
+
     if result == 'hit':
         result_str += "`" + attacker.name +  "` hit `" + target.name + "`\n" + "Damage taken: " + str(damage) + "\n"
         if killed:
@@ -289,8 +346,10 @@ def format_battle_result(attacker, target, attack_move, defense_move, results):
 
 #region player defense
 def set_player_defense(player, feed):
+
     defense = None
     default = None
+    
     for tech in technique_list:
         if player.technique in tech:
             if next(iter(tech.keys())) == player.technique:
@@ -317,6 +376,7 @@ def simulation_embed(lobby, round_num):
     print(f"TeamB players: {[(p.user_id, p.name) for p in lobby.teamB['players']]}")
     print(f"Field players: {[(p.user_id, p.name) for p in lobby.field.values() if hasattr(p, 'user_id')]}")
     """Generate simulation embed for all actions in the current round."""
+    set_npc_attacks = get_npc_random_attack(lobby)
     embed = discord.Embed(title=f"Round {round_num} Simulation", description="Battle Results") # initialize embed
     round_feed = lobby.feed[round_num] # get the feed for the current round
     
