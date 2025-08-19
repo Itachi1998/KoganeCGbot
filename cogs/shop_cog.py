@@ -164,7 +164,7 @@ class CursedToolView(discord.ui.View):
         super().__init__(timeout=None)
         # self.add_item(Vow(msg, id, bot, color))
         # self.add_item(Rule(msg, id, bot, color))
-        self.add_item(C_Tool_Select(msg, id, bot))
+        self.add_item(CursedToolSelect(msg, id, bot))
 
 
 # class BvView(discord.ui.View):
@@ -219,7 +219,7 @@ class CursedToolView(discord.ui.View):
         # await msg.edit(view=CursedToolView(msg, self.id, self.bot, self.color))
 
 
-class C_Tool_Select(discord.ui.Select):
+class CursedToolSelect(discord.ui.Select):
 
     def __init__(self, msg, id, bot):
         self.msg = msg
@@ -233,7 +233,7 @@ class C_Tool_Select(discord.ui.Select):
                 label=f"{tool_obj.name}",
                 value=tool_obj.name,
                 description=
-                f"Price: {tool_obj.cost}, Strength: {tool_obj.strength}, Negation: {tool_obj.negates}, Durability: {tool_obj.max_hp}"
+                f"Price: {tool_obj.cost}, Strength: {tool_obj.strength}, Negates: {tool_obj.negates}, Durability: {tool_obj.max_hp}"
                 ) for tool_obj in cursed_tool_items
         ]
 

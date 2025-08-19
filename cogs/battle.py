@@ -16,9 +16,9 @@ def healthbar(health, max_health):
     dashes = "<:fullheart:1401327640018944070>" * filled_dashes
     if remainder > 0:
         dashes += "<:halfheart:1401327657060270160>"  # Add a half-heart emoji
-    percent = f"`{round((health / max_health) * 100)}%`"
-    if '-' in percent:
-        percent = "`0%`"
+    percent = f"`{max(round((health / max_health) * 100), 0)}%`"
+    # if '-' in percent:
+    #     percent = "`0%`"
     bar = f"{dashes} {percent}"
     return bar
 
@@ -573,10 +573,49 @@ class BattleView(discord.ui.View):
             await itx.response.send_message("Error not in a lobby")
             return
         
-    @discord.ui.button(label="Item Options", disabled=True, style=discord.ButtonStyle.red)
-    async def item_options(self, itx:discord.Interaction, btn:discord.ui.Button):
-        #logic to select items - make shop before
-        pass
+    @discord.ui.button(label="Tool Options", style=discord.ButtonStyle.red) # Work in progress
+    async def tool_options(self, itx:discord.Interaction, btn:discord.ui.Button):
+        lobby = self.lobby
+        if lobby:
+            player = verify_player(itx.user.id, itx.guild.id)
+            name = None
+            if player:
+                embed = discord.Embed(title="Tools", description="Choose from your tools")
+                value_string = ""
+                tool_list = [t for t in player.inventory["Tools"]]
+                if tool_list:
+                    for tool in tool_list:
+                        fields = [
+                            f"`Def dmg:` **{tool.strength}**",
+                            f"`Def spd:` **{tool.speed}**",
+                            f"`Bodyparts:` **{', '.join(tool.act_req)}**",
+                            f"`Max targets:` **{tool.aoe}**",
+                            f"`Type:` **{tool.type}**"
+                        ]
+
+                    if tool.soul:
+                        fields.append(f"`Soul defense` **{tool}.soul**")
+
+                else:
+                     await itx.response.send_message("You have no tools")
+                     return
+                
+                # Optionally include other properties if needed and if length allows
+                value_string = "\n".join(fields) + "\n"
+
+                embed.add_field(name=tool.name, value=value_string)
+
+                embed.set_thumbnail(url=self.bot.user.avatar.url)
+                view = MoveView(player, self.bot, tool_list, self.lobby, defense=True) #new view for tool lists?
+                await itx.response.send_message(embed=embed, view=view, ephemeral=True)
+                return
+            
+            else:
+                 await itx.response.send_message("Error player doesn't exist")
+                 return
+        else:
+            await itx.response.send_message("Error not in a lobby")
+            return
 
     @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
     async def summon_options(self, itx:discord.Interaction, btn:discord.ui.Button):
@@ -664,8 +703,9 @@ class BattleView(discord.ui.View):
     async def end_turn(self, itx:discord.Interaction, btn:discord.ui.Button):
         # Logic to end the turn
         pass
-
 # endregion
+
+#region MoveView
 class MoveView(discord.ui.View):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         super().__init__()
@@ -675,7 +715,9 @@ class MoveView(discord.ui.View):
             self.add_item(MoveSelect(player, bot, technique, lobby, defense=True))
         if barrier:
             self.add_item(MoveSelect(player, bot, technique, lobby, barrier=True))
-    
+#endregion
+
+#region MoveSelect    
 class MoveSelect(discord.ui.Select):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         print(technique)
@@ -745,7 +787,8 @@ class MoveSelect(discord.ui.Select):
                  await itx.followup.send(embeds=[embed, t_embed], view=view, ephemeral=True)
                  
             return
-           
+#endregion
+   
 #region TargetSelect
 class TargetSelectView(discord.ui.View):
     def __init__(self, bot, player, targets, lobby, move, attack=False, defense=False, barrier=False):
