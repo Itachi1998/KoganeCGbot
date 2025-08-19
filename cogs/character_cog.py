@@ -5,7 +5,12 @@ from db import create_player, update_player, update_colony, create_technique
 from models import Technique
 from discord.ext import commands
 from discord import app_commands
+import boto3
 
+s3_client = boto3.client('s3', region_name='us-east-1')
+
+s3_name = "cullinggame-images"
+url = s3_client.generate_presigned_url('get_object', Params={"Bucket":s3_name, "Key": "IMG_2120-3.png"})
 #region List of Techniques and Classes
 sorcerer_techs = [
     player_tech.anti_gravity, 
@@ -303,7 +308,7 @@ class CreatePromptLayout(discord.ui.LayoutView):
         
         text1 = discord.ui.TextDisplay("### `Spin the button for your character`\n"
                                        "### `Stat Ranges`\n```py\n* HP: 100 - 300\n* CE: 200 - 2000\n* STRENGTH: 50 - 200\n* SPEED: 50 - 200```")
-        section2 = discord.ui.Section(accessory=discord.ui.Thumbnail("https://cullinggame-images.s3.us-east-1.amazonaws.com/IMG_3530.png"))
+        section2 = discord.ui.Section(accessory=discord.ui.Thumbnail(url))
         text2 = discord.ui.TextDisplay( "### `Class Boost`\n- **Curses:**\n```py\n* CE: +200\n* HP: +150\n* STRENGTH: +150\n* SPEED: +150```\n- **Sorcerers:**\n```py\n* CE: +50\n* HP: +100\n* STRENGTH: +100\n* SPEED: +100```"
                 "\n- **Reincarnate:**\n```py\n* CE: +100\n* HP: +150\n* STRENGTH: +120\n* SPEED +120```")
         section2.add_item(text2)
