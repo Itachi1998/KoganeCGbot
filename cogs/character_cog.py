@@ -11,6 +11,8 @@ s3_client = boto3.client('s3', region_name='us-east-1')
 
 s3_name = "cullinggame-images"
 url = s3_client.generate_presigned_url('get_object', Params={"Bucket":s3_name, "Key": "IMG_2120-3.png"}, ExpiresIn=3600)
+url2 = s3_client.generate_presigned_url('get_object', Params={"Bucket":s3_name, "Key": "IMG_3530.png"}, ExpiresIn=3600)
+
 #region List of Techniques and Classes
 sorcerer_techs = [
     player_tech.anti_gravity, 
@@ -313,7 +315,7 @@ class CreatePromptLayout(discord.ui.LayoutView):
                 "\n- **Reincarnate:**\n```py\n* CE: +100\n* HP: +150\n* STRENGTH: +120\n* SPEED +120```")
         section2.add_item(text2)
         # thummie = discord.ui.Thumbnail(self.bot.avatar.url
-        section3 = discord.ui.Section(accessory=discord.ui.Thumbnail(self.bot.user.avatar.url))
+        section3 = discord.ui.Section(accessory=discord.ui.Thumbnail(url2))
         text3 = discord.ui.TextDisplay("### `Tech Boosts`\n"
                                         "- **Six Eyes:**\n```py\n* CE: + 1000\n* HP: + 300```\n- **Shrine:**\n```py\n* CE + 3000\n* HP: + 300```\n- **Limitless|Copy:**\n```py\n* CE: + 1000\n* HP: + 100```\n- **H.R:zero:**\n```py\n* CE: = 0\n* HP: + 300\n* SPEED: + 200\n* STRENGTH: + 200```")
         section.add_item(text1)
