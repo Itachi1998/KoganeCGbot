@@ -246,16 +246,19 @@ class CreatePromptLayout(discord.ui.LayoutView):
         super().__init__()
         self.playerdict = playerdict
         self.bot = bot  # Store the bot object for reference
-        section = discord.ui.Section(accessory=discord.ui.Thumbnail(self.bot.user.avatar.url))
+        self.spin = CreateButton(bot, playerdict)
+        section = discord.ui.Section(accessory=self.spin)
+        
         text1 = discord.ui.TextDisplay("### `Spin the button for your character`\n"
                                        "### `Stat Ranges`\n```py\n* HP: 100 - 300\n* CE: 200 - 2000\n* STRENGTH: 50 - 200\n* SPEED: 50 - 200```")
-        section2 = discord.ui.Section(accessory=discord.ui.Thumbnail("https://cullinggame-images.s3.us-east-1.amazonaws.com/anxious_ears.png"))
+        section2 = discord.ui.Section(accessory=discord.ui.Thumbnail(self.bot.user.avatar.url))
         text2 = discord.ui.TextDisplay( "### `Class Boost`\n- **Curses:**\n```py\n* CE: +200\n* HP: +150\n* STRENGTH: +150\n* SPEED: +150```\n- **Sorcerers:**\n```py\n* CE: +50\n* HP: +100\n* STRENGTH: +100\n* SPEED: +100```"
                 "\n- **Reincarnate:**\n```py\n* CE: +100\n* HP: +150\n* STRENGTH: +120\n* SPEED +120```")
         section2.add_item(text2)
         # thummie = discord.ui.Thumbnail(self.bot.avatar.url)
         mediagal = discord.ui.MediaGallery()
         mediagal.add_item(media="attachment://D:\KoganeCGbot\images\dagon_womb.png")
+        
         section3 = discord.ui.Section(accessory=discord.ui.Thumbnail(self.bot.user.avatar.url))
         text3 = discord.ui.TextDisplay("### `Tech Boosts`\n"
                                         "- **Six Eyes:**\n```py\n* CE: + 1000\n* HP: + 300```\n- **Shrine:**\n```py\n* CE + 3000\n* HP: + 300```\n- **Limitless|Copy:**\n```py\n* CE: + 1000\n* HP: + 100```\n- **H.R:zero:**\n```py\n* CE: = 0\n* HP: + 300\n* SPEED: + 200\n* STRENGTH: + 200```")
@@ -272,13 +275,6 @@ class CreatePromptLayout(discord.ui.LayoutView):
         container.add_item(section2)
         container.add_item(discord.ui.Separator())
         container.add_item(section3)
-        self.spin = CreateButton(bot, playerdict)
-        container.add_item(discord.ui.Separator())
-        container.add_item(
-            discord.ui.Section( discord.ui.TextDisplay("### Press Button to Spin for random stats!"),
-                accessory=self.spin
-            )
-        )
         self.add_item(container)
         
         # self.remove_item(self.action_row)

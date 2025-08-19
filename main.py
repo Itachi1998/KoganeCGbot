@@ -78,4 +78,4 @@ async def layout(ctx: commands.Context):
     await ctx.send(view=Layout())
 
   
-bot.run("MTIwOTM3MjI1NTI3NzAzMTQ0NA.GBdXG6.VdmhoXv05A5yF-GJbx6NA7GnK7N4vZ0luZ8gOY")
+bot.run(token)
