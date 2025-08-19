@@ -167,8 +167,8 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     return target.hp, target.max_hp, body_dmg
     #endregion
     
-def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=False):
 # region get move
+def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=False):
     tech=None 
     is_player=False
     is_enemy=False

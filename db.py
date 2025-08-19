@@ -269,18 +269,38 @@ def read_enemy(colony_id: int, enemy_name: str):
 
 # update_player(user_id, colony_id, value={'cgp' : 200, 'speed' : 100, 'skp' : 200})
 def update_player(user_id, colony_id, value=None):
-   
+
+    print(user_id)
+    print(colony_id)
+    print(value)
+    
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if not existing_player:
             raise ValueError("Player does not exist")
-        
+
         for key, val in value.items():
-            setattr(existing_player, key, val)
+            old_val = getattr(existing_player, key)
+            if isinstance(old_val, int):
+                new_val = old_val + val
+                setattr(existing_player, key, new_val)
+            
+            else:
+                 setattr(existing_player, key, val)
 
         session.commit()
+        new_player = existing_player.__dict__
+        new_player['techniques'] = [
+                    {column.name: getattr(tech, column.name) for column in tech.__table__.columns}
+                    for tech in existing_player.techniques
+                ]
         session.close()
-        return existing_player
+        tech = new_player["techniques"][0]["name"]
+        new_player["technique"] = tech
+        del new_player["techniques"]
+        del new_player["id"]
+        del new_player['_sa_instance_state']
+        return new_player
 
      
 def update_colony(colony_id, value=None):

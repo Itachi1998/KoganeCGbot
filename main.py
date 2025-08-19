@@ -3,6 +3,7 @@ from db import read_player, read_enemy, read_colony # Import general dependencie
 from game import Player, Enemy
 from discord.ext import commands
 
+
 log_channel = os.getenv('LOGCHANNEL')
 token = os.getenv('TOKEN')
 intents = discord.Intents.default()
@@ -58,6 +59,7 @@ async def sync(ctx):
         fstring = f'User {ctx.author.id} ({ctx.author}) tried to sync commands but is not the owner in {ctx.guild.id} ({ctx.guild.name}) - {ctx.channel.id} ({ctx.channel.name}) '
         # await channel.send(fstring)
         print(fstring)
+ 
 
 
 class Layout(discord.ui.LayoutView):
@@ -77,5 +79,5 @@ class Layout(discord.ui.LayoutView):
 async def layout(ctx: commands.Context):
     await ctx.send(view=Layout())
 
-  
+ 
 bot.run(token)
