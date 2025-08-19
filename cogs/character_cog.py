@@ -308,7 +308,7 @@ class CreatePromptLayout(discord.ui.LayoutView):
         self.spin = CreateButton(bot, playerdict)
         section = discord.ui.Section(accessory=self.spin)
         
-        text1 = discord.ui.TextDisplay("### `Spin the button for your character`\n" + url + "\n"
+        text1 = discord.ui.TextDisplay("### `Spin the button for your character`\n"
                                        "### `Stat Ranges`\n```py\n* HP: 100 - 300\n* CE: 200 - 2000\n* STRENGTH: 50 - 200\n* SPEED: 50 - 200```")
         section2 = discord.ui.Section(accessory=discord.ui.Thumbnail(url))
         text2 = discord.ui.TextDisplay( "### `Class Boost`\n- **Curses:**\n```py\n* CE: +200\n* HP: +150\n* STRENGTH: +150\n* SPEED: +150```\n- **Sorcerers:**\n```py\n* CE: +50\n* HP: +100\n* STRENGTH: +100\n* SPEED: +100```"
