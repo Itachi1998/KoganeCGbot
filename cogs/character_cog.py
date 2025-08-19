@@ -158,7 +158,7 @@ class Character_cog(commands.Cog):
         embed.set_thumbnail(url=self.bot.user.avatar)
         embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
         embed.color=discord.Color.from_rgb(255, 0, 0)
-        await ctx.send(url, view=CreatePromptLayout(self.bot, self.playerdict))
+        await ctx.send(view=CreatePromptLayout(self.bot, self.playerdict))
         return
     
     @commands.hybrid_command(name="custom", description="Create your player in the culling games! (only one player per colony)")
@@ -306,7 +306,7 @@ class CreatePromptLayout(discord.ui.LayoutView):
         self.spin = CreateButton(bot, playerdict)
         section = discord.ui.Section(accessory=self.spin)
         
-        text1 = discord.ui.TextDisplay("### `Spin the button for your character`\n"
+        text1 = discord.ui.TextDisplay("### `Spin the button for your character`\n" + url + "\n"
                                        "### `Stat Ranges`\n```py\n* HP: 100 - 300\n* CE: 200 - 2000\n* STRENGTH: 50 - 200\n* SPEED: 50 - 200```")
         section2 = discord.ui.Section(accessory=discord.ui.Thumbnail(url))
         text2 = discord.ui.TextDisplay( "### `Class Boost`\n- **Curses:**\n```py\n* CE: +200\n* HP: +150\n* STRENGTH: +150\n* SPEED: +150```\n- **Sorcerers:**\n```py\n* CE: +50\n* HP: +100\n* STRENGTH: +100\n* SPEED: +100```"
