@@ -236,7 +236,10 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
             return new_barrier
         
         if "Heal" in defense:
-            new_defense = tech[player.technique][3]['RCT'][defense]
+            if is_player:
+                new_defense = tech[player.technique][3]['RCT'][defense]
+            elif is_enemy:
+                new_defense=tech[3]['RCT'][defense]
             player.defense = new_defense
             return new_defense
 
@@ -515,7 +518,7 @@ def tank_check(target, attack, defense, dmg, speed, defense_strength, defense_sp
             target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
             return ("hit", body_dmg, target_hp <= 0, target_maxhp <=0)
         else:
-            return("tank", dmg, target_hp<=0, target_maxhp <=0)
+            return("tank", dmg, target.hp<=0, target.max_hp <=0)
     
     else:
             activation_difference = attack.act_speed - defense.act_speed
@@ -554,8 +557,8 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
     
     if targ_invis:
         dmg = 0
-        print(f"{defense.name} (invisible) was able to dodge {attack.name}")
-        return ("hit", dmg, target.hp<=0, target.max_hp<=0)
+        target_hp, max_hp, body_dmg = damage_target(target=target, defense=defense, dmg=defense_strength, soul=counter_soul)
+        return ("counter", dmg, target.hp<=0, target.max_hp<=0)
 
     if attack_negated:
         dmg = 0

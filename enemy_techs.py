@@ -31,7 +31,7 @@ enemy_tech = {
              type="melee"
         )
     }},
-    {"Defense" : {
+    {"Defend" : {
         "Divine Claw" : 
          Techniques(
              name="Divine Claw",
@@ -77,7 +77,7 @@ enemy_tech = {
              type="melee"
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
        "Escape" : 
        Techniques(
             name="Escape",
@@ -126,7 +126,7 @@ enemy_tech = {
              charge=True,
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
        "Frog Grab" : 
        Techniques(
            name="Frog Grab",
@@ -172,7 +172,7 @@ enemy_tech = {
              type="melee"
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
        "Hitch A Ride" : 
        Techniques(
             name="Hitch A Ride",
@@ -206,7 +206,7 @@ enemy_tech = {
             type="melee"
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
        "Choke" : 
          Techniques(
             name="Choke",
@@ -252,7 +252,7 @@ enemy_tech = {
             type="melee"
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
         "Water Flood" : 
          Techniques(
             name="Water Flood",
@@ -298,7 +298,7 @@ enemy_tech = {
             type="melee"
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
         "Charge" : 
          Techniques(
             name="Charge",
@@ -332,7 +332,7 @@ enemy_tech = {
 #             type="melee"
 #          )
 #      }},
-#      {"Defense" : {
+#      {"Defend" : {
 #         "" : 
 #          Techniques(
 #             name="Water Flood",
@@ -368,7 +368,7 @@ enemy_tech = {
             debuff=("negate techs", 10) # negates or weakens techs
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
         "Positive Energy" : 
          Techniques(
             name="Positive Energy",
@@ -474,7 +474,7 @@ enemy_tech = {
             type="melee"
          )
      }},
-     {"Defense" : {
+     {"Defend" : {
         "Claw" : 
          Techniques(
             name="Claw",
@@ -522,7 +522,7 @@ enemy_tech = {
 #             type="melee"
 #          )
 #      }},
-#      {"Defense" : {
+#      {"Defend" : {
 #         "" : 
 #          Techniques(
 #             name="",
@@ -570,7 +570,7 @@ enemy_tech = {
             }
         },
         {
-            "Defense" : 
+            "Defend" : 
             {
                 "Energy Shield" : Techniques(
                     name="Energy Shield",
@@ -630,7 +630,7 @@ enemy_tech = {
                     )
                 }
             },
-            {"Defense" :         
+            {"Defend" :         
                 {"Foresight" : Techniques(
                     name="Orbmaster: Foresight",
                     level=1,
@@ -676,7 +676,7 @@ enemy_tech = {
                     )
                 }
             },
-            {"Defense" : 
+            {"Defend" : 
                 {"Charged Field" : Techniques(
                     name="Charger : Charged Field",
                     level=1,
@@ -723,7 +723,7 @@ enemy_tech = {
                     )
                 }
             },
-            {"Defense" :
+            {"Defend" :
                 {"Ammonia Cloud" : Techniques( # can cause skin burns, respitory damage and is highly flammable
                     name="Stinkaspore : Ammonia Cloud", 
                     level=1,
@@ -760,8 +760,8 @@ enemy_tech = {
                 }
             },
 
-            {"Defense" :
-                {"" : 
+            {"Defend" :
+                {"Tree Swing" : 
                  Techniques(
                     name="Swing around",
                     level=1,

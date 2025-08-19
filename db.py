@@ -54,8 +54,6 @@ def create_player(player):
             )
             session.add(new_user)
             
-        
-        
         # Flush to get the ID for the new player
         session.flush()
         
@@ -164,6 +162,7 @@ def create_vow(vow_data: dict):
             session.commit()
             session.close()
             return vow
+        
 # Update read_technique function to match new model
 def read_technique(player_id, value=None):
     with Session(engine) as session:
@@ -223,7 +222,6 @@ def read_player(user_id, colony_id, value=None):
                                  .options(joinedload(Player.techniques))\
                                  .filter_by(user_id=user_id, colony_id=colony_id)\
                                  .first()
-        
         if existing_player:
             if value:
                 player_dict = {column.name: getattr(existing_player, column.name) for column in existing_player.__table__.columns}
@@ -269,10 +267,13 @@ def read_enemy(colony_id: int, enemy_name: str):
             session.close()
             return False
 
+# update_player(user_id, colony_id, value={'cgp' : 200, 'speed' : 100, 'skp' : 200})
 def update_player(user_id, colony_id, value=None):
+
     print(user_id)
     print(colony_id)
     print(value)
+    
     with Session(engine) as session:
         existing_player = session.query(Player).filter_by(user_id=user_id, colony_id=colony_id).first()
         if not existing_player:
@@ -301,6 +302,7 @@ def update_player(user_id, colony_id, value=None):
         del new_player['_sa_instance_state']
         return new_player
 
+     
 def update_colony(colony_id, value=None):
      with Session(engine) as session:
           existing_colony= session.query(Colony).filter_by(colony_id=colony_id).first()
