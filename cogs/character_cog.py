@@ -10,7 +10,7 @@ import boto3
 s3_client = boto3.client('s3', region_name='us-east-1')
 
 s3_name = "cullinggame-images"
-url = s3_client.generate_presigned_url('get_object', Params={"Bucket":s3_name, "Key": "IMG_2120-3.png"})
+url = s3_client.generate_presigned_url('get_object', Params={"Bucket":s3_name, "Key": "IMG_2120-3.png"}, ExpiresIn=3600)
 #region List of Techniques and Classes
 sorcerer_techs = [
     player_tech.anti_gravity, 
