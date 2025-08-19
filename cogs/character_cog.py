@@ -158,7 +158,7 @@ class Character_cog(commands.Cog):
         embed.set_thumbnail(url=self.bot.user.avatar)
         embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
         embed.color=discord.Color.from_rgb(255, 0, 0)
-        await ctx.send(view=CreatePromptLayout(self.bot, self.playerdict))
+        await ctx.send(url, view=CreatePromptLayout(self.bot, self.playerdict))
         return
     
     @commands.hybrid_command(name="custom", description="Create your player in the culling games! (only one player per colony)")
