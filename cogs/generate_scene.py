@@ -14,7 +14,9 @@ class Generate(commands.Cog):
         self.call_lambda_and_save_image()
     
     def call_lambda_and_save_image(self):
-        """Invokes lambda functionm retrieves the merged image, and saves it locally."""
+        """Invokes lambda function, retrieves the merged image, and saves it locally."""
+        # It's good practice to create the client inside the method 
+        # if the cog is long-lived, to handle session expiration.
         client = boto3.client('lambda')
         payload = {"bucket_name": self.s3_bucket,
                    "image1_key" : self.img1,
@@ -26,16 +28,41 @@ class Generate(commands.Cog):
                 InvocationType='RequestResponse',
                 Payload=json.dumps(payload)
             )
+            
             if 'FunctionError' in response:
-                    error_payload = json.loads(response['Payload'].read())
-                    print(f"Lambda function returned an error: {error_payload}")
-                    return
-            response_payload=json.loads(response['Payload'].read())
+                error_payload = json.loads(response['Payload'].read())
+                print(f"Lambda function returned an error: {error_payload}")
+                return
+
+            # Read the streaming body from the Lambda response
+            response_body = response['Payload'].read()
+            
+            # The body is a JSON string, so we parse it into a Python dict
+            response_payload = json.loads(response_body)
+
+            # Your Lambda function likely returns a JSON object where the 
+            # image data is base64-encoded in a specific key.
+            # A common key name is 'body'. If your Lambda uses a different key,
+            # replace 'body' with the correct key name.
+            if 'body' in response_payload:
+                image_data_base64 = response_payload['body']
+            else:
+                # If you're unsure of the key, you might want to print the payload
+                # to inspect its structure.
+                print("Error: 'body' key not found in Lambda response. Full payload:", response_payload)
+                return
+
+            # Decode the base64 string into bytes
+            image_bytes = base64.b64decode(image_data_base64)
+
+            # Write the decoded bytes to the output file
             with open(self.output_file, 'wb') as f:
-                f.write(response_payload)
+                f.write(image_bytes)
+            
             print(f"Image saved to {self.output_file}")
+
         except Exception as e:
-             print(f"Error calling lambda function: {e}")
+             print(f"Error calling lambda function or processing its response: {e}")
         
     
 async def setup(bot):
