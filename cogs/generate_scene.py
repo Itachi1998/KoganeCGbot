@@ -15,8 +15,6 @@ class Generate(commands.Cog):
     
     def call_lambda_and_save_image(self):
         """Invokes lambda function, retrieves the merged image, and saves it locally."""
-        # It's good practice to create the client inside the method 
-        # if the cog is long-lived, to handle session expiration.
         client = boto3.client('lambda')
         payload = {"bucket_name": self.s3_bucket,
                    "image1_key" : self.img1,
@@ -34,36 +32,50 @@ class Generate(commands.Cog):
                 print(f"Lambda function returned an error: {error_payload}")
                 return
 
-            # Read the streaming body from the Lambda response
             response_body = response['Payload'].read()
             
-            # The body is a JSON string, so we parse it into a Python dict
-            response_payload = json.loads(response_body)
+            # --- DEBUGGING STEP 1: Print the raw response from Lambda ---
+            # This will show us exactly what the function is sending back.
+            print("Raw Lambda response body:", response_body)
 
-            # Your Lambda function likely returns a JSON object where the 
-            # image data is base64-encoded in a specific key.
-            # A common key name is 'body'. If your Lambda uses a different key,
-            # replace 'body' with the correct key name.
-            if 'body' in response_payload:
-                image_data_base64 = response_payload['body']
-            else:
-                # If you're unsure of the key, you might want to print the payload
-                # to inspect its structure.
-                print("Error: 'body' key not found in Lambda response. Full payload:", response_payload)
+            try:
+                response_payload = json.loads(response_body)
+            except json.JSONDecodeError:
+                print("Error: Failed to decode Lambda response as JSON. The response may not be in JSON format.")
                 return
 
-            # Decode the base64 string into bytes
-            image_bytes = base64.b64decode(image_data_base64)
+            # --- DEBUGGING STEP 2: Print the parsed payload ---
+            print("Parsed Lambda response (JSON):", response_payload)
 
-            # Write the decoded bytes to the output file
-            with open(self.output_file, 'wb') as f:
-                f.write(image_bytes)
-            
-            print(f"Image saved to {self.output_file}")
+            if 'body' in response_payload:
+                image_data_base64 = response_payload['body']
+                
+                # --- DEBUGGING STEP 3: Print the string we are about to decode ---
+                print("Attempting to decode this string:", image_data_base64)
+                
+                try:
+                    # A valid base64 string's length must be a multiple of 4.
+                    # This adds the required padding if it's missing.
+                    missing_padding = len(image_data_base64) % 4
+                    if missing_padding:
+                        image_data_base64 += '=' * (4 - missing_padding)
+                    
+                    image_bytes = base64.b64decode(image_data_base64)
+                    
+                    with open(self.output_file, 'wb') as f:
+                        f.write(image_bytes)
+                    
+                    print(f"Image successfully decoded and saved to {self.output_file}")
+
+                except Exception as e:
+                    print(f"Error during base64 decoding: {e}")
+                    print("This usually means the 'body' of the response is not a valid base64 string.")
+            else:
+                print("Error: 'body' key not found in Lambda response.")
 
         except Exception as e:
-             print(f"Error calling lambda function or processing its response: {e}")
-        return self.output_file
+             print(f"An unexpected error occurred: {e}")
+        
     
 async def setup(bot):
     await bot.add_cog(Generate(bot))
