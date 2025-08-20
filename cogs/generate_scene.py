@@ -3,7 +3,6 @@ from PIL import Image
 import discord
 from discord.ext import commands
 
-os.getenv("LOGCHANNEL")
 class Generate(commands.Cog):
     def __init__(self, bot):
         self.bot=bot
