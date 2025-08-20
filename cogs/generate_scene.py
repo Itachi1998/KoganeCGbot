@@ -9,7 +9,7 @@ class Generate(commands.Cog):
         self.s3_bucket= 'cullinggame-images'
         self.img1 = 'IMG_2120-3.png'
         self.img2 = 'IMG_3530.png'
-        self.img3 = "Studio-Project_-_2025-06-15T205543.786 (1).png"
+        self.img3 = "color-facade-factory-industry-energy-shipping-container-59287-pxhere.com.png"
 
     
     @commands.command()
