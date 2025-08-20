@@ -11,17 +11,18 @@ class Generate(commands.Cog):
         self.img1 = 'IMG_2120-3.png'
         self.img2 = 'IMG_3530.png'
         self.output_file='merged_image.png'
+        self.call_lambda_and_save_image()
     
-    def call_lambda_and_save_image(lambda_name, bucket_name, image1_key, image2_key, o_filename):
+    def call_lambda_and_save_image(self):
         """Invokes lambda functionm retrieves the merged image, and saves it locally."""
         client = boto3.client('lambda')
-        payload = {"bucket_name": bucket_name,
-                   "image1_key" : image1_key,
-                   "image2_key" : image2_key
+        payload = {"bucket_name": self.s3_bucket,
+                   "image1_key" : self.img1,
+                   "image2_key" : self.img2
                    }
         try:
             response = client.invoke(
-                FunctionName=lambda_name,
+                FunctionName=self.lambda_name,
                 InvocationType='RequestResponse',
                 Payload=json.dumps(payload)
             )
@@ -30,13 +31,12 @@ class Generate(commands.Cog):
                     print(f"Lambda function returned an error: {error_payload}")
                     return
             response_payload=json.loads(response['Payload'].read())
-            with open(o_filename, 'wb') as f:
+            with open(self.output_file, 'wb') as f:
                 f.write(response_payload)
-            print(f"Image saved to {o_filename}")
+            print(f"Image saved to {self.output_file}")
         except Exception as e:
              print(f"Error calling lambda function: {e}")
         
-        call_lambda_and_save_image(lambda_name=self.lambda_name, bucket_name=self.s3_bucket, image1_key=self.img1, image2_key=self.img2, o_filename=self.output_file)
     
 async def setup(bot):
     await bot.add_cog(Generate(bot))
