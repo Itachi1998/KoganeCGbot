@@ -19,15 +19,12 @@ class Generate(commands.Cog):
 
     async def call_lambda_and_send_image(self):
         """Invokes lambda function, retrieves the merged image, and sends it to the log channel."""
-        # It's better to create the client inside the method for thread safety with async
-        # and to allow for updated credentials if the bot runs for a long time.
         client = boto3.client('lambda')
         payload = {"bucket_name": self.s3_bucket,
                    "image1_key" : self.img1,
                    "image2_key" : self.img2
                    }
         try:
-            # boto3 calls are blocking, run them in an executor to avoid blocking the bot's event loop
             response = await self.bot.loop.run_in_executor(
                 None, 
                 lambda: client.invoke(
@@ -43,21 +40,39 @@ class Generate(commands.Cog):
                 return
 
             response_body = response['Payload'].read()
+            image_data_base64 = None
+
+            # Attempt to parse the response as JSON.
+            try:
+                # The response from Lambda invoke is often a JSON payload.
+                response_payload = json.loads(response_body)
+                
+                # Check for a 'body' key, common in API Gateway proxy responses.
+                # The body itself might be a JSON string, so we parse it again.
+                if 'body' in response_payload:
+                    try:
+                        image_data_base64 = json.loads(response_payload['body'])
+                    except (json.JSONDecodeError, TypeError):
+                         # If the body is not a JSON string, use it directly.
+                        image_data_base64 = response_payload['body']
+                else:
+                    # If no 'body', maybe the whole payload is the base64 string.
+                    # This is unlikely if it parsed as a dict, but we'll handle it.
+                    image_data_base64 = response_payload
+
+            except json.JSONDecodeError:
+                # If it's not JSON, assume the whole response body is the base64 string.
+                # We decode it to a string first.
+                image_data_base64 = response_body.decode('utf-8')
+
+            if not image_data_base64 or not isinstance(image_data_base64, str):
+                print(f"Error: Could not extract a valid base64 string from Lambda response. Got: {image_data_base64}")
+                return
 
             try:
-                response_payload = json.loads(response_body)
-            except json.JSONDecodeError:
-                print("Error: Failed to decode Lambda response as JSON. The response may not be in JSON format.")
-                # If the raw response might be the image, let's try to decode it.
-                image_data_base64 = response_body.decode('utf-8')
-            else:
-                 if 'body' in response_payload:
-                    image_data_base64 = response_payload['body']
-                 else:
-                    print("Error: 'body' key not found in Lambda response.")
-                    return
-            
-            try:
+                # Remove potential surrounding quotes from a stringified JSON payload
+                image_data_base64 = image_data_base64.strip('"')
+
                 # Add padding if required
                 missing_padding = len(image_data_base64) % 4
                 if missing_padding:
@@ -73,7 +88,6 @@ class Generate(commands.Cog):
                 log_channel = self.bot.get_channel(int(log_channel_id))
 
                 if log_channel:
-                    # Use io.BytesIO to send the raw bytes as a file
                     file = discord.File(io.BytesIO(image_bytes), filename='merged_image.png')
                     await log_channel.send("Generated Scene:", file=file)
                     print(f"Image successfully sent to channel {log_channel.name}")
