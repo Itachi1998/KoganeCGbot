@@ -3,6 +3,7 @@ from PIL import Image
 import discord
 from discord.ext import commands
 
+os.getenv("LOGCHANNEL")
 class Generate(commands.Cog):
     def __init__(self, bot):
         self.bot=bot
@@ -63,7 +64,7 @@ class Generate(commands.Cog):
 
         except Exception as e:
              print(f"Error calling lambda function or processing its response: {e}")
-        
+        return self.output_file
     
 async def setup(bot):
     await bot.add_cog(Generate(bot))
