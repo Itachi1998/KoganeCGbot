@@ -156,23 +156,23 @@ class Character_cog(commands.Cog):
         await ctx.send(view=CreatePromptLayout(self.bot, self.playerdict))
         return
     
-    # @commands.hybrid_command(name="custom", description="Create your player in the culling games! (only one player per colony)")
-    # async def custom(self, ctx, name: str=None, pclass: str=None, tech: str=None):
-    #     if not name:
-    #         name=ctx.author.display_name
-    #     self.playerdict["colony"] = ctx.guild.id
-    #     self.playerdict["name"] = name
-    #     embed= discord.Embed(title="Create a character", description= self.welcstr + name +
-    #     "\n## The first step in creating your character!"
-    #     "\n## Click the button to spin for your stats!")
-    #     embed.add_field(name="Stat Ranges", value="```python\n* HP: 100 - 300\n* CE: 200 - 2000\n* Strength: 50 - 200\n* Speed: 50 - 200"
-    #     "\n* Class: Sorcerer, Curse, Reincarnate ```")
-    #     embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
-    #     embed.set_thumbnail(url=self.bot.user.avatar)
-    #     embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
-    #     embed.color=discord.Color.from_rgb(255, 0, 0)
-    #     await ctx.send(embed= embed, view=CustomCreateButton(pclass, tech, embed, self.bot, self.playerdict, user=ctx.author.id))
-    #     return
+    @commands.hybrid_command(name="custom", description="Create your player in the culling games! (only one player per colony)")
+    async def custom(self, ctx, name: str=None, pclass: str=None, tech: str=None):
+        if not name:
+            name=ctx.author.display_name
+        self.playerdict["colony"] = ctx.guild.id
+        self.playerdict["name"] = name
+        embed= discord.Embed(title="Create a character", description= self.welcstr + name +
+        "\n## The first step in creating your character!"
+        "\n## Click the button to spin for your stats!")
+        embed.add_field(name="Stat Ranges", value="```python\n* HP: 100 - 300\n* CE: 200 - 2000\n* Strength: 50 - 200\n* Speed: 50 - 200"
+        "\n* Class: Sorcerer, Curse, Reincarnate ```")
+        embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
+        embed.set_thumbnail(url=self.bot.user.avatar)
+        embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
+        embed.color=discord.Color.from_rgb(255, 0, 0)
+        await ctx.send(embed=embed, view=CustomCreateButton(pclass, tech, embed, self.bot, self.playerdict, user=ctx.author.id))
+        return
     
     @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
     async def delete(self, ctx):
@@ -185,6 +185,11 @@ class Character_cog(commands.Cog):
             if existing_player:
                 playername = existing_player['name']
                 db.delete_player(user_id=ctx.author.id, colony_id=ctx.guild.id)
+
+                db.delete_technique(player_id=existing_player['user_id'])
+                if len(existing_user.players) <= 0:
+                    db.delete_user(user_id=ctx.author.id)
+
                 embed = discord.Embed(title="Deleted player", description=f"Deleted {playername} player from {ctx.guild.name}")
                 await ctx.send(embed=embed, ephemeral=True)
                 return
@@ -199,9 +204,13 @@ class Character_cog(commands.Cog):
             user = ctx.author
 
         player_dict, techlist = db.read_player(user_id=user.id, colony_id=ctx.guild.id)
-        technique = techlist[0]
-        techname = technique['name']
-        player_dict['technique'] = techname
+
+        # technique = player_dict['techniques'][0]
+        # techname = technique['name']
+        # del player_dict['techniques']
+        # del player_dict['id']
+        # player_dict['technique'] = techname
+
         player = Player(**player_dict)
 
         if not player:
@@ -229,11 +238,54 @@ class Character_cog(commands.Cog):
             embed.add_field(name="Exp", value="`" + str(player.xp) + "`", inline=True)
             embed.add_field(name="Skillpoints", value="`" + str(player.skp) + "`", inline=True)
             embed.add_field(name="Class", value="`" + player.playerclass + "`", inline=True)
-            embed.add_field(name="Technique", value="`" + techname + "`", inline=True)
+            embed.add_field(name="Technique", value="`" + player.technique + "`", inline=True)
             embed.add_field(name="Status", value="`Active`", inline=True)
             embed.set_author(name=user.display_name, url=user.avatar, icon_url=user.avatar)
             embed.set_thumbnail(url=self.bot.user.avatar)
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, ephemeral=True)
+            return
+        else:
+            await ctx.send("Player does not exist in this colony")
+            return
+
+
+    @commands.hybrid_command(name="mod", description="Modify player stats")
+    async def mod(self, ctx, stat: str=None, amount: int=None):
+
+        user = ctx.author
+
+        colony = ctx.guild.id
+        player_dict, techlist = db.read_player(user.id, colony)
+        player = Player(**player_dict)
+
+        if not player:
+            await ctx.send("Player does not exist")
+            return
+        
+        if not colony:
+            await ctx.send("You are not in a colony")
+            return
+        
+        if player.colony != colony:
+            await ctx.send("You are not in this colony")
+            return
+        
+        if player:
+            embed = discord.Embed(title=f"Player Profile", description="## Colony: `" + "`\n## " + player.name)
+            embed.add_field(name="Level", value="`" + str(player.level) + "`", inline=True)
+            embed.add_field(name="Health", value="`" + str(player.hp) + "`", inline=True)
+            embed.add_field(name="Energy", value="`" + str(player.ce) + "`", inline=True)
+            embed.add_field(name="Strength", value=f"`{player.strength}`", inline=True)
+            embed.add_field(name="Speed", value=f"`{player.speed}`", inline=True)
+            embed.add_field(name="Game Points", value=f"`{player.cgp}`")
+            embed.add_field(name="Exp", value="`" + str(player.xp) + "`", inline=True)
+            embed.add_field(name="Skillpoints", value="`" + str(player.skp) + "`", inline=True)
+            embed.add_field(name="Class", value="`" + player.playerclass + "`", inline=True)
+            embed.add_field(name="Technique", value="`" + player.technique + "`", inline=True)
+            embed.add_field(name="Status", value="`Active`", inline=True)
+            embed.set_author(name=user.display_name, url=user.avatar, icon_url=user.avatar)
+            embed.set_thumbnail(url=self.bot.user.avatar)
+            await ctx.send(embed=embed, view=ModView(self.bot, player, embed, stat, amount, colony, user), ephemeral=True)
             return
         else:
             await ctx.send("Player does not exist in this colony")
@@ -602,6 +654,50 @@ class CustomCreateButton(discord.ui.View):
             await itx.response.send_message("You cannot create more than one player per colony")
             return
         
+#endregion
+
+
+#region ModView
+class ModView(discord.ui.View):
+    def __init__(self, bot, player, embed, stat: str, amount: int, colony, user, timeout=30):
+        super().__init__(timeout=timeout)
+        self.bot=bot
+        self.player=player
+        self.embed=embed
+        self.stat=stat
+        self.amount=amount
+        self.colony=colony
+        self.user=user
+
+    @discord.ui.button(label="Mod", style=discord.ButtonStyle.primary)
+    async def mod(self, itx: discord.Interaction, btn: discord.Button):
+        player = self.player
+        embed = self.embed
+        stat = self.stat
+        amount = self.amount
+        colony = self.colony
+        user = self.user
+        
+        player_dict = update_player(user.id, colony, value={stat : amount})
+        player = Player(**player_dict)
+
+        embed = discord.Embed(title=f"Player Profile", description="## Colony: `" + "`\n## " + player.name)
+        embed.add_field(name="Level", value="`" + str(player.level) + "`", inline=True)
+        embed.add_field(name="Health", value="`" + str(player.hp) + "`", inline=True)
+        embed.add_field(name="Energy", value="`" + str(player.ce) + "`", inline=True)
+        embed.add_field(name="Strength", value=f"`{player.strength}`", inline=True)
+        embed.add_field(name="Speed", value=f"`{player.speed}`", inline=True)
+        embed.add_field(name="Game Points", value=f"`{player.cgp}`")
+        embed.add_field(name="Exp", value="`" + str(player.xp) + "`", inline=True)
+        embed.add_field(name="Skillpoints", value="`" + str(player.skp) + "`", inline=True)
+        embed.add_field(name="Class", value="`" + player.playerclass + "`", inline=True)
+        embed.add_field(name="Technique", value="`" + player.technique + "`", inline=True)
+        embed.add_field(name="Status", value="`Active`", inline=True)
+        embed.set_author(name=user.display_name, url=user.avatar, icon_url=user.avatar)
+        embed.set_thumbnail(url=self.bot.user.avatar)
+        
+        await itx.response.edit_message(embed=embed)
+        return
 #endregion
 
 
