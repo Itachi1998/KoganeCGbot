@@ -29,6 +29,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         wget \
         ca-certificates \
+        zlib1g \
     ; \
     rm -rf /var/lib/apt/lists/*
 
