@@ -9,6 +9,8 @@ class Generate(commands.Cog):
         self.s3_bucket= 'cullinggame-images'
         self.img1 = 'IMG_2120-3.png'
         self.img2 = 'IMG_3530.png'
+        self.img3 = "Studio-Project_-_2025-06-15T205543.786 (1).png"
+
     
     @commands.command()
     @commands.is_owner() # Optional: restricts this command to the bot owner
@@ -21,8 +23,9 @@ class Generate(commands.Cog):
         """Invokes lambda function, retrieves the merged image, and sends it to the log channel."""
         client = boto3.client('lambda')
         payload = {"bucket_name": self.s3_bucket,
-               "image1_key" : self.img1,
-               "image2_key" : self.img2
+               "image1" : self.img1,
+               "image2" : self.img2,
+                   "image3" : self.img3
                }
         try:
             response = await self.bot.loop.run_in_executor(
