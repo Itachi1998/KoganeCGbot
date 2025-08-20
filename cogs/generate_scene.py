@@ -1,4 +1,4 @@
-import boto3, json, base64, os, io
+import boto3, json, base64, os, io, PIL
 from PIL import Image
 
 
