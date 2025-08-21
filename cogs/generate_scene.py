@@ -26,8 +26,8 @@ class Generate(commands.Cog):
                "image1" : self.img1,
                "image2" : self.img2,
                    "image3" : self.img3,
-                   "text1" : "Comedian:\n    BE MY WIFI!",
-                'text2' : "Domain Expansion:\n   Deadly Sentence"
+                   "text1" : "Comedian:\nBE MY WIFI!",
+                'text2' : "Domain Expansion:\nDeadly Sentence"
                }
         try:
             response = await self.bot.loop.run_in_executor(
