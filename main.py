@@ -59,6 +59,6 @@ async def sync(ctx):
         fstring = f'User {ctx.author.id} ({ctx.author}) tried to sync commands but is not the owner in {ctx.guild.id} ({ctx.guild.name}) - {ctx.channel.id} ({ctx.channel.name}) '
         # await channel.send(fstring)
         print(fstring)
+ 
 
-        
 bot.run(token)

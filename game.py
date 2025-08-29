@@ -1,4 +1,4 @@
-import traceback, os
+import traceback, os, db
 import datetime
 from typing import Union, List, Optional
 import enum, random, sys
@@ -368,8 +368,11 @@ class Player(Actor):
             xp_needed = (self.level) * 32
         return (self.xp >= xp_needed, xp_needed)
 
-#     def save_to_db(self):
-#      save_player(self) #the imported save_player method from the database file
+def save_to_db(self, value=None):
+    if value == None:
+          db.save_player(self)
+    else:
+         updated_player = db.update_player(value)
 
 #endregion
 def check_for_image(name):
