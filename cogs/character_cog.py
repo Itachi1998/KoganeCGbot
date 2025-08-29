@@ -333,8 +333,8 @@ class CreatePromptLayout(discord.ui.LayoutView):
         container.add_item(section3)
         self.add_item(container)
         
-        # self.remove_item(self.action_row)
-        # self.add_item(self.action_row)
+        self.remove_item(self.action_row)
+        self.add_item(self.action_row)
 
     # @action_row.button(label="Spin", emoji="<a:slots:1364792630155804722>")
     # async def spin(self, itx: discord.Interaction, btn: discord.ui.Button):
