@@ -29,6 +29,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         wget \
         ca-certificates \
+        zlib1g \
     ; \
     rm -rf /var/lib/apt/lists/*
 
@@ -84,6 +85,9 @@ WORKDIR /kogane
 # copy in python and the built dependencies
 COPY --from=build-stage /python /
 COPY --from=build-stage /deps /deps
+# Copy zlib library from build-stage to final_stage
+COPY --from=build-stage /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu/libz.so.1
+
 
 # Copy application code from build stage
 COPY --from=build-stage /kogane /kogane
