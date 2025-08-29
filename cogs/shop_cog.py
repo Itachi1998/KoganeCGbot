@@ -121,6 +121,31 @@ def cursed_tool_shop():
     return name, price
 
 
+class CursedToolLayout(discord.ui.LayoutView):
+    def __init__(self, bot, msg):
+        container = discord.ui.Container(discord.ui.TextDisplay("# `Cursed Tool Shop`"))
+        container.add_item(discord.ui.Separator(spacing=discord.SeparatorSpacing.large))
+        
+        self.select = CursedToolSelect(msg, bot)
+        section = discord.ui.Section(accessory=self.select)
+        katana_title = discord.ui.TextDisplay("## `Katana <:soulsplit:1277632881640083456>`")
+        katana = cursed_tools["Katana"]
+        katana_info = discord.ui.TextDisplay(f"{katana.name}\n"
+                                                f"'Cost:' {katana.cost}\n"
+                                                f"'HP:' {katana.hp}\n"
+                                                f"'Max HP:' {katana.max_hp}\n"
+                                                f"'AOE:' {katana.aoe}\n",
+                                                f"'Strength:' {katana.strength}\n"
+                                                f"'Speed:' {katana.speed}\n"
+                                                f"'Type:' {katana.type}"
+                                                )
+        
+        section.add_item(katana_title)
+        section.add_item(katana_info)
+        container.add_item(section)
+        
+    
+
 class Shop(commands.Cog):
 
      def __init__(self, bot):
@@ -147,8 +172,10 @@ class Shop(commands.Cog):
         # name, price = cursed_tool_shop()
 
         # title = 'Cursed Tool Shop'
+        
+        await ctx.send(view=CursedToolLayout(self.bot, msg))
 
-        await msg.edit(view=CursedToolView(msg, ctx.author.id, self.bot))
+        #await msg.edit(view=CursedToolView(msg, self.bot))
         
         # img = get_image(image, name, price, title)
 
@@ -160,11 +187,11 @@ class Shop(commands.Cog):
 
 class CursedToolView(discord.ui.View):
 
-    def __init__(self, msg, id, bot):
+    def __init__(self, msg, bot):
         super().__init__(timeout=None)
         # self.add_item(Vow(msg, id, bot, color))
         # self.add_item(Rule(msg, id, bot, color))
-        self.add_item(CursedToolSelect(msg, id, bot))
+        self.add_item(CursedToolSelect(msg, bot))
 
 
 # class BvView(discord.ui.View):
@@ -219,11 +246,10 @@ class CursedToolView(discord.ui.View):
         # await msg.edit(view=CursedToolView(msg, self.id, self.bot, self.color))
 
 
-class CursedToolSelect(discord.ui.Select):
+class CursedToolSelect(discord.ui.ActionRow['CursedToolLayout']):
 
-    def __init__(self, msg, id, bot):
+    def __init__(self, msg, bot):
         self.msg = msg
-        self.id = id
         self.bot = bot
         #self.color = color
         cursed_tool_items = list(cursed_tools.values())
@@ -237,8 +263,8 @@ class CursedToolSelect(discord.ui.Select):
                 ) for tool_obj in cursed_tool_items
         ]
 
-        super().__init__(placeholder="Choose a cursed tool...",
-                         options=options)
+        super().__init__()
+        self.placeholder = 
 
     async def callback(self, itx: discord.Interaction):
         await itx.response.defer()
@@ -275,7 +301,7 @@ class CursedToolSelect(discord.ui.Select):
             await itx.followup.send(
                 content=f"You bought {name} for {price} points")
             await self.msg.edit(
-                view=CursedToolView(self.msg, self.id, self.bot))
+                view=CursedToolView(self.msg, self.bot))
             return
         else:
             await itx.followup.send(
