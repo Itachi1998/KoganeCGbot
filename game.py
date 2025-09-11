@@ -738,7 +738,7 @@ class SpecialGrade_NatureSpirit(Enemy):
                        speed=900, 
                        xp=1000, 
                        cgp=1, 
-                       technique="Nature Spirit", 
+                       technique="Natures Wrath", 
                        playerclass="curse",
                        bodyparts=human_body_parts,
                        timer=300,

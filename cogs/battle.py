@@ -16,7 +16,10 @@ def healthbar(health, max_health):
     dashes = "<:fullheart:1401327640018944070>" * filled_dashes
     if remainder > 0:
         dashes += "<:halfheart:1401327657060270160>"  # Add a half-heart emoji
-    percent = f"`{max(round((health / max_health) * 100), 0)}%`"
+    if health != 0:   
+        percent = f"`{max(round((health / max_health) * 100), 0)}%`"
+    else:
+        percent = 0
     # if '-' in percent:
     #     percent = "`0%`"
     bar = f"{dashes} {percent}"
@@ -28,7 +31,10 @@ def ce_bar(ce, max_ce):
     filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
     remainder = max_dashes - filled_dashes if ce > 0 else 0 # 1000 / 250 = 4 dashes - 3 = 1 remainder 
     dashes = "<:fullce:1401327669328740405>" * filled_dashes # emoji times number of dashes
-    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`" # 853 / 1000 = 0.853 * 100 = 85.3% rounded to 85%
+    if ce != 0:   
+        percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`" # 853 / 1000 = 0.853 * 100 = 85.3% rounded to 85%
+    else:
+        percent = 0
     if remainder > 0: # if remainder is greater than 0, add a half dash
         dashes += "<:halfce:1401327682540666951>" # Add a half-ce emoji
     bar = f"{dashes} {percent}" # return the bar with dashes and percent
@@ -623,8 +629,8 @@ class BattleView(discord.ui.View):
     async def summon_options(self, itx:discord.Interaction, btn:discord.ui.Button):
         lobby = self.lobby
         if lobby:
-            player, id = verify_player(itx.user.id, itx.guild.id)
-            tech = read_technique(id)
+            player = verify_player(itx.user.id, itx.guild.id)
+            tech = read_technique(player.user_id)
             teama = lobby.teamA
             teamb = lobby.teamB
             field = lobby.field
