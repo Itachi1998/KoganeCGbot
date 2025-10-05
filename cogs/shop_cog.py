@@ -20,6 +20,136 @@ async def setup(bot):
     await bot.add_cog(Shop_cog(bot))
 
 
+# #region cursed_tool_shop
+# def cursed_tool_shop():
+
+#     cursed_tool_items = list(cursed_tools.items())
+
+#     name = ""
+
+#     price = ""
+
+#     for key, value in cursed_tool_items:
+#         price += f"{value.cost}\n\n"
+#         name += f"{value.name}\n\n"
+
+#     return name, price
+# #endregion
+
+
+# #region CursedToolLayout
+# class CursedToolLayout(discord.ui.LayoutView):
+#     def __init__(self, bot, msg):
+#         container = discord.ui.Container(discord.ui.TextDisplay("# `Cursed Tool Shop`"))
+#         container.add_item(discord.ui.Separator(spacing=discord.SeparatorSpacing.large))
+        
+#         self.select = CursedToolSelect(msg, bot)
+#         section = discord.ui.Section(accessory=self.select)
+#         katana_title = discord.ui.TextDisplay("## `Katana <:soulsplit:1277632881640083456>`")
+#         katana = cursed_tools["Katana"]
+#         katana_info = discord.ui.TextDisplay(f"{katana.name}\n"
+#                                                 f"'Cost:' {katana.cost}\n"
+#                                                 f"'HP:' {katana.hp}\n"
+#                                                 f"'Max HP:' {katana.max_hp}\n"
+#                                                 f"'AOE:' {katana.aoe}\n",
+#                                                 f"'Strength:' {katana.strength}\n"
+#                                                 f"'Speed:' {katana.speed}\n"
+#                                                 f"'Type:' {katana.type}"
+#                                                 )
+        
+#         section.add_item(katana_title)
+#         section.add_item(katana_info)
+#         container.add_item(section)
+# #endregion 
+    
+
+# #region Shop command
+# class Shop(commands.Cog):
+
+#      def __init__(self, bot):
+#          self.bot = bot
+
+#      @commands.hybrid_command(name="shop", description="Shows the shop")
+#      async def shop(self, ctx):
+#         await ctx.defer()
+#         colony_Data = read_colony(ctx.guild.id)
+#         if colony_Data is None:
+#             await ctx.send("You are not in a colony")
+#             return
+        
+#         msg = await ctx.send(
+#             "Welcome to the shop! Buy cursed tools, vows, and rules here to help you achieve your goals!"
+#         )
+
+#         await ctx.send(view=CursedToolLayout(self.bot, msg))
+# #endregion
+
+
+# #region CursedToolSelect (action row)
+# class CursedToolSelect(discord.ui.ActionRow['CursedToolLayout']):
+
+#     def __init__(self, msg, bot):
+#         self.msg = msg
+#         self.bot = bot
+#         #self.color = color
+#         cursed_tool_items = list(cursed_tools.values())
+
+#         options = [
+#             discord.SelectOption(
+#                 label=f"{tool_obj.name}",
+#                 value=tool_obj.name,
+#                 description=
+#                 f"Price: {tool_obj.cost}, Strength: {tool_obj.strength}, Negates: {tool_obj.negates}, Durability: {tool_obj.max_hp}"
+#                 ) for tool_obj in cursed_tool_items
+#         ]
+
+#         super().__init__()
+#         #self.placeholder = 
+
+#     async def callback(self, itx: discord.Interaction):
+#         await itx.response.defer()
+
+#         # id = check_id(itx.user.id, self.id)
+#         # if not id:
+#         #     await itx.response.send_message(
+#         #         content="It is not your turn yet", ephemeral=True)
+
+#         #     return
+
+#         name = self.values[0]
+
+#         tool = cursed_tools[name]
+
+#         price = tool.cost
+        
+#         player_dict, techlist = read_player(itx.user.id, itx.user.guild.id, value=None)
+
+#         player = Player(**player_dict)
+
+#         if player is None:
+
+#             await itx.followup.send(content="Player not found", ephemeral=True)
+
+#             return
+
+#         if player.cgp >= price:
+#             player.cgp -= price
+#             player.inventory["Tools"][name]=tool 
+#             player.save_to_db()
+#             print(player.inventory)
+
+#             await itx.followup.send(
+#                 content=f"You bought {name} for {price} points")
+#             # await self.msg.edit(
+#             #     view=CursedToolView(self.msg, self.bot))
+#             return
+#         else:
+#             await itx.followup.send(
+#                 content=f"You don't have enough points to buy {name}.",
+#                 ephemeral=True)
+#             return
+        
+
 # png_dict = {
 #     'gray': 'images/grayshop.png',
 #     'blue': 'images/blueshop.png',
