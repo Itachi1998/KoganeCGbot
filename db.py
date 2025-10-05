@@ -166,6 +166,7 @@ def create_vow(vow_data: dict):
 # Update read_technique function to match new model
 def read_technique(player_id, value=None):
     with Session(engine) as session:
+        print("Searching for existing tech") # RETURNING FALSE?
         existing_tech = session.query(Technique).filter_by(
             player_id = player_id
         ).first()

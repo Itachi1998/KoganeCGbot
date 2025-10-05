@@ -173,7 +173,7 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
     is_player=False
     is_enemy=False
     if isinstance(player, Enemy):
-        if player.name in enemy_tech:
+        if player.playerclass == "summon":
             list_tech = [v for k, v in enemy_tech.items() if k == player.name]
             tech = list_tech[0]
             print(f"Enemy {player.name} has {player.technique} technique")
@@ -1052,11 +1052,11 @@ test_player3 = Player(
 #test_player3.inventory['Technique Inv']['Charges'] = {"Gojo" : 1}
 
 test_player2.defense = "Infinity"
-test_player3.defense = "Nail Storm"
+test_player3.defense = "Squeaky Hammer"
 
-enemy = game.SpecialGrade_FingerBearer()
+#enemy = game.Grade3_Furrpede()
+#shiki = summon_check("Nue", "shikigami")
 
-shiki = summon_check("Nue", "shikigami")
 results = battle_checks(test_player3, test_player2, "Nails", "Heal")
 print(results)
 #endregion

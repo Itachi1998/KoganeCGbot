@@ -50,9 +50,9 @@ reincarnate_techs = [
 
 curse_techs = [
     player_tech.disaster_flames, 
-    player_tech.disaster_plants, 
     player_tech.disaster_tides,
-    player_tech.idle_transfig, 
+    player_tech.idle_transfig,
+    player_tech.natures_wrath,  
     player_tech.projection_sorcery
     ]
 
