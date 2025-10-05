@@ -18,7 +18,7 @@ def random_pve_enemy(colony_id, lobby):
     
 
 async def load():
-    await bot.load_extension('cogs.battle')
+#     await bot.load_extension('cogs.battle')
     for filename in os.listdir('cogs'):
         if filename.endswith('.py'):
             
@@ -80,4 +80,4 @@ async def layout(ctx: commands.Context):
     await ctx.send(view=Layout())
 
  
-bot.run(token)
+bot.run("MTIwOTM3MjI1NTI3NzAzMTQ0NA.G6MHKd.SQ-ABi5jDaM4rXO7sU9WIWPXZL9-44XM2mPs5U")

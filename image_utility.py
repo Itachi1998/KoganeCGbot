@@ -1,25 +1,27 @@
 import boto3, json, base64, os, io
 
-
-async def attack_scene(attacker, target, lobby):
+lambda_name = "cullinggame-images"
+async def attack_scene(attacker, target, lobby, bot):
         """Invokes lambda function, retrieves the merged image, and sends it to the log channel."""
         client = boto3.client('lambda')
         payload={ 
                 
-                "bucket_name": "cullinggame-images",
+                "bucket_name": lambda_name,
                 
                 "image1" : lobby.background,
                 
                 "image2" : attacker.name,
                 
-                "image3" : target.name
+                "image3" : target.name,
+                "text1" : "Comedian:\n    BE MY WIFI!",
+                'text2' : "Domain Expansion:\n   Deadly Sentence"
                 
                 } 
         try:
-            response = await self.bot.loop.run_in_executor(
+            response = await bot.loop.run_in_executor(
                 None,
                 lambda: client.invoke(
-                FunctionName=self.lambda_name,
+                FunctionName=lambda_name,
                 InvocationType='RequestResponse',
                 Payload=json.dumps(payload)
                 )
