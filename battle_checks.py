@@ -1,6 +1,6 @@
 import game, random
 from summons import shikigami_list
-from game import Player, Enemy, KingOfCurses
+from game import Player, Enemy
 from player_tech import technique_list
 from enemy_techs import enemy_tech
 from cursed_tools import cursed_tools
@@ -216,17 +216,17 @@ def get_move(player, attack=None, defense=None, tools=None, aoe=False, target=Fa
             print("You can't heal on an attack move")
             return None
 
-        if is_player:
+        else:
             #print(f"Player {player.name} is using {attack}")
             #print(tech)
             new_attack = tech[player.technique][0]['Attack'][attack]
             return new_attack
         
-        if is_enemy:
-            #print(f"Enemy {player.name} is using {attack}")
-            #print(tech)
-            new_attack = tech[0]['Attack'][attack]
-            return new_attack
+        # if is_enemy:
+        #     #print(f"Enemy {player.name} is using {attack}")
+        #     #print(tech)
+        #     new_attack = tech[0]['Attack'][attack]
+        #     return new_attack
     
     if defense:
         print(f"Setting defense '{defense}' for {player.name}")
@@ -1054,9 +1054,9 @@ test_player3 = Player(
 test_player2.defense = "Infinity"
 test_player3.defense = "Squeaky Hammer"
 
-#enemy = game.Grade3_Furrpede()
+enemy = game.Reggie()
 #shiki = summon_check("Nue", "shikigami")
 
-results = battle_checks(test_player3, test_player2, "Nails", "Heal")
+results = battle_checks(enemy, test_player3, "Knife Receipt", "Squeaky Hammer")
 print(results)
 #endregion

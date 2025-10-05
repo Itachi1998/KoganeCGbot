@@ -561,6 +561,50 @@ boogie_woogie = {
 }
 # endregion
 
+# region Bugfly
+bugfly={  
+"Bugfly" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Swat" :
+                         Techniques(
+                              name="Swat",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="melee"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Swat" :
+                         Techniques(
+                              name="Swat",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
 # region Charger
 charger={  
 "Charger" :
@@ -942,6 +986,50 @@ construction={
 ],
 "Rarity" : 15, 
 "Six Eyes" : False
+}
+# endregion
+
+# region Contractual Recreation
+contractual_recreation={  
+"Contractual Recreation" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Knife Receipt" :
+                         Techniques(
+                              name="Knife Receipt",
+                              level=1,
+                              act_speed=3,                              
+                              act_cost=20,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=600,
+                              speed=400,
+                              type="melee"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Knife Receipt" :
+                         Techniques(
+                              name="Knife Receipt",
+                              level=1,
+                              act_speed=3,                              
+                              act_cost=20,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=600,
+                              speed=400,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 10
 }
 # endregion
 
@@ -1525,6 +1613,96 @@ finger_bearer={
                          speed=200,
                          type="dodge"
                     )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
+# region Floatjelly
+floatjelly={  
+"Floatjelly" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Sting" :
+                         Techniques(
+                              name="Sting",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="melee",
+                              poison=(1, 2)
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Sting" :
+                         Techniques(
+                              name="Sting",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="counter",
+                              poison=(1, 2)
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
+# region Flymouth
+flymouth={  
+"Flymouth" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Chomp" :
+                         Techniques(
+                              name="Chomp",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Head"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="melee"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Chomp" :
+                         Techniques(
+                              name="Chomp",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Head"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="counter"
+                         )
                }
           }
      ],
@@ -2760,7 +2938,6 @@ shrine={
 # endregion
 
 # region Sky Manipulation
-
 sky_manip={
      
 "Sky Manipulation" :
@@ -3329,10 +3506,10 @@ ten_shadows={
 
 technique_list = [
                     anti_gravity, anxious_ears, auspicious_beasts_summon, barehand, bird_manip, 
-                    blood_manip, body_hop, boogie_woogie, charger, ce_discharge, 
-                    comedian, construction, copy, cursed_speech, cursed_spirit_manip, 
+                    blood_manip, body_hop, boogie_woogie, bugfly, charger, ce_discharge, 
+                    comedian, construction, contractual_recreation, copy, cursed_speech, cursed_spirit_manip, 
                     disaster_flames, disaster_tides, explosive_flesh, finger_bearer, 
-                    furrpede, hr_max, hr_zero, ice_manip, idle_transfig, limitless, 
+                    floatjelly, flymouth, furrpede, hr_max, hr_zero, ice_manip, idle_transfig, limitless, 
                     mba, natures_wrath, orbmaster, primate, projection_sorcery, 
                     shrine, sky_manip, star_rage, stinkaspore, straw_doll, ten_shadows
                ]
