@@ -1,6 +1,6 @@
 from techniques import Techniques
 
-enemy_tech = { #techs with a * have been added to player_tech.py
+enemy_tech = { #techs with a * have been added to player_tech.py - leaving summon techs in here
 #region Divine Dog
 "Divine Dog" : 
 [

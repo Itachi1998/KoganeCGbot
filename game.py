@@ -420,7 +420,7 @@ Grade4_Bugfly.min_level = 1
 class  Grade4_Floatjelly(Enemy):
     def __init__(self):
           super().__init__(
-             name="FloatJelly", 
+             name="Floatjelly", 
              level=1, 
       
              max_hp=20, 
@@ -446,11 +446,11 @@ if image:
 Grade4_Floatjelly.grade = 1
 Grade4_Floatjelly.min_level=1
 #region Flymouth
-class Grade4_Mouthbat(Enemy):
+class Grade4_Flymouth(Enemy):
     min_level= 1
     def __init__(self):
           super().__init__(
-             name="Mouthbat", 
+             name="Flymouth", 
              level="1", 
              max_hp=30, 
              max_ce=20, 
@@ -468,12 +468,12 @@ class Grade4_Mouthbat(Enemy):
           self.hp = self.max_hp
           self.ce = self.max_ce
 #endregion
-Grade4_Mouthbat.grade = 1
-Grade4_Mouthbat.min_level=1
+Grade4_Flymouth.grade = 1
+Grade4_Flymouth.min_level=1
 
 image = check_for_image("mouthbat_spirit")
 if image:
-     Grade4_Mouthbat.image_path = image
+     Grade4_Flymouth.image_path = image
 
 #region Barehand
 class Grade3_Barehand(Enemy):
@@ -842,7 +842,7 @@ class Reggie(Enemy):
                            speed=800,
                            xp=1000,
                            cgp=5,
-                           technique="Reggie",
+                           technique="Contractual Recreation",
                            playerclass="Reincarnate",
                            bodyparts=human_body_parts,
                            timer=300,
@@ -866,7 +866,7 @@ class Uro(Enemy):
                                    speed=1200,
                                    xp=1000,
                                    cgp=5,
-                                   technique="Uro",
+                                   technique="Sky Manipulation",
                                    playerclass="Reincarnate",
                                    bodyparts=human_body_parts,
                                    timer=300,
