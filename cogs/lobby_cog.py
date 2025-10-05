@@ -565,7 +565,7 @@ class Lobby_Cog(commands.Cog):
              embed= discord.Embed(title="Error reading player", description="Player not found. Use /create or ,create to create a player in a colony!")
              await ctx.send(embed=embed, ephemeral=True)
              return False
-        invited = [ctx.author.id]
+        invited=[ctx.author.id]
         thread = await ctx.channel.create_thread(name=name, type=discord.ChannelType.private_thread,
                                                       auto_archive_duration=1440, reason="## Lobby created " + name)
         await thread.add_user(ctx.author)
@@ -751,13 +751,17 @@ class Lobby_Cog(commands.Cog):
                         await ctx.send("Battle cog not found.")
                         await ctx.channel.send(embed=embed)
                         return
+                    
                     view = battle_cog.BattleView(lobby, self.bot)
+
                     lobby.feed = [{
                           'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
                           'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
                           'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
                           }]
-                    await ctx.send(embed=embed, view=view)
+                    
+                    await ctx.send(view=view)
+
                     return
                 else:
                     await ctx.send("`Lobby is already in battle`")
@@ -1001,29 +1005,44 @@ class LobbyView(discord.ui.View):
         if itx.channel.id == thread.id:
             if itx.user.id == lobby.owner:
                 if lobby.status == 1:
+                    
                     lobby.round = 0
+                    
                     embed, lobby = start_round_embed(lobby, self.bot)
+                    
                     battle_cog = self.bot.get_cog("Battle")
+                    
                     if battle_cog is None:
                         await itx.response.send_message("Battle cog not found.")
                         return
+                    
                     view = battle_cog.BattleView(lobby, self.bot)
+                    
                     lobby.feed = [{
                           'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
                           'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
                           'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
                           }]
+                    
                     await itx.response.send_message(embed=embed, view=view)
+
+                    
                     return
                 else:
+                    
                     await itx.response.send_message("`Lobby is already in battle`", ephemeral=True)
+                    
                     return
             else:
+                
                 await itx.response.send_message("You are not the owner of this lobby", ephemeral=True)
+                
                 return
         
         else:
+            
             await itx.response.send_message("You are not in a lobby", ephemeral=True)
+            
             return
     
     @discord.ui.button(label="Change Name", style=discord.ButtonStyle.blurple)

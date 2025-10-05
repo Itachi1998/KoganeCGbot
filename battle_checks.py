@@ -335,7 +335,8 @@ def attack_verify(player, target, attack, aoe=False):
 
     else:
         print("Attack verified!")
-        player.ce -= attack.act_cost + player.imbue
+        
+        player.ce -= attack.act_cost + player.imbue['strength'] + player.imbue['speed']
         return attack
     
 
@@ -366,53 +367,85 @@ def defense_verify(target, player, defense, aoe=False):
 
     else:
         print("Defense verified!")
-        target.ce -= defense.act_cost + target.imbue
+
+        target.ce -= defense.act_cost + target.imbue['strength'] + player.imbue['speed']
         return defense
     
 # endregion
 
 # region type increment
 def type_increment(player, attack=None, defense=None, tools=None):
-
+    buffs = {'attack': {'strength' : {}, 'speed' : {}}, 'defense': {'strength' : {}, 'speed': {}}}
     if attack:
         print(f"Incrementing {attack.name} stats...")
-
         if attack.type == 'melee':
             if tools:
                 for item in tools:
-                    dmg = attack.strength + item.strength + player.strength + player.imbue
-                    speed = attack.speed + item.speed + player.speed + player.imbue
-                return dmg, speed, tools
+                    dmg = attack.strength + item.strength + player.strength + player.imbue['strength']
+                    buffs['attack']['strength']['tool'] = item.strength
+                    buffs['attack']['strength']['imbue'] = player.imbue['strength']
+                    buffs['attack']['strength']['physical'] = player.strength
+                    # playful cloud gets strength buffed based on both player strength and speed
+                    # dragonbone gets strength buffed based on player speed 
+                    speed = attack.speed + item.speed + player.speed + player.imbue['speed']
+                    buffs['attack']['speed']['physical'] = player.speed
+                    buffs['attack']['speed']['imbue'] = player.imbue['speed']
+                player.imbue['strength'] = 0
+                player.imbue['speed'] = 0
+                return dmg, speed, buffs, tools
             else:
-                dmg = attack.strength + player.imbue + player.strength
-                speed = attack.speed + player.imbue + player.speed
-        
-        if attack.type == 'projectile':
-            dmg = attack.strength + player.imbue
-            speed = attack.speed + player.imbue
-        else:
-            dmg = attack.strength
-            speed = attack.speed
+                dmg = attack.strength + player.imbue['strength'] + player.strength
+                speed = attack.speed + player.imbue['speed'] + player.speed
+                # bf = black_flash_check(player) 
+                # implement black flash counter to lobby feed and player
+                # if bf:
+                #     buffs['attack']['black flash'] = bf
+                buffs['attack']['strength']['physical']= player.strength
+                buffs['attack']['strength']['imbue'] = player.imbue['strength']
+                buffs['attack']['speed']['imbue'] = player.imbue['speed']
+                buffs['attack']['speed']['physical'] = player.speed
 
-        return dmg, speed
-    
+        elif attack.type == 'projectile':
+            dmg = attack.strength + player.imbue['strength']
+            speed = attack.speed + player.imbue['speed']
+            buffs['attack']['strength']['imbue'] = player.imbue['strength']
+            buffs['attack']['speed']['imbue'] = player.imbue['speed']
+        
+        player.imbue['strength'] = 0
+        player.imbue['speed'] = 0
+        return dmg, speed, buffs
+
     if defense:
         print(f"Incrementing {defense.name} stats...")
         if defense.type == 'tank' or defense.type == 'counter' or defense.type == 'dodge':
-            defense_strength = defense.strength + player.imbue + player.strength
-            defense_speed = defense.speed + player.imbue + player.speed
-            
+            defense_strength = defense.strength + player.imbue['strength'] + player.strength
+            buffs['defense']['strength']['physical'] = player.strength
+            # think about implementing different counter types i.e: 'counter melee' 'counter projectile' 'counter barrier'
+            buffs['defense']['strength']['imbue'] = player.imbue['strength']
+            defense_speed = defense.speed + player.imbue['speed'] + player.speed
+            buffs['defense']['speed']['physical'] = player.speed
+            buffs['defense']['speed']['imbue'] = player.imbue['speed']
+
             if tools:
                 for item in tools:
                     defense_strength += item.strength
+                    buffs['defense']['strength']['tool'] = item.strength
                     defense_speed += item.speed
-                return defense_strength, defense_speed, tools
+                    buffs['defense']['speed']['tool'] = item.speed
+                return defense_strength, defense_speed, buffs, tools
+        if defense.type == 'heal':
+            defense_strength = defense.strength + player.imbue['strength'] + player.strength
+            buffs['defense']['strength']['physical'] = player.strength
+            buffs['defense']['strength']['imbue'] = player.imbue['strength']
+            defense_speed = defense.speed + player.imbue['speed'] + player.speed
+            buffs['defense']['speed']['physical'] = player.speed
+            buffs['defense']['speed']['imbue'] = player.imbue['speed']
 
-        else:
-            defense_strength = defense.strength
-            defense_speed = defense.speed
+        # else:
+        #     defense_strength = defense.strength
+        #     defense_speed = defense.speed
 
-        return defense_strength, defense_speed
+        return defense_strength, defense_speed, buffs
 #endregion
       
 # region visibility checks
@@ -795,6 +828,7 @@ def battle_aoe_check(player, targets, attack_str=None, defense=None):
 def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=False):      
         tools=None
         target_tools=None
+        buffs = None
         if aoe:
             attack = attack_verify(player, target, attack_str, aoe=True)
             defense = defense_verify(target, player, defense_str, aoe=True)
@@ -823,7 +857,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
 
         # player increment
         if tools:
-            dmg, speed, items = type_increment(player, attack=attack, tools=tools)  
+            dmg, speed, buffs, items = type_increment(player, attack=attack, tools=tools)  
             for item in items:
                 print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed} with item {item.name}")
                 if item.negates:
@@ -843,18 +877,18 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
                     print(f"{item.name} has a poison of {item.poison}")
 
         if attack.type == 'amp':
-            dmg, speed = type_increment(player, attack=attack)
+            dmg, speed, buffs = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed}")
             results = barrier_checks(player, target, defense, attack, dmg)
         
         else:
             print(f"Attack {attack.name} has a base damage of {attack.strength} and base speed of {attack.speed}")
-            dmg, speed = type_increment(player, attack=attack)
+            dmg, speed, buffs = type_increment(player, attack=attack)
             print(f"Attack {attack.name} has a incremented damage of {dmg} and incremented speed of {speed}")
 
         # target increment
         if target_tools:
-            defense_strength, defense_speed, items = type_increment(defense=defense, tools=target_tools)
+            defense_strength, defense_speed, buffs, items = type_increment(defense=defense, tools=target_tools)
          
             for item in items:
                 print(f"Defense {defense.name} has a base damage of {defense.strength} and speed of {defense.speed} with item {item.name}")
@@ -866,13 +900,13 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
                     print(f"{item.name} has a soul defense of {soul_defense}")
 
         if defense.type == 'amp':
-            defense_strength, defense_speed = type_increment(target, defense=defense)
+            defense_strength, defense_speed, buffs = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has an incremented defense of {defense_strength} and incremented speed of {defense_speed}")
             results = barrier_checks(player, target, attack, dmg, speed, defense, defense_strength)
         
         else:
             print(f"Defense {defense.name} has a base defense of {defense.strength} and base speed of {defense.speed}")
-            defense_strength, defense_speed = type_increment(target, defense=defense)
+            defense_strength, defense_speed, buffs = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has a incremented defense of {defense_strength} and incremented speed of {defense_speed}") 
     #endregion
 
@@ -923,35 +957,35 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             if defense.type == 'open' or defense.type == 'closed':
                 print(f"{defense.name} 'domain clash' against {attack.name}...")    
                 results = domain_clash(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
-                return results
+                return results, buffs
             else:
                 print(f"{attack.name} 'barrier check' with defense {defense.name}...")    
                 results = barrier_checks(player, target, attack, dmg, speed, defense, defense_strength)
-                return results
+                return results, buffs
         
         # tank check
         if defense.type == 'tank' or defense.type == 'heal':
             print(f"{defense.name} 'tank check' against {attack.name}...")
             results = tank_check(target, attack, defense, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated, soul_defense=soul_defense)
-            return results
+            return results, buffs
         
         # counter check
         if 'counter' in defense.type:
             print(f"{defense.name} 'counter check' against {attack.name}...")
             results = counter_check(target, player, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, atk_invis, attack_negated, defense_negated)
-            return results
+            return results, buffs
         
         # dodge check
         if defense.type == 'dodge':
             print(f"{defense.name} 'dodge check' against {attack.name}...")
             results = dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_speed, targ_invis, attack_negated, defense_negated)
-            return results   
+            return results, buffs   
         
         # barrier defense check
         else:
             print(f"{defense.name} 'barrier check' with attack {attack.name}...")    
             results = barrier_checks(player, target, attack, dmg, speed, defense, defense_strength)
-            return results
+            return results, buffs
         #endregion
 #endregion
 
@@ -993,7 +1027,7 @@ test_player2= Player(
     skp=0,
     user_id=0,
     grade=5,
-    imbue=0
+    imbue={'strength': 50, 'speed': 50}
 )
 
 test_player3 = Player(
@@ -1012,7 +1046,7 @@ test_player3 = Player(
     skp=0,
     user_id=0,
     grade=3,
-    imbue=0
+    imbue={'strength': 50, 'speed': 50}
 )
 
 #test_player3.inventory['Technique Inv']['Charges'] = {"Gojo" : 1}

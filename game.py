@@ -149,9 +149,8 @@ class Player(Actor):
     def __init__(self, 
                     name, entered, level, max_hp, max_ce, strength, 
                     speed, technique, playerclass, colony_id, 
-
                     xp: int, cgp: int, skp: int, user_id: int,
-                    stack=0, imbue=0,
+                    stack=0, imbue={'speed':0, 'strength':0},
                     defense: str="CE", 
                     inventory={"Technique Inv" : {}, "Tools" : {}, "Summon" : {}, "Binding Vows" : {}, "Rules" : {}},
                     equipped: list=None,
