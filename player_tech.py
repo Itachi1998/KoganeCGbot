@@ -2019,7 +2019,7 @@ mba={
           {
                "Attack" : 
                {
-                    "Lighting Dash" :
+                    "Lightning Dash" :
                         Techniques(
                             name="Lightning Dash",
                             level=1,

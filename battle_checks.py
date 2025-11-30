@@ -341,7 +341,11 @@ def attack_verify(player, target, attack, aoe=False):
     
 
 def defense_verify(target, player, defense, aoe=False):
+    if defense == None:
+        print("No defense selected")
+        return None
     print("Verifying defense '" + defense + "' for " + target.name)
+    
     defense = get_move(target, defense=defense)
 
     # if target.ce < defense.act_cost:
@@ -367,8 +371,13 @@ def defense_verify(target, player, defense, aoe=False):
 
     else:
         print("Defense verified!")
-
-        target.ce -= defense.act_cost + target.imbue['strength'] + player.imbue['speed']
+        if target.imbue:
+            if isinstance((target.imbue), int):
+                amount = target.imbue
+                target.imbue = {'strength': amount, 'speed': amount}
+            target.ce -= defense.act_cost + target.imbue['strength'] + target.imbue['speed']
+        else:
+            target.ce -= defense.act_cost
         return defense
     
 # endregion
@@ -418,6 +427,9 @@ def type_increment(player, attack=None, defense=None, tools=None):
     if defense:
         print(f"Incrementing {defense.name} stats...")
         if defense.type == 'tank' or defense.type == 'counter' or defense.type == 'dodge':
+            if isinstance(player.imbue, int):
+                amount = player.imbue
+                player.imbue = {'strength': amount, 'speed': amount}
             defense_strength = defense.strength + player.imbue['strength'] + player.strength
             buffs['defense']['strength']['physical'] = player.strength
             # think about implementing different counter types i.e: 'counter melee' 'counter projectile' 'counter barrier'
@@ -854,9 +866,12 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
         speed = 0
     
     # region conditional increments
-
+        if attack.type == "summon":
+            print("summon")
+            
         # player increment
         if tools:
+            print("Tool detected... incrementing attack stats with tools")
             dmg, speed, buffs, items = type_increment(player, attack=attack, tools=tools)  
             for item in items:
                 print(f"Attack {attack.name} has a base damage of {dmg} and speed of {speed} with item {item.name}")
@@ -908,6 +923,7 @@ def battle_checks(player, target, attack_str, defense_str, tech_vow=None, aoe=Fa
             print(f"Defense {defense.name} has a base defense of {defense.strength} and base speed of {defense.speed}")
             defense_strength, defense_speed, buffs = type_increment(target, defense=defense)
             print(f"Defense {defense.name} has a incremented defense of {defense_strength} and incremented speed of {defense_speed}") 
+
     #endregion
 
     # region conditional checks
