@@ -741,6 +741,7 @@ class Lobby_Cog(commands.Cog):
         lobby = self.lobbies[ctx.channel.id]["Lobby"]
         lobby.status = 1
         lobby.ready = []
+        print(lobby.field)
         if ctx.channel.id in self.lobbies.keys():
             if ctx.author.id == lobby.owner:
                 if lobby.status == 1:

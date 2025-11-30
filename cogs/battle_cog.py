@@ -102,83 +102,45 @@ def get_player_feed(player, team, lobby, type):
         return False
     
 def get_valid_targets(feed, team, player, lobby):
-        is_npc = False
-        is_player = False
-        chosen_enemies = None
-        if hasattr(player, "user_id"):
-             is_player = True
-        if is_player:
-            chosen_enemies = feed[player.user_id]['targets'] if player.user_id in feed else []
-        if is_npc:
-             chosen_enemies = feed[player.name]['targets'] if player.name in feed else []
-        targets = []
-        teamA = lobby.teamA
-        teamB = lobby.teamB
+    print(lobby)
+    print(feed)
+    print(team)
+    print(player)
+    is_player = hasattr(player, "user_id")
+    chosen_enemies = feed.get(player.user_id if is_player else player.name, {}).get('targets', [])
+    if not chosen_enemies:
+        chosen_enemies = []
+    targets = []
+    teamA = lobby.teamA
+    teamB = lobby.teamB
 
-        if 'name' in team.keys():
-                
-                if team['name'] == teamA['name']:
-                        for p in teamB['players']:
-                            if not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                                        targets.append(p)
-                elif team['name'] == teamB['name']:
-                        for p in teamA['players']:
-                            if not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                                    targets.append(p)
+    if 'name' in team:
+        opposing_team = teamB if team['name'] == teamA['name'] else teamA
+        for p in opposing_team['players']:
+            if p.name not in [e.name for e in chosen_enemies]:
+                targets.append(p)
 
-                for p in lobby.field.values():
-                    print("Checking target: " + str(p))
-                    if is_player:
-                        if hasattr(p, 'user_id') and p.user_id == player.user_id:
-                            continue
-                        elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                            targets.append(p)
+    for p in lobby.field.values():
+        if is_player and hasattr(p, 'user_id') and p.user_id == player.user_id:
+            continue
+        if not is_player and p.name == player.name:
+            continue
+        if p.name not in [e.name for e in chosen_enemies]:
+            targets.append(p)
 
-                    elif is_npc:
-                        if p.name == player.name:
-                              continue
-                        elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                             targets.append(p) 
-                         
-                    
-                return targets
-        
-        else:
-            for p in lobby.field.values():
-                    print("Checking target: " + str(p))
-                    if is_player:
-                        if hasattr(p, 'user_id') and p.user_id == player.user_id:
-                            continue
-                        elif not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                            targets.append(p)
-                    if is_npc:
-                        if p.name == player.name:
-                              continue
-                        else:
-                            if not chosen_enemies or p.name not in [p.name for p in chosen_enemies]:
-                                 targets.append(p) 
-
-                    for tar in teamA['players'] :
-                        if is_player:
-                            if tar.user_id == player.user_id:
-                                continue
-
-                            elif not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
-                                    targets.append(tar)
-                        if is_npc:
-                             if not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
-                                  targets.append(tar)
-
-                    for tar in teamB['players']:
-                        if is_player:
-                            if tar.user_id == player.user_id:
-                                    continue
-                            elif not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
-                                targets.append(tar)
-                        if is_npc:
-                            if not chosen_enemies or tar.name not in [p.name for p in chosen_enemies]:
-                                 targets.append(tar)
-                    return targets
+    if 'name' not in team:
+        for tar in teamA['players'] + teamB['players']:
+            if is_player and tar.user_id == player.user_id:
+                continue
+            if not is_player and tar.name == player.name:
+                continue
+            if tar.name not in [e.name for e in chosen_enemies]:
+                targets.append(tar)
+    print("Chosen enemies:")
+    print(chosen_enemies)
+    print("Valid targets:")
+    print(targets)
+    return targets
 
 
 # def target_layout(player, lobby, type):
@@ -274,10 +236,10 @@ def get_npc_random_attack(lobby):
             attack_field_feed[enemy_name] = {'target' : rand_targ}
             technique=None
             for tech in enemy_tech:
-                if tech.name == enemy_player.technique:
+                if tech == enemy_player.technique:
                       technique = tech
             for ptec in technique_list:
-                if ptec.name == enemy_player.technique:
+                if ptec == enemy_player.technique:
                      technique=ptec
             # think about summons and joining all the techniques in one file
             # different summon techniques should have different abilities
@@ -311,13 +273,22 @@ def get_npc_random_defense(target):
 #region battle format
 def format_battle_result(attacker, target, attack_move, defense_move, results):
     # Format the battle result for display.
-    result_str = "`" + attacker.name + ":` " + attack_move.name + "\n"
-    result_str += "`" + target.name + ":` " + defense_move.name + "\n"
+    if defense_move:
+        result_str = "`" + attacker.name + ":` " + attack_move.name + "\n"
+        result_str += "`" + target.name + ":` " + defense_move.name + "\n"
+    else:
+         result_str = "`" + attacker.name + ":` " + attack_move.name + "\n"
+         result_str += "`" + target.name + ":` No Defense\n"
     # results structure : ("name", damage, killed, soul_damage)
-    result = results[0]
-    killed = results[2]
-    damage = results[1]
-
+    if results:
+        og_results = results[0]
+        buffs = results[1]
+        
+        result = og_results[0]
+        killed = og_results[2]
+        damage = og_results[1]
+    else:
+         return "No results available"
     if result == 'hit':
         result_str += "`" + attacker.name +  "` hit `" + target.name + "`\n" + "Damage taken: " + str(damage) + "\n"
         if killed:
@@ -393,6 +364,7 @@ def simulation_embed(lobby, round_num):
     defenses = round_feed.get('defenses', {})
     melee = round_feed.get('melee', {})
     summons = round_feed.get('summons', {})
+    transformations = round_feed.get('transformations', {})
     heal = round_feed.get('heal', {})
     #Set NPC attack moves
     if defenses:
@@ -797,18 +769,23 @@ class MoveView(discord.ui.LayoutView):
 
 #region MoveSelect    
 class MoveSelect(discord.ui.Select):
-    def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False, transform=False, summon=False, heal=False):
+    def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False, transform=False, summon=False, heal=False, melee=False, projectile=False):
         print(technique)
         moves = []
         self.bot = bot
         techname = next(iter(technique.keys()))
         if attack:
             moves = [technique[techname][0]['Attack'][move] for move in technique[techname][0]['Attack'].keys()]
+
         if defense:
             moves = [technique[techname][1]['Defend'][move] for move in technique[techname][1]['Defend'].keys()]
+        
         if barrier:
             moves = [technique[techname][2]['Barrier'][move] for move in technique[techname][2]['Barrier'].keys()]  
-       
+        if projectile:
+            moves = [technique[techname][3]['Projectile'][move] for move in technique[techname][3]['Projectile'].keys()]
+        if melee:
+            moves = [technique[techname][4]['Melee'][move] for move in technique[techname][4]['Melee'].keys()]  
         options = [discord.SelectOption(label=f"{i+1}: {m.name}", value=str(i)) for i, m in enumerate(moves)]
         super().__init__(placeholder='Choose your move', min_values=1, options=options)
         self.lobby = lobby
@@ -826,7 +803,6 @@ class MoveSelect(discord.ui.Select):
         self.teamb = lobby.teamB
 
     async def callback(self, itx: discord.Interaction):
-
         channel = itx.channel
         if itx.user.id != self.player.user_id:
             await itx.response.send_message("You did not invoke this prompt", ephemeral=True)
@@ -836,45 +812,40 @@ class MoveSelect(discord.ui.Select):
                                 await itx.followup.send("You have already selected an action for this round.", ephemeral=True)
                                 return
             move = self.moves[int(self.values[0])]
-            move_type = None
-            if self.attack:
-                move_type = 'attacks'
-            elif self.defense:
-                move_type = 'defenses'
-            elif self.barrier:
-                move_type = 'barriers'
-            elif self.heal:
-                 move_type = 'heal'
-            elif self.summon:
-                    move_type = 'summon'
-            elif self.transform:
-                    move_type = 'transform'
-            else:
-                await itx.followup.send("Invalid move type.", ephemeral=True)
+            move_type = move.type
+            if move_type == "projectile" or move_type=="melee":
+                move_type = "attacks"
+            elif move_type ==  "counter" or move_type =="tank" or move_type=="dodge":
+                move_type = "defenses"
+            elif move_type == "domain" or move_type == "amp" or move_type == "simple" or move_type == "wicker" or move_type == "fbe":
+                move_type = "barriers"
+            elif move_type == 'heal' or move_type=="rct":
+                move_type = 'heal'
+         
+            if move_type is None:
+                await itx.followup.send("Error determining move type.", ephemeral=True)
                 return
             
             targets = get_valid_targets(self.lobby.feed[self.lobby.round][move_type], get_player_team(self.player, self.lobby), self.player, self.lobby)
             print(self.lobby)
             view = TargetLayout(self.bot, self.player, targets, move, self.lobby)
-
             await itx.followup.send(view=view)
-         
-                 
             return
 #endregion
    
 #region TargetLayout
 class TargetLayout(discord.ui.LayoutView):
+
     def __init__(self, bot, player, targets, move, lobby):
         super().__init__()
         print(targets)
         header=""
         body="" 
         self.team = get_player_team(player, lobby)
-        feed = get_player_feed(player, self.team, lobby, move.type)
+        move_type = 'attacks' if move.type == "projectile" or move.type=="melee" else 'defenses' if move.type ==  "counter" or move.type =="tank" or move.type=="dodge" else 'barriers' if move.type == "domain" or move.type == "amp" or move.type == "simple" or move.type == "wicker" or move.type == "fbe" else 'heal' if move.type == 'heal' else None
+        feed = get_player_feed(player, self.team, lobby, move_type)
         targets = []
-        if feed:
-            targets = get_valid_targets(feed, self.team, player, lobby)
+        targets = get_valid_targets(feed, self.team, player, lobby)
         for t in targets:
             if hasattr(t, 'user_id') and t.user_id == player.user_id:
                 targets.remove(t)
@@ -902,15 +873,11 @@ class TargetLayout(discord.ui.LayoutView):
             self.summon = True
         elif move.type == 'transform':
             self.transform = True
-        elif move.type == 'melee':
-            self.melee = True
-        elif move.type == 'projectile':
-            self.projectile = True
         container = discord.ui.Container(accent_colour=discord.Color.ash_embed())
         text = discord.ui.TextDisplay(header + "\n" + body)
         container.add_item(text)
         act_row = discord.ui.ActionRow()
-        act_row.add_item(TargetSelect(bot, player, targets, lobby, move, self.attack, self.defense, self.barrier, self.heal, self.summon, self.transform, self.melee, self.projectile))
+        act_row.add_item(TargetSelect(bot, player, targets, lobby, move))
         container.add_item(act_row)
         self.add_item(container)
 
@@ -918,7 +885,7 @@ class TargetLayout(discord.ui.LayoutView):
 
     
 class TargetSelect(discord.ui.Select):
-    def __init__(self, bot, player, targets, lobby, move, attack=False, defense=False, barrier=False, heal=False, summon=False, transform=False, melee=False, projectile=False):
+    def __init__(self, bot, player, targets, lobby, move):
         print(targets)
         option_list = [discord.SelectOption(label=f"{i+1}: {t.name}", value=str(i)) for i, t in enumerate(targets)]
         super().__init__(placeholder='Choose your target', min_values=1, options=option_list)
@@ -931,14 +898,6 @@ class TargetSelect(discord.ui.Select):
         self.field = lobby.field
         self.teama = lobby.teamA
         self.teamb = lobby.teamB
-        self.attack = attack
-        self.defense = defense
-        self.barrier = barrier
-        self.summon = summon
-        self.melee= melee
-        self.heal = heal
-        self.transform = transform
-        self.projectile=projectile
 
     async def callback(self, itx: discord.Interaction):
         if itx.user.id != self.player.user_id:
@@ -953,25 +912,11 @@ class TargetSelect(discord.ui.Select):
             transforms = self.lobby.feed[round]['transform']
             heals = self.lobby.feed[round]['heal']
             summons = self.lobby.feed[round]['summon']
-            melee = self.lobby.feed[round]['melee']
             channel = itx.channel
             # Determine which team the player is on
             team = None
-            move_type = None
-            if self.attack:
-                move_type = 'attacks'
-            elif self.defense:
-                move_type = 'defenses'
-            elif self.barrier:
-                move_type = 'barriers'
-            elif self.heal:
-                move_type = 'heals'
-            elif self.summon:
-                move_type = 'summons'
-            elif self.transform:
-                move_type = 'transforms'
-            elif self.melee:
-                move_type= 'melee'
+            move_type = self.move.type
+            print("Move type: " + move_type)
             team_name = None
             if any(self.player.user_id == p.user_id for p in self.teama['players']):
                 team = self.teama
@@ -989,20 +934,32 @@ class TargetSelect(discord.ui.Select):
                 await itx.followup.send("Player is not on any team.", ephemeral=True)
                 return
             
-            if self.attack:
+            if move_type == "projectile" or move_type=="melee":
                 if team_name not in attacks:
                     attacks[team_name] = {}
                 team_feed = attacks[team_name]
 
-            elif self.defense:
+            elif move_type == "counter" or move_type =="tank" or move_type=="dodge":
                 if team_name not in defenses:
                     defenses[team_name] = {}
                 team_feed = defenses[team_name]
 
-            elif self.barrier:
+            elif move_type == "domain" or move_type == "amp" or move_type == "simple" or move_type == "wicker" or move_type == "fbe" or move_type == "barrier":
                 if team_name not in barriers:
                     barriers[team_name] = {}
                 team_feed = barriers[team_name]
+            elif move_type == "heal":
+                if team_name not in heals:
+                    heals[team_name] = {}
+                team_feed = heals[team_name]
+            elif move_type == "summon":
+                if team_name not in summons:
+                    summons[team_name] = {}
+                team_feed = summons[team_name]
+            elif move_type == "transform":
+                if team_name not in transforms:
+                    transforms[team_name] = {}
+                team_feed = transforms[team_name]    
             else:
                 await itx.followup.send("Invalid move type.", ephemeral=True)
                 return
@@ -1029,7 +986,7 @@ class TargetSelect(discord.ui.Select):
             selected_targets = len(team_feed[self.player.user_id]['targets'])
 
             if self.move.aoe > 1 and  selected_targets < self.move.aoe:
-                results = TargetLayout(self.player, self.targets, self.lobby, self.move, self.bot, self.attack, self.defense, self.barrier, self.heal, self.summon, self.transform, self.melee, self.projectile)
+                results = TargetLayout(self.bot, self.player, self.targets, self.move, self.lobby)
                 if results:
                     embed, targets, file = results
                     if self.defense:
@@ -1044,7 +1001,8 @@ class TargetSelect(discord.ui.Select):
                         msg_text = "summon"
                     elif self.transform:
                         msg_text = "transformation"
-                    view = TargetLayout(self.bot, self.player, targets, self.lobby, self.move, attack=self.attack, defense=self.defense, barrier=self.barrier, heal=self.heal, summon=self.summon, transform=self.transform)
+                    await itx.followup.send(f"Select additional {msg_text} for `{self.move.name}`:", ephemeral=True)
+                    view = TargetLayout(self.bot, self.player, targets, self.lobby, self.move)
                     # Update the embed with the selected targets
                     aoe = self.move.aoe
                     if not file:
