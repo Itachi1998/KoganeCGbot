@@ -741,24 +741,30 @@ class Lobby_Cog(commands.Cog):
         lobby = self.lobbies[ctx.channel.id]["Lobby"]
         lobby.status = 1
         lobby.ready = []
+        print(lobby.field)
         if ctx.channel.id in self.lobbies.keys():
             if ctx.author.id == lobby.owner:
                 if lobby.status == 1:
                     lobby.round = 0
                     embed, lobby = start_round_embed(lobby, self.bot)
+                    lobby.feed = [{
+                            'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                            'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                            'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                            'summon' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                            'transform' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                            'heal' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                            'melee' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                            'projectile' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},                            
+                          }]
                     battle_cog = self.bot.get_cog("Battle")
                     if battle_cog is None:
                         await ctx.send("Battle cog not found.")
                         await ctx.channel.send(embed=embed)
                         return
                     
+                    print(lobby.feed)
                     view = battle_cog.BattleView(lobby, self.bot)
-
-                    lobby.feed = [{
-                          'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
-                          }]
                     
                     await ctx.send(view=view)
 
@@ -1016,14 +1022,18 @@ class LobbyView(discord.ui.View):
                         await itx.response.send_message("Battle cog not found.")
                         return
                     
-                    view = battle_cog.BattleView(lobby, self.bot)
+                    
                     
                     lobby.feed = [{
-                          'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
-                          'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
+                           'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                           'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
+                           'barriers' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                           'summon' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                           'transform' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                           'heal' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
+                           'melee' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
                           }]
-                    
+                    view = battle_cog.BattleView(lobby, self.bot)
                     await itx.response.send_message(embed=embed, view=view)
 
                     

@@ -603,14 +603,8 @@ class Grade2_Primate(Enemy):
              technique="Primate",
              playerclass="Curse",
              quantity=random.randrange(1,2),
-             bodyparts={"Head" : BodyPart(name='Head', max_hp=300 * 20// 100, max_ce=350 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=300 * 50 // 100, max_ce=350 * 50 // 100), "Arms" : BodyPart(name="Arms", max_hp=300 * 15 // 100, max_ce = 350 * 30 //100), "Legs" : BodyPart(name="Legs", max_hp=300*15//100, max_ce = 350 * 30 // 100)}
-              ,
-              timer=60,
-              killed=False)
-        self.hp = self.max_hp
-        self.ce = self.max_ce
-
-#endregion
+             bodyparts={"Head" : BodyPart(name='Head', max_hp=300 * 20// 100, max_ce=350 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=300 * 50 // 100, max_ce=350 * 50 // 100), "Arms" : BodyPart(name="Arms", max_hp=300 * 15 // 100, max_ce = 350 * 30 //100),
+                         "Legs" : BodyPart(name="Legs", max_hp=300*15//100, max_ce =350 * 30 //100)})
 Grade2_Primate.grade = 3
 Grade2_Primate.min_level=1
 image = check_for_image("primate")
@@ -935,7 +929,7 @@ if image:
      Kashimo.image_path = image
 #region KingOfCurses
 class KingOfCurses(Enemy):                  
-        def __init__(self, **kwargs):
+        def __init__(self):
                 super().__init__(name="King Of Curses", 
                            level=150,
                            max_hp=7000, 

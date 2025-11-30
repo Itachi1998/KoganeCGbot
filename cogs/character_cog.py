@@ -331,101 +331,6 @@ class CreatePromptLayout(discord.ui.LayoutView):
         btn_row.add_item(CreateButton(bot, playerdict))
         self.add_item(btn_row)
      
-
-    # @row.button(label="Spin", emoji="<a:slots:1364792630155804722>")
-    # async def spin(self, itx: discord.Interaction, btn: discord.ui.Button):
-    #     ce = random.randint(200, 2000)
-    #     strength=random.randint(50, 200)
-    #     speed=random.randint(50, 200)
-    #     hp = random.randint(100, 300)
-    #     pclass= get_random_class()
-    #     tech = None
-
-    #     if pclass== "Sorcerer":
-    #         strength += 100
-    #         speed += 100
-    #         hp += 100
-    #         ce += 50
-    #         tech= get_random_sorcerer_tech()
-
-    #     if pclass == "Reincarnate":
-    #         ce += 100
-    #         tech =  get_random_reincarnate_tech()      
-    #         strength+= 120
-    #         speed += 120
-    #         hp += 150
-
-    #     if pclass == "Curse":
-    #         ce += 200
-    #         strength += 150
-    #         speed += 150
-    #         hp += 150
-    #         tech = get_random_curse_tech()
-
-    #     six_eyes=False
-
-    #     techname= next(iter(tech))
-    #     print(f"rolled {techname}")
-
-    #     if 'Six Eyes' in tech.keys() and tech['Six Eyes'] == True:
-    #         print("Added 6 eyes ce: 1000 to " +  str(ce))
-    #         ce += 1000
-    #         hp += 300
-    #         six_eyes=True
-
-    #     if any(keyword in techname.lower() for keyword in ['copy', 'shrine', 'limitless']):
-    #         print("Added copy, shrine, limitless, star rage, or cursed spirit manip ce boost of 1000 to: \n"+ next(iter(tech)) )
-    #         ce += 1000
-    #         hp += 100
-
-    #     if techname == "Shrine":
-    #         ce += 2000
-    #         hp += 200
-
-    #     if 'zero' in techname.lower():
-    #         strength += 200
-    #         speed += 200
-    #         hp += 300
-    #         ce = 0
-
-    #     entered = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    #     player = Player(
-    #         name=self.playerdict['name'],
-    #         level=1,
-    #         max_hp=hp,
-    #         max_ce=ce,
-    #         speed=speed,
-    #         strength=strength,
-    #         technique=techname,
-    #         playerclass=pclass,
-    #         colony_id=self.playerdict['colony'],
-    #         xp=0,
-    #         cgp=0,
-    #         skp=0,
-    #         user_id=itx.user.id,
-    #         six_eyes=six_eyes,
-    #         entered=entered
-    #     )
-    #     player.grade = 1
-
-    #     created = create_player(player)
-    #     rarity = {"legend": 5, "rare": 15, "uncommon": 30, "common": 50}
-    #     # inventory={"Summons": {}, "Tools": {}, "Vows":{}}
-    #     tech_rarity = next((k for k in rarity.keys() if rarity[k] >= tech['Rarity']), None)
-    #     class_rarity = next((k for k in rarity.keys() if rarity[k] >= classes[pclass]), None)
-    #     if created:
-    #         print ("Created technique: " + techname)
-    #         container = discord.ui.Container(accent_colour=discord.Colour.blurple(), )
-    #         container.add_item(discord.ui.TextDisplay(f"* `Name:` " + "**" + player.name + "**" + f"\n* `Level:` **{player.level}**\n* `Technique:` **{techname}**\n* `HP:` **{hp}**\n* `CE:` **{ce}** \n* `Class:` **{pclass}**\n* `Six Eyes:` **{six_eyes}**\n* `Speed:` **{player.speed}**\n* `Strength:` **{player.strength}**\n* `Technique Rarity:` **{tech_rarity}**\n* `Class Rarity:` **{class_rarity}**"))
-    #         view= CreateReturnView(container)
-    #         await itx.response.send_message(view=view)
-    #         return
-    #     else:
-    #         await itx.response.send_message("You cannot create more than one player per colony")
-    #         return
-#endregion
-
-
 #region Create Return
 class CreatedCharDisplayView(discord.ui.LayoutView):
     def __init__(self, bot, player, class_rarity, tech_rarity):
@@ -512,7 +417,7 @@ class CreateButton(discord.ui.Button['CreatePromptLayout']):
             max_ce=ce,
             speed=speed,
             strength=strength,
-            technique=techname,
+            technique="Idle Transfiguration",
             playerclass=pclass,
             colony_id=self.playerdict['colony'],
             xp=0,
@@ -520,7 +425,8 @@ class CreateButton(discord.ui.Button['CreatePromptLayout']):
             skp=0,
             user_id=itx.user.id,
             six_eyes=six_eyes,
-            entered=entered
+            entered=entered,
+            imbue={'strength' : 0, 'speed': 0}
         )
         player.grade = 1
 
