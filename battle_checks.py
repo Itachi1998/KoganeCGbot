@@ -335,12 +335,14 @@ def attack_verify(player, target, attack, aoe=False):
 
     else:
         print("Attack verified!")
-        
+
         if isinstance(player.imbue, int):
             amount = player.imbue
             player.imbue = {'strength': amount, 'speed': amount}
+        else:
+            player.imbue = {'strength' : 0}
         
-        player.ce -= attack.act_cost + player.imbue['strength'] + player.imbue['speed']
+        player.ce -= attack.act_cost + player.imbue['strength']
         return attack
     
 
