@@ -842,7 +842,20 @@ class TargetLayout(discord.ui.LayoutView):
         header=""
         body="" 
         self.team = get_player_team(player, lobby)
-        move_type = 'attacks' if move.type == "projectile" or move.type=="melee" else 'defenses' if move.type ==  "counter" or move.type =="tank" or move.type=="dodge" else 'barriers' if move.type == "domain" or move.type == "amp" or move.type == "simple" or move.type == "wicker" or move.type == "fbe" else 'heal' if move.type == 'heal' else None
+        if move.type in ["projectile", "melee"]:
+            move_type = 'attacks'
+        elif move.type in ["counter", "tank", "dodge"]:
+            move_type = 'defenses'
+        elif move.type in ["domain", "amp", "simple", "wicker", "fbe"]:
+            move_type = 'barriers'
+        elif move.type in ["heal", "rct"]:
+            move_type = 'heal'
+        elif move.type == "transform":
+            move_type = 'transform'
+        elif move.type == "summon":
+            move_type = 'summon'
+        else:
+            move_type = None
         feed = get_player_feed(player, self.team, lobby, move_type)
         targets = []
         targets = get_valid_targets(feed, self.team, player, lobby)
