@@ -83,7 +83,7 @@ class Actor:
 class Enemy(Actor):
     def __init__(self, name, level, max_hp, max_ce, strength, speed, technique, 
                  playerclass,  xp: int, cgp: int, 
-                stack=0, colony_id:int = None, defense: dict=None,
+                stack=0, imbue={'strength': 0, 'speed': 0}, colony_id:int = None, defense: dict=None,
                 inventory: list = None, equipped: list = None,
                 poison: tuple=None,charge: int=None, 
                 stun: tuple=None,  hi: bool=None, hr: str=None,

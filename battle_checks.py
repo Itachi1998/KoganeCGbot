@@ -336,7 +336,11 @@ def attack_verify(player, target, attack, aoe=False):
     else:
         print("Attack verified!")
         
-        player.ce -= attack.act_cost + player.imbue['strength'] + player.imbue['speed']
+        if player.imbue:
+            player.ce -= attack.act_cost + player.imbue['strength'] + player.imbue['speed']
+        else:
+            player.ce -= attack.act_cost
+    
         return attack
     
 
@@ -372,12 +376,10 @@ def defense_verify(target, player, defense, aoe=False):
     else:
         print("Defense verified!")
         if target.imbue:
-            if isinstance((target.imbue), int):
-                amount = target.imbue
-                target.imbue = {'strength': amount, 'speed': amount}
             target.ce -= defense.act_cost + target.imbue['strength'] + target.imbue['speed']
         else:
             target.ce -= defense.act_cost
+
         return defense
     
 # endregion
@@ -405,6 +407,7 @@ def type_increment(player, attack=None, defense=None, tools=None):
             else:
                 dmg = attack.strength + player.imbue['strength'] + player.strength
                 speed = attack.speed + player.imbue['speed'] + player.speed
+        
                 # bf = black_flash_check(player) 
                 # implement black flash counter to lobby feed and player
                 # if bf:
@@ -427,9 +430,6 @@ def type_increment(player, attack=None, defense=None, tools=None):
     if defense:
         print(f"Incrementing {defense.name} stats...")
         if defense.type == 'tank' or defense.type == 'counter' or defense.type == 'dodge':
-            if isinstance(player.imbue, int):
-                amount = player.imbue
-                player.imbue = {'strength': amount, 'speed': amount}
             defense_strength = defense.strength + player.imbue['strength'] + player.strength
             buffs['defense']['strength']['physical'] = player.strength
             # think about implementing different counter types i.e: 'counter melee' 'counter projectile' 'counter barrier'
@@ -453,9 +453,9 @@ def type_increment(player, attack=None, defense=None, tools=None):
             buffs['defense']['speed']['physical'] = player.speed
             buffs['defense']['speed']['imbue'] = player.imbue['speed']
 
-        # else:
-        #     defense_strength = defense.strength
-        #     defense_speed = defense.speed
+        else:
+            defense_strength = defense.strength
+            defense_speed = defense.speed
 
         return defense_strength, defense_speed, buffs
 #endregion
@@ -1071,6 +1071,7 @@ test_player2.defense = "Infinity"
 test_player3.defense = "Squeaky Hammer"
 
 enemy = game.Reggie()
+enemy.imbue = {'strength': 0, 'speed': 0}
 #shiki = summon_check("Nue", "shikigami")
 
 results = battle_checks(enemy, test_player3, "Knife Receipt", "Squeaky Hammer")
