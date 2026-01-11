@@ -450,7 +450,7 @@ class Grade4_Mouthbat(Enemy):
     def __init__(self):
           super().__init__(
              name="Mouthbat", 
-             level="1", 
+             level=1, 
              max_hp=30, 
              max_ce=20, 
              strength=10, 
@@ -545,7 +545,7 @@ class Grade3_AnxiousEars(Enemy):
              speed=50, 
              xp=100, 
              cgp=1, 
-             technique="AnxiousEars", 
+             technique="Anxious Ears", 
              playerclass="Curse", 
              quantity=random.randrange(1,3),
              bodyparts={"Head" : BodyPart(name='Head', max_hp=250 * 20// 100, max_ce=200 * 20 // 100), "Torso" : BodyPart(name="Torso", max_hp=250 * 50 // 100, max_ce=200 * 50 // 100), "Hands" : BodyPart(name="Hands", max_hp=250 * 30 // 100, max_ce = 200 * 30 //100)}
@@ -610,6 +610,7 @@ Grade2_Primate.min_level=1
 image = check_for_image("primate")
 if image:
      Grade2_Primate.image_path = image
+
 #region Orbmaster
 class Grade1_Orbmaster(Enemy):
     def __init__(self ):
@@ -690,6 +691,7 @@ SpecialGrade_FingerBearer.min_level=50
 image = check_for_image("fingerer")
 if image:
      SpecialGrade_FingerBearer.image_path = image
+     
 #region DisasterFlames
 class SpecialGrade_DisasterFlames(Enemy):
         def __init__(self):
@@ -719,6 +721,7 @@ image = check_for_image("joga")
 if image:
      SpecialGrade_DisasterFlames.image_path = image
 #region NatureSpirit
+
 class SpecialGrade_NatureSpirit(Enemy):
         def __init__(self):
             super().__init__(name="Nature Spirit",
@@ -731,7 +734,7 @@ class SpecialGrade_NatureSpirit(Enemy):
                        speed=900, 
                        xp=1000, 
                        cgp=1, 
-                       technique="Nature Spirit", 
+                       technique="Natures Wrath", 
                        playerclass="curse",
                        bodyparts=human_body_parts,
                        timer=300,
@@ -745,6 +748,7 @@ SpecialGrade_NatureSpirit.min_level=50
 image = check_for_image("hanam")
 if image:
      SpecialGrade_NatureSpirit.image_path = image
+
 #region TideCurse
 class SpecialGrade_TideCurse(Enemy):
        def __init__(self):

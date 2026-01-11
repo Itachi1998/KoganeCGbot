@@ -758,13 +758,14 @@ class Lobby_Cog(commands.Cog):
                             'projectile' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},                            
                           }]
                     battle_cog = self.bot.get_cog("Battle")
+                    print(battle_cog)
                     if battle_cog is None:
                         await ctx.send("Battle cog not found.")
                         await ctx.channel.send(embed=embed)
                         return
                     
                     print(lobby.feed)
-                    view = battle_cog.BattleView(lobby, self.bot)
+                    view = battle_cog.BattleLayout(lobby, self.bot)
                     
                     await ctx.send(view=view)
 
@@ -1022,8 +1023,6 @@ class LobbyView(discord.ui.View):
                         await itx.response.send_message("Battle cog not found.")
                         return
                     
-                    
-                    
                     lobby.feed = [{
                            'attacks' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
                            'defenses':{lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}, 
@@ -1033,8 +1032,8 @@ class LobbyView(discord.ui.View):
                            'heal' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}},
                            'melee' : {lobby.teamA['name'] : {}, lobby.teamB['name'] : {}, 'Field' : {}}
                           }]
-                    view = battle_cog.BattleView(lobby, self.bot)
-                    await itx.response.send_message(embed=embed, view=view)
+                    view = battle_cog.BattleLayout(lobby, self.bot)
+                    await itx.response.send_message(view=view)
 
                     
                     return
