@@ -1,6 +1,6 @@
 from techniques import Techniques
 
-enemy_tech = {
+enemy_tech = { #techs with a * have been added to player_tech.py - leaving summon techs in here
 #region Divine Dog
 "Divine Dog" : 
 [
@@ -538,321 +538,321 @@ enemy_tech = {
 #      }}
 # ],
 #endregion
-#region Finger Bearer
-    "Finger Bearer" : 
-    [
-        {
-            "Attack" : 
-            {
-                    "Energy Blast" : Techniques(
-                        name="Energy Blast",
-                        level=1,
-                        act_speed=5,
-                        act_cost=50,
-                    act_req=("hands"),
-                    aoe=2,
-                    strength=500,
-                    speed=500,
-                    type="projectile",
-                    ),
-                    "Claw Cleave": Techniques(
-                    name="Claw Cleave",
-                    level=1,
-                    act_speed=1,
-                    act_cost=100,
-                    act_req=("hands"),
-                    aoe=1,
-                    strength=700,
-                    speed=700,
-                    type="melee",
+#region Finger Bearer *
+    # "Finger Bearer" : 
+    # [
+    #     {
+    #         "Attack" : 
+    #         {
+    #                 "Energy Blast" : Techniques(
+    #                     name="Energy Blast",
+    #                     level=1,
+    #                     act_speed=5,
+    #                     act_cost=50,
+    #                 act_req=("hands"),
+    #                 aoe=2,
+    #                 strength=500,
+    #                 speed=500,
+    #                 type="projectile",
+    #                 ),
+    #                 "Claw Cleave": Techniques(
+    #                 name="Claw Cleave",
+    #                 level=1,
+    #                 act_speed=1,
+    #                 act_cost=100,
+    #                 act_req=("hands"),
+    #                 aoe=1,
+    #                 strength=700,
+    #                 speed=700,
+    #                 type="melee",
                     
-                    )  
-            }
-        },
-        {
-            "Defend" : 
-            {
-                "Energy Shield" : Techniques(
-                    name="Energy Shield",
-                    level=1,
-                    act_speed=5,
-                    act_cost=50,
-                    act_req=("hands"),
-                    aoe=2,
-                    strength=500,
-                    speed=500,
-                    type="tank",
-                ),
+    #                 )  
+    #         }
+    #     },
+    #     {
+    #         "Defend" : 
+    #         {
+    #             "Energy Shield" : Techniques(
+    #                 name="Energy Shield",
+    #                 level=1,
+    #                 act_speed=5,
+    #                 act_cost=50,
+    #                 act_req=("hands"),
+    #                 aoe=2,
+    #                 strength=500,
+    #                 speed=500,
+    #                 type="tank",
+    #             ),
 
-                "Self Heal" : Techniques(
-                    name="Self Heal",
-                    level=1,
-                    act_speed=5,
-                    act_cost=50,
-                    act_req=("hands"),
-                    aoe=2,
-                    strength=500,
-                    speed=500,
-                    type="heal",
+    #             "Self Heal" : Techniques(
+    #                 name="Self Heal",
+    #                 level=1,
+    #                 act_speed=5,
+    #                 act_cost=50,
+    #                 act_req=("hands"),
+    #                 aoe=2,
+    #                 strength=500,
+    #                 speed=500,
+    #                 type="heal",
                     
-                ),
-                "Body Flicker" : Techniques(
-                    name="Body Flicker",
-                    level=1,
-                    act_speed=5,
-                    act_cost=150,
-                    act_req=("hands"),
-                    aoe=2,
-                    strength=000,
-                    speed=200,
-                    type="dodge"
-                )
+    #             ),
+    #             "Body Flicker" : Techniques(
+    #                 name="Body Flicker",
+    #                 level=1,
+    #                 act_speed=5,
+    #                 act_cost=150,
+    #                 act_req=("hands"),
+    #                 aoe=2,
+    #                 strength=000,
+    #                 speed=200,
+    #                 type="dodge"
+    #             )
 
-            }
-        }
-    ],
+    #         }
+    #     }
+    # ],
 #endregion
-#region Orbmaster
-    "Orbmaster" : # grade 1
-        [    
-            {"Attack" : 
-                {"Impending Doom" : Techniques(
-                    name="Orbmaster: Impending Doom",
-                    level=1,
-                    act_speed=10,
-                    act_cost=100,
-                    act_req=("hands", "torso"),
-                    aoe=1,
-                    strength=420,
-                    speed=100,
-                    type="projectile", # attack projectile, attack melee
-                    sure_hit=True
-                    )
-                }
-            },
-            {"Defend" :         
-                {"Foresight" : Techniques(
-                    name="Orbmaster: Foresight",
-                    level=1,
-                    act_speed=10,
-                    act_cost=100,
-                    act_req=("head"),
-                    aoe=1,
-                    strength=400,
-                    speed=200,
-                    type="counter", #defense tank, defense dodge, defense counter
-                    sure_hit=True
-                    )
-                }
-            }]
-        ,
+#region Orbmaster *
+    # "Orbmaster" : # grade 1
+    #     [    
+    #         {"Attack" : 
+    #             {"Impending Doom" : Techniques(
+    #                 name="Orbmaster: Impending Doom",
+    #                 level=1,
+    #                 act_speed=10,
+    #                 act_cost=100,
+    #                 act_req=("hands", "torso"),
+    #                 aoe=1,
+    #                 strength=420,
+    #                 speed=100,
+    #                 type="projectile", # attack projectile, attack melee
+    #                 sure_hit=True
+    #                 )
+    #             }
+    #         },
+    #         {"Defend" :         
+    #             {"Foresight" : Techniques(
+    #                 name="Orbmaster: Foresight",
+    #                 level=1,
+    #                 act_speed=10,
+    #                 act_cost=100,
+    #                 act_req=("head"),
+    #                 aoe=1,
+    #                 strength=400,
+    #                 speed=200,
+    #                 type="counter", #defense tank, defense dodge, defense counter
+    #                 sure_hit=True
+    #                 )
+    #             }
+    #         }]
+    #     ,
 #endregion
-#region Charger
-    "Charger" : 
-        [ 
-            {"Attack" :
-                {"Charged Punch" : Techniques(
-                    name="Charger : Charged Punch",
-                    level=1,
-                    act_speed=3,
-                    act_cost=40,
-                    act_req=("right arm"),
-                    aoe=1,
-                    strength=500,
-                    speed=300,
-                    buff=(2, 'strength', 100),
-                    type="melee"
-                    ),
-                "Electric Ground-pound" : Techniques(
-                    name="Charger : Electric Ground-pound",
-                    level=1,
-                    act_speed=3,
-                    act_cost=50,
-                    act_req=("right arm", "left arm"),
-                    aoe=5,
-                    strength=400,
-                    speed=300,
-                    type="projectile" # add a 'wave' or 'spread' type of attack?
-                    )
-                }
-            },
-            {"Defend" : 
-                {"Charged Field" : Techniques(
-                    name="Charger : Charged Field",
-                    level=1,
-                    act_speed=2,
-                    act_cost=40,
-                    act_req=("right arm"),
-                    aoe=5,
-                    strength=400, 
-                    speed=500,
-                    type="tank"
-                    )
-                }
-            }
-        ],
+#region Charger *
+    # "Charger" : 
+    #     [ 
+    #         {"Attack" :
+    #             {"Charged Punch" : Techniques(
+    #                 name="Charger : Charged Punch",
+    #                 level=1,
+    #                 act_speed=3,
+    #                 act_cost=40,
+    #                 act_req=("right arm"),
+    #                 aoe=1,
+    #                 strength=500,
+    #                 speed=300,
+    #                 buff=(2, 'strength', 100),
+    #                 type="melee"
+    #                 ),
+    #             "Electric Ground-pound" : Techniques(
+    #                 name="Charger : Electric Ground-pound",
+    #                 level=1,
+    #                 act_speed=3,
+    #                 act_cost=50,
+    #                 act_req=("right arm", "left arm"),
+    #                 aoe=5,
+    #                 strength=400,
+    #                 speed=300,
+    #                 type="projectile" # add a 'wave' or 'spread' type of attack?
+    #                 )
+    #             }
+    #         },
+    #         {"Defend" : 
+    #             {"Charged Field" : Techniques(
+    #                 name="Charger : Charged Field",
+    #                 level=1,
+    #                 act_speed=2,
+    #                 act_cost=40,
+    #                 act_req=("right arm"),
+    #                 aoe=5,
+    #                 strength=400, 
+    #                 speed=500,
+    #                 type="tank"
+    #                 )
+    #             }
+    #         }
+    #     ],
 #endregion
-#region Stinkaspore
-    "Stinkaspore" : # grade 2
-        [
-            {"Attack" : 
-                {"Hydrogen Sulfide Bomb" : Techniques( # rotten egg smelling gas that can cause; unconsciousness, memory loss, death
-                    name="Stinkaspore: Hydrogen Sulfide Bomb",
-                    level=1,
-                    act_speed=3,
-                    act_cost=20,
-                    act_req=("Head", "Torso"),
-                    aoe=5,
-                    strength=150,
-                    speed=100,
-                    type="projectile",
-                    poison=(range(10, 20), 2)
-                    ),
-                "Carbon Monoxide Disperse" : Techniques( # colorless odorless gas that can be fatal in high enough quantities
-                    name="Stinkaspore : Carbon Monoxide Disperse",
-                    level=1,
-                    act_speed=3,
-                    act_cost=60,
-                    act_req=("Head", "Torso"),
-                    aoe=5,
-                    strength=100,
-                    speed=100,
-                    type="projectile",
-                    poison=(range(10, 20), 2),
-                    sure_hit=True 
-                    )
-                }
-            },
-            {"Defend" :
-                {"Ammonia Cloud" : Techniques( # can cause skin burns, respitory damage and is highly flammable
-                    name="Stinkaspore : Ammonia Cloud", 
-                    level=1,
-                    act_speed=3,
-                    act_cost=60,
-                    act_req=("Head", "Torso"),
-                    aoe=5,
-                    strength=180,
-                    speed=150,
-                    type="counter",
-                    poison=(range(10, 20), 2)
+#region Stinkaspore *
+    # "Stinkaspore" : # grade 2
+    #     [
+    #         {"Attack" : 
+    #             {"Hydrogen Sulfide Bomb" : Techniques( # rotten egg smelling gas that can cause; unconsciousness, memory loss, death
+    #                 name="Stinkaspore: Hydrogen Sulfide Bomb",
+    #                 level=1,
+    #                 act_speed=3,
+    #                 act_cost=20,
+    #                 act_req=("Head", "Torso"),
+    #                 aoe=5,
+    #                 strength=150,
+    #                 speed=100,
+    #                 type="projectile",
+    #                 poison=(range(10, 20), 2)
+    #                 ),
+    #             "Carbon Monoxide Disperse" : Techniques( # colorless odorless gas that can be fatal in high enough quantities
+    #                 name="Stinkaspore : Carbon Monoxide Disperse",
+    #                 level=1,
+    #                 act_speed=3,
+    #                 act_cost=60,
+    #                 act_req=("Head", "Torso"),
+    #                 aoe=5,
+    #                 strength=100,
+    #                 speed=100,
+    #                 type="projectile",
+    #                 poison=(range(10, 20), 2),
+    #                 sure_hit=True 
+    #                 )
+    #             }
+    #         },
+    #         {"Defend" :
+    #             {"Ammonia Cloud" : Techniques( # can cause skin burns, respitory damage and is highly flammable
+    #                 name="Stinkaspore : Ammonia Cloud", 
+    #                 level=1,
+    #                 act_speed=3,
+    #                 act_cost=60,
+    #                 act_req=("Head", "Torso"),
+    #                 aoe=5,
+    #                 strength=180,
+    #                 speed=150,
+    #                 type="counter",
+    #                 poison=(range(10, 20), 2)
 
-                    )
-                }
-            }
-        ],
+    #                 )
+    #             }
+    #         }
+    #     ],
 #endregion
-#region Primate
-    "Primate" : 
-        [ 
-            {"Attack" :
-                {"Head Twirl" : Techniques(
-                    name="Primate: Head Twirl",
-                    level=1,
-                    act_speed=2,
-                    act_cost=30,
-                    act_req=("Head", "Torso"),
-                    aoe=1,
-                    strength=200,
-                    speed=500,
-                    type="projectile",
-                    stun=2
-                    )
-                }
-            },
+#region Primate *
+    # "Primate" : 
+    #     [ 
+    #         {"Attack" :
+    #             {"Head Twirl" : Techniques(
+    #                 name="Primate: Head Twirl",
+    #                 level=1,
+    #                 act_speed=2,
+    #                 act_cost=30,
+    #                 act_req=("Head", "Torso"),
+    #                 aoe=1,
+    #                 strength=200,
+    #                 speed=500,
+    #                 type="projectile",
+    #                 stun=2
+    #                 )
+    #             }
+    #         },
 
-            {"Defend" :
-                {"Tree Swing" : 
-                 Techniques(
-                    name="Swing around",
-                    level=1,
-                    act_speed=2,
-                    act_cost=50,
-                    act_req=("Head"),
-                    aoe=5,
-                    strength=300,
-                    speed=400,
-                    type="dodge"
-                    )
-                }
-            }
-        ],
+    #         {"Defend" :
+    #             {"Tree Swing" : 
+    #              Techniques(
+    #                 name="Swing around",
+    #                 level=1,
+    #                 act_speed=2,
+    #                 act_cost=50,
+    #                 act_req=("Head"),
+    #                 aoe=5,
+    #                 strength=300,
+    #                 speed=400,
+    #                 type="dodge"
+    #                 )
+    #             }
+    #         }
+    #     ],
 #endregion
-#region Furrpede
-        "Furrpede" : 
-        [
-            {"Attack" : {
-                    "Eye Beam" : Techniques(
-                        name="Eye Beam",
-                        level=1,
-                        act_speed=5,
-                        act_cost=50,
-                        act_req=("eyes"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="projectile",
-                    ),
-                    "Underground Strike" : Techniques(
-                        name="Underground Strike",
-                        level=1,
-                        act_speed=5,
-                        act_cost=50,
-                        act_req=("hands"),
-                        aoe=2,
-                        strength=500,
-                        speed=500,
-                        type="melee",
-                    ),}},
-            {"Defend" : {
-                "Furr Spikes" : Techniques(
-                    name="Furr Spikes",
-                    level=1,
-                    act_speed=5,
-                    act_cost=50,
-                    act_req=("hands"),
-                    aoe=2,
-                    strength=100,
-                    speed=200,
-                    type="counter",
-                    poison=(range(10, 20), 2)
-                )
+#region Furrpede *
+        # "Furrpede" : 
+        # [
+        #     {"Attack" : {
+        #             "Eye Beam" : Techniques(
+        #                 name="Eye Beam",
+        #                 level=1,
+        #                 act_speed=5,
+        #                 act_cost=50,
+        #                 act_req=("eyes"),
+        #                 aoe=2,
+        #                 strength=500,
+        #                 speed=500,
+        #                 type="projectile",
+        #             ),
+        #             "Underground Strike" : Techniques(
+        #                 name="Underground Strike",
+        #                 level=1,
+        #                 act_speed=5,
+        #                 act_cost=50,
+        #                 act_req=("hands"),
+        #                 aoe=2,
+        #                 strength=500,
+        #                 speed=500,
+        #                 type="melee",
+        #             ),}},
+        #     {"Defend" : {
+        #         "Furr Spikes" : Techniques(
+        #             name="Furr Spikes",
+        #             level=1,
+        #             act_speed=5,
+        #             act_cost=50,
+        #             act_req=("hands"),
+        #             aoe=2,
+        #             strength=100,
+        #             speed=200,
+        #             type="counter",
+        #             poison=(range(10, 20), 2)
+        #         )
 
-            }}
-        ],
+        #     }}
+        # ],
 #endregion
-#region Anxious Ears
-    "Anxious Ears" : 
-    [
-        {"Attack" : {
-            "Sound Clap" : Techniques(
-                name="Anxious Ears: Sound Clap",
-                level=1,
-                act_speed=1,
-                act_cost=50,
-                act_req=("head", "torso"),
-                aoe=1,
-                strength=300,
-                speed=300,
-                type="projectile",
-                stun=1
-            ),
-        }},
-        {"Defend" :
-         {
-             "Sound Reflection" : Techniques(
-                 "Anxious Ears: Sound Reflection",
-                 level=1,
-                    act_speed=1,
-                    act_cost=50,
-                    act_req=("head", "torso"),
-                    aoe=1,
-                    strength=300,
-                    speed=300,
-                    type="counter",
+#region Anxious Ears *
+    # "Anxious Ears" : 
+    # [
+    #     {"Attack" : {
+    #         "Sound Clap" : Techniques(
+    #             name="Anxious Ears: Sound Clap",
+    #             level=1,
+    #             act_speed=1,
+    #             act_cost=50,
+    #             act_req=("head", "torso"),
+    #             aoe=1,
+    #             strength=300,
+    #             speed=300,
+    #             type="projectile",
+    #             stun=1
+    #         ),
+    #     }},
+    #     {"Defend" :
+    #      {
+    #          "Sound Reflection" : Techniques(
+    #              "Anxious Ears: Sound Reflection",
+    #              level=1,
+    #                 act_speed=1,
+    #                 act_cost=50,
+    #                 act_req=("head", "torso"),
+    #                 aoe=1,
+    #                 strength=300,
+    #                 speed=300,
+    #                 type="counter",
                 
-             )
-         } }
-    ],
+    #          )
+    #      } }
+    # ],
 #endregion
 #region Barehand
     "Barehand" : 

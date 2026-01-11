@@ -71,6 +71,7 @@ class CursedTools():
                 strength: int,
                 speed: int,
                 type: str,
+                emoji: str,
                 soul: bool = None,
                 buff: tuple = None,
                 debuff: tuple = None,
@@ -92,6 +93,7 @@ class CursedTools():
             self.strength=strength
             self.speed=speed
             self.type=type
+            self.emoji=emoji
             self.soul=soul
             self.buff=buff
             self.debuff=debuff

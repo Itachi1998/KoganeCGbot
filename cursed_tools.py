@@ -13,7 +13,8 @@ cursed_tools={
                 aoe=1,
                 strength=20,
                 speed=2,
-                type="melee"
+                type="melee",
+                emoji="<:katana:1414044436811350128>"
                 ),
 #endregion
 #region 9mm Pistol
@@ -27,7 +28,8 @@ cursed_tools={
                 aoe=1,
                 strength=20,
                 speed=1,
-                type="projectile" # won't factor in player stats other than speed/perception?
+                type="projectile", # won't factor in player stats other than speed/perception?
+                emoji="<:soulblicky:1277633038251196497>"
                 ),
 #endregion
 #region Steel Arm
@@ -41,7 +43,8 @@ cursed_tools={
                 aoe=1,
                 strength=10,
                 speed=1,
-                type="melee"
+                type="melee",
+                emoji="<:steelarm:1414044081155473539>"
                 ),
 #endregion
 #region Dull Melee
@@ -55,7 +58,8 @@ cursed_tools={
                 aoe=1,
                 strength=20,
                 speed=2,
-                type="melee"
+                type="melee",
+                emoji="<:cow_blade:1277632737683046431>"
                 ),
 #endregion
 #region ISOH
@@ -70,6 +74,7 @@ cursed_tools={
                 strength=500,
                 speed=2,
                 type="melee",
+                emoji="<:ISOH_FULL:1275114973055684618>",
                 negates=True
                 ),
 #endregion
@@ -84,7 +89,8 @@ cursed_tools={
                 aoe=1,
                 strength=20,
                 speed=2,
-                type="melee"
+                type="melee",
+                emoji="<:dragonbone:1277632814367506567>"
                 ),
 #endregion
 #region Maichan
@@ -99,6 +105,7 @@ cursed_tools={
                 strength=20,
                 speed=2,
                 type="melee",
+                emoji="<:soulsplit:1277632881640083456>",
                 soul=250
                 ),
 #endregion
@@ -114,6 +121,7 @@ cursed_tools={
                 strength=20,
                 speed=3,
                 type="melee",
+                emoji="<:playfulcloud:1277632921720586362>",
                 buff={"strength" : 2, "speed" : 2} # multiplier of player physical strength by its dmg - doesn't take in account imbue
                 ),
 #endregion
@@ -130,6 +138,7 @@ cursed_tools={
                 strength=20,
                 speed=3,
                 type="melee",
+                emoji="<:blackrope:1277632984928882769>",
                 negates=True,
                 self_dmg=5 # not exactly sure how this works
                 )

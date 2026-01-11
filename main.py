@@ -4,8 +4,8 @@ from game import Player, Enemy
 from discord.ext import commands
 
 
-log_channel = os.getenv('LOGCHANNEL')
-token = os.getenv('TOKEN')
+# log_channel = os.getenv('LOGCHANNEL')
+# token = os.getenv('TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
