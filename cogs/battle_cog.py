@@ -416,7 +416,7 @@ def summon_options_container(player, team, technique):
     options = [e() for e in Enemy.__subclasses__() if e().level < 50]
     container.add_item(title_text)
     container.add_item(discord.ui.Separator())
-    techname = next(iter(technique.keys()))
+    techname = technique.name
     summon_text: str = f"# {techname} options\n"
     ten_shadows = ["Toad", "Black Divine Dog", "Rabbit Escape", "White Divine Dog", "Nue", "Piercing Ox", "Funeral Tiger", "Mahoraga", "Great Serpent", "Rika", "Garuda", "Round Deer", "Max Elephant"]
     copy = "Rika"
@@ -590,6 +590,16 @@ class Battle(commands.Cog):
 #endregion
 
 #region Layout/View Section
+class SummonLayout(discord.ui.LayoutView):
+    def __init__(self, bot, player, technique, lobby, team_name):
+        super().__init__()
+        act_row = discord.ui.ActionRow()
+        container, summons = summon_options_container(player, team_name, technique)
+        act_row.add_item(SummonSelect(bot, player, technique, summons, lobby, lobby.feed[lobby.round]['summon'][team_name]))
+        container.add_item(act_row)
+        self.add_item(container)
+        
+        
 class BattleLayout(discord.ui.LayoutView):
     def __init__(self, lobby, bot):
         super().__init__()
@@ -1293,18 +1303,9 @@ class TargetFinish(discord.ui.Button):
 
     async def callback(self, itx: discord.Interaction):
         await itx.response.defer()
-
         await itx.followup.send("Finished selecting targets.")
 
-class SummonLayout(discord.ui.LayoutView):
-    def __init__(self, bot, player, technique, lobby, team_name):
-        super().__init__()
-        act_row = discord.ui.ActionRow()
-        container, summons = summon_options_container(player, team_name, technique)
-        act_row.add_item(SummonSelect(bot, player, technique, summons, lobby, lobby.feed[lobby.round]['summon'][team_name]))
-        container.add_item(act_row)
-        self.add_item(container)
-        
+
 
 # class QuantityButton(discord.ui.Button):
 #     def __init__(self, label, quantity):
