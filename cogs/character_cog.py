@@ -38,7 +38,8 @@ reincarnate_techs = [
     player_tech.blood_manip, 
     player_tech.body_hop, 
     player_tech.ce_discharge, 
-    player_tech.construction, 
+    player_tech.construction,
+    player_tech.contractual_recreation, 
     player_tech.cursed_speech, 
     player_tech.explosive_flesh,
     player_tech.ice_manip,
@@ -50,9 +51,9 @@ reincarnate_techs = [
 
 curse_techs = [
     player_tech.disaster_flames, 
-    player_tech.disaster_plants, 
     player_tech.disaster_tides,
-    player_tech.idle_transfig, 
+    player_tech.idle_transfig,
+    player_tech.natures_wrath,  
     player_tech.projection_sorcery
     ]
 
@@ -163,23 +164,23 @@ class Character_cog(commands.Cog):
         await ctx.send(view=CreatePromptLayout(self.bot, self.playerdict))
         return
     
-    @commands.hybrid_command(name="custom", description="Create your player in the culling games! (only one player per colony)")
-    async def custom(self, ctx, name: str=None, pclass: str=None, tech: str=None):
-        if not name:
-            name=ctx.author.display_name
-        self.playerdict["colony"] = ctx.guild.id
-        self.playerdict["name"] = name
-        embed= discord.Embed(title="Create a character", description= self.welcstr + name +
-        "\n## The first step in creating your character!"
-        "\n## Click the button to spin for your stats!")
-        embed.add_field(name="Stat Ranges", value="```python\n* HP: 100 - 300\n* CE: 200 - 2000\n* Strength: 50 - 200\n* Speed: 50 - 200"
-        "\n* Class: Sorcerer, Curse, Reincarnate ```")
-        embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
-        embed.set_thumbnail(url=self.bot.user.avatar)
-        embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
-        embed.color=discord.Color.from_rgb(255, 0, 0)
-        await ctx.send(embed=embed, view=CustomCreateButton(pclass, tech, embed, self.bot, self.playerdict, user=ctx.author.id))
-        return
+    # @commands.hybrid_command(name="custom", description="Create your player in the culling games! (only one player per colony)")
+    # async def custom(self, ctx, name: str=None, pclass: str=None, tech: str=None):
+    #     if not name:
+    #         name=ctx.author.display_name
+    #     self.playerdict["colony"] = ctx.guild.id
+    #     self.playerdict["name"] = name
+    #     embed= discord.Embed(title="Create a character", description= self.welcstr + name +
+    #     "\n## The first step in creating your character!"
+    #     "\n## Click the button to spin for your stats!")
+    #     embed.add_field(name="Stat Ranges", value="```python\n* HP: 100 - 300\n* CE: 200 - 2000\n* Strength: 50 - 200\n* Speed: 50 - 200"
+    #     "\n* Class: Sorcerer, Curse, Reincarnate ```")
+    #     embed.set_author(name=ctx.author.display_name, url=ctx.author.avatar, icon_url=ctx.author.avatar)
+    #     embed.set_thumbnail(url=self.bot.user.avatar)
+    #     embed.set_footer(text="Click the button to spin for your stats!", icon_url=self.bot.user.avatar)
+    #     embed.color=discord.Color.from_rgb(255, 0, 0)
+    #     await ctx.send(embed=embed, view=CustomCreateButton(pclass, tech, embed, self.bot, self.playerdict, user=ctx.author.id))
+    #     return
     
     @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
     async def delete(self, ctx):

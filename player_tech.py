@@ -1,5 +1,6 @@
 from techniques import Techniques
-from random import randint
+
+# Note: techs with a rarity of 0 are only available to enemies
 
 # region Anti Gravity
 anti_gravity={
@@ -66,6 +67,51 @@ anti_gravity={
             }
         ],
 "Rarity" : 15
+}
+# endregion
+
+# region Anxious Ears
+anxious_ears={  
+"Anxious Ears" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Sound Clap" : 
+                         Techniques(
+                              name="Sound Clap",
+                              level=1,
+                              act_speed=1,
+                              act_cost=50,
+                              act_req=("head", "torso"),
+                              aoe=1,
+                              strength=300,
+                              speed=300,
+                              type="projectile",
+                              stun=1
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Sound Reflection" : 
+                         Techniques(
+                              "Sound Reflection",
+                              level=1,
+                              act_speed=1,
+                              act_cost=50,
+                              act_req=("head", "torso"),
+                              aoe=1,
+                              strength=300,
+                              speed=300,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
 }
 # endregion
 
@@ -137,6 +183,50 @@ auspicious_beasts_summon={
           }
      ],
 "Rarity" : 50
+}
+# endregion
+
+# region Barehand
+barehand={  
+"Barehand" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Barehand Slap" :
+                         Techniques(
+                              name="Barehand Slap",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=10,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=200,
+                              speed=400,
+                              type="melee"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Barehand Slap" :
+                         Techniques(
+                              name="Barehand Slap",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=10,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=200,
+                              speed=400,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
 }
 # endregion
 
@@ -471,6 +561,107 @@ boogie_woogie = {
 }
 # endregion
 
+# region Bugfly
+bugfly={  
+"Bugfly" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Swat" :
+                         Techniques(
+                              name="Swat",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="melee"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Swat" :
+                         Techniques(
+                              name="Swat",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
+# region Charger
+charger={  
+"Charger" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Charged Punch" :
+                         Techniques(
+                              name="Charged Punch",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=40,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=500,
+                              speed=300,
+                              type="melee"
+                         ),
+                    
+                    "Electric Ground-pound" : 
+                         Techniques(
+                              name="Electric Ground-pound",
+                              level=1,
+                              act_speed=3,
+                              act_cost=50,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=400,
+                              speed=300,
+                              type="projectile"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Charged Field" :
+                         Techniques(
+                              name="Charged Field",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=40,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=400,
+                              speed=500,
+                              type="tank"
+                         )
+               }
+          }
+     ],
+"Rarity" : 30
+}
+# endregion
+
 # region Cursed Energy Discharge
 ce_discharge={
      
@@ -795,6 +986,50 @@ construction={
 ],
 "Rarity" : 15, 
 "Six Eyes" : False
+}
+# endregion
+
+# region Contractual Recreation
+contractual_recreation={  
+"Contractual Recreation" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Knife Receipt" :
+                         Techniques(
+                              name="Knife Receipt",
+                              level=1,
+                              act_speed=3,                              
+                              act_cost=20,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=600,
+                              speed=400,
+                              type="melee"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Knife Receipt" :
+                         Techniques(
+                              name="Knife Receipt",
+                              level=1,
+                              act_speed=3,                              
+                              act_cost=20,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=600,
+                              speed=400,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 10
 }
 # endregion
 
@@ -1186,77 +1421,6 @@ disaster_flames={
 }
 # endregion
 
-# region Natures Wrath
-disaster_plants={
-"Natures Wrath" :
-     [
-          {
-               "Attack" : 
-               {
-                    "Cursed Buds" :
-                         Techniques(
-                              name="Cursed Buds",
-                              level=1,
-                              act_speed=1,                              
-                              act_cost=20,
-                              act_req=("Left Arm", "Right Arm"),
-                              aoe=5,
-                              strength=10,
-                              speed=800,
-                              type="projectile",
-                              debuff=('burn ce', 50) # burns 50 ce per round if it hits target (won't hit if target has no ce imbued or is hr zero)
-                         ), 
-
-                    "Roots" :
-                         Techniques(
-                              name="Roots",
-                              level=2,
-                              act_speed=1,                              
-                              act_cost=40,
-                              act_req=("Left Arm", "Right Arm"),
-                              aoe=3,
-                              strength=700,
-                              speed=700,
-                              type="projectile"
-                         ),
-               }
-          },
-
-          {
-               "Defend": 
-               {
-                    "Root Rider" :
-                         Techniques(
-                              name="Root Rider",
-                              level=2,
-                              act_speed=1,                              
-                              act_cost=40,
-                              act_req=("Left Arm", "Right Arm"),
-                              aoe=1,
-                              strength=100,
-                              speed=700,
-                              type="dodge"
-                         ),
-
-                    "Roots" :
-                         Techniques(
-                              name="Roots",
-                              level=2,
-                              act_speed=1,                              
-                              act_cost=40,
-                              act_req=("Left Arm", "Right Arm"),
-                              aoe=3,
-                              strength=700,
-                              speed=700,
-                              type="counter"
-                         ),
-                }
-            }
-        ],
-"Rarity" : 35
-}
-# endregion
-
 # region Disaster Tides
 disaster_tides={
      
@@ -1388,6 +1552,220 @@ explosive_flesh={
 "Rarity" : 50
 }
 #endregion
+
+# region Finger Bearer
+finger_bearer={
+"Finger Bearer" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Energy Blast" :
+                         Techniques(
+                              name="Energy Blast",
+                              level=1,
+                              act_speed=5,                              
+                              act_cost=50,
+                              act_req=("Hands"),
+                              aoe=2,
+                              strength=500,
+                              speed=500,
+                              type="projectile"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Energy Shield" : Techniques(
+                         name="Energy Shield",
+                         level=1,
+                         act_speed=5,
+                         act_cost=50,
+                         act_req=("hands"),
+                         aoe=2,
+                         strength=500,
+                         speed=500,
+                         type="tank",
+                    ),
+
+                    "Self Heal" : Techniques(
+                         name="Self Heal",
+                         level=1,
+                         act_speed=5,
+                         act_cost=50,
+                         act_req=("hands"),
+                         aoe=2,
+                         strength=500,
+                         speed=500,
+                         type="heal",
+                    ),
+
+                    "Body Flicker" : Techniques(
+                         name="Body Flicker",
+                         level=1,
+                         act_speed=5,
+                         act_cost=150,
+                         act_req=("hands"),
+                         aoe=2,
+                         strength=000,
+                         speed=200,
+                         type="dodge"
+                    )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
+# region Floatjelly
+floatjelly={  
+"Floatjelly" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Sting" :
+                         Techniques(
+                              name="Sting",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="melee",
+                              poison=(1, 2)
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Sting" :
+                         Techniques(
+                              name="Sting",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="counter",
+                              poison=(1, 2)
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
+# region Flymouth
+flymouth={  
+"Flymouth" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Chomp" :
+                         Techniques(
+                              name="Chomp",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Head"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="melee"
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Chomp" :
+                         Techniques(
+                              name="Chomp",
+                              level=1,
+                              act_speed=2,                              
+                              act_cost=1,
+                              act_req=("Head"),
+                              aoe=1,
+                              strength=100,
+                              speed=100,
+                              type="counter"
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
+# region Furrpede
+furrpede={  
+"Furrpede" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Eye Beam" : 
+                         Techniques(
+                              name="Eye Beam",
+                              level=1,
+                              act_speed=5,
+                              act_cost=50,
+                              act_req=("Head"),
+                              aoe=2,
+                              strength=500,
+                              speed=500,
+                              type="projectile",
+                         ),
+                    "Underground Strike" : 
+                         Techniques(
+                              name="Underground Strike",
+                              level=1,
+                              act_speed=5,
+                              act_cost=50,
+                              act_req=("Hands"),
+                              aoe=2,
+                              strength=500,
+                              speed=500,
+                              type="melee",
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Furr Spikes" : 
+                         Techniques(
+                              name="Furr Spikes",
+                              level=1,
+                              act_speed=5,
+                              act_cost=50,
+                              act_req=("Torso"),
+                              aoe=3,
+                              strength=100,
+                              speed=200,
+                              type="counter",
+                              poison=50
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
 
 # region Heavenly Restriction: Max
 hr_max={   
@@ -2098,6 +2476,168 @@ mba={
 }
 # endregion
 
+# region Natures Wrath
+natures_wrath={
+"Natures Wrath" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Cursed Buds" :
+                         Techniques(
+                              name="Cursed Buds",
+                              level=1,
+                              act_speed=1,                              
+                              act_cost=20,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=5,
+                              strength=10,
+                              speed=800,
+                              type="projectile",
+                              debuff=('burn ce', 50) # burns 50 ce per round if it hits target (won't hit if target has no ce imbued or is hr zero)
+                         ), 
+
+                    "Roots" :
+                         Techniques(
+                              name="Roots",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=700,
+                              speed=700,
+                              type="projectile"
+                         ),
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Root Rider" :
+                         Techniques(
+                              name="Root Rider",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=700,
+                              type="dodge"
+                         ),
+
+                    "Roots" :
+                         Techniques(
+                              name="Roots",
+                              level=2,
+                              act_speed=1,                              
+                              act_cost=40,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=3,
+                              strength=700,
+                              speed=700,
+                              type="counter"
+                         ),
+                }
+            }
+        ],
+"Rarity" : 35
+}
+# endregion
+
+# region Orbmaster
+orbmaster={
+"Orbmaster" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Impending Doom" : 
+                         Techniques(
+                              name="Impending Doom",
+                              level=1,
+                              act_speed=10,
+                              act_cost=100,
+                              act_req=("hands", "torso"),
+                              aoe=1,
+                              strength=420,
+                              speed=100,
+                              type="projectile",
+                              sure_hit=True
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Foresight" : 
+                         Techniques(
+                              name="Foresight",
+                              level=1,
+                              act_speed=10,
+                              act_cost=100,
+                              act_req=("head"),
+                              aoe=1,
+                              strength=400,
+                              speed=200,
+                              type="counter",
+                              sure_hit=True
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
+# region Primate
+primate={  
+"Primate" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Head Twirl" : 
+                         Techniques(
+                              name="Head Twirl",
+                              level=1,
+                              act_speed=2,
+                              act_cost=30,
+                              act_req=("Head", "Torso"),
+                              aoe=1,
+                              strength=200,
+                              speed=500,
+                              type="projectile",
+                              stun=2
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Tree Swing" : 
+                         Techniques(
+                              name="Tree Swing",
+                              level=1,
+                              act_speed=2,
+                              act_cost=50,
+                              act_req=("Left Arm", "Right Arm"),
+                              aoe=1,
+                              strength=100,
+                              speed=400,
+                              type="dodge"
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
+}
+# endregion
+
 # region Projection Sorcery
 projection_sorcery={
      
@@ -2182,7 +2722,6 @@ projection_sorcery={
 
 # region Shrine
 shrine={
-
 "Shrine" :
      [
           {
@@ -2398,7 +2937,6 @@ shrine={
 # endregion
 
 # region Sky Manipulation
-
 sky_manip={
      
 "Sky Manipulation" :
@@ -2567,6 +3105,67 @@ star_rage={
           }
      ],
 "Rarity" : 15
+}
+# endregion
+
+# region StinkaSpore
+stinkaspore={  
+"StinkaSpore" :
+     [
+          {
+               "Attack" : 
+               {
+                    "Hydrogen Sulfide Bomb" : 
+                         Techniques(
+                              name="Hydrogen Sulfide Bomb",
+                              level=1,
+                              act_speed=3,
+                              act_cost=20,
+                              act_req=("Head", "Torso"),
+                              aoe=5,
+                              strength=150,
+                              speed=100,
+                              type="projectile",
+                              poison=50
+                         ),
+                    
+                    "Carbon Monoxide Disperse" : 
+                         Techniques(
+                              name="Carbon Monoxide Disperse",
+                              level=1,
+                              act_speed=3,
+                              act_cost=60,
+                              act_req=("Head", "Torso"),
+                              aoe=5,
+                              strength=100,
+                              speed=100,
+                              type="projectile",
+                              poison=50,
+                              sure_hit=True 
+                         )
+               }
+          },
+
+          {
+               "Defend" : 
+               {
+                    "Ammonia Cloud" : 
+                         Techniques(
+                              name="Stinkaspore : Ammonia Cloud", 
+                              level=1,
+                              act_speed=3,
+                              act_cost=60,
+                              act_req=("Head", "Torso"),
+                              aoe=5,
+                              strength=180,
+                              speed=150,
+                              type="counter",
+                              poison=50
+                         )
+               }
+          }
+     ],
+"Rarity" : 0
 }
 # endregion
 
@@ -2861,8 +3460,7 @@ ten_shadows={
 # endregion
 
 # region TEMPLATE
-# _={
-     
+# _={  
 # "" :
 #      [
 #           {
@@ -2877,14 +3475,14 @@ ten_shadows={
 #                               act_req=("Left Arm", "Right Arm"),
 #                               aoe=1,
 #                               strength=100,
-#                               speed=0,
+#                               speed=100,
 #                               type=""
 #                          )
 #                }
 #           },
 
 #           {
-#                "Defend": 
+#                "Defend" : 
 #                {
 #                     "" :
 #                          Techniques(
@@ -2895,19 +3493,22 @@ ten_shadows={
 #                               act_req=("Left Arm", "Right Arm"),
 #                               aoe=1,
 #                               strength=100,
-#                               speed=0,
+#                               speed=100,
 #                               type=""
 #                          )
-#                 }
-#             }
-#         ],
+#                }
+#           }
+#      ],
 # "Rarity" : 100
 # }
 # endregion
 
-technique_list = [anti_gravity, auspicious_beasts_summon, bird_manip, blood_manip, 
-                  body_hop, boogie_woogie, ce_discharge, comedian, construction, 
-                  copy, cursed_speech, cursed_spirit_manip, disaster_flames, 
-                  disaster_plants, disaster_tides, explosive_flesh, hr_max, hr_zero, 
-                  ice_manip, idle_transfig, limitless, mba, projection_sorcery, 
-                  shrine, sky_manip, star_rage, straw_doll, ten_shadows]
+technique_list = [
+                    anti_gravity, anxious_ears, auspicious_beasts_summon, barehand, bird_manip, 
+                    blood_manip, body_hop, boogie_woogie, bugfly, charger, ce_discharge, 
+                    comedian, construction, contractual_recreation, copy, cursed_speech, cursed_spirit_manip, 
+                    disaster_flames, disaster_tides, explosive_flesh, finger_bearer, 
+                    floatjelly, flymouth, furrpede, hr_max, hr_zero, ice_manip, idle_transfig, limitless, 
+                    mba, natures_wrath, orbmaster, primate, projection_sorcery, 
+                    shrine, sky_manip, star_rage, stinkaspore, straw_doll, ten_shadows
+               ]
