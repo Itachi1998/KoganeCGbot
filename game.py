@@ -50,7 +50,7 @@ human_body_parts = {"Head" : BodyPart('Head', 0, 0),
 #endregion
 
 #region Actor
-class Actor:
+class Actor:                   
     def __init__(self,
             name: str, 
             level: int,
@@ -62,13 +62,13 @@ class Actor:
             playerclass: str, colony_id
             ):
         self.name = name
-        self.level = level
+        self.level = level                
         self.max_hp = max_hp
         self.max_ce = max_ce
         self.strength = strength
         self.speed = speed
         self.technique = technique
-        self.playerclass = playerclass
+        self.playerclass = playerclass                                      
         self.colony_id = colony_id
         self.hp = max_hp
         self.ce = max_ce

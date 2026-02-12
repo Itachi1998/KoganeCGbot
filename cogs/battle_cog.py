@@ -36,6 +36,7 @@ def ce_bar(ce, max_ce):
 
 def verify_player(user_id, colony):
     player, techlist = read_player(user_id, colony)
+    print(player, techlist)
     p = Player(**player)
 
     return p
@@ -413,10 +414,10 @@ def summon_options_container(player, team, technique):
     container = discord.ui.Container(accent_color=discord.Color.purple())
     title_text = discord.ui.TextDisplay(f"# `Summon Options for {player.name}`")
     options = []
-    options = [e() for e in Enemy.__subclasses__() if e().level < 50]
+    options = [e() for e in Enemy.__subclasses__() if int(e().level) < 50]
     container.add_item(title_text)
     container.add_item(discord.ui.Separator())
-    techname = technique.name
+    techname = next(iter(technique.keys()))
     summon_text: str = f"# {techname} options\n"
     ten_shadows = ["Toad", "Black Divine Dog", "Rabbit Escape", "White Divine Dog", "Nue", "Piercing Ox", "Funeral Tiger", "Mahoraga", "Great Serpent", "Rika", "Garuda", "Round Deer", "Max Elephant"]
     copy = "Rika"
@@ -869,6 +870,9 @@ class BattleView(discord.ui.View):
     async def end_turn(self, itx:discord.Interaction, btn:discord.ui.Button):
         # Logic to end the turn
         pass
+
+
+    
 class MoveView(discord.ui.LayoutView):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         super().__init__()
@@ -1127,7 +1131,7 @@ class EndTargeting(discord.ui.Button):
                 lobby.ready = []
                 return embed
             else:
-                await itx.response.send_message("Not all players have selected their moves.", ephemeral=True)
+                await itx.response.send_message("Waiting on all players to finish selecting their moves.", ephemeral=True)
                 return
         else:
             await itx.response.send_message("Error not in a lobby")
@@ -1377,6 +1381,8 @@ class SummonSelect(discord.ui.Select):
             print(team)
 
             await itx.followup.send(f"{selected_summon.name} has been summoned to {team_name}!")
+            battlew_view = BattleLayout(self.lobby, self.bot)
+            await itx.channel.send(view=battlew_view)
             return
 
      

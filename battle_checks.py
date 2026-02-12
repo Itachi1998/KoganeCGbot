@@ -334,7 +334,7 @@ def damage_target(target, dmg, soul, defense, def_vow=None, atk_vow=None):
     body_dmg = initial_hp - total_hp # part of returning body_dmg
     print("Total hp left: " + str(total_hp))
     print("Total maxhp left: " + str(total_maxhp))    
-    return target.hp, target.max_hp, body_dmg
+    return target, target.hp, target.max_hp, body_dmg
     #endregion
     
 # region get move
@@ -578,56 +578,67 @@ def defense_verify(target, player, defense, aoe=False):
 # region type increment
 def type_increment(player, attack=None, defense=None, tools=None):
     buffs = {'attack': {'strength' : {}, 'speed' : {}}, 'defense': {'strength' : {}, 'speed': {}}}
+    str_imbued = 0
+    spd_imbued = 0
+    if isinstance(player.imbue, int):
+                str_imbued = player.imbue
+                spd_imbued = player.imbue
+    else:
+                str_imbued = player.imbue['strength']
+                spd_imbued = player.imbue['speed']
     if attack:
         print(f"Incrementing {attack.name} stats...")
         if attack.type == 'melee':
             if tools:
                 for item in tools:
-                    dmg = attack.strength + item.strength + player.strength + player.imbue['strength']
+                    dmg = attack.strength + item.strength + player.strength + str_imbued
                     buffs['attack']['strength']['tool'] = item.strength
-                    buffs['attack']['strength']['imbue'] = player.imbue['strength']
+                    buffs['attack']['strength']['imbue'] = str_imbued
                     buffs['attack']['strength']['physical'] = player.strength
                     # playful cloud gets strength buffed based on both player strength and speed
                     # dragonbone gets strength buffed based on player speed 
-                    speed = attack.speed + item.speed + player.speed + player.imbue['speed']
+                    speed = attack.speed + item.speed + player.speed + spd_imbued
                     buffs['attack']['speed']['physical'] = player.speed
-                    buffs['attack']['speed']['imbue'] = player.imbue['speed']
+                    buffs['attack']['speed']['imbue'] = spd_imbued
                 player.imbue['strength'] = 0
                 player.imbue['speed'] = 0
                 return dmg, speed, buffs, tools
             else:
-                dmg = attack.strength + player.imbue['strength'] + player.strength
-                speed = attack.speed + player.imbue['speed'] + player.speed
+                dmg = attack.strength + str_imbued + player.strength
+                speed = attack.speed + spd_imbued + player.speed
         
                 # bf = black_flash_check(player) 
                 # implement black flash counter to lobby feed and player
                 # if bf:
                 #     buffs['attack']['black flash'] = bf
                 buffs['attack']['strength']['physical']= player.strength
-                buffs['attack']['strength']['imbue'] = player.imbue['strength']
-                buffs['attack']['speed']['imbue'] = player.imbue['speed']
+                buffs['attack']['strength']['imbue'] = str_imbued
+                buffs['attack']['speed']['imbue'] = spd_imbued
                 buffs['attack']['speed']['physical'] = player.speed
 
         elif attack.type == 'projectile':
-            dmg = attack.strength + player.imbue['strength']
-            speed = attack.speed + player.imbue['speed']
-            buffs['attack']['strength']['imbue'] = player.imbue['strength']
-            buffs['attack']['speed']['imbue'] = player.imbue['speed']
-        
-        player.imbue['strength'] = 0
-        player.imbue['speed'] = 0
+            dmg = attack.strength + str_imbued
+            speed = attack.speed + spd_imbued
+            buffs['attack']['strength']['imbue'] = str_imbued
+            buffs['attack']['speed']['imbue'] = spd_imbued
+        if isinstance(player.imbue, int):
+            player.imbue=0
+        else:
+            player.imbue['strength'] = 0
+            player.imbue['speed'] = 0
         return player, dmg, speed, buffs
 
     if defense:
         print(f"Incrementing {defense.name} stats...")
         if defense.type == 'tank' or defense.type == 'counter' or defense.type == 'dodge':
-            defense_strength = defense.strength + player.imbue['strength'] + player.strength
-            buffs['defense']['strength']['physical'] = player.strength
+            
+            defense_strength = defense.strength + str_imbued + player.strength
+            buffs['defense']['strength']['physical'] = defense_strength
             # think about implementing different counter types i.e: 'counter melee' 'counter projectile' 'counter barrier'
-            buffs['defense']['strength']['imbue'] = player.imbue['strength']
-            defense_speed = defense.speed + player.imbue['speed'] + player.speed
-            buffs['defense']['speed']['physical'] = player.speed
-            buffs['defense']['speed']['imbue'] = player.imbue['speed']
+            buffs['defense']['strength']['imbue'] = str_imbued
+            defense_speed = defense.speed + spd_imbued + player.speed
+            buffs['defense']['speed']['physical'] = defense_speed
+            buffs['defense']['speed']['imbue'] = spd_imbued
 
             if tools:
                 for item in tools:
@@ -640,12 +651,12 @@ def type_increment(player, attack=None, defense=None, tools=None):
     
             return player, defense_strength, defense_speed, buffs
         if defense.type == 'heal':
-            defense_strength = defense.strength + player.imbue['strength'] + player.strength
+            defense_strength = defense.strength + str_imbued + player.strength
             buffs['defense']['strength']['physical'] = player.strength
-            buffs['defense']['strength']['imbue'] = player.imbue['strength']
-            defense_speed = defense.speed + player.imbue['speed'] + player.speed
+            buffs['defense']['strength']['imbue'] = str_imbued
+            defense_speed = defense.speed + spd_imbued + player.speed
             buffs['defense']['speed']['physical'] = player.speed
-            buffs['defense']['speed']['imbue'] = player.imbue['speed']
+            buffs['defense']['speed']['imbue'] = spd_imbued
                 # else:
                 #     defense_strength = defense.strength
                 #     defense_speed = defense.speed
@@ -817,7 +828,7 @@ def counter_check(target, player, defense, attack, dmg, speed, defense_strength,
                     # 50 - 24
         total_dmg = dmg - reduction_multiplier
         
-        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+        target, target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
         print(f"{defense.name} was too slow to counter {attack.name}")
         return ("hit", body_dmg, target_hp <=0, target_maxhp <=0, target)
     
@@ -889,7 +900,7 @@ def dodge_check(target, defense, attack, dmg, speed, defense_strength, defense_s
                  # 50 - 24
         # print(f"Reduced multiplier: {reduced_multiplier}")
         total_dmg = dmg - reduced_multiplier
-        target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
+        target, target_hp, target_maxhp, body_dmg = damage_target(target=target, defense=defense, dmg=total_dmg, soul=attack.soul)
         return ("dodge", body_dmg, target_hp<=0, target_maxhp<=0, target)
 
     else: 
