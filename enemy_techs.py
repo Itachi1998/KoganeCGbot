@@ -854,4 +854,37 @@ enemy_tech = { #techs with a * have been added to player_tech.py - leaving summo
     #      } }
     # ],
 #endregion
+#region Barehand
+    "Barehand" : 
+    [
+        {"Attack" : {
+            "Punch" : Techniques(
+                name="Barehand: Punch",
+                level=1,
+                act_speed=1,
+                act_cost=10,
+                act_req=("hands"),
+                aoe=1,
+                strength=100,
+                speed=500,
+                type="melee"
+            ),
+        }},
+        {"Defend" :
+         {
+             "Block" : Techniques(
+                 "Barehand: Block",
+                 level=1,
+                    act_speed=1,
+                    act_cost=10,
+                    act_req=("hands"),
+                    aoe=1,
+                    strength=100,
+                    speed=500,
+                    type="tank",
+                
+             )
+         } }
+    ],
+#endregion
 }

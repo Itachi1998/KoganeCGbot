@@ -417,7 +417,7 @@ class CreateButton(discord.ui.Button['CreatePromptLayout']):
             max_ce=ce,
             speed=speed,
             strength=strength,
-            technique="Idle Transfiguration",
+            technique=techname,
             playerclass=pclass,
             colony_id=self.playerdict['colony'],
             xp=0,

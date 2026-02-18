@@ -2375,7 +2375,7 @@ limitless={
                               act_speed=1,
                               act_cost=50,
                               act_req=("Head"),
-                              aoe=1,
+                               aoe=1,
                               strength=500,
                               speed=1000,
                               type="heal",
@@ -2391,8 +2391,7 @@ limitless={
 
 # region Mythic Beast Amber
 mba={
-     
-"Mythical Beast":
+    "Mythical Beast":
      [
           {
                "Attack" : 

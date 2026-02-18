@@ -1,3 +1,4 @@
+from math import nextafter
 import discord, pagination, game, db, random, battle_checks
 from player_tech import technique_list
 from battle_checks import battle_checks
@@ -13,30 +14,29 @@ def healthbar(health, max_health):
     dash_ratio = max_health / max_dashes
     filled_dashes = 0 if health <= 0 else int(health / dash_ratio)
     remainder = (health / dash_ratio) - filled_dashes if health > 0 else 0
-    dashes = "<:fullheart:1401327640018944070>" * filled_dashes
+    dashes = "<:1000001328:1354469784724570172>" * filled_dashes
     if remainder > 0:
-        dashes += "<:halfheart:1401327657060270160>"  # Add a half-heart emoji
+        dashes += "<:1000001329:1354469791724736745>" * remainder
     percent = f"`{max(round((health / max_health) * 100), 0)}%`"
-    # if '-' in percent:
-    #     percent = "`0%`"
-    bar = f"{dashes} {percent}"
+    bar = f"{dashes} {percent} `{health}/{max_health}`"
     return bar
 
 def ce_bar(ce, max_ce):
-    max_dashes = 4 # max 4
-    dash_ratio = max_ce / max_dashes # maximum ce / 4 = 1000 ce = 250 ce per dash
-    filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) # 853 / 250 = 3 dashes 
-    remainder = max_dashes - filled_dashes if ce > 0 else 0 # 1000 / 250 = 4 dashes - 3 = 1 remainder 
-    dashes = "<:fullce:1401327669328740405>" * filled_dashes # emoji times number of dashes
-    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`" # 853 / 1000 = 0.853 * 100 = 85.3% rounded to 85%
-    if remainder > 0: # if remainder is greater than 0, add a half dash
-        dashes += "<:halfce:1401327682540666951>" # Add a half-ce emoji
-    bar = f"{dashes} {percent}" # return the bar with dashes and percent
+    max_dashes = 4 
+    dash_ratio = max_ce / max_dashes 
+    filled_dashes = 0 if ce <= 0 else int(ce / dash_ratio) 
+    remainder = max_dashes - filled_dashes if ce > 0 else 0 
+    dashes = "<:1000001330:1354469798230102258>" * filled_dashes 
+    percent = f"`{0 if ce <= 0 else round((ce / max_ce) * 100)}%`" 
+    if remainder > 0: 
+        dashes += "<:IMG_44021:1394503076223783043>" * remainder
+    bar = f"{dashes} {percent} `{ce}/{max_ce}`" 
     print(dashes)
     return bar
 
 def verify_player(user_id, colony):
     player, techlist = read_player(user_id, colony)
+    print(player, techlist)
     p = Player(**player)
 
     return p
@@ -49,13 +49,78 @@ def verify_barrier(technique, name):
     else:
          return True
 
-def generate_round_embed(lobby):
-    embed = discord.Embed(title="Round " + str(lobby.round), description="Round " + str(lobby.round) + " has started!")
-    embed.add_field(name=lobby.teamA['name'], value="\n".join(p.name for p in lobby.teamA['players']))
-    embed.add_field(name=lobby.teamB['name'], value="\n".join(p.name for p in lobby.teamB['players']))
-    embed.add_field(name="Field", value="\n".join(p.name for p in lobby.field.values()))
-    embed.set_author(name=lobby.name)
-    return embed
+def round_container(lobby, bot):
+    colony = read_colony(lobby.colony_id)
+    if not colony:
+         return False
+    playerlist = []
+
+    container = discord.ui.Container(accent_color=discord.Color.yellow())
+    title_text = discord.ui.TextDisplay(content=f"# `Round: {lobby.round}`")
+    title_section = discord.ui.Section(title_text, accessory= discord.ui.Thumbnail(media=bot.user.avatar.url))
+    container.add_item(title_section)
+    container.add_item(discord.ui.Separator())
+    for p in lobby.players:
+        player, techlist = read_player(p, lobby.colony_id)
+        real_player = None
+        if player:
+            real_player = Player(**player)
+            playerlist.append(real_player)
+    for target in lobby.field:
+        if target in [p.name for p in playerlist]:
+              continue
+        else:
+             playerlist.append(target)
+    teamA_text = {}
+    teamA_text['title'] = '# ' + lobby.teamA['name'] if lobby.teamA['name'] else "Team A" + '\n'
+    teamB_text = {}
+    teamB_text['title'] = '# ' + lobby.teamB['name'] if lobby.teamB['name'] else "Team B" + '\n'
+    field_text = {}
+    field_text['title'] = '# Field' + '\n'
+    for p in playerlist:
+        if isinstance(p, Player) and p.user_id:
+            if p.user_id in [pl.user_id for pl in lobby.teamA['players']]:
+                health = p.hp
+                max_health = p.max_hp
+                ce = p.ce
+                max_ce = p.max_ce
+                name = p.name
+                teamA_text[name] = healthbar(health, max_health) + "\n" + ce_bar(ce, max_ce) + "\n"
+            elif p.user_id in [pl.user_id for pl in lobby.teamB['players']]:
+                health = p.hp
+                max_health = p.max_hp
+                ce = p.ce
+                max_ce = p.max_ce
+                name = p.name
+                teamB_text[name] = healthbar(health, max_health) + "\n" + ce_bar(ce, max_ce) + "\n"
+            elif p.name in [n for n in lobby.field.keys()]:
+                health = p.hp
+                max_health = p.max_hp
+                ce = p.ce
+                max_ce = p.max_ce
+                name = p.name
+                field_text[name] = healthbar(health, max_health) + "\n" + ce_bar(ce, max_ce) + "\n"
+
+        else:
+            player = lobby.field[p]
+            health = player.hp
+            max_health = player.max_hp
+            ce = player.ce
+            max_ce = player.max_ce
+            name = player.name
+            field_text[name] = healthbar(health, max_health) + "\n" + ce_bar(ce, max_ce) + "\n"
+    
+    teamA_display = discord.ui.TextDisplay(content=f"# {lobby.teamA['name']}\n" + "".join([f"`{name}`\n{status}" if name != 'title' else "" for name, status in teamA_text.items()]))
+    container.add_item(teamA_display)
+    container.add_item(discord.ui.Separator())
+    teamB_display = discord.ui.TextDisplay(content=f"# {lobby.teamB['name']}\n" + "".join([f"`{name}`\n{status}" if name != 'title' else "" for name, status in teamB_text.items()]))
+    container.add_item(teamB_display)
+    container.add_item(discord.ui.Separator())
+    field_display = discord.ui.TextDisplay(content=f"# Field\n" + "".join([f"`{name}`\n{status}" if name != 'title' else "" for name, status in field_text.items()]))
+    container.add_item(field_display)
+    container.add_item(discord.ui.Separator())
+    
+    return container
 
 def check_ready_players(lobby):
     players = []
@@ -283,7 +348,6 @@ def format_battle_result(attacker, target, attack_move, defense_move, results):
     if results:
         og_results = results[0]
         buffs = results[1]
-        
         result = og_results[0]
         killed = og_results[2]
         damage = og_results[1]
@@ -345,6 +409,38 @@ def set_player_defense(player, feed):
         player.defense = default.name if default else "None"
         return default.name, default
 #endregion
+def summon_options_container(player, team, technique):
+    print(technique)
+    container = discord.ui.Container(accent_color=discord.Color.purple())
+    title_text = discord.ui.TextDisplay(f"# `Summon Options for {player.name}`")
+    options = []
+    options = [e() for e in Enemy.__subclasses__() if int(e().level) < 50]
+    container.add_item(title_text)
+    container.add_item(discord.ui.Separator())
+    techname = next(iter(technique.keys()))
+    summon_text: str = f"# {techname} options\n"
+    ten_shadows = ["Toad", "Black Divine Dog", "Rabbit Escape", "White Divine Dog", "Nue", "Piercing Ox", "Funeral Tiger", "Mahoraga", "Great Serpent", "Rika", "Garuda", "Round Deer", "Max Elephant"]
+    copy = "Rika"
+    star_rage = "Garuda"
+    available_summons = []
+    for summon in options:
+        if summon.name in ten_shadows or summon.name == copy or summon.name == star_rage:
+             continue
+        
+        fields = [
+            f"## `{summon.name}`",
+            f"`Level:` **{summon.level}**",
+            f"`HP:` **{summon.max_hp}**",
+            f"`CE:` **{summon.max_ce}**",
+            f"`Strength:` **{summon.strength}**",
+            f"`Defense:` **{summon.defense}**",
+            f"`Speed:` **{summon.speed}**\n"
+        ]
+        summon_text += "\n".join(fields) + "\n"
+        available_summons.append(summon)
+    options_text = discord.ui.TextDisplay(summon_text)
+    container.add_item(options_text)
+    return container, available_summons
 
 #region sim embed
 def simulation_embed(lobby, round_num):
@@ -362,6 +458,7 @@ def simulation_embed(lobby, round_num):
     attacks = round_feed.get('attacks', {}) # get the value from round_feed or default it to empty
     barriers = round_feed.get('barriers', {}) 
     defenses = round_feed.get('defenses', {})
+
     melee = round_feed.get('melee', {})
     summons = round_feed.get('summons', {})
     transformations = round_feed.get('transformations', {})
@@ -447,10 +544,9 @@ def simulation_embed(lobby, round_num):
                         else:
 
                             defense_str, defense = get_npc_random_defense(target)
-                            results = battle_checks(player, target, move.name, defense_str)
+                            results, player, target = battle_checks(player, target, move.name, defense_str)
                             
                         result_str = format_battle_result(player, target, move, defense, results)
-
                         simulations.append(result_str)
                         action_data['results'] = results
 
@@ -494,7 +590,32 @@ class Battle(commands.Cog):
         return
 #endregion
 
-#region BattleView
+#region Layout/View Section
+class SummonLayout(discord.ui.LayoutView):
+    def __init__(self, bot, player, technique, lobby, team_name):
+        super().__init__()
+        act_row = discord.ui.ActionRow()
+        container, summons = summon_options_container(player, team_name, technique)
+        act_row.add_item(SummonSelect(bot, player, technique, summons, lobby, lobby.feed[lobby.round]['summon'][team_name]))
+        container.add_item(act_row)
+        self.add_item(container)
+        
+        
+class BattleLayout(discord.ui.LayoutView):
+    def __init__(self, lobby, bot):
+        super().__init__()
+        self.lobby = lobby
+        self.bot = bot
+        self.timeout = 300 #TIMOUT SET LONGER FOR TESTING
+        container = round_container(self.lobby, self.bot)
+        action_row = discord.ui.ActionRow()
+        action_row.add_item(AttackButton(lobby, bot))
+        action_row.add_item(EndTargeting(lobby, bot))
+        action_row.add_item(SummonButton(lobby, bot))
+        container.add_item(action_row)
+        self.add_item(container)
+
+
 class BattleView(discord.ui.View):
     def __init__(self, lobby, bot):
         super().__init__()
@@ -562,7 +683,7 @@ class BattleView(discord.ui.View):
                 # # view = TargetSelectView(player, targets, lobby)
                 # await itx.response.send_message(embed=embed, view=view, ephemeral=True)
                 await itx.response.defer()
-                await itx.followup.send(embed=embed, ephemeral=True)
+                await itx.followup.send(embed=embed)
                 await itx.followup.send(view=select_view)
 
                 return
@@ -664,7 +785,7 @@ class BattleView(discord.ui.View):
             return
 
     @discord.ui.button(label="Barrier Options", style=discord.ButtonStyle.gray)
-    async def summon_options(self, itx:discord.Interaction, btn:discord.ui.Button):
+    async def barrier_options(self, itx:discord.Interaction, btn:discord.ui.Button):
         lobby = self.lobby
         if lobby:
             player = verify_player(itx.user.id, itx.guild.id)
@@ -749,9 +870,9 @@ class BattleView(discord.ui.View):
     async def end_turn(self, itx:discord.Interaction, btn:discord.ui.Button):
         # Logic to end the turn
         pass
-# endregion
 
-#region MoveView
+
+    
 class MoveView(discord.ui.LayoutView):
     def __init__(self, player, bot, technique, lobby, attack=False, defense=False, barrier=False):
         super().__init__()
@@ -765,6 +886,266 @@ class MoveView(discord.ui.LayoutView):
             act_row.add_item(MoveSelect(player, bot, technique, lobby, barrier=True))
         container.add_item(act_row)
         self.add_item(container)
+#endregion
+
+#region New BattleView
+class SummonButton(discord.ui.Button):
+    def __init__(self, lobby, bot):
+         super().__init__(label="Summon Options", style=discord.ButtonStyle.blurple)
+         self.lobby = lobby
+         self.bot = bot
+
+    async def callback(self, itx:discord.Interaction):
+        lobby = self.lobby
+        if lobby:
+                teama = lobby.teamA
+                teamb = lobby.teamB
+                field = lobby.field
+                feed= lobby.feed
+                player = verify_player(itx.user.id, itx.guild.id)
+                container = discord.ui.Container()
+                view = discord.ui.LayoutView()
+                technique = None
+                name = None
+                team_name = None
+                team = get_player_team(player, lobby)
+                if team == lobby.teamA:
+                    team_name = teama['name']
+                elif team == lobby.teamB:
+                    team_name = teamb['name']
+                else:
+                    team_name = 'Field'
+                if player:
+                    for t in technique_list:
+                        key = list(t.keys())[0]
+                        print(f"Player= {player}")
+                        print(f"Checking for {player.technique}")
+                        if key == player.technique:
+                            technique = t
+                            name = key
+                            break
+                if technique is None or name not in technique:
+                    await itx.response.send_message(content="Technique not found.", ephemeral=True)
+                    return
+                if any(itx.user.id == p.user_id for p in teama['players']):
+                    if player.user_id in lobby.feed[lobby.round]['attacks'][teama['name']]:
+                                await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+                                return
+                if any(itx.user.id == p.user_id for p in teamb['players']):
+                    if player.user_id in lobby.feed[lobby.round]['attacks'][teamb['name']]:
+                                await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+                                return
+                if any(hasattr(thing, 'user_id') and itx.user.id == thing.user_id for thing in field):
+                    if player.user_id in lobby.feed[lobby.round]['attacks']['Field']:
+                                await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+                                return
+                        
+                view = SummonLayout(self.bot, player, technique, self.lobby, team_name)
+                # select_view = MoveView(player, self.bot, technique, self.lobby, attack=True)
+                # t_embed, targets = target_embed(player, lobby)
+                # # await itx.channel.send(embed=t_embed)
+                # # view = TargetSelectView(player, targets, lobby)
+                # await itx.response.send_message(embed=embed, view=view, ephemeral=True)
+                await itx.response.send_message(view=view)
+    
+
+class  AttackButton(discord.ui.Button):
+    def __init__(self, lobby, bot):
+        super().__init__(label="Attack Options", style=discord.ButtonStyle.green)
+        self.lobby = lobby
+        self.bot = bot
+    
+    async def callback(self, itx:discord.Interaction):
+        lobby = self.lobby
+        if lobby:
+                teama = lobby.teamA
+                teamb = lobby.teamB
+                field = lobby.field
+                player = verify_player(itx.user.id, itx.guild.id)
+                container = discord.ui.Container()
+                view = discord.ui.LayoutView()
+                technique = None
+                name = None
+                if player:
+                    for t in technique_list:
+                        key = list(t.keys())[0]
+                        print(f"Player= {player}")
+                        print(f"Checking for {player.technique}")
+                        if key == player.technique:
+                            technique = t
+                            name = key
+                            break
+                if technique is None or name not in technique:
+                    await itx.response.send_message(content="Technique not found.", ephemeral=True)
+                    return
+                if any(itx.user.id == p.user_id for p in teama['players']):
+                    if player.user_id in lobby.feed[lobby.round]['attacks'][teama['name']]:
+                                await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+                                return
+                if any(itx.user.id == p.user_id for p in teamb['players']):
+                    if player.user_id in lobby.feed[lobby.round]['attacks'][teamb['name']]:
+                                await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+                                return
+                if any(hasattr(thing, 'user_id') and itx.user.id == thing.user_id for thing in field):
+                    if player.user_id in lobby.feed[lobby.round]['attacks']['Field']:
+                                await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+                                return
+                        
+                embed = discord.Embed(title="Attack", description="Choose from your offense")
+                title_text = discord.ui.TextDisplay(content=f"# `Attack Options`\n## Choose from your attack moves")
+                title_section = discord.ui.Section(title_text, accessory= discord.ui.Thumbnail(media=self.bot.user.avatar.url))
+                container.add_item(title_section)
+                options_text = f"# {player.technique}\n"
+                for key in technique[name][0]['Attack'].keys():
+                    attack = technique[name][0]['Attack'][key]
+                    if attack.type == "projectile" or attack.type == "melee":
+                        fields = [
+                            f"## `{key}`",
+                            f"`Atk dmg:` **{attack.strength}**",
+                            f"`Atk spd:` **{attack.speed}**",
+                            f"`Bodyparts:` **{', '.join(attack.act_req)}**",
+                            f"`Max targets:` **{attack.aoe}**",
+                            f"`Type:` **{attack.type}**\n"
+                        ]
+                        if attack.soul:
+                            fields.append(f"`Soul dmg:` **{attack.soul}**")
+                        # Optionally include other properties if needed and if length allows
+                        options_text += "\n".join(fields) + "\n"
+                    else:
+                        continue
+
+                options_section = discord.ui.Section(discord.ui.TextDisplay(options_text), accessory=discord.ui.Thumbnail(media=self.bot.user.avatar.url))
+                container.add_item(options_section)
+                action_row = discord.ui.ActionRow()
+                action_row.add_item(MoveSelect(player, self.bot, technique, self.lobby, attack=True))
+                container.add_item(action_row)
+                view.add_item(container)
+                # select_view = MoveView(player, self.bot, technique, self.lobby, attack=True)
+                # t_embed, targets = target_embed(player, lobby)
+                # # await itx.channel.send(embed=t_embed)
+                # # view = TargetSelectView(player, targets, lobby)
+                # await itx.response.send_message(embed=embed, view=view, ephemeral=True)
+                await itx.response.send_message(view=view)
+
+                return
+        else:
+            await itx.response.send_message("Error not in lobby")
+            return
+        
+class SelectMove(discord.ui.Button):
+    def __init__(self, label, player, bot, technique, lobby, attack):
+        super().__init__(label=label, style=discord.ButtonStyle.blurple)
+        self.player = player
+        self.bot = bot
+        self.technique = technique
+        self.lobby = lobby
+        self.attack = attack
+
+    async def callback(self, itx:discord.Interaction):
+        lobby = self.lobby
+        player = self.player
+        team = get_player_team(player, lobby)
+        feed = lobby.feed[lobby.round][team['name']]
+        targets = get_valid_targets(feed, team, player, lobby)
+        target_view = TargetLayout(self.bot, self.player, targets, self.lobby, attack=self.attack)
+        await itx.response.send_message(view=target_view)
+        return
+    
+# class attack_button(discord.ui.Button):
+#     def __init__(self, lobby, bot):
+#         super().__init__(label="Attack Options", style=discord.ButtonStyle.green)
+#         self.lobby = lobby
+#         self.bot = bot
+
+#     async def callback(self, itx:discord.Interaction):
+#         lobby = self.lobby
+#         if lobby:
+#                 teama = lobby.teamA
+#                 teamb = lobby.teamB
+#                 field = lobby.field
+#                 player = verify_player(itx.user.id, itx.guild.id)
+#                 technique = None
+#                 name = None
+#                 if player:
+#                     for t in technique_list:
+#                         key = list(t.keys())[0]
+#                         print(f"Player= {player}")
+#                         print(f"Checking for {player.technique}")
+#                         if key == player.technique:
+#                             technique = t
+#                             name = key
+#                             break
+#                 if technique is None or name not in technique:
+#                     await itx.response.send_message(content="Technique not found.", ephemeral=True)
+#                     return
+#                 if any(itx.user.id == p.user_id for p in teama['players']):
+#                     if player.user_id in lobby.feed[lobby.round]['attacks'][teama['name']]:
+#                                 await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+#                                 return
+#                 if any(itx.user.id == p.user_id for p in teamb['players']):
+#                     if player.user_id in lobby.feed[lobby.round]['attacks'][teamb['name']]:
+#                                 await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+#                                 return
+#                 if any(hasattr(thing, 'user_id') and itx.user.id == thing.user_id for thing in field):
+#                     if player.user_id in lobby.feed[lobby.round]['attacks']['Field']:
+#                                 await itx.response.send_message("You have already selected an attack for this round.", ephemeral=True)
+#                                 return
+                        
+#                 embed = discord.Embed(title="Attack", description="Choose from your offense")
+#                 value_string = ""
+#                 fields = []
+#                 for key in technique[name][0]['Attack'].keys():
+#                     attack = technique[name][0]['Attack'][key]
+#                     fields = [
+#                         f"`Atk dmg:` **{attack.strength}**",
+#                         f"`Atk spd:` **{attack.speed}**",
+#                         f"`Bodyparts:` **{', '.join(attack.act_req)}**",
+#                         f"`Max targets:` **{attack.aoe}**",
+#                         f"`Type:` **{attack.type}**"
+#                     ]
+#                     if attack.soul:
+#                         fields.append(f"`Soul dmg:` **{attack.soul}**")
+                    
+#                     else:
+#                         fields.append(f"`Soul dmg:` **0**")
+#                 for field in fields:
+#                     value_string += field + "\n"
+                
+
+
+                
+class EndTargeting(discord.ui.Button):
+    def __init__(self, lobby, bot):
+        super().__init__(label="End Targeting", style=discord.ButtonStyle.red)
+        self.lobby = lobby
+        self.bot = bot
+
+    async def callback(self, itx:discord.Interaction):
+        lobby = self.lobby
+        if lobby:
+            if check_ready_players(lobby):
+                embed = simulation_embed(lobby, lobby.round)
+                await itx.response.send_message(embed=embed)
+                lobby.round += 1
+                # Reset ready players for next round
+                lobby.ready = []
+                return embed
+            else:
+                await itx.response.send_message("Waiting on all players to finish selecting their moves.", ephemeral=True)
+                return
+        else:
+            await itx.response.send_message("Error not in a lobby")
+            return
+
+#endregion
+
+
+#region Old BattleView
+
+# endregion
+
+#region MoveView
+
 #endregion
 
 #region MoveSelect    
@@ -821,11 +1202,37 @@ class MoveSelect(discord.ui.Select):
                 move_type = "barriers"
             elif move_type == 'heal' or move_type=="rct":
                 move_type = 'heal'
-         
+            elif move_type == "transform":
+                move_type = 'transform'
+            elif move_type == "summon":
+                move_type = 'summon'
             if move_type is None:
                 await itx.followup.send("Error determining move type.", ephemeral=True)
                 return
-            
+            if move_type == "summon":
+                view = discord.ui.LayoutView()
+                team=get_player_team(self.player, self.lobby)
+                container, summons = None, None
+                if 'name' in team.keys():
+                    container, summons = summon_options_container(self.player, team['name'],)
+                    view.add_item(container)
+                    act_row = discord.ui.ActionRow()
+
+                    act_row.add_item(SummonSelect(self.bot, self.player, move, summons, self.lobby, self.lobby.feed[self.lobby.round]['summon'][team['name']]))
+                    view.add_item(act_row)
+                    await itx.followup.send(view=view)
+                    return
+                else:
+                    container, summons = summon_options_container(self.player, 'Field', move)
+                    view.add_item(container)
+                    act_row = discord.ui.ActionRow()
+
+                    act_row.add_item(SummonSelect(self.bot, self.player, move, summons, self.lobby, self.lobby.feed[self.lobby.round]['summon']['Field']))
+                    view.add_item(act_row)
+                    await itx.followup.send(view=view)
+                    return
+                    
+                
             targets = get_valid_targets(self.lobby.feed[self.lobby.round][move_type], get_player_team(self.player, self.lobby), self.player, self.lobby)
             print(self.lobby)
             view = TargetLayout(self.bot, self.player, targets, move, self.lobby)
@@ -842,7 +1249,20 @@ class TargetLayout(discord.ui.LayoutView):
         header=""
         body="" 
         self.team = get_player_team(player, lobby)
-        move_type = 'attacks' if move.type == "projectile" or move.type=="melee" else 'defenses' if move.type ==  "counter" or move.type =="tank" or move.type=="dodge" else 'barriers' if move.type == "domain" or move.type == "amp" or move.type == "simple" or move.type == "wicker" or move.type == "fbe" else 'heal' if move.type == 'heal' else None
+        if move.type in ["projectile", "melee"]:
+            move_type = 'attacks'
+        elif move.type in ["counter", "tank", "dodge"]:
+            move_type = 'defenses'
+        elif move.type in ["domain", "amp", "simple", "wicker", "fbe"]:
+            move_type = 'barriers'
+        elif move.type in ["heal", "rct"]:
+            move_type = 'heal'
+        elif move.type == "transform":
+            move_type = 'transform'
+        elif move.type == "summon":
+            move_type = 'summon'
+        else:
+            move_type = None
         feed = get_player_feed(player, self.team, lobby, move_type)
         targets = []
         targets = get_valid_targets(feed, self.team, player, lobby)
@@ -881,9 +1301,91 @@ class TargetLayout(discord.ui.LayoutView):
         container.add_item(act_row)
         self.add_item(container)
 
+class TargetFinish(discord.ui.Button):
+    def __init__(self):
+        super().__init__(label="Finish Selecting Targets", style=discord.ButtonStyle.green)
+
+    async def callback(self, itx: discord.Interaction):
+        await itx.response.defer()
+        await itx.followup.send("Finished selecting targets.")
 
 
+
+# class QuantityButton(discord.ui.Button):
+#     def __init__(self, label, quantity):
+#         super().__init__(label=label, style=discord.ButtonStyle.primary)
+#         self.quantity = quantity
+
+#     async def callback(self, itx: discord.Interaction):
+#         await itx.response.send_message(f"You selected quantity: {self.quantity}", ephemeral=True)
+#         return self.quantity
+
+# class QuantityModal(discord.ui.Modal):
+#     def __init__(self, max_quantity=None):
+#         super().__init__(title="Select Quantity")
+#         self.max_quantity = max_quantity
+#         self.quantity_input=None
+#         if self.max_quantity:
+#             self.quantity_input = discord.ui.TextInput(label=f"Enter quantity less than or equal to {max_quantity}", placeholder="e.g., 1, 2, 3", required=True)
+#         else:
+#             self.quantity_input = discord.ui.TextInput(label="Enter quantity", placeholder="e.g., 1, 2, 3", required=True)
+#         self.add_item(self.quantity_input)
+
+#     async def callback(self, itx: discord.Interaction):
+#         quantity = int(self.quantity_input.value)
+#         if self.max_quantity and quantity > self.max_quantity:
+#             await itx.response.send_message(f"Quantity cannot exceed {self.max_quantity}.", ephemeral=True)
+#             return
+#         await itx.response.send_message(f"You selected quantity: {quantity}", ephemeral=True)
+#         return quantity
     
+class SummonSelect(discord.ui.Select):
+    def __init__(self, bot, player, technique, summons, lobby, feed):
+        option_list = [discord.SelectOption(label=f"{i+1}: {s.name}", value=str(i)) for i, s in enumerate(summons)]
+        super().__init__(placeholder='Choose your summon', min_values=1, options=option_list)
+        self.lobby = lobby
+        self.bot = bot
+        self.player = player
+        self.technique = technique
+        self.summons = summons
+        self.feed = feed
+        
+
+    async def callback(self, itx: discord.Interaction):
+        team_name = None
+        if itx.user.id != self.player.user_id:
+            await itx.response.send_message("You did not invoke this prompt.", ephemeral=True)
+        else:
+            await itx.response.defer()
+            team = get_player_team(self.player, self.lobby)
+            print("Team:")
+            print(team)
+            team_name = None
+            if 'name' in team.keys():
+                team_name = team['name']
+            else:
+                team_name = 'Field'
+            selected_summon = self.summons[int(self.values[0])]
+            await itx.followup.send(self.player.name + " summons: " + selected_summon.name)
+            for s in self.summons:
+                s.owner = self.player.user_id
+                if s.name == selected_summon.name:
+                    if self.lobby.teamA['name'] == team_name:
+                        self.lobby.add_teamA(s)
+                    if self.lobby.teamB['name'] == team_name:
+                        self.lobby.add_teamB(s)
+                    if 'Field' == team_name:
+                        self.lobby.add_field(s)
+                    self.feed[self.player.user_id] = {'summon': s}
+                    
+            print(team)
+
+            await itx.followup.send(f"{selected_summon.name} has been summoned to {team_name}!")
+            battlew_view = BattleLayout(self.lobby, self.bot)
+            await itx.channel.send(view=battlew_view)
+            return
+
+     
 class TargetSelect(discord.ui.Select):
     def __init__(self, bot, player, targets, lobby, move):
         print(targets)
@@ -967,7 +1469,6 @@ class TargetSelect(discord.ui.Select):
             # print("Team feed: " + str(team_feed) + " for team: " + team_name)
             selected_target = self.targets[int(self.values[0])]
             print("Selected target: " + selected_target.name)
-
             if self.player.user_id not in team_feed.keys():
                 team_feed[self.player.user_id] = {
                     'move': self.move, # save technique to feed
@@ -975,7 +1476,6 @@ class TargetSelect(discord.ui.Select):
                     'charges': charges, # initialize charges
                     'results': None # initialize results
                 }
-                
             else:
                 team_feed[self.player.user_id]['targets'].append(selected_target)
 
@@ -986,37 +1486,50 @@ class TargetSelect(discord.ui.Select):
             selected_targets = len(team_feed[self.player.user_id]['targets'])
 
             if self.move.aoe > 1 and  selected_targets < self.move.aoe:
-                results = TargetLayout(self.bot, self.player, self.targets, self.move, self.lobby)
-                if results:
-                    embed, targets, file = results
-                    if self.defense:
-                        msg_text = "defense targets"
-                    elif self.attack:
-                        msg_text = "attack targets"
-                    elif self.barrier:
-                        msg_text = "barrier targets"
-                    elif self.heal:
-                        msg_text = "healing"
-                    elif self.summon:
-                        msg_text = "summon"
-                    elif self.transform:
-                        msg_text = "transformation"
-                    await itx.followup.send(f"Select additional {msg_text} for `{self.move.name}`:", ephemeral=True)
-                    view = TargetLayout(self.bot, self.player, targets, self.lobby, self.move)
-                    # Update the embed with the selected targets
-                    aoe = self.move.aoe
-                    if not file:
-                        await itx.followup.send(view=view)
-                    else:
-                         await itx.followup.send(view=view, file=file)
+                for t in self.targets:
+                     for selected in team_feed[self.player.user_id]['targets']:
+                        if t.name == selected.name:
+                            self.targets.remove(t)
+                if len(self.targets) == 0:
+                    await itx.followup.send("No more valid targets available.", ephemeral=True)
+                    self.lobby.ready.append(self.player.user_id)
+                    ready = check_ready_players(self.lobby)
+                    if ready:
+                        embed = simulation_embed(self.lobby, self.lobby.round)
+                        await itx.followup.send(embed=embed)
+                        self.lobby.round += 1
+                        self.lobby.ready = []
+                        self.lobby.feed.append({'round' : self.lobby.round,
+                            'attacks': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                            'defenses': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                            'barriers': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                            'heal': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                            'summon': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+                            'transform': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}}
+                        })
+                        view = BattleLayout(self.lobby, self.bot)
+                        await channel.send(view=view)       
+                        return      
+                    await itx.followup.send("Move selected for this round, wait for players to finish selecting moves.", ephemeral=True)
                     return
-                else:
-                        await itx.followup.send("No more targets available.", ephemeral=True)
+                if move_type == "summon":
+                    view = SummonLayout(bot=self.bot, player=self.player, summons=self.player.inventory['Summons'], lobby=self.lobby)
+                    itx.followup.send(view=view)
+                    return
+                await itx.followup.send(f"Select additional targets for `{self.move.name}`:", ephemeral=True)
+                view = TargetLayout(bot=self.bot, player=self.player, targets=self.targets, move=self.move, lobby=self.lobby)
+                    # Update the embed with the selected targets
+                aoe = self.move.aoe
+            
+                await itx.followup.send(view=view)
+                return
+            else:
+                        await itx.followup.send("Finished target select", ephemeral=True)
                         self.lobby.ready.append(self.player.user_id)
                         ready = check_ready_players(self.lobby)
                         if ready:
                             embed = simulation_embed(self.lobby, self.lobby.round)
-                            await itx.followup.send(embed=embed, ephemeral=True)
+                            await itx.followup.send(embed=embed)
                             self.lobby.round += 1
                             self.lobby.ready = []
                             self.lobby.feed.append({'round' : self.lobby.round,
@@ -1027,35 +1540,35 @@ class TargetSelect(discord.ui.Select):
                                 'summon': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
                                 'transform': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}}
                             })
-                            round_embed = generate_round_embed(self.lobby)
-                            await channel.send(embed=round_embed, view=BattleView(self.lobby, self.bot))
+                            view=BattleView(lobby=self.lobby, bot=self.bot)
+                            await itx.followup.send(view=view)
                             return      
                         await itx.followup.send("Move selected for this round, wait for players to finish selecting moves.", ephemeral=True)
                         return
-            else:
-                self.lobby.ready.append(self.player.user_id)
-                ready = check_ready_players(self.lobby)
-                if ready:
-                    embed = simulation_embed(self.lobby, self.lobby.round)
-                    print("Final round feed: " + str(self.lobby.feed))
-                    await itx.followup.send(embed=embed)
-                    
-                    self.lobby.round += 1
-                    self.lobby.ready = []
-                    self.lobby.feed.append({'round' : self.lobby.round,
-                        'attacks': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
-                        'defenses': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
-                        'barriers': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
-                        'heal': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
-                        'summon': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
-                        'transform': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}}
-                    })
-                    round_embed = generate_round_embed(self.lobby)
-                    await channel.send(embed=round_embed, view=BattleView(self.lobby, self.bot))
-                    return
+            
+            # self.lobby.ready.append(self.player.user_id)
+            # ready = check_ready_players(self.lobby)
+            # if ready:
+            #     embed = simulation_embed(self.lobby, self.lobby.round)
+            #     print("Final round feed: " + str(self.lobby.feed))
+            #     await itx.followup.send(embed=embed)
                 
-                await itx.followup.send("You have selected your target. Wait for others to finish selecting", ephemeral=True)
-                return
+            #     self.lobby.round += 1
+            #     self.lobby.ready = []
+            #     self.lobby.feed.append({'round' : self.lobby.round,
+            #         'attacks': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+            #         'defenses': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+            #         'barriers': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+            #         'heal': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+            #         'summon': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}},
+            #         'transform': { self.lobby.teamA['name'] : {}, self.lobby.teamB['name'] : {}, 'Field': {}}
+            #     })
+            #     round_embed = generate_round_embed(self.lobby)
+            #     await channel.send(embed=round_embed, view=BattleView(self.lobby, self.bot))
+            #     return
+            
+            # await itx.followup.send("You have selected your target. Wait for others to finish selecting", ephemeral=True)
+            # return            
         
 #endregion
 
@@ -1063,4 +1576,5 @@ class TargetSelect(discord.ui.Select):
 async def setup(bot):
     battle_cog = Battle(bot)
     battle_cog.BattleView = BattleView
+    battle_cog.BattleLayout = BattleLayout
     await bot.add_cog(battle_cog)
