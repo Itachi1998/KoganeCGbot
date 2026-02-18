@@ -1107,6 +1107,7 @@ class Technique():
     aoe: int
     grade: int
     travel_speed: int = 0
+    requirements: dict = field(default_factory=dict)
     binding_vows: dict = field(default_factory=dict)
     effects: dict = field(default_factory=dict)
     summons: list = field(default_factory=list)
@@ -1123,6 +1124,7 @@ class Domain():
     lethal: bool
     aoe: int
     duration: int
+    requirements: dict = field(default_factory=dict)
     vows: dict = field(default_factory=dict)
 
 @dataclass
@@ -1134,15 +1136,16 @@ class Barrier():
     duration: int
     cooldown: int
     aoe: int
+    requirements: dict = field(default_factory=dict)
     effects: dict = field(default_factory=dict)
-    buffs: dict = field(default_factory=dict)
-    debuffs: dict = field(default_factory=dict)
+
 
 @dataclass
 class CurseItem():
     name: str
     durability: int
     cost: int
-    effect: dict = field(default_factory=dict)
+    requirements: dict = field(default_factory=dict)
+    effects: dict = field(default_factory=dict)
     
 
