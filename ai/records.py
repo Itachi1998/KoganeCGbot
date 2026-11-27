@@ -58,7 +58,7 @@ def has_six_eyes(techniques, six_eyes: bool = False) -> bool:
 
 def build_stats(pclass: PClass, level: int, techniques: list[str],
                 body: Optional[dict] = None, equipment: Optional[dict] = None,
-                old_stats: Optional[dict] = None) -> np.ndarray:
+                old_stats: Optional[dict] = None, skills: Optional[dict] = None) -> np.ndarray:
     """Class base -> level scaling -> technique multipliers -> the player's rolled (original-bot)
     stats -> body-hop overrides -> armor."""
     s = np.zeros(N_STATS)
@@ -82,6 +82,9 @@ def build_stats(pclass: PClass, level: int, techniques: list[str],
     if old_stats:                                # what they rolled at creation (oldstats.py)
         from .oldstats import apply as apply_old
         apply_old(s, pclass, old_stats)
+    if skills:                                   # trained with skill points (skills.py)
+        s[Stat.EFF] += skills.get("efficiency", 0)
+        s[Stat.PER] += skills.get("perception", 0)
     if body:                                     # stats of a hopped-into body
         for k, v in body.items():
             s[int(k)] = v
@@ -142,6 +145,8 @@ class PlayerRecord:
     looted: list = field(default_factory=list)             # item keys taken from the dead (sell at any price)
     six_eyes: bool = False                                 # born with the Six Eyes (Limitless always is)
     old_stats: Optional[dict] = None                       # {"hp", "ce", "str", "spd"} rolled at creation (oldstats.py)
+    skill_points: int = 0                                  # unspent (skills.py)
+    skills: dict = field(default_factory=dict)             # skill -> points spent
     fingers: int = 0                                       # Sukuna's fingers eaten and still caged
     vessel: int = 0                                        # how many this body can cage (20 = a strong vessel)
     ce_frac: float = 1.0                                   # cursed energy left after the last fight (share of maximum)...
@@ -239,6 +244,8 @@ class PlayerRecord:
             self.xp -= xp_to_next(self.level)
             self.level += 1
             gained += 1
+            from .skills import points_for_level
+            self.skill_points += points_for_level(self.level)       # +10 up to level 10, +5 after
         if self.level >= ADVANCED_LEVEL:
             self.brain_capacity = max(self.brain_capacity, BRAIN_SLOTS + 1)
         return gained
@@ -257,7 +264,7 @@ class PlayerRecord:
         return Spec(name=self.name, pclass=PClass(self.pclass), level=self.level,
                     grade=grade_for(self.level, techs),
                     stats=build_stats(PClass(self.pclass), self.level, techs, self.body, self.equipment,
-                                      self.old_stats),
+                                      self.old_stats, self.skills),
                     techniques=techs, tech_state=self.tech_state, flags=flags,
                     equipment=self.equipment, inventory=self.inventory, vows=list(self.vows),
                     controller=controller, record=self, crimes=self.crimes)
@@ -272,6 +279,9 @@ class PlayerRecord:
     def from_item(cls, d: dict) -> "PlayerRecord":
         d = dict(d)
         crimes = CrimeLog.from_bytes(d.pop("crimes", None))
+        if "skill_points" not in d:                    # a character from before skill points: back-pay them
+            from .skills import points_through
+            d["skill_points"] = points_through(int(d.get("level", 1)))
         known = {k: v for k, v in d.items() if k in cls.__dataclass_fields__}
         rec = cls(**known)
         rec.equipment = {"weapon": rec.equipment.get("weapon"), "armor": rec.equipment.get("armor")}

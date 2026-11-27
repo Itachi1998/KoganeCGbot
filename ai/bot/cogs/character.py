@@ -61,6 +61,8 @@ def sheet(rec: PlayerRecord, colony_name: str, now: float, inactivity_days: int,
         style.stat("In battle", f"Strength {st[Stat.STR]:.0f} · Speed {st[Stat.SPD]:.0f} · "
                                 f"Durability {st[Stat.DUR]:.0f} · Perception {st[Stat.PER]:.0f}"),
         style.stat("Game Points", rec.points),
+        style.stat("Skill Points", f"{rec.skill_points} to spend (/skills)") + "  "
+        + " · ".join(f"{k} {v}" for k, v in rec.skills.items() if v),
         style.stat("Condition", rec.condition_text()),
         style.stat("Gear", ", ".join(f"{k}: {ITEMS[v].name if v in ITEMS else v}" for k, v in rec.equipment.items() if v)
                    or "none"),

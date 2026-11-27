@@ -175,3 +175,9 @@ cython_debug/
 # ai engine save files (GameStore's JSON fallback)
 culling_save.json
 culling_save.json.tmp
+
+# new bot: local game data and deploy secrets
+culling.db
+culling.db-wal
+culling.db-shm
+deploy/.env

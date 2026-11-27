@@ -13,7 +13,9 @@ from discord import app_commands
 from discord.ext import commands
 
 from ...data import ITEMS
+from ...colony import skills_text
 from ...rules import RULES
+from ...skills import SKILLS
 from .. import style
 
 INFO = ("look", "map", "me", "medic", "fingers", "shop", "market", "rules", "scouts", "puppets", "players")
@@ -62,6 +64,52 @@ class ShopView(discord.ui.LayoutView):
     async def close(self, itx: discord.Interaction) -> None:
         await itx.response.edit_message(view=style.panel(None, None, "`Shop closed`", thumbnail=False))
         self.stop()
+
+
+class SkillsView(discord.ui.LayoutView):
+    """Skill points: pick a skill, spend 1 / 5 / 10. Only the player who opened it can use it."""
+
+    def __init__(self, cog: "Colony", uid: int, text: str, chosen: Optional[str] = None, note: str = ""):
+        super().__init__(timeout=300)
+        self.cog, self.uid, self.chosen = cog, uid, chosen
+        container = discord.ui.Container(accent_colour=style.BLURPLE)
+        container.add_item(discord.ui.TextDisplay(style.heading("Skills") + "\n" + style.code(text)[:3800]))
+        if note:
+            container.add_item(discord.ui.TextDisplay(f"> {note}"))
+        sel = discord.ui.Select(placeholder="Choose a skill to train...", options=[
+            discord.SelectOption(label=name, value=key, description=what[:100], default=key == chosen)
+            for key, (name, what) in SKILLS.items()])
+        sel.callback = self.pick
+        container.add_item(discord.ui.ActionRow(sel))
+        row = discord.ui.ActionRow()
+        for n in (1, 5, 10):
+            b = discord.ui.Button(label=f"+{n}", style=discord.ButtonStyle.green, disabled=chosen is None)
+            b.callback = self.spend(n)
+            row.add_item(b)
+        container.add_item(row)
+        self.add_item(container)
+
+    async def interaction_check(self, itx: discord.Interaction) -> bool:
+        if itx.user.id != self.uid:
+            await itx.response.send_message("These are not your skills.", ephemeral=True)
+            return False
+        return True
+
+    def _text(self, guild) -> str:
+        me = self.cog.rt.session(guild).player(self.uid)
+        return skills_text(me) if me else "You have no living character."
+
+    async def pick(self, itx: discord.Interaction) -> None:
+        await itx.response.edit_message(view=SkillsView(self.cog, self.uid, self._text(itx.guild),
+                                                        itx.data["values"][0]))
+
+    def spend(self, n: int):
+        async def cb(itx: discord.Interaction) -> None:
+            await itx.response.defer()
+            note = await self.cog.rt.command(itx.guild, itx.channel, self.uid, f"upgrade {self.chosen} {n}")
+            await itx.edit_original_response(view=SkillsView(self.cog, self.uid, self._text(itx.guild), self.chosen,
+                                                             note or "The colony is busy - try again in a moment."))
+        return cb
 
 
 class Colony(commands.Cog):
@@ -268,6 +316,23 @@ class Colony(commands.Cog):
             return f"{rec.name} leaves {game.colony.name} for {dst.name}."
         ok, text = await self.rt.run(ctx.guild, ctx.channel, move)
         await ctx.send(text if ok else "The colony is busy. Try again in a moment.", ephemeral=True)
+
+    # ---- skill points --------------------------------------------------------------------------
+    @commands.hybrid_command(name="skills", description="Spend skill points (+10 a level to 10, +5 after)")
+    @commands.guild_only()
+    async def skills_cmd(self, ctx):
+        game = self.rt.session(ctx.guild)
+        me = game.player(ctx.author.id)
+        if me is None:
+            await ctx.send("You have no living character in this colony. Use `/create` first.", ephemeral=True)
+            return
+        await ctx.send(view=SkillsView(self, ctx.author.id, skills_text(me)), ephemeral=True)
+
+    @commands.hybrid_command(name="upgrade", description="Spend skill points on a skill")
+    @commands.guild_only()
+    @app_commands.choices(skill=[app_commands.Choice(name=n, value=k) for k, (n, _) in SKILLS.items()])
+    async def upgrade(self, ctx, skill: str, points: Optional[int] = 1):
+        await self.do(ctx, f"upgrade {skill} {max(1, int(points or 1))}", "Skills")
 
     # ---- spirits, shikigami, puppets -------------------------------------------------------------
     @commands.hybrid_command(name="scouts", description="Spirits and shikigami you have out in the colony")

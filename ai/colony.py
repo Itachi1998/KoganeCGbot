@@ -17,6 +17,7 @@ import numpy as np
 from .battle import IO, Battle
 from .constants import (PART_HP_FRAC, CLASS_NAME, DAY, GRADE_NAME, Grade, Part, PClass, Stat,
                         REST_RECOVERY, SIX_EYES_RECOVERY, SIX_EYES_REST)
+from . import skills
 from .crimes import Crime
 from .data import ITEMS, SHIKIGAMI
 from .effects import PUPPET_CHARGE, scout_state
@@ -126,6 +127,14 @@ class ColonySession:
                                             body_hp=float(c.meta.get("body_hp", c.max_hp))))
                 io.say(f"\n!!! SUKUNA walks {colony.name} with {held} finger(s). He will gather the rest: "
                             f"the Finger Bearers first, then anyone carrying or caging one.")
+        for spec, _ in sides:                             # every character who fought, with their stats
+            if spec.record is not None:
+                try:
+                    self.cache.save_character(spec.record, {"last_battle": {"node": node, "label": label,
+                                                                            "rounds": b.round}})
+                except Exception as e:                    # a cache outage must not lose the fight
+                    print(f"[colony] character snapshot failed: {type(e).__name__}: {e}")
+        self.save()                                       # and for good, in the database
         if hasattr(io, "flush"):
             io.flush()
         return added
@@ -230,8 +239,9 @@ class ColonySession:
                 out(f"   obj#{oid} {o.name} ({o.role}, {state})")
             here = [p.name + (" (puppet)" if is_puppeteer(p) and p.hideout != me.node else "")
                     for p in players if me.node in where(p) and p is not me]
+            reach = skills.sight_range(me)                # navigation: see further
             near = [f"{r.label} at node {r.node}" for r in world.roamers
-                    if not r.respawn_at and (r.node == me.node or r.node in node.edges)]
+                    if not r.respawn_at and 0 <= world.hops(me.node, r.node) <= reach]
             out("   Players here: " + (", ".join(here) or "none") + " | Nearby: " + (", ".join(near) or "quiet"))
             if world.medic == me.node:
                 out("   The colony's medic is here. (`treat`)")
@@ -279,7 +289,7 @@ class ColonySession:
             else:
                 msg = world.enter(me, int(rest[0]), day())
                 out(msg)
-                spend = 1.0 if "can't" not in msg else 0.0
+                spend = skills.travel_hours(me) if "can't" not in msg else 0.0   # navigation: quicker
                 if pst is not None:                       # it is the puppet that walked
                     next(e for e in pst["out"] if e["id"] == pst["sel"])["node"] = me.node
         elif cmd in ("scouts", "send", "order") or (cmd == "recall" and not is_puppeteer(me)):
@@ -429,10 +439,10 @@ class ColonySession:
                 out(f"An hour of concentration. {who.name}: {who.condition_text()}")
                 spend = 1.0
         elif cmd == "medic":
-            out(world.medic_rumour(me.node, exact=colony.has("score_board")))
+            out(world.medic_rumour(me.node, exact=colony.has("score_board") or skills.get(me, "navigation") >= 10))
         elif cmd == "treat":
             if world.medic != me.node:
-                out("The medic isn't here. " + world.medic_rumour(me.node, exact=colony.has("score_board")))
+                out("The medic isn't here. " + world.medic_rumour(me.node, exact=colony.has("score_board") or skills.get(me, "navigation") >= 10))
             elif me.pclass == PClass.CURSED_SPIRIT:
                 out("The medic works with reverse cursed energy. It would kill you.")
             elif not me.injured:
@@ -638,6 +648,11 @@ class ColonySession:
                 me.crimes.add(Crime.ASSAULT, me.node, day())
                 fight([(present(me, me.node), 0), (present(foe, me.node), 1)], me.node, f"{me.name} attacks {foe.name}!")
                 spend = 1.0
+        elif cmd == "skills":
+            out(skills_text(me))
+        elif cmd in ("upgrade", "train") and len(rest) >= 1:
+            n = int(rest[1]) if len(rest) > 1 and rest[1].isdigit() else 1
+            out(skills.spend(me, rest[0], n))
         else:
             out("Unknown command. Type `help`.")
             return
@@ -673,9 +688,33 @@ class ColonySession:
                 out("\n!!! " + line)
             world.news.clear()
             for nid, roamers in fights:                  # only players who can fight (in a lobby, on Discord)
-                if self.encounter(nid, roamers) is None:
+                party = [p for p in players if p.alive and self.can_fight(p) and nid in where(p)]
+                if party and rng.random() < skills.evade_chance(party):    # navigation: slip away
+                    guide = max(party, key=lambda p: skills.get(p, "navigation"))
+                    out(f"\n{guide.name} spots {', '.join(r.label for r in roamers)} first and leads the way "
+                        f"around them at {world.nodes[nid].name}.")
+                    continue
+                if self.encounter(nid, roamers, party) is None:
                     continue
                 spend = 0
             for p in enforce_inactivity(players, colony, now):
                 out(f"\n!!! {p.name}'s score has not changed in {colony.inactivity_days} days. "
                     f"Their cursed technique is removed. {p.name} is dead.")
+
+
+def skills_text(rec) -> str:
+    """Skill points, what each skill holds and does, and the techniques perception still locks."""
+    from .constants import REINCARNATED_PER_BONUS
+    lines = [f"Skill points to spend: {rec.skill_points}   (+10 a level up to level 10, +5 after; "
+             f"`upgrade <skill> [points]`, at most {skills.SKILL_CAP} in each)"]
+    for key, (name, what) in skills.SKILLS.items():
+        lines.append(f"  {key:<11} {skills.get(rec, key):>3}  {name}: {what}")
+    per = (float(rec.to_spec().stats[Stat.PER]) + (REINCARNATED_PER_BONUS if rec.pclass == PClass.REINCARNATED else 0)
+           + (6 if has_six_eyes(rec.techniques, rec.six_eyes) else 0))           # the Six Eyes: +6 in a fight
+    locked = sorted(((a.min_per, a.name, TECHNIQUES[t].name) for t in rec.techniques if t in TECHNIQUES
+                     for a in TECHNIQUES[t].actions if a.min_per > per), key=lambda x: x[0])
+    lines.append(f"Perception for unlocks: {per:.0f}" + (" (incl. +6 from a past life)"
+                                                         if rec.pclass == PClass.REINCARNATED else ""))
+    lines += [f"  locked until perception {p}: {name} ({tech})" for p, name, tech in locked] or ["  nothing locked"]
+    return "\n".join(lines)
+

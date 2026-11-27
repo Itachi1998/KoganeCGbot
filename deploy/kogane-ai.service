@@ -1,0 +1,17 @@
+# Without Docker: a systemd service (see deploy/EC2.md, "Option B").
+[Unit]
+Description=Kogane culling game bot (ai engine)
+After=network-online.target redis6.service redis.service
+Wants=network-online.target
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user/KoganeCGbot
+EnvironmentFile=/home/ec2-user/KoganeCGbot/deploy/.env
+Environment=REDIS_URL=redis://127.0.0.1:6379/0 REDIS_REQUIRED=1 CULLING_SQLITE=/home/ec2-user/kogane-data/culling.db
+ExecStart=/home/ec2-user/KoganeCGbot/.venv/bin/python -m ai.bot
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

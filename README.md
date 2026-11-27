@@ -16,8 +16,10 @@
 * `pip install -r requirements.txt`
 * set `DISCORD_TOKEN` to the bot's token, then run `python -m ai.bot`
 * in discord, run `,sync` (bot owner) to push the slash commands
-* characters and colonies are saved to `culling_save.json` (set `CULLING_SAVE` to move it), or to
-  DynamoDB when `CULLING_DYNAMO=1`; live battles snapshot to Redis when `REDIS_URL` is reachable
+* characters and colonies are saved to SQLite (`culling.db`, or `CULLING_SQLITE`), or to DynamoDB
+  with `CULLING_DB=dynamodb`; both hold the same items, and `python -m ai.migrate` copies between them
+  (see `ai/STORAGE.md`). Redis (`REDIS_URL`) holds live battles and post-battle character snapshots.
+* **On a server (EC2):** see `deploy/EC2.md` - `docker compose -f deploy/docker-compose.yml up -d --build`
 * the command-line version still works: `python -c "from ai.cli import main; main([])"`
 ### Commands
 * `/create` (spin for class and technique, at the original odds), `/profile`, `/delete`, `/mod`
@@ -35,6 +37,12 @@
   techniques are in the roll too, rarity by grade (special grade = legend).
 * `ai/oldstats.py` rolls the original stats (HP, CE, Strength, Speed, class and technique boosts).
   Players see those numbers; in a fight they scale the engine's stats against an average roll.
+### Skill points
++10 per level-up up to level 10, +5 after (`/skills`, `/upgrade`): CE efficiency, physical speed,
+physical strength (close-range moves), perception, soul perception (needed to harm Idle
+Transfiguration), domain refinement, navigation. Most technique moves need perception to unlock;
+a reincarnated sorcerer's counts +6, so awakened sorcerers have much more to unlock. Details in
+`ai/skills.py` and `ai/data.py` (`perception_needed`).
 ### Perception check
 Attacked while committed to a move with no defence set? With perception 16+ you are asked: keep
 your move and take the hit, or drop it and switch to a defence, which comes up in time with a

@@ -23,11 +23,12 @@ from typing import Optional
 import numpy as np
 
 from . import ai
-from .constants import (SWITCH_BASE, SWITCH_PER, SWITCH_SPD, SWITCH_MIN, SWITCH_MAX, BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
+from .constants import (REINCARNATED_PER_BONUS, SWITCH_BASE, SWITCH_PER, SWITCH_SPD, SWITCH_MIN, SWITCH_MAX, BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
                         DOT_STATUSES, DUR_FACTOR, EXTRA,
                         LEGS, LIMBS, N_PARTS, N_STATS, N_STATUS, PART_ACC, PART_DMG_MULT,
                         PART_HP_FRAC, POINTS_PLAYER, POINTS_SPIRIT, SOUL_PER, STICKY, VITAL,
                         DType, Kind, Part, PClass, PState, React, Rng, Stat, Status, Target)
+from . import skills
 from .crimes import Crime
 from .data import ITEMS, SHIKIGAMI
 from .records import Spec, build_stats
@@ -485,6 +486,9 @@ class Battle:
             return f"requires {Status(act.needs_status).name}"
         if c.granted.get(act.key, 0) <= 0 and c.unlock_level < act.min_level:
             return f"unlocks at level {act.min_level}"
+        if (act.min_per and c.record is not None and c.kind == "fighter" and c.granted.get(act.key, 0) <= 0
+                and self.unlock_per(c) < act.min_per):
+            return f"unlocks at perception {act.min_per} (yours counts as {self.unlock_per(c):.0f})"
         if tech.innate and c.has(ST.SEALED) and act.needs_status is None:
             return "your technique is sealed"
         if tech.innate and c.has(ST.AMPLIFY):
@@ -523,6 +527,15 @@ class Battle:
         if act.target == Target.CHOICE and not self.choices(c, act):
             return "nothing to choose from"
         return None
+
+    @staticmethod
+    def unlock_per(c: Combatant) -> float:
+        """Perception as it counts for unlocking techniques: trained perception, plus a reincarnated
+        sorcerer's past life (awakened sorcerers have to earn theirs)."""
+        bonus = REINCARNATED_PER_BONUS if c.root.pclass == PClass.REINCARNATED else 0
+        if c.meta.get("sukuna"):
+            bonus = 99
+        return float(c.base(S.PER)) + bonus
 
     def elevated(self, c: Combatant) -> bool:
         obj = self.field.get(c.pos)
@@ -650,7 +663,7 @@ class Battle:
         if chant:
             lead += CHANT_TIME
         if act.kind == Kind.ATTACK and act.rng == Rng.MELEE:
-            return lead + MELEE_TIME * 20.0 / (10.0 + c.stat(S.SPD))
+            return lead + MELEE_TIME * 20.0 / (10.0 + c.stat(S.SPD) + skills.melee_speed(c))
         return lead + (RANGED_TIME if act.kind == Kind.ATTACK else BUFF_TIME) / max(act.speed, 0.1)
 
     def channel(self, c: Combatant, parts: list, amount: float) -> bool:
@@ -861,7 +874,8 @@ class Battle:
 
     def perceives_soul(self, c: Combatant) -> bool:
         w = c.weapon
-        return c.stat(S.PER) >= SOUL_PER or "soul_strike" in c.flags or bool(w and "soul_strike" in w.flags)
+        return (c.stat(S.PER) + skills.soul_sight(c) >= SOUL_PER or "soul_strike" in c.flags
+                or bool(w and "soul_strike" in w.flags))
 
     def passive_mult(self, atk, tgt, dtype, tags, bypass=False) -> float:
         """Technique-level defences that scale or void incoming damage."""
@@ -879,6 +893,7 @@ class Battle:
                 self.say(f"   {tgt}'s flesh warps around the blow; {atk} cannot perceive the soul, so nothing is harmed.")
                 return 0.0
         r = self.adapt_resist(tgt, tags)
+        soul = skills.soul_damage(atk) if "soul_body" in tgt.flags else 1.0      # trained soul perception
         if r > 0:
             self.say(f"   {tgt} has adapted ({r:.0%} resisted).")
         keep = 1.0 - r
@@ -886,7 +901,7 @@ class Battle:
                                                    for o in self.fighters):
             self.say("   Round Deer's reverse cursed energy unravels the liquid metal before it arrives.")
             keep *= 0.25
-        return keep
+        return keep * soul
 
     # ---- damage ------------------------------------------------------------------------
     def _mitigate(self, idx, parts, raw, dtype) -> np.ndarray:
@@ -1051,6 +1066,8 @@ class Battle:
                 self.say(f"   {tgt} moves; the lightning follows the charge.")
         elif not sure_hit:
             acc = 0.88 + PART_ACC[part] + act.acc + 0.012 * (atk.stat(S.SPD) - tgt.stat(S.SPD))
+            if act.rng == Rng.MELEE:
+                acc += skills.melee_acc(atk)             # trained physical speed
             if tgt.has(ST.STUN):
                 acc += 0.2
             if "unseen" in tgt.traits and atk.stat(S.PER) < UNSEEN_PER:
@@ -1070,6 +1087,7 @@ class Battle:
         raw = power * amp * DMG_SCALE * (1 + atk.stat(S.STR if dtype == DType.PHYSICAL else S.OUT) / 25)
         raw *= self.rng.uniform(0.9, 1.1) * (JACKPOT_DMG if atk.has(ST.JACKPOT) else 1.0) * atk.dmg_mult
         if act.rng == Rng.MELEE:
+            raw *= skills.melee_mult(atk)                         # trained physical strength
             raw += 0.2 * float(self.limb_ce[atk.idx].sum())      # grown limbs hit as hard as the CE in them
             if self.costs(atk, act)[0] > 0 and self.rng.random() < 0.03 + 0.003 * atk.level:
                 raw *= BLACK_FLASH_MULT
@@ -1389,8 +1407,10 @@ class Battle:
             k.record.score(pts, self.now)
             if victim.kind == "fighter":
                 k.record.kills["spirits" if spirit else "players"] += 1
+            before = k.record.skill_points
             if k.record.gain_xp(xp):
                 self.say(f"   {k} reaches level {k.record.level}!")
+                self.tell(k, f"+{k.record.skill_points - before} skill points ({k.record.skill_points} to spend: /skills).")
         if pts:
             self.say(f"   {k} scores {pts} points (+{xp} XP).")
 
@@ -1441,7 +1461,7 @@ class Battle:
 
     def _refinement(self, d: Domain) -> float:
         owner = self.by_cid[d.owner]
-        r = owner.stat(S.OUT) * (1 + owner.level / 20) * self.rng.uniform(0.9, 1.1)
+        r = owner.stat(S.OUT) * (1 + owner.level / 20) * self.rng.uniform(0.9, 1.1) * skills.refinement(owner)
         return r * (1.0 if d.data.get("lethal", True) else NONLETHAL_CLASH)
 
     def _clash_power(self, d: Domain, other: Domain) -> float:

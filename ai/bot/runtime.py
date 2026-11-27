@@ -15,6 +15,7 @@ from .bridge import DiscordIO
 class Runtime:
     def __init__(self, bot: discord.Client):
         self.bot = bot
+        # CULLING_DB = sqlite (default; file at CULLING_SQLITE) | dynamodb | json - see ai/STORAGE.md
         self.store = GameStore(local_path=os.environ.get("CULLING_SAVE", "culling_save.json"))
         self.cache = BattleCache()
         self.sessions: dict = {}

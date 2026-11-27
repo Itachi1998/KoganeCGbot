@@ -899,6 +899,42 @@ def _apply_timing() -> None:
 _apply_timing()
 
 # ======================================================================================
+# Perception unlocks (players only; NPCs are already trained). Every technique's first move, its
+# first attack and its defences are free; everything else needs perception - more for heavier moves - and a
+# reincarnated sorcerer's perception counts +6 (constants.REINCARNATED_PER_BONUS), so an awakened
+# sorcerer has far more to unlock. PER_OVERRIDE sets a requirement by hand.
+# ======================================================================================
+PER_BY_KIND = {Kind.ATTACK: 12, Kind.BUFF: 13, Kind.UTILITY: 13, Kind.SUMMON: 13, Kind.HEAL: 13,
+               Kind.DOMAIN: 18, Kind.DEFENSE: 0}
+PER_BY_LEVEL = ((18, 12), (12, 8), (10, 6), (6, 3))     # unlock level -> extra perception
+PER_OVERRIDE: dict = {}                                  # action key -> perception
+
+
+def perception_needed(tech, act) -> int:
+    if act.key in PER_OVERRIDE:
+        return PER_OVERRIDE[act.key]
+    if act.react is not None or act.kind == Kind.DEFENSE:
+        return 0
+    first = next((a for a in tech.actions if a.kind == Kind.ATTACK), None)
+    if (first is not None and act.key == first.key) or (tech.actions and act.key == tech.actions[0].key):
+        return 0
+    extra = next((e for lv, e in PER_BY_LEVEL if act.min_level >= lv), 0)
+    return PER_BY_KIND.get(act.kind, 10) + extra
+
+
+def _apply_perception() -> None:
+    from dataclasses import replace
+    from .techniques import TECHNIQUES
+    for tech in list(TECHNIQUES.values()):
+        if not tech.innate:
+            continue
+        acts = tuple(replace(a, min_per=perception_needed(tech, a)) for a in tech.actions)
+        register(replace(tech, actions=acts))
+
+
+_apply_perception()
+
+# ======================================================================================
 # Comedian material (original gags)
 # ======================================================================================
 @dataclass(frozen=True)

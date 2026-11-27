@@ -421,6 +421,9 @@ def create_character(inp, out, server_id: str, user_id: str, ask_level: bool = F
         rec.old_stats = oldstats.roll(pclass, tech, six_eyes, rng)
         out("Your stats: " + ", ".join(f"{k.upper()} {v}" for k, v in rec.old_stats.items()))
     rec.level = _int(inp, "Level", 6, 1, 20) if ask_level else 1
+    if ask_level:                                            # an arena character skips the training: its
+        from .skills import SKILL_CAP, points_through     # level's skill points go into perception
+        rec.skills = {"perception": min(SKILL_CAP, points_through(rec.level))}
     if rng is not None:                                      # how many of Sukuna's fingers this body can cage
         rec.vessel = roll_vessel(rng)
         if rec.vessel >= 20:
@@ -558,6 +561,8 @@ WORLD_HELP = """Colony commands
                                put a cursed tool up for other players at your own price: at most
                                double its shop price - unless you took it from the dead, then
                                any price. Sold when another player buys it.
+  skills | upgrade <skill> [n] spend skill points (+10 a level to level 10, +5 after): efficiency,
+                               speed, strength, perception, soul, refinement, navigation
   rules | addrule <key>        colony rules cost 100 points each
   give <player> <points>       needs the Point Transfer rule
   pvp <player>                 attack another player at your node (works in hideouts too)

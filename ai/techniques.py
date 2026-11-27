@@ -30,6 +30,7 @@ class Action:
     speed: float = 1.0                # technique speed: how fast a ranged technique or buff arrives
     can_chant: bool = False           # may be amplified by an incantation (extra turn)
     min_level: int = 1
+    min_per: int = 0                  # perception a PLAYER needs to unlock it (data.py: _apply_perception)
     statuses: tuple = ()              # (Status, chance, duration, magnitude)
     tags: frozenset = frozenset()     # phenomena, used by adaptation ("slash", "blood", ...)
     react: Optional[React] = None     # set on defensive reactions

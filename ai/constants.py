@@ -161,6 +161,7 @@ DAY = 86400.0
 
 SOUL_PER = 12                # perception needed to perceive / reinforce the soul
 REINCARNATED_UNLOCK = 6      # reincarnated sorcerers treat their level as +6 for unlocks
+REINCARNATED_PER_BONUS = 6   # ...and their perception as +6 for perception unlocks (awakened sorcerers train it)
 BRAIN_SLOTS = 2              # innate techniques one brain can hold (3 for advanced users)
 ADVANCED_LEVEL = 10
 CHANT_AMP = 1.5              # incantation bonus
