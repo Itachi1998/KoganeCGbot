@@ -54,6 +54,25 @@ fewer than 20 fingers are in play (`RESPAWN_HOURS` in `ai/world.py`).
 ### Battle feed
 One message per stretch of rounds, edited as the fight goes; a new one starts at Discord's 4000
 character limit (about 9 rounds of a 1v1, 6 of a 2v2, 4 of a three-team fight).
+### Domains
+Every domain takes in who it does in the manga (`constants.Tier`, set per domain in `ai/data.py`):
+* **one target** - Deadly Sentencing, Graveyard Domain, Authentic Mutual Love, a miniature barrier.
+  Everyone else is shut OUTSIDE the barrier: nothing crosses it until it falls.
+* **every enemy** - most domains.
+* **everyone its user is not touching** - Unlimited Void (allies too; Gojo holds one ally per free hand).
+* **everyone and everything in range** - Malevolent Shrine, alone: allies and the battlefield are cut.
+* **no sure-hit** - Chimera Shadow Garden (incomplete).
+### Binding vows
+`vow` in a fight (or the vow menu in the battle controls). A vow moves numbers around:
+* **domain** (reach, sure-hit output, clash strength, rounds, cost, barrier): Widened / Condensed /
+  Pinpoint Domain trade reach for output along one target < every enemy < the domain's own tier;
+  Inverted Barrier makes it strong from outside instead of from inside; Brief, Lasting, Lavish.
+* **technique** (output, strength, tool, cost, activation time): Overcharge, Measured Output, Quick
+  Hands, Deliberate Form, and the bindings (Bound Arm, Iron Stance, Revealing One's Hand...).
+* **release**: Snap Release lets the next channelled technique go at once with no gathering, weaker,
+  and the same technique owes a chant next round. Oath of Incantation is permanent: once a fight the
+  first technique goes at once and stronger, and every other technique must be chanted for good.
+New vows are data: `vows.trade(key, name, desc, technique={...}, domain={...})`.
 ### Perception check
 Attacked while committed to a move with no defence set? With perception 16+ you are asked: keep
 your move and take the hit, or drop it and switch to a defence, which comes up in time with a
