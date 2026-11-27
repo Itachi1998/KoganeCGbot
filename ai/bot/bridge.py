@@ -29,7 +29,8 @@ import discord
 from .. import ai
 from ..battle import IO
 from ..cli import BATTLE_HELP, PART_LABEL, battle_command, channel_command, limb_line, vitals
-from ..constants import Kind, Part, PState, Target
+from .. import vows
+from ..constants import TIER_NAME, Kind, Part, PState, Target
 from . import style
 
 TURN_TIMEOUT = 180.0          # seconds a player has to commit (then they wait)
@@ -50,8 +51,14 @@ def domain_line(b) -> str:
     def describe(d):
         owner = b.by_cid.get(d.owner)
         shape = "open (no barrier)" if d.data.get("open") else f"{d.data.get('shell', 'normal')} barrier"
-        sure = "sure-hit" if d.data.get("lethal", True) else "no harm by itself"
-        return f"**{d.name}** ({owner.name if owner else '?'}; {shape}; {sure}; {d.rounds} round(s) left)"
+        tier = d.data.get("tier")
+        aim = TIER_NAME[1] if d.data.get("only") else TIER_NAME[tier] if tier is not None else "every enemy"
+        if d.data.get("only") and b.by_cid.get(d.data["only"]) is not None:
+            aim += f" - {b.by_cid[d.data['only']].name}; everyone else is shut outside"
+        sure = f"takes in {aim}" if d.data.get("lethal", True) else "no harm by itself"
+        out = d.data.get("output", 1.0)
+        power = f"; sure-hit x{out:.2f}" if abs(out - 1) > 0.01 else ""
+        return f"**{d.name}** ({owner.name if owner else '?'}; {shape}; {sure}{power}; {d.rounds} round(s) left)"
     if b.domain is None:
         return ""
     if b.rival is None:
@@ -477,6 +484,15 @@ class ControlPanel:
                                                   for a in guards])
                 dsel.callback = self._on_defend
                 container.add_item(discord.ui.ActionRow(dsel))
+        if p.kind == "turn":
+            open_vows = vows.available(c)[:25]
+            if open_vows:
+                vsel = discord.ui.Select(placeholder="Swear a binding vow (free)...", options=[
+                    discord.SelectOption(label=v.name[:100], value=v.key,
+                                         description=f"[{v.kind}{', permanent' if v.permanent else ''}] {v.desc}"[:100])
+                    for v in open_vows])
+                vsel.callback = self._on_vow
+                container.add_item(discord.ui.ActionRow(vsel))
         row = discord.ui.ActionRow()
         if p.kind == "turn":
             row.add_item(self._button("Commit", discord.ButtonStyle.green, self._on_commit, disabled=act is None))
@@ -547,6 +563,9 @@ class ControlPanel:
     async def _on_chant(self, itx: discord.Interaction) -> None:
         self.chant = not self.chant
         await itx.response.edit_message(view=self.render())
+
+    async def _on_vow(self, itx: discord.Interaction) -> None:
+        await self.submit(itx, f"vow {itx.data['values'][0]}")
 
     async def _on_defend(self, itx: discord.Interaction) -> None:
         await self.submit(itx, f"defend {itx.data['values'][0]}")

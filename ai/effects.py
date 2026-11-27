@@ -17,7 +17,8 @@ from collections import defaultdict
 import numpy as np
 
 from .constants import (BRAIN_HEALS, SLASH_ROUNDS, CE_RECOVERY, SIX_EYES_EFF, SIX_EYES_RECOVERY, SUKUNA_EFF, FINGER_AMP, FINGER_CE, SUKUNA_CE_BASE, SUKUNA_CE_FINGER, SUKUNA_LEVEL, TIER_POWER, FRAME_STACKS, FRAME_STEP, UNSEEN_PER, DUR_FACTOR, EFF_CAP, PART_HP_FRAC, Rng, Target, ADVANCED_LEVEL, BRAIN_SLOTS, EXTRA, LIMBS, N_STATS, UZUMAKI_EXTRACT_MIN_GRADE,
-                        DType, Grade, GRADE_NAME, Kind, Part, PClass, PState, Stat, Status)
+                        DType, Grade, GRADE_NAME, Kind, Part, PClass, PState, Stat, Status,
+                        RANGE_OUTPUT, TIER_NAME, Tier)
 from .crimes import CRIME_INFO, FABRICATED
 from .data import JOKES, MERGE_NAMES, SHIKI_ORDER, SHIKIGAMI
 from .records import Spec, build_stats, npc_spirit, sukuna_share
@@ -200,15 +201,85 @@ def choose_touched(b, c) -> list:
     return held
 
 
+def shift_tier(native, steps: int) -> tuple:
+    """A domain's reach after its owner's range vows: (tier, steps actually moved).
+
+    The ladder is: one target < every enemy < what the domain natively does, if that is more
+    (Unlimited Void: everyone untouched; Malevolent Shrine: everything). A vow can pull a domain
+    in, or push a narrow one out - never past what it is in the manga, and never onto friends
+    unless that is what the domain itself does."""
+    native = Tier(native)
+    if native == Tier.NONE:
+        return Tier.NONE, 0
+    ladder = [Tier.ONE, Tier.ENEMIES] + ([native] if native > Tier.ENEMIES else [])
+    i = ladder.index(native)
+    j = max(0, min(len(ladder) - 1, i + int(steps)))
+    return ladder[j], j - i
+
+
+def pick_one(b, c, target=None):
+    """Whom a one-target domain closes on: the action's own target, else the owner's choice."""
+    if target is not None and target is not c and target.alive and b.hostile(c, target):
+        return target.root
+    foes = [e for e in b.enemies(c) if e.owner is None] or b.enemies(c)
+    if not foes:
+        return None
+    rivals = [b.by_cid[d.owner].root for d in b.domains() if b.hostile(c, b.by_cid[d.owner])]
+    ranked = sorted(foes, key=lambda e: (e.root not in rivals, -e.level, -e.hp))[:24]
+    if c.controller == "human" and len(ranked) > 1:
+        k = b.ask(c, "Your domain closes on ONE target - everyone else is shut outside it. Who?",
+                  [e.name for e in ranked], [1.0] + [0.0] * (len(ranked) - 1))
+        return ranked[k].root
+    return ranked[0].root
+
+
+def aim_domain(b, c, native, target=None) -> dict:
+    """How this fighter's domain targets, as ``Battle.domain_reaches`` reads it: the domain's own
+    tier (constants.Tier), moved by the owner's range vows, with the strength that goes with it."""
+    tier, moved = shift_tier(native, c.domain_mods["range"])
+    data = {"tier": int(tier), "native": int(native), "output": RANGE_OUTPUT ** (-moved)}
+    if tier == Tier.NONE:
+        data["scope"] = "none"
+    elif tier == Tier.ONE:
+        one = pick_one(b, c, target)
+        data["scope"], data["only"] = "enemies", (one.cid if one is not None else None)
+    elif tier == Tier.ENEMIES:
+        data["scope"] = "enemies"
+    elif tier == Tier.UNTOUCHED:
+        data["scope"], data["spared"] = "all", choose_touched(b, c)
+    else:
+        data["scope"], data["objects"] = "all", True
+    if moved:
+        b.say(f"   A binding vow has {'pulled' if moved < 0 else 'pushed'} {c}'s domain "
+              f"{'in' if moved < 0 else 'out'}: it takes in {TIER_NAME[tier]}, and its sure-hit is "
+              f"{abs(RANGE_OUTPUT ** (-moved) - 1):.0%} {'stronger' if moved < 0 else 'weaker'} for it.")
+    return data
+
+
+def retarget(b, d) -> None:
+    """A one-target domain whose target is gone turns on the next: the strongest enemy left."""
+    if d.data.get("tier") != Tier.ONE:
+        return
+    owner = b.by_cid[d.owner]
+    marked = b.by_cid.get(d.data.get("only") or "")
+    if marked is not None and marked.alive and not marked.fled:
+        return
+    saved, d.data["only"] = d.data.get("only"), None            # (everyone can be reached while it chooses)
+    foes = [e for e in b.enemies(owner) if e.owner is None] or b.enemies(owner)
+    nxt = max(foes, key=lambda e: (e.level, e.hp), default=None)
+    d.data["only"] = nxt.root.cid if nxt is not None else saved
+    if nxt is not None:
+        b.say(f"{d.name} closes on {nxt} next." + b.shut_out_text(d))
+
+
 @effect("domain")
 def generic_domain(b, c, act, targets, part, amp, arg):
     p = act.params
-    data = {k: p[k] for k in ("scope", "objects") if k in p}      # how this domain targets (battle.domain_reaches)
-    if p.get("touch"):
-        data["spared"] = choose_touched(b, c)
+    native = Tier.ONE if p.get("shell") == "miniature" else p.get("tier", Tier.ENEMIES)
+    data = aim_domain(b, c, native)
     if b.open_domain(c, act.key, p["name"], p["rounds"] - 1, p["tick"], data, lethal=p.get("lethal", True),
                      open_barrier=p.get("open", False), shell=p.get("shell", "normal")) and b.rival is None:
-        EFFECTS[p["tick"]](b, c, b.domain_of(c))        # the sure-hit lands at once
+        b.run_tick(b.domain_of(c))                      # the sure-hit lands at once
 
 
 @effect("shrine_tick")
@@ -222,7 +293,7 @@ def shrine_tick(b, owner, d):
         b.say(f"   {', '.join(t.name for t in friends)}: on {owner}'s side, and inside it all the same.")
     b.aoe(owner, ACTIONS["dismantle"], targets=hit, sure_hit=True, power=13)
     if d.data.get("objects"):
-        b.shred_field(owner, 13)
+        b.shred_field(owner, 13 * b.domain_output)
 
 
 @effect("coffin_tick")
@@ -285,7 +356,8 @@ def deadly_sentencing(b, c, act, targets, part, amp, arg):
     # Non-lethal: the "sure-hit" is only the rules of the court, so anti-domain techniques do
     # nothing against it, and it is stronger in a clash.  Even locked against another domain the
     # trial is held; the verdict stands and the court then closes.
-    if not b.open_domain(c, "ds_domain", "Deadly Sentencing", 0, None, {"no_burnout": True}, lethal=False):
+    if not b.open_domain(c, "ds_domain", "Deadly Sentencing", 0, None,
+                         {"no_burnout": True, "tier": int(Tier.ONE), "only": t.root.cid}, lethal=False):
         return
     court = b.domain_of(c)
     c.meta["court_held"] = True
@@ -1739,9 +1811,9 @@ def mutual_love(b, c, act, targets, part, amp, arg):
         else:
             tech = ranked[0]
     target = targets[0] if targets else None
-    data = {"only": target.root.cid if target is not None else None, "copied": tech}
+    data = {**aim_domain(b, c, Tier.ONE, target), "copied": tech}
     if b.open_domain(c, "mutual_love", "Authentic Mutual Love", 2, "mutual_love_tick", data) and b.rival is None:
-        mutual_love_tick(b, c, b.domain_of(c))
+        b.run_tick(b.domain_of(c))
 
 
 @effect("mutual_love_tick")
@@ -1750,20 +1822,16 @@ def mutual_love_tick(b, owner, d):
     if tech is None:
         b.say("Authentic Mutual Love: a field of blades, and nothing copied to fill them with.")
         return
-    marked = b.by_cid.get(d.data.get("only") or "")
-    if marked is None or not marked.alive or marked.fled:        # the one it was turned on is gone: the next
-        foes = [e for e in b.enemies(owner) if e.owner is None] or b.enemies(owner)
-        marked = max(foes, key=lambda e: (e.level, e.hp), default=None)
-        d.data["only"] = marked.root.cid if marked is not None else None
-        if marked is not None:
-            b.say(f"Authentic Mutual Love turns on {marked}.")
     best = max((a for a in tech.actions if a.kind == Kind.ATTACK), key=lambda a: a.power)
-    hit = [t for t in b.domain_targets(owner) if t.owner is None] or b.domain_targets(owner)
+    hit = b.domain_targets(owner)
+    if d.data.get("tier") == Tier.ONE:                   # on the one it closed on (not on what is theirs)
+        hit = ([t for t in hit if t.owner is None] or hit)[:1]
     if not hit:
         b.say(f"Authentic Mutual Love: the barrier holds {best.name}, with nobody left to turn it on.")
         return
-    b.say(f"Authentic Mutual Love: the barrier is {tech.name} now. {best.name} cannot miss {hit[0]}.")
-    b.aoe(owner, best, targets=hit[:1], sure_hit=True)
+    b.say(f"Authentic Mutual Love: the barrier is {tech.name} now. {best.name} cannot miss "
+          f"{', '.join(t.name for t in hit)}.")
+    b.aoe(owner, best, targets=hit, sure_hit=True)
 
 
 @effect("world_slash")
@@ -1779,8 +1847,8 @@ def _in_garden(b, c) -> bool:
 @effect("shadow_garden")
 def shadow_garden(b, c, act, targets, part, amp, arg):
     # Incomplete, so it does not burn his technique out when it ends - but he carries whatever sinks into it.
-    if b.open_domain(c, "shadow_garden", "Chimera Shadow Garden", 4, None, {"no_burnout": True, "weight": 0},
-                     lethal=False):
+    if b.open_domain(c, "shadow_garden", "Chimera Shadow Garden", 4, None,
+                     {"no_burnout": True, "weight": 0, "tier": int(Tier.NONE), "scope": "none"}, lethal=False):
         b.say("Shadow floods the ground like deep water. Anything of his can rise from anywhere in it.")
 
 
@@ -2002,7 +2070,7 @@ def grave_tick(b, owner, d):
             b.say(f"   A coffin closes over {t} and the earth closes over the coffin.")
             b.add_status(t, ST.STUN, 1.0, 1, 1.0, {"disease"})
     for t in inside:
-        b.apply_damage(owner, t, Part.TORSO, 8.0, DType.CURSED, {"disease"}, "the weight of the grave")
+        b.apply_damage(owner, t, Part.TORSO, 8.0 * b.domain_output, DType.CURSED, {"disease"}, "the weight of the grave")
     if n >= 3:
         for t in inside:
             if t.alive:

@@ -51,6 +51,13 @@ Attack or defend:
     asked whether to expand against it at once. In the middle of a technique that takes
     perception 16+, and the technique is dropped.
 
+Domains: every domain takes in who it does in the manga. Most reach every ENEMY inside. Some close on
+  ONE target (Deadly Sentencing, Graveyard Domain, Authentic Mutual Love, a miniature barrier): everyone
+  else is shut OUTSIDE the barrier, and nothing crosses it until it falls. Unlimited Void reaches everyone
+  its user is not touching, allies too. Malevolent Shrine alone cuts everyone and everything in range.
+  Chimera Shadow Garden is incomplete: no sure-hit. Binding vows (`vow`) move a domain's numbers: pull its
+  reach in for a stronger sure-hit or push it out for a weaker one, invert the barrier, trade rounds, cost.
+
 Battle commands
   status                      the clock; everyone's HP / max HP, every limb's HP and what is in
                               it (poison, bleeding, numb...), energy, speed, position
@@ -82,7 +89,9 @@ Battle commands
                               An ordinary weapon holds no cursed energy - it cannot hurt a curse,
                               and a sorcerer killed with one rises as a curse. Use
                               `use infused_strike` / `use infused_shot` to pour energy in.
-  vow [key]                   list binding vows / swear one (free)
+  vow [key]                   list binding vows / swear one (free). Vows move your technique's and your
+                              domain's numbers around (range for output, an inverted barrier...), or let a
+                              technique go without the channelling phase (snap_release, oath_of_incantation)
   spare <target> <points>     buy mercy (needs the Point Transfer rule)
   flee | pass | help
 Parts: head torso larm rarm lleg rleg (extra1 extra2).  Targets: the id in brackets (e1, p2, s1)."""
@@ -340,8 +349,23 @@ def battle_command(b, c, line: str, out=print) -> bool:
         return b.throw(c, rest[0].lower(), target, part)
     elif cmd == "vow":
         if not rest:
-            for v in vows.VOWS.values():
-                out(f"  {v.key:<16} {v.name}: {v.desc}")
+            taken = c.meta.get("vows", set())
+            for kind, title in (("binding", "Bindings - a restriction for a boon"),
+                                ("technique", "Technique - move its numbers around"),
+                                ("release", "Release - let a technique go without the channelling phase"),
+                                ("domain", "Domain - move its numbers around (shapes the NEXT domain you open)")):
+                out(title)
+                for v in vows.VOWS.values():
+                    if v.kind == kind:
+                        out(f"  {'[sworn]' if v.key in taken else '       '} {v.key:<20} {v.name}: {v.desc}")
+            m, d = c.mult, c.domain_mods
+            out(f"Your technique: output x{m['out']:.2f}, strength x{m['str']:.2f}, tool x{m['tool']:.2f}, "
+                f"cost x{m['cost']:.2f}, activation time x{m['speed']:.2f}"
+                + (" | every technique must be chanted" if c.must_chant else "")
+                + (" | next channelled technique goes at once" if c.vow_snap else ""))
+            out(f"Your domain: reach {d['range']:+d} step(s), sure-hit x{d['output']:.2f}, clash x{d['refine']:.2f}, "
+                f"rounds {d['rounds']:+d}, cost x{d['cost']:.2f}, barrier "
+                + ("strong from outside (inverted)" if d["shell"] == "reinforced" else "strong from inside"))
         elif rest[0].lower() in vows.VOWS:
             vows.apply(b, c, vows.VOWS[rest[0].lower()])
         else:

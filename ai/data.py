@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from .constants import (ANY_ARM, ANY_LEG, BOTH_ARMS, HEAD_REQ, TORSO_REQ, DType, Kind,
-                        PClass, React, Rng, Stat, Status, Target)
+                        PClass, React, Rng, Stat, Status, Target, Tier)
 from .techniques import Action as A
 from .techniques import Technique, register
 
@@ -306,7 +306,7 @@ register(Technique("shrine", "Shrine", desc="Slashes that adjust to the target."
     A("shrine_domain", "Domain Expansion: Malevolent Shrine", kind=DOMAIN, target=SELF, ce=50, min_level=8,
       requires=BOTH_ARMS, channel=1, effect="domain",
       params={"rounds": 2, "tick": "shrine_tick", "name": "Malevolent Shrine", "open": True,
-              "scope": "all", "objects": True},
+              "tier": Tier.EVERYTHING},
       desc="No barrier, and nothing in range is spared: enemies, ALLIES and the battlefield itself are "
            "cut every round. Only you and your own shikigami are not."),
     A("spiderweb", "Spiderweb", target=ALL, power=16, ce=14, rng=RANGED, requires=ANY_ARM, channel=1,
@@ -353,13 +353,13 @@ register(Technique("limitless", "Limitless", flags=("six_eyes",),
       channel=1, can_chant=True, min_level=12, tags=fs({"void"})),
     A("void_domain", "Domain Expansion: Unlimited Void", kind=DOMAIN, target=SELF, ce=60, min_level=10,
       requires=ANY_ARM, channel=1, effect="domain",
-      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void", "scope": "all", "touch": True},
+      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void", "tier": Tier.UNTOUCHED},
       desc="Everyone inside is flooded with everything at once and frozen - allies too, except "
            "whoever you are touching (one per free hand: you are asked as it opens)."),
     A("void_reinforced", "Unlimited Void: Reinforced Shell", kind=DOMAIN, target=SELF, ce=60, min_level=12,
       requires=ANY_ARM, channel=1, effect="domain",
-      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void", "shell": "reinforced", "scope": "all",
-              "touch": True},
+      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void", "shell": "reinforced",
+              "tier": Tier.UNTOUCHED},
       desc="The barrier's conditions swapped: nothing breaks it from outside, so an open domain gets no "
            "edge on it. Soft inside: it holds nobody in, and gives 10% to another closed barrier."),
     A("void_miniature", "Unlimited Void: Miniature Barrier", kind=DOMAIN, target=SELF, ce=80, min_level=20,
@@ -593,7 +593,7 @@ register(Technique("pestilence", "Pestilence", desc="The Smallpox Deity: a coffi
     A("plague_touch", "Plague Touch", power=12, ce=8, channel=1, statuses=((Status.POISON, 1.0, 4, 7.0),),
       tags=fs({"disease"})),
     A("grave_domain", "Domain Expansion: Graveyard Domain", kind=DOMAIN, target=SELF, ce=45, min_level=8, channel=1,
-      effect="domain", params={"rounds": 3, "tick": "grave_tick", "name": "Graveyard Domain"},
+      effect="domain", params={"rounds": 3, "tick": "grave_tick", "name": "Graveyard Domain", "tier": Tier.ONE},
       desc="Everyone is shut in a coffin (stunned). Still inside on the third count: the disease takes hold."),
     A("miasma", "Miasma", kind=DEF, react=React.BLOCK, ce=4, params={"hold": 2, "block": 0.5}),
 )))

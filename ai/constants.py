@@ -147,6 +147,20 @@ class React(IntEnum):
     COVER = 5       # one of your summons takes the blow for you
 
 
+class Tier(IntEnum):
+    """Who a domain's sure-hit takes in - as each domain is shown doing in the manga."""
+    NONE = 0          # an incomplete domain: no sure-hit at all (Chimera Shadow Garden)
+    ONE = 1           # one chosen target; everyone else is shut outside the barrier (Deadly Sentencing,
+                      # Graveyard Domain, Authentic Mutual Love, a miniature barrier)
+    ENEMIES = 2       # every enemy inside (most domains)
+    UNTOUCHED = 3     # everyone inside the user is not touching, allies included (Unlimited Void)
+    EVERYTHING = 4    # everyone and everything in range: friend, foe and the field (Malevolent Shrine, alone)
+
+
+TIER_NAME = ["no sure-hit", "one target", "every enemy", "everyone you are not touching",
+             "everyone and everything in range"]
+
+
 class Rng(IntEnum):
     MELEE = 0
     RANGED = 1
@@ -196,6 +210,10 @@ BUFF_TIME = 0.2              # a speed-1 buff, summon or stance taking effect (T
 CHANNEL_TIME = 0.5           # activation of anything that has to be channelled
 CHANT_TIME = 0.6             # an incantation on top of that
 REACT_PER = 16               # perception needed to be offered a defence while committed to an attack
+# ---- binding vows that move a domain's or a technique's numbers around (vows.py) ---------------
+RANGE_OUTPUT = 1.25          # a domain pulled in one step of reach hits this much harder; pushed out one, this much less
+SNAP_DEBUFF = 0.7            # Snap Release: a technique let go without gathering lands at this share of its strength
+OATH_BUFF = 1.3              # Oath of Incantation: the once-a-fight instant technique lands this much harder
 # Switching from a committed move to a defence mid-round (perception check). The chance it comes
 # off: SWITCH_BASE, plus SWITCH_PER for each point of perception above REACT_PER, plus SWITCH_SPD
 # for each point of speed over the attacker's (minus when slower), kept within SWITCH_MIN..MAX.

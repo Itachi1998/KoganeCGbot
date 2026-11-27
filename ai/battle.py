@@ -23,7 +23,7 @@ from typing import Optional
 import numpy as np
 
 from . import ai
-from .constants import (REINCARNATED_PER_BONUS, SWITCH_BASE, SWITCH_PER, SWITCH_SPD, SWITCH_MIN, SWITCH_MAX, BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
+from .constants import (SNAP_DEBUFF, OATH_BUFF, REINCARNATED_PER_BONUS, SWITCH_BASE, SWITCH_PER, SWITCH_SPD, SWITCH_MIN, SWITCH_MAX, BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
                         DOT_STATUSES, DUR_FACTOR, EXTRA,
                         LEGS, LIMBS, N_PARTS, N_STATS, N_STATUS, PART_ACC, PART_DMG_MULT,
                         PART_HP_FRAC, POINTS_PLAYER, POINTS_SPIRIT, SOUL_PER, STICKY, VITAL,
@@ -148,11 +148,20 @@ class Combatant:
         self.last_hit_by: Optional[str] = None
         self.granted: dict = {}                           # one-shot actions (Uzumaki extraction)
         self.cooldowns: dict = {}
-        self.mult = {"out": 1.0, "str": 1.0, "tool": 1.0}
+        # A fighter's technique numbers, and their domain's. Binding vows move them (vows.py).
+        self.mult = {"out": 1.0, "str": 1.0, "tool": 1.0,     # output, strength, tool output
+                     "cost": 1.0,                             # cursed energy a technique costs
+                     "speed": 1.0}                            # time a technique takes to activate (lower = sooner)
+        self.domain_mods = {"range": 0,                       # steps of reach: -1 pulled in, +1 pushed out
+                            "output": 1.0, "refine": 1.0,     # sure-hit strength; strength in a clash
+                            "rounds": 0, "cost": 1.0,         # how long it stands; what it costs
+                            "shell": None}                    # "reinforced": strong from outside, soft inside
+        self.vow_snap: Optional[str] = None                   # "snap" | "oath": the next channelled technique goes at once
+        self.chant_due: dict = {}                             # action key -> round in which it must be chanted
         self.dmg_mult = float(self.meta.get("dmg_mult", 1.0))   # weak curses hit softly
         self.vow_flags: set = set()
         self.sealed_parts: set = set()
-        self.vow_instant = self.must_chant = False
+        self.must_chant = False
         self.adapt: dict = self.meta.pop("adapt", {})     # tag -> adaptation progress 0..1
         self.channeling: Optional[str] = None
         self.points_gained = self.xp_gained = 0
@@ -282,6 +291,7 @@ class Battle:
         self._next_team = 100
         self._cid_n: dict[str, int] = {}
         self._last_kill: dict[str, int] = {}             # root cid -> round of its side's latest kill
+        self.domain_output = 1.0                         # strength of the domain sure-hit being resolved (run_tick)
         self.broken_oids: list = []                      # map objects broken in this fight (colony.py re-applies them)
         self._plain = False                              # the blow being resolved carries no cursed energy
         self.last_tags: set = set()                      # tags of the damage being applied (for hooks)
@@ -352,8 +362,9 @@ class Battle:
         c.meta["base_max_hp"] = float(stats[S.MAX_HP])   # before soul scars
         self.fighters.append(c)
         self.by_cid[c.cid] = c
-        for key in spec.vows:
-            vows.apply(self, c, vows.VOWS[key], announce=False)
+        for key in spec.vows:                            # permanent vows come into every fight
+            if key in vows.VOWS:
+                vows.apply(self, c, vows.VOWS[key], announce=False)
         held = spec.meta.get("fingers", spec.record.fingers if spec.record is not None else 0)
         if held:                                         # Sukuna's fingers amplify everything their holder does
             effects.set_fingers(self, c, held)
@@ -382,7 +393,35 @@ class Battle:
 
     def enemies(self, c: Combatant, targetable: bool = True) -> list:
         return [o for o in self.fighters if o.alive and not o.fled and self.hostile(c, o)
-                and not (targetable and "remote" in o.flags)]
+                and not (targetable and ("remote" in o.flags or self.separated(c, o)))]
+
+    def walled(self, d: "Domain") -> Optional[set]:
+        """Root ids INSIDE a barrier that has closed around one target: its owner and that one (each
+        with what is their own). Everyone else has been shut outside. None if this domain shuts
+        nobody out - it takes in more than one, or it has no barrier at all."""
+        if d.data.get("only") is None or d.data.get("open"):
+            return None
+        return {self.by_cid[d.owner].root.cid, d.data["only"]}
+
+    def shut_out_text(self, d: "Domain") -> str:
+        """Who a one-target barrier has expelled, as a sentence (empty if nobody)."""
+        inside = self.walled(d)
+        if inside is None:
+            return ""
+        one = self.by_cid.get(d.data["only"])
+        out = [o.name for o in self.fighters if o.alive and not o.fled and o.owner is None
+               and o.root.cid not in inside]
+        return (f" The barrier closes on {one.name if one is not None else 'its target'} alone."
+                + (f" Shut outside until it falls: {', '.join(out)}." if out else ""))
+
+    def separated(self, a: Combatant, b: Combatant) -> bool:
+        """Is there a barrier between these two - one of them inside a one-target domain, the other
+        expelled from it? Neither can reach the other until it falls."""
+        for d in self.domains():
+            inside = self.walled(d)
+            if inside is not None and (a.root.cid in inside) != (b.root.cid in inside):
+                return True
+        return False
 
     def summons(self, c: Combatant, kind: Optional[str] = None) -> list:
         return [o for o in self.fighters if o.alive and o.owner == c.cid and (kind is None or o.kind == kind)]
@@ -430,7 +469,8 @@ class Battle:
         """(cursed energy, stamina). Curses pay for physical exertion with cursed energy."""
         ce = act.ce
         if ce > 0:                                       # efficiency: the same technique for less energy
-            ce = max(1, int(np.ceil(ce * (1 - self.efficiency(c) / 100.0) - 1e-9)))
+            vowed = c.mult["cost"] * (c.domain_mods["cost"] if act.kind == Kind.DOMAIN else 1.0)
+            ce = max(1, int(np.ceil(ce * vowed * (1 - self.efficiency(c) / 100.0) - 1e-9)))
         if c.pclass == PClass.CURSED_SPIRIT and c.kind == "fighter":
             return ce + act.sta, 0
         return ce, act.sta
@@ -559,6 +599,9 @@ class Battle:
             self.tell(c, f"Can't use {act.name}: {why}.")
             return False
         t = act.target
+        if target is not None and target is not c and self.separated(c, target):
+            self.tell(c, f"A domain's barrier stands between you and {target}: nothing crosses it until it falls.")
+            return False
         if t == Target.ENEMY:
             if not (target and target.alive and self.hostile(c, target) and "remote" not in target.flags):
                 self.tell(c, "Pick a living enemy.")
@@ -584,7 +627,9 @@ class Battle:
         targets = [c] if t == Target.SELF else [target] if target is not None else []
         ce, sta = self.costs(c, act)
         quick = effects.QUICK.get(act.effect)
-        free = bool(quick and quick(self, c)) or c.vow_instant
+        owed = bool(act.channel) and c.chant_due.get(act.key, -1) >= self.round    # snapped last round: chant it now
+        snap = c.vow_snap if (act.channel and not owed) else None
+        free = bool(quick and quick(self, c)) or snap is not None
         gathered = self.phase == "commit" and act.channel and not free
         if gathered:                                     # it has to have been channelled for
             missing = self.charged_for(c, act)
@@ -602,14 +647,25 @@ class Battle:
 
         quick = effects.QUICK.get(act.effect)
         skip = bool(quick and quick(self, c))            # nothing to activate right now
-        if act.channel and not skip and c.vow_instant:   # binding vow: no activation time, once
-            c.vow_instant, c.must_chant, skip = False, True, True
-            self.say(f"{c} honours a binding vow: {act.name} needs no time to activate. "
-                     f"Every technique from now on needs an incantation.")
+        vowed = 1.0
+        if act.channel and not skip and snap is not None:    # a binding vow: let go at once, no gathering
+            c.vow_snap, skip = None, True
+            if snap == "oath":                           # permanent: stronger for it - and every technique after is chanted
+                vowed, c.must_chant = OATH_BUFF, True
+                self.say(f"{c} honours the Oath of Incantation: {act.name} is loosed at once, and stronger for it. "
+                         f"Every technique after this one must be spoken.")
+            else:                                        # one use: weaker for it - and the same technique owes a chant
+                vowed = SNAP_DEBUFF
+                c.chant_due[act.key] = self.round + 1
+                c.meta.get("vows", set()).discard("snap_release")       # spent: it can be sworn again
+                self.say(f"{c} honours a binding vow: {act.name} is loosed at once on what cursed energy is in hand "
+                         f"- weaker for it. To use it again next round it will have to be chanted.")
         chanting = chant and act.can_chant
-        spoken = bool(act.channel and not skip and (chanting or c.must_chant or act.params.get("must_chant")))
+        spoken = bool(act.channel and not skip and (chanting or owed or c.must_chant or act.params.get("must_chant")))
+        if owed and act.channel and not skip:
+            self.say(f"{c} pays what the vow asked: {act.name} has to be chanted this time.")
         lead = self.timing(c, act, chant=spoken, skip=skip)
-        amp = (CHANNEL_AMP if act.channel else 1.0) * (CHANT_AMP if chanting else 1.0)
+        amp = (CHANNEL_AMP if act.channel else 1.0) * (CHANT_AMP if chanting else 1.0) * vowed
         c.pending = Pending(act, [x.cid for x in targets], part, amp, int(spoken), arg, land_at=self.time + lead)
         c.plan = "attack"
         if gathered:                                     # already read (or not) in the channel phase
@@ -661,6 +717,7 @@ class Battle:
         everything else (ranged techniques, buffs, summons, domains): TECHNIQUE speed
         """
         lead = 0.0 if skip else (act.activation if act.activation is not None else CHANNEL_TIME * act.channel)
+        lead *= c.mult["speed"]                          # (a vow may have made this fighter's techniques quicker, or slower)
         if chant:
             lead += CHANT_TIME
         if act.kind == Kind.ATTACK and act.rng == Rng.MELEE:
@@ -1133,6 +1190,8 @@ class Battle:
         if undone:                                       # the technique comes apart; only the force arrives
             raw *= AMPLIFY_GUARD
             self.say(f"   {name} comes apart against {tgt}'s Domain Amplification; only the force behind it lands.")
+        if sure_hit:
+            raw *= self.domain_output                    # (a domain's sure-hit, as strong as its owner's vows made it)
         if sure_hit and tgt.has(ST.FBE) and raw > 0:
             raw *= FBE_GUARD
             self.say(f"   {tgt}'s Falling Blossom Emotion meets it the instant it touches.")
@@ -1186,7 +1245,7 @@ class Battle:
                            for t in targets])
         raw *= np.where(undone, AMPLIFY_GUARD, 1.0)      # Domain Amplification takes the technique apart
         if sure_hit:                                     # Falling Blossom Emotion meets a sure-hit on contact
-            raw *= np.array([FBE_GUARD if t.has(ST.FBE) else 1.0 for t in targets])
+            raw *= np.array([FBE_GUARD if t.has(ST.FBE) else 1.0 for t in targets]) * self.domain_output
         if not sure_hit:                                 # cover helps against blasts
             raw *= np.array([0.6 if (o := self.field.get(t.pos)) and o.role == "cover" else 1.0 for t in targets])
         dmg = self._mitigate(idx, parts, raw, act.dtype)
@@ -1436,6 +1495,9 @@ class Battle:
         the outside is soft on the inside; a miniature barrier closes around one enemy only."""
         if d.data.get("open") or not self.hostile(c, self.by_cid[d.owner]):
             return False
+        inside = self.walled(d)
+        if inside is not None and c.root.cid not in inside:
+            return False                                 # shut outside it: nothing is keeping them in
         shell = d.data.get("shell", "normal")
         return shell == "normal" or (shell == "miniature" and d.data.get("only") == c.root.cid)
 
@@ -1504,7 +1566,8 @@ class Battle:
 
     def _refinement(self, d: Domain) -> float:
         owner = self.by_cid[d.owner]
-        r = owner.stat(S.OUT) * (1 + owner.level / 20) * self.rng.uniform(0.9, 1.1) * skills.refinement(owner)
+        r = (owner.stat(S.OUT) * (1 + owner.level / 20) * self.rng.uniform(0.9, 1.1) * skills.refinement(owner)
+             * d.data.get("refine", 1.0))
         return r * (1.0 if d.data.get("lethal", True) else NONLETHAL_CLASH)
 
     def _clash_power(self, d: Domain, other: Domain) -> float:
@@ -1553,7 +1616,14 @@ class Battle:
         if any(not self.hostile(c, self.by_cid[d.owner]) for d in existing):
             self.say(f"{c} cannot expand a domain inside their own side's.")
             return False
-        new = Domain(c.cid, key, name, rounds, tick, {**(data or {}), "lethal": lethal, "open": open_barrier,
+        mods = c.domain_mods                             # what binding vows have done to this fighter's domain
+        rounds = max(0, rounds + mods["rounds"])
+        if mods["shell"] and not open_barrier and shell == "normal":
+            shell = mods["shell"]
+        data = dict(data or {})
+        data["output"] = data.get("output", 1.0) * mods["output"]
+        data["refine"] = mods["refine"]
+        new = Domain(c.cid, key, name, rounds, tick, {**data, "lethal": lethal, "open": open_barrier,
                                                       "shell": "normal" if open_barrier else shell})
         self.say(f"\n>>> DOMAIN EXPANSION: {name.upper()} <<<  ({c})")
         if c.meta.pop("last_domain", False):
@@ -1564,10 +1634,14 @@ class Battle:
         elif new.data["shell"] == "miniature":
             foes = [e for e in self.enemies(c) if e.owner is None] or self.enemies(c)
             rival = [self.by_cid[d.owner] for d in existing if self.hostile(c, self.by_cid[d.owner])]
-            one = rival[0] if rival else max(foes, key=lambda e: (e.level, e.hp), default=None)
-            new.data["only"] = one.cid if one is not None else None
+            one = (self.by_cid.get(new.data.get("only") or "") or (rival[0].root if rival else None)
+                   or max(foes, key=lambda e: (e.level, e.hp), default=None))
+            new.data["only"] = one.root.cid if one is not None else None
             self.say(f"   {c} shrinks the barrier to the size of a ball, its conditions swapped: almost nothing can "
                      f"break it, and it closes around {one if one is not None else 'no one'} alone.")
+        shut = self.shut_out_text(new)
+        if shut:
+            self.say("  " + shut)
         if not existing:
             self.domain = new
             self._answer_domain(new)
@@ -1735,7 +1809,17 @@ class Battle:
             if self.rival is not None and d.data.get("lethal", True):
                 self.say(f"{d.name}: its sure-hit is cancelled by the clash.")
             else:                                        # a harmless domain's rules still run mid-clash
-                effects.EFFECTS[d.tick](self, self.by_cid[d.owner], d)
+                self.run_tick(d)
+
+    def run_tick(self, d: Domain) -> None:
+        """One round of a domain's sure-hit, at the strength its owner's vows have given it."""
+        from . import effects
+        self.domain_output = float(d.data.get("output", 1.0))
+        effects.retarget(self, d)                        # (a one-target domain whose target is gone turns on the next)
+        try:
+            effects.EFFECTS[d.tick](self, self.by_cid[d.owner], d)
+        finally:
+            self.domain_output = 1.0
 
     # ---- a round ------------------------------------------------------------------------
     # 1. upkeep   2. everyone who is free commits ONE choice: an action, or a defence
