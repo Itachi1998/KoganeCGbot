@@ -195,6 +195,14 @@ BUFF_TIME = 0.2              # a speed-1 buff, summon or stance taking effect (T
 CHANNEL_TIME = 0.5           # activation of anything that has to be channelled
 CHANT_TIME = 0.6             # an incantation on top of that
 REACT_PER = 16               # perception needed to be offered a defence while committed to an attack
+# Switching from a committed move to a defence mid-round (perception check). The chance it comes
+# off: SWITCH_BASE, plus SWITCH_PER for each point of perception above REACT_PER, plus SWITCH_SPD
+# for each point of speed over the attacker's (minus when slower), kept within SWITCH_MIN..MAX.
+# Switching gives up the move either way; failing means the defence comes up too late.
+SWITCH_BASE = 0.45
+SWITCH_PER = 0.04
+SWITCH_SPD = 0.02
+SWITCH_MIN, SWITCH_MAX = 0.10, 0.90
 # ---- techniques are NOT balanced against each other ------------------------------------
 # Every innate technique has a grade, and a stronger one is simply stronger: these multiply
 # its user's cursed energy output (all technique damage, and domain refinement); the square

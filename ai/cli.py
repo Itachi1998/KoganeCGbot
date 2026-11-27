@@ -5,7 +5,7 @@ from typing import Optional
 
 import numpy as np
 
-from . import ai, vows
+from . import ai, oldstats, vows
 from .battle import IO, Battle
 from .colony import ColonySession
 from .constants import CLASS_NAME, GRADE_NAME, Grade, Kind, Part, PClass, PState, Stat, Status, Target
@@ -417,6 +417,9 @@ def create_character(inp, out, server_id: str, user_id: str, ask_level: bool = F
         tech = techs[_pick(inp, out, "Innate technique:",
                            [f"[{GRADE_NAME[TECHNIQUES[t].grade]}] {TECHNIQUES[t].name} - {TECHNIQUES[t].desc}" for t in techs])]
     rec = PlayerRecord(server_id, user_id, name, int(pclass), techniques=[tech], six_eyes=six_eyes)
+    if rng is not None:                                      # the original bot's stat spin (oldstats.py)
+        rec.old_stats = oldstats.roll(pclass, tech, six_eyes, rng)
+        out("Your stats: " + ", ".join(f"{k.upper()} {v}" for k, v in rec.old_stats.items()))
     rec.level = _int(inp, "Level", 6, 1, 20) if ask_level else 1
     if rng is not None:                                      # how many of Sukuna's fingers this body can cage
         rec.vessel = roll_vessel(rng)

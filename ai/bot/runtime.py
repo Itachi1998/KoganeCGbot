@@ -19,7 +19,34 @@ class Runtime:
         self.cache = BattleCache()
         self.sessions: dict = {}
         self.locks: dict = {}
-        self.busy_users: set = set()          # users in a lobby (spar) fight right now
+        self.busy_users: set = set()          # users in a lobby spar right now
+        self.lobbies: dict = {}               # channel id -> Lobby (cogs/lobby.py)
+        self.loop = None
+
+    # ---- lobbies: only players in one can fight (or be attacked) ----------------------------
+    def lobby_of(self, guild_id, user_id):
+        return next((lb for lb in self.lobbies.values()
+                     if lb.guild_id == int(guild_id) and int(user_id) in lb.members), None)
+
+    def _hooks(self, game: ColonySession, guild_id: int) -> None:
+        def can_fight(p):
+            return self.lobby_of(guild_id, p.user_id) is not None
+
+        def pvp_check(me, foe):
+            mine, theirs = self.lobby_of(guild_id, me.user_id), self.lobby_of(guild_id, foe.user_id)
+            if mine is None:
+                return "Fights need a lobby: join one first (`/lobby create`, or a Join button)."
+            if theirs is not mine:
+                return f"{foe.name} is not in your lobby. You can only attack players in the same lobby."
+            return None
+
+        def io_for(party):
+            lb = next((self.lobby_of(guild_id, p.user_id) for p in party
+                       if self.lobby_of(guild_id, p.user_id) is not None), None)
+            if lb is None or getattr(game.io, "dest", None) is lb.channel:
+                return game.io
+            return DiscordIO(self.bot, lb.channel, self.loop)      # the fight is shown in the lobby's thread
+        game.can_fight, game.pvp_check, game.io_for = can_fight, pvp_check, io_for
 
     def lock(self, guild_id) -> asyncio.Lock:
         return self.locks.setdefault(str(guild_id), asyncio.Lock())
@@ -29,6 +56,7 @@ class Runtime:
         if gid not in self.sessions:
             self.sessions[gid] = ColonySession(gid, self.store, self.cache, name=guild.name,
                                                managers=[str(guild.owner_id)] if guild.owner_id else [])
+            self._hooks(self.sessions[gid], guild.id)
         return self.sessions[gid]
 
     async def run(self, guild: discord.Guild, channel, fn, *args, wait: bool = False):
@@ -42,7 +70,8 @@ class Runtime:
             return False, None
         async with lock:
             game = self.session(guild)
-            io = DiscordIO(self.bot, channel, asyncio.get_running_loop())
+            self.loop = asyncio.get_running_loop()
+            io = DiscordIO(self.bot, channel, self.loop)
             game.io = io
             try:
                 return True, await asyncio.to_thread(fn, game, *args)

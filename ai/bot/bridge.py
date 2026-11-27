@@ -38,6 +38,22 @@ ASK_TIMEOUT = 60.0            # ...to answer a question (then the engine decides
 MENTIONS = discord.AllowedMentions(users=True, roles=False, everyone=False)
 
 
+def domain_line(b) -> str:
+    """The domain(s) in force, and how a clash stands, in a line or two."""
+    def describe(d):
+        owner = b.by_cid.get(d.owner)
+        shape = "open (no barrier)" if d.data.get("open") else f"{d.data.get('shell', 'normal')} barrier"
+        sure = "sure-hit" if d.data.get("lethal", True) else "no harm by itself"
+        return f"**{d.name}** ({owner.name if owner else '?'}; {shape}; {sure}; {d.rounds} round(s) left)"
+    if b.domain is None:
+        return ""
+    if b.rival is None:
+        return f"🌀 Domain: {describe(b.domain)}"
+    n = b.rival.data.get("clash", 0)
+    return (f"⚔️ **DOMAIN CLASH** (round {n}): {describe(b.domain)} against {describe(b.rival)}. While they are "
+            f"locked, neither sure-hit lands; each round the more refined domain gains, and one breaks.")
+
+
 def user_of(c) -> Optional[str]:
     """The Discord user id that controls a combatant (its root's player record), if any."""
     rec = getattr(c.root, "record", None)
@@ -136,7 +152,7 @@ class DiscordIO(IO):
                 else "commit an action or a defence")
         limit = self.channel_timeout if kind == "channel" else self.turn_timeout
         text = (f"<@{uid}> {style.heading(f'Round {b.round}', 3)} - **{c.name}** `[{c.cid}]`: {what}. "
-                f"You have {int(limit)} seconds.")
+                f"You have {int(limit)} seconds." + (f"\n{domain_line(b)}" if b.domain else ""))
         call = self._send(lambda: CallView(self, p, text))
         handler = channel_command if kind == "channel" else battle_command
         deadline = time.monotonic() + limit
@@ -354,7 +370,7 @@ class ControlPanel:
         head = style.heading(f"Round {b.round} - {c.name} [{c.cid}]", 3)
         phase = ("**Channel phase.** Gather cursed energy in the parts a technique needs (it leaves your pool "
                  "now); only techniques that need it are listed." if p.kind == "channel" else
-                 "**Commit an action or a defence.**" + (" Domain: " + b.domain.name if b.domain else ""))
+                 "**Commit an action or a defence.**") + (f"\n{domain_line(b)}" if b.domain else "")
         body = (f"{head}\n{phase}\n" + style.stat("HP", f"{max(c.hp, 0):.0f}/{c.max_hp:.0f}") + " "
                 + style.bar(c.hp, c.max_hp) + "\n" + style.stat("CE", f"{b.ce_pool(c):.0f}/{c.max_ce:.0f}") + " "
                 + style.bar(b.ce_pool(c), c.max_ce, style.CE, style.HALF_CE) + "\n"

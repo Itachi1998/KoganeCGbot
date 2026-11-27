@@ -40,6 +40,10 @@ class ColonySession:
         self.cache = cache if cache is not None else BattleCache()
         self.io = io or IO()
         self.battle_banner = battle_banner            # extra text when a fight starts (the CLI prints its help)
+        # Front-end hooks (the CLI leaves them as they are; the Discord bot ties fights to lobbies):
+        self.can_fight: Callable = lambda p: True     # may this player be attacked / fight at all?
+        self.pvp_check: Callable = lambda me, foe: None   # an error message, or None to allow a PvP fight
+        self.io_for: Callable = lambda party: self.io     # where a fight involving these players is shown
         self.rng = np.random.default_rng(seed)
         colony = self.store.get_colony(self.server_id)
         if colony is None:
@@ -99,12 +103,14 @@ class ColonySession:
     def fight(self, sides, node, label):
         """sides: list of (spec, team). Runs a battle at a node and writes results back."""
         world, colony, rng = self.world, self.colony, self.rng
-        b = Battle(self.server_id, seed=int(rng.integers(1 << 30)), io=self.io, colony=colony, world=world,
+        party = [spec.record for spec, _ in sides if spec.record is not None]
+        io = self.io_for(party) if party else self.io
+        b = Battle(self.server_id, seed=int(rng.integers(1 << 30)), io=io, colony=colony, world=world,
                    node=node, now=self.now, cache=self.cache)
         added = [b.add(spec, team) for spec, team in sides]
         for kw in world.field_objects(node):
             b.add_object(**kw)
-        self.io.say(f"\n*** {label} ***" + (f"\n{self.battle_banner}\n" if self.battle_banner else ""))
+        io.say(f"\n*** {label} ***" + (f"\n{self.battle_banner}\n" if self.battle_banner else ""))
         b.run()
         for p in self.players:
             self.steer(p)
@@ -118,8 +124,28 @@ class ColonySession:
                                             host=c.meta.get("host", ""),
                                             slash=bool(c.tech_state.get("ten_shadows", {}).get("world_slash")),
                                             body_hp=float(c.meta.get("body_hp", c.max_hp))))
-                self.io.say(f"\n!!! SUKUNA walks {colony.name} with {held} finger(s). He will gather the rest: "
+                io.say(f"\n!!! SUKUNA walks {colony.name} with {held} finger(s). He will gather the rest: "
                             f"the Finger Bearers first, then anyone carrying or caging one.")
+        if hasattr(io, "flush"):
+            io.flush()
+        return added
+
+    def encounter(self, nid, roamers, party=None):
+        """Roamers fight the players present at a node. Returns the combatants, or None if nobody is there."""
+        world, rng = self.world, self.rng
+        party = party if party is not None else [p for p in self.players if p.alive and self.can_fight(p)
+                                                 and nid in self.where(p)]
+        if not party or not roamers:
+            return None
+        specs = [world.spec_for(r, rng) for r in roamers]
+        added = self.fight([(self.present(p, nid), 0) for p in party] + [(sp, 50) for sp in specs], nid,
+                           f"Curses close in at {world.nodes[nid].name}: " + ", ".join(sp.name for sp in specs))
+        for r, c in zip(roamers, added[len(party):]):
+            if not c.alive:
+                world.defeat(r, self.now, rng)
+            elif r.kind == "sukuna":                      # he keeps whatever he took back, and what he learned
+                r.fingers = c.inventory.count("sukuna_finger")
+                r.slash = r.slash or bool(c.tech_state.get("ten_shadows", {}).get("world_slash"))
         return added
 
     @staticmethod
@@ -604,8 +630,10 @@ class ColonySession:
         elif cmd == "pvp" and rest:
             foe = next((p for p in players if me.node in where(p) and p is not me
                         and p.name.lower().startswith(rest[0].lower())), None)
-            if foe is None:
-                out("No such player at this node.")
+            err = (("No such player at this node." if foe is None else None)
+                   or self.pvp_check(me, foe))
+            if err:
+                out(err)
             else:
                 me.crimes.add(Crime.ASSAULT, me.node, day())
                 fight([(present(me, me.node), 0), (present(foe, me.node), 1)], me.node, f"{me.name} attacks {foe.name}!")
@@ -620,7 +648,7 @@ class ColonySession:
     def advance(self, spend: float, out: Callable = print) -> None:
         """The world moves an hour at a time: roamers close in, fights break out, idle players die."""
         world, colony, players, rng = self.world, self.colony, self.players, self.rng
-        where, scouts_of, fight, present = self.where, self.scouts_of, self.fight, self.present
+        where, scouts_of = self.where, self.scouts_of
         now = self.now
         while spend > 0:                                  # the world moves an hour at a time
             step = min(1.0, spend)
@@ -639,24 +667,14 @@ class ColonySession:
                         ways = [x for x in world.nodes[e["node"]].edges if world.nodes[x].kind != "hideout"]
                         e["node"] = step if step is not None else int(rng.choice(ways)) if ways else e["node"]
             found = [SimpleNamespace(node=n, alive=True, fingers=p.fingers + p.inventory.count("sukuna_finger"))
-                     for p in players if p.alive for n in where(p)]
+                     for p in players if p.alive and self.can_fight(p) for n in where(p)]
             fights = world.tick(found, now, rng)
             for line in world.news:                       # what Sukuna has been doing
                 out("\n!!! " + line)
             world.news.clear()
-            for nid, roamers in fights:
-                party = [p for p in players if p.alive and nid in where(p)]
-                if not party:
+            for nid, roamers in fights:                  # only players who can fight (in a lobby, on Discord)
+                if self.encounter(nid, roamers) is None:
                     continue
-                specs = [world.spec_for(r, rng) for r in roamers]
-                added = fight([(present(p, nid), 0) for p in party] + [(s, 50) for s in specs], nid,
-                              f"Curses close in at {world.nodes[nid].name}: " + ", ".join(s.name for s in specs))
-                for r, c in zip(roamers, added[len(party):]):
-                    if not c.alive:
-                        world.defeat(r, now, rng)
-                    elif r.kind == "sukuna":              # he keeps whatever he took back, and what he learned
-                        r.fingers = c.inventory.count("sukuna_finger")
-                        r.slash = r.slash or bool(c.tech_state.get("ten_shadows", {}).get("world_slash"))
                 spend = 0
             for p in enforce_inactivity(players, colony, now):
                 out(f"\n!!! {p.name}'s score has not changed in {colony.inactivity_days} days. "

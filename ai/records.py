@@ -57,8 +57,10 @@ def has_six_eyes(techniques, six_eyes: bool = False) -> bool:
 
 
 def build_stats(pclass: PClass, level: int, techniques: list[str],
-                body: Optional[dict] = None, equipment: Optional[dict] = None) -> np.ndarray:
-    """Class base -> level scaling -> technique multipliers -> body-hop overrides -> armor."""
+                body: Optional[dict] = None, equipment: Optional[dict] = None,
+                old_stats: Optional[dict] = None) -> np.ndarray:
+    """Class base -> level scaling -> technique multipliers -> the player's rolled (original-bot)
+    stats -> body-hop overrides -> armor."""
     s = np.zeros(N_STATS)
     for k, v in CLASS_BASE[PClass(pclass)].items():
         s[k] = v
@@ -77,6 +79,9 @@ def build_stats(pclass: PClass, level: int, techniques: list[str],
         s[Stat.OUT] *= power
         for stat in (Stat.STR, Stat.DUR, Stat.MAX_HP, Stat.MAX_CE):
             s[stat] *= power ** 0.5
+    if old_stats:                                # what they rolled at creation (oldstats.py)
+        from .oldstats import apply as apply_old
+        apply_old(s, pclass, old_stats)
     if body:                                     # stats of a hopped-into body
         for k, v in body.items():
             s[int(k)] = v
@@ -136,6 +141,7 @@ class PlayerRecord:
     kills: dict = field(default_factory=lambda: {"players": 0, "spirits": 0})
     looted: list = field(default_factory=list)             # item keys taken from the dead (sell at any price)
     six_eyes: bool = False                                 # born with the Six Eyes (Limitless always is)
+    old_stats: Optional[dict] = None                       # {"hp", "ce", "str", "spd"} rolled at creation (oldstats.py)
     fingers: int = 0                                       # Sukuna's fingers eaten and still caged
     vessel: int = 0                                        # how many this body can cage (20 = a strong vessel)
     ce_frac: float = 1.0                                   # cursed energy left after the last fight (share of maximum)...
@@ -250,7 +256,8 @@ class PlayerRecord:
         flags = {f for k in techs for f in TECHNIQUES[k].flags}
         return Spec(name=self.name, pclass=PClass(self.pclass), level=self.level,
                     grade=grade_for(self.level, techs),
-                    stats=build_stats(PClass(self.pclass), self.level, techs, self.body, self.equipment),
+                    stats=build_stats(PClass(self.pclass), self.level, techs, self.body, self.equipment,
+                                      self.old_stats),
                     techniques=techs, tech_state=self.tech_state, flags=flags,
                     equipment=self.equipment, inventory=self.inventory, vows=list(self.vows),
                     controller=controller, record=self, crimes=self.crimes)

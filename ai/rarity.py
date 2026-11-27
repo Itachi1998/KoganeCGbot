@@ -82,10 +82,11 @@ TECH_RARITY = {
 # sorcerers only (its reincarnate roll never checked).  Limitless always has them (data.py flag).
 SIX_EYES_CHANCE = {PClass.SORCERER: {"copy": 0.5, "construction": 0.5}}
 
-# Techniques that exist in the ai engine but were not in the original creation pools.  They are
-# still used by NPCs.  Off by default so the original odds are untouched; turning it on adds them
-# to the roll with a rarity number taken from their grade (which dilutes the original entries).
-INCLUDE_NEW_TECHNIQUES = False
+# Techniques that exist in the ai engine but were not in the original creation pools (ai/data.py
+# PLAYABLE) are in the roll too, each with a rarity number from its grade: special grade rolls as
+# a legend (5), grade 1 as rare (15), semi-grade 1 as uncommon (30), the rest as common (50).
+# The original techniques keep their own numbers. Set False to roll the original pools only.
+INCLUDE_NEW_TECHNIQUES = True
 GRADE_TO_RARITY = {5: 5, 4: 15, 3: 30, 2: 50, 1: 50, 0: 50}
 
 

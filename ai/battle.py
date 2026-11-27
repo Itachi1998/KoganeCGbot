@@ -23,7 +23,7 @@ from typing import Optional
 import numpy as np
 
 from . import ai
-from .constants import (BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
+from .constants import (SWITCH_BASE, SWITCH_PER, SWITCH_SPD, SWITCH_MIN, SWITCH_MAX, BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
                         DOT_STATUSES, DUR_FACTOR, EXTRA,
                         LEGS, LIMBS, N_PARTS, N_STATS, N_STATUS, PART_ACC, PART_DMG_MULT,
                         PART_HP_FRAC, POINTS_PLAYER, POINTS_SPIRIT, SOUL_PER, STICKY, VITAL,
@@ -928,14 +928,7 @@ class Battle:
             if linked:                                   # a technique that defends as it attacks
                 choice = linked[0]
             elif tgt.stat(S.PER) >= REACT_PER and tgt.reactions > 0 and opts:
-                tgt.reactions -= 1                       # sharp enough to see it coming mid-attack
-                if tgt.controller == "human":
-                    k = self.ask(tgt, f"{atk} attacks {tgt}'s {Part(part).name} with {name} while you are committed "
-                                      f"to your own attack. Your perception lets you answer:",
-                                 [f"{a.name} ({a.react.name.lower()})" for a in opts] + ["Take the hit"])
-                    choice = opts[k] if k < len(opts) else None
-                else:
-                    choice = ai.pick_reaction(self, tgt, atk, opts)
+                choice = self._switch_window(tgt, atk, part, name, opts)
         elif tgt.plan == "wait" or tgt.controller != "human":
             choice = ai.pick_reaction(self, tgt, atk, opts) if opts and tgt.reactions > 0 else None
             tgt.reactions -= choice is not None
@@ -954,6 +947,42 @@ class Battle:
             if fx:
                 effects.REACT_FX[fx](self, tgt)
         return choice
+
+    def switch_chance(self, tgt: Combatant, atk: Combatant) -> float:
+        """Odds of getting a defence up in time after dropping a committed move (constants.SWITCH_*)."""
+        p = (SWITCH_BASE + SWITCH_PER * (tgt.stat(S.PER) - REACT_PER)
+             + SWITCH_SPD * (tgt.stat(S.SPD) - atk.stat(S.SPD)))
+        return float(np.clip(p, SWITCH_MIN, SWITCH_MAX))
+
+    def _switch_window(self, tgt: Combatant, atk: Combatant, part, name: str, opts: list) -> Optional[Action]:
+        """Perception check: tgt is committed to a move, has no defence set, and is perceptive enough
+        to see this attack coming. Keep the move and take the hit - or drop the move and try to get a
+        defence up, which comes off with ``switch_chance``. Either way it uses up a reaction."""
+        tgt.reactions -= 1
+        p = self.switch_chance(tgt, atk)
+        mine = tgt.pending.act.name if tgt.pending is not None else None
+        keep = f"Keep {mine} and take the hit" if mine else "Keep going and take the hit"
+        if tgt.controller == "human":
+            k = self.ask(tgt, f"PERCEPTION CHECK - {atk} attacks your {Part(part).name} with {name} while you are "
+                              f"committed{f' to {mine}' if mine else ''}. Keep your move, or drop it for a defence "
+                              f"({p:.0%} chance to get it up in time)?",
+                         [keep] + [f"Switch: {a.name} ({a.react.name.lower()}, {p:.0%})" for a in opts])
+            want = opts[k - 1] if k else None
+        else:
+            want = ai.pick_reaction(self, tgt, atk, opts)
+        if want is None:
+            self.tell(tgt, "You hold to your move and take what comes.")
+            return None
+        if tgt.pending is not None:                      # the move is given up, whether or not this works
+            self.say(f"{tgt} abandons {tgt.pending.act.name} to defend.")
+            tgt.pending = None
+        tgt.plan, tgt.guard, tgt.guard_arg = "defend", None, None
+        if self.rng.random() >= p:
+            self.say(f"{tgt} tries to bring up {want.name} - too late!")
+            return None
+        tgt.guard = want                                 # and it stays up for the rest of the round
+        self.say(f"{tgt} sees it coming and switches to {want.name}!")
+        return want
 
     def strike(self, atk: Combatant, tgt: Combatant, act: Action, part: Part = Part.TORSO,
                amp: float = 1.0, *, power: Optional[float] = None, dtype: Optional[DType] = None,

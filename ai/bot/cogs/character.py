@@ -13,6 +13,7 @@ from discord.ext import commands
 
 from ...constants import CLASS_NAME, GRADE_NAME, DAY, PClass, Stat
 from ...data import ITEMS
+from ... import oldstats
 from ...effects import tame_all
 from ...rarity import (class_odds, class_rarity_of, rarity_of, roll_class, roll_six_eyes, roll_technique,
                        technique_odds)
@@ -35,7 +36,7 @@ def odds_text() -> tuple:
     return classes, "\n".join(legends)
 
 
-def sheet(rec: PlayerRecord, colony_name: str, now: float, inactivity_days: int) -> str:
+def sheet(rec: PlayerRecord, colony_name: str, now: float, inactivity_days: int, in_lobby: bool = False) -> str:
     """The profile, in the original `Label:` **value** style."""
     spec = rec.to_spec()
     st = spec.stats
@@ -55,8 +56,10 @@ def sheet(rec: PlayerRecord, colony_name: str, now: float, inactivity_days: int)
         style.stat("Six Eyes", has_six_eyes(rec.techniques, rec.six_eyes)),
         f"{style.stat('Health', f'{hp:.0f}/{mx_hp:.0f}')} {style.bar(hp, mx_hp)}",
         f"{style.stat('Energy', f'{ce:.0f}/{st[Stat.MAX_CE]:.0f}')} {style.bar(ce, st[Stat.MAX_CE], style.CE, style.HALF_CE)}",
-        style.stat("Strength", f"{st[Stat.STR]:.0f}") + "  " + style.stat("Speed", f"{st[Stat.SPD]:.0f}")
-        + "  " + style.stat("Durability", f"{st[Stat.DUR]:.0f}") + "  " + style.stat("Perception", f"{st[Stat.PER]:.0f}"),
+        (style.stat("Rolled", f"HP {o['hp']} · CE {o['ce']} · Strength {o['str']} · Speed {o['spd']}")
+         if (o := rec.old_stats) else ""),
+        style.stat("In battle", f"Strength {st[Stat.STR]:.0f} · Speed {st[Stat.SPD]:.0f} · "
+                                f"Durability {st[Stat.DUR]:.0f} · Perception {st[Stat.PER]:.0f}"),
         style.stat("Game Points", rec.points),
         style.stat("Condition", rec.condition_text()),
         style.stat("Gear", ", ".join(f"{k}: {ITEMS[v].name if v in ITEMS else v}" for k, v in rec.equipment.items() if v)
@@ -64,10 +67,12 @@ def sheet(rec: PlayerRecord, colony_name: str, now: float, inactivity_days: int)
         style.stat("Bag", ", ".join(ITEMS[k].name if k in ITEMS else k for k in rec.inventory) or "empty"),
         style.stat("Kills", f"{rec.kills['players']} players, {rec.kills['spirits']} curses"),
         style.stat("Record", rec.crimes.summary()),
+        style.stat("Lobby", "in a lobby: curses and players can fight you" if in_lobby else
+                   "not in a lobby: nothing can attack you, and you can't fight") if rec.alive else "",
         style.stat("Status", "Active" if rec.alive else "Dead")
         + (f"  ({left:.1f} days until technique removal)" if rec.alive else ""),
     ]
-    return "\n".join(lines)
+    return "\n".join(x for x in lines if x)
 
 
 class CreateView(discord.ui.LayoutView):
@@ -118,6 +123,7 @@ class Character(commands.Cog):
         six = roll_six_eyes(pclass, tech, rng)
         rec = PlayerRecord(str(guild.id), str(user.id), user.display_name, int(pclass), techniques=[tech],
                            six_eyes=six)
+        rec.old_stats = oldstats.roll(pclass, tech, six, rng)              # the original stat spin
         rec.vessel = roll_vessel(rng)
         notes = []
         if tech == "ten_shadows" and rec.unlock_level >= 6:
@@ -138,20 +144,18 @@ class Character(commands.Cog):
             return style.panel(self.bot, "Create a character",
                                "You cannot create more than one player per colony. (`/delete` your current one first.)",
                                accent=style.DANGER)
-        spec = rec.to_spec()
-        st = spec.stats
         t = TECHNIQUES[tech]
         body = "\n".join([
             f"* {style.stat('Name', rec.name)}",
             f"* {style.stat('Level', rec.level)}",
             f"* {style.stat('Technique', t.name)}",
             f"* {style.stat('Technique Grade', GRADE_NAME[t.grade])}",
-            f"* {style.stat('HP', f'{st[Stat.MAX_HP]:.0f}')}",
-            f"* {style.stat('CE', f'{st[Stat.MAX_CE]:.0f}')}",
+            f"* {style.stat('HP', rec.old_stats['hp'])}",
+            f"* {style.stat('CE', rec.old_stats['ce'])}",
             f"* {style.stat('Class', SHORT_CLASS[pclass])}",
             f"* {style.stat('Six Eyes', has_six_eyes(rec.techniques, rec.six_eyes))}",
-            f"* {style.stat('Speed', f'{st[Stat.SPD]:.0f}')}",
-            f"* {style.stat('Strength', f'{st[Stat.STR]:.0f}')}",
+            f"* {style.stat('Speed', rec.old_stats['spd'])}",
+            f"* {style.stat('Strength', rec.old_stats['str'])}",
             f"* {style.stat('Technique Rarity', rarity_of(pclass, tech))}",
             f"* {style.stat('Class Rarity', class_rarity_of(pclass))}",
         ])
@@ -185,7 +189,9 @@ class Character(commands.Cog):
         colony = game.colony if game is not None else self.rt.store.get_colony(str(ctx.guild.id))
         name = colony.name if colony else ctx.guild.name
         days = colony.inactivity_days if colony else 19
-        await ctx.send(view=style.panel(self.bot, "Player Profile", sheet(rec, name, now, days)), ephemeral=True)
+        in_lobby = self.rt.lobby_of(ctx.guild.id, user.id) is not None
+        await ctx.send(view=style.panel(self.bot, "Player Profile", sheet(rec, name, now, days, in_lobby)),
+                       ephemeral=True)
 
     @commands.hybrid_command(name="delete", description="Delete your player in the culling games!")
     @commands.guild_only()

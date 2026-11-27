@@ -24,9 +24,18 @@
 * colony: `/look` `/map` `/me` `/go` `/wait` `/rest` `/search` `/interact` `/heal` `/medic` `/treat`
   `/use` `/equip` `/unequip` `/shop` `/buy` `/sell` `/market` `/fingers` `/eat` `/rules` `/addrule`
   `/give` `/pvp` `/transfer` `/scouts` `/puppets` `/players`, or any command typed with `/do` (`,c`)
-* `/lobby create`: teams, ready up, curses and named opponents, spar battles (nothing is saved)
+* `/lobby create`: **fights need a lobby**. Outside one you can move and do everything else, but no
+  curse or player can attack you. In a lobby: **Hunt** the curses at the owner's node and **PvP** (Team A
+  vs Team B) are real and saved; **Spar** is practice and saves nothing. Ambushes play in the lobby thread.
 * `/learn create|colony|battle|lobby`
 * in a fight, press **Open controls** when the bot pings you
-### Character creation odds
-`ai/rarity.py` keeps the original bot's class odds (Sorcerer / Curse / Reincarnate), every
-technique's rarity number, the `weight_system` roll and the Six Eyes chance, unchanged.
+### Character creation
+* `ai/rarity.py` keeps the original bot's class odds (Sorcerer / Curse / Reincarnate), every
+  technique's rarity number, the `weight_system` roll and the Six Eyes chance. The engine's newer
+  techniques are in the roll too, rarity by grade (special grade = legend).
+* `ai/oldstats.py` rolls the original stats (HP, CE, Strength, Speed, class and technique boosts).
+  Players see those numbers; in a fight they scale the engine's stats against an average roll.
+### Perception check
+Attacked while committed to a move with no defence set? With perception 16+ you are asked: keep
+your move and take the hit, or drop it and switch to a defence, which comes up in time with a
+chance shown on the button (`SWITCH_*` in `ai/constants.py`).

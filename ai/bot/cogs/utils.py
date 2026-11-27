@@ -82,8 +82,9 @@ class Utils(commands.Cog):
     async def colony(self, ctx):
         intro = (style.heading("Playing the colony", 2) + "\nEvery colony command is a slash command (`/look`, "
                  "`/go`, `/search`, `/shop`...), or type any of them with `/do` (or `,c`): `/do break 4`.\n"
-                 "Commands that take time (moving, waiting, searching) let the curses move too - if they reach you, "
-                 "a fight starts right there, in that channel.")
+                 "Commands that take time (moving, waiting, searching) let the curses move too. **Fights need a "
+                 "lobby**: if you are on a lobby team and curses reach you, the fight starts in the lobby's thread; "
+                 "if you are not in a lobby, they pass you by (see `/learn lobby`).")
         await ctx.send(view=Pager(self.bot, ctx.author.id, [intro] + text_pages(WORLD_HELP, "Colony commands")),
                        ephemeral=True)
 
@@ -98,8 +99,14 @@ class Utils(commands.Cog):
     @learn.command(name="lobby", description="Learn how lobbies work")
     async def lobby(self, ctx):
         await ctx.send(view=Pager(self.bot, ctx.author.id, [
-            style.heading("Lobbies", 2) + "\n`/lobby create` opens a lobby thread. Join a team, Ready Up; the owner "
-            "adds curses or named opponents and starts the round. Lobby fights are spars: nothing is saved."]),
+            style.heading("Lobbies", 2) + "\n**Fights need a lobby.** Outside one you can move and do everything "
+            "else, but no curse or player can attack you, and you can't attack anyone.\n"
+            "`/lobby create` opens a lobby thread. Join a team and Ready Up. The owner then picks:\n"
+            "* **Hunt** - fight the curses at the owner's node, with every lobby player there (saved)\n"
+            "* **PvP** - Team A against Team B at the owner's node (saved; Judgeman hears of it)\n"
+            "* **Spar** - practice against opponents the owner adds (nothing is saved)\n"
+            "Curses that reach lobby players while time passes fight them in the lobby's thread. "
+            "`/lobby leave` takes you out of reach."]),
             ephemeral=True)
 
     @commands.command(name="colony", description="Set up a colony for every server (owner only)")
