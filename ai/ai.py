@@ -12,7 +12,7 @@ PART_WEIGHT = {Part.TORSO: 0.45, Part.HEAD: 0.15, Part.L_ARM: 0.1, Part.R_ARM: 0
 def _domain_threat(b, c) -> bool:
     """A lethal sure-hit is bearing down on c right now."""
     return (b.rival is None and b.domain is not None and b.domain.data.get("lethal", True)
-            and b.hostile(c, b.by_cid[b.domain.owner]))
+            and b.domain_reaches(b.domain, c))           # (an ally's domain can reach you too: Malevolent Shrine)
 
 
 def _domain_coming(b, c, enemies) -> bool:

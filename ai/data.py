@@ -148,10 +148,10 @@ register(Technique("copy", "Copy", copyable=False,
       desc="Five rounds of access to every copied technique and Rika's energy."),
     A("rika_guard", "Rika's Guard", kind=DEF, react=React.BLOCK, ce=4,
       params={"hold": 3, "block": 0.65, "cond": "has_rika"}),
-    A("mutual_love", "Domain Expansion: Authentic Mutual Love", kind=DOMAIN, target=SELF, ce=60, min_level=12,
+    A("mutual_love", "Domain Expansion: Authentic Mutual Love", kind=DOMAIN, ce=60, min_level=12,
       requires=ANY_ARM, channel=1, effect="mutual_love",
-      desc="Every copied technique is open to you inside it without Rika, and each round one of "
-           "them strikes everyone as a sure-hit."),
+      desc="You choose one copied technique to fill the barrier and one enemy to turn it on: every "
+           "round it strikes that one person as a sure-hit."),
 )))
 
 register(Technique("ten_shadows", "Ten Shadows Technique", desc="Shikigami drawn from shadow.", actions=(
@@ -305,7 +305,10 @@ register(Technique("shrine", "Shrine", desc="Slashes that adjust to the target."
       params={"counter": 0.15}),
     A("shrine_domain", "Domain Expansion: Malevolent Shrine", kind=DOMAIN, target=SELF, ce=50, min_level=8,
       requires=BOTH_ARMS, channel=1, effect="domain",
-      params={"rounds": 2, "tick": "shrine_tick", "name": "Malevolent Shrine", "open": True}),
+      params={"rounds": 2, "tick": "shrine_tick", "name": "Malevolent Shrine", "open": True,
+              "scope": "all", "objects": True},
+      desc="No barrier, and nothing in range is spared: enemies, ALLIES and the battlefield itself are "
+           "cut every round. Only you and your own shikigami are not."),
     A("spiderweb", "Spiderweb", target=ALL, power=16, ce=14, rng=RANGED, requires=ANY_ARM, channel=1,
       tags=fs({"slash"}), desc="A web of slashes through the ground under everyone."),
     A("fuga", "Divine Flame: Open", power=48, ce=40, rng=RANGED, requires=ANY_ARM, channel=1, can_chant=True,
@@ -350,10 +353,13 @@ register(Technique("limitless", "Limitless", flags=("six_eyes",),
       channel=1, can_chant=True, min_level=12, tags=fs({"void"})),
     A("void_domain", "Domain Expansion: Unlimited Void", kind=DOMAIN, target=SELF, ce=60, min_level=10,
       requires=ANY_ARM, channel=1, effect="domain",
-      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void"}),
+      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void", "scope": "all", "touch": True},
+      desc="Everyone inside is flooded with everything at once and frozen - allies too, except "
+           "whoever you are touching (one per free hand: you are asked as it opens)."),
     A("void_reinforced", "Unlimited Void: Reinforced Shell", kind=DOMAIN, target=SELF, ce=60, min_level=12,
       requires=ANY_ARM, channel=1, effect="domain",
-      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void", "shell": "reinforced"},
+      params={"rounds": 2, "tick": "void_tick", "name": "Unlimited Void", "shell": "reinforced", "scope": "all",
+              "touch": True},
       desc="The barrier's conditions swapped: nothing breaks it from outside, so an open domain gets no "
            "edge on it. Soft inside: it holds nobody in, and gives 10% to another closed barrier."),
     A("void_miniature", "Unlimited Void: Miniature Barrier", kind=DOMAIN, target=SELF, ce=80, min_level=20,

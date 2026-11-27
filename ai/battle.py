@@ -1439,17 +1439,50 @@ class Battle:
         shell = d.data.get("shell", "normal")
         return shell == "normal" or (shell == "miniature" and d.data.get("only") == c.root.cid)
 
+    def inside(self, owner: Combatant) -> list:
+        """Everyone on the field a domain could reach, besides its owner: friend and foe alike."""
+        return [o for o in self.fighters if o.alive and not o.fled and o is not owner and "remote" not in o.flags]
+
+    def domain_reaches(self, d: Domain, c: Combatant) -> bool:
+        """Is ``c`` someone this domain's sure-hit is aimed at (before any defence of theirs)?
+
+        Every domain targets in its own way (``d.data``, set from the action's params in data.py):
+          scope "enemies"  only those hostile to the owner (the default)
+          scope "all"      everything inside but the owner and what is the owner's own (their
+                           shikigami): allies are hit too - Malevolent Shrine, Unlimited Void...
+          scope "none"     no sure-hit at all (an incomplete domain)
+          spared           root ids the owner keeps out of it (Unlimited Void: whoever Gojo is touching)
+          only             the one root id it closes on (a miniature barrier; a single defendant, a single
+                           coffin, the one person a copied technique is turned on)
+        Those with no cursed energy at all are outside every sure-hit."""
+        owner = self.by_cid[d.owner]
+        if not c.alive or c.fled or c is owner or "remote" in c.flags or "hr_zero" in c.root.flags:
+            return False
+        only = d.data.get("only")
+        if only is not None and c.root.cid != only:
+            return False
+        if c.root.cid in d.data.get("spared", ()):
+            return False
+        scope = d.data.get("scope", "enemies")
+        if scope == "none":
+            return False
+        if scope == "all":
+            return c.root is not owner.root
+        return self.hostile(owner, c)
+
     def domain_targets(self, owner: Combatant) -> list:
-        """Who a lethal sure-hit reaches: every enemy, except those with no cursed energy, those
-        under Domain Amplification and those behind an anti-domain technique (which it erodes)."""
+        """Who the sure-hit lands on this round: everyone the domain reaches (``domain_reaches``),
+        except those under Domain Amplification and those behind an anti-domain technique (which
+        it erodes)."""
         if self.rival is not None:
             return []                                    # clashing domains cancel each other's sure-hit
-        out = []
         mine = self.domain_of(owner)
-        only = mine.data.get("only") if mine is not None else None
-        for e in self.enemies(owner):
-            if "hr_zero" in e.root.flags or (only is not None and e.root.cid != only):
-                continue                                 # (a miniature barrier holds one enemy and no more)
+        if mine is None:
+            return []
+        out = []
+        for e in self.fighters:
+            if not self.domain_reaches(mine, e):
+                continue
             if e.has(ST.AMPLIFY):
                 self.say(f"   {e}'s Domain Amplification neutralises the sure-hit.")
             elif e.has(ST.ANTI_DOMAIN):
@@ -1460,6 +1493,14 @@ class Battle:
             else:
                 out.append(e)
         return out
+
+    def shred_field(self, by: Combatant, power: float, what: str = "is cut to pieces") -> None:
+        """A domain that spares nothing: every battlefield object inside takes the hit too."""
+        for obj in list(self.field.values()):
+            obj.hp -= power * 2
+            if obj.hp <= 0:
+                self.say(f"   The {obj.name} {what}.")
+                self._break_object(obj, by)
 
     def _refinement(self, d: Domain) -> float:
         owner = self.by_cid[d.owner]

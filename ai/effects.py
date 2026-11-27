@@ -172,18 +172,57 @@ def cleave(b, c, act, targets, part, amp, arg):
         b.strike(c, t, act, part, amp, power=act.power + 0.8 * t.base(S.DUR) + t.level)
 
 
+def choose_touched(b, c) -> list:
+    """Unlimited Void floods everyone inside it except Gojo and whoever he is touching: one ally per
+    usable hand. Returns the root ids he keeps hold of (their own shikigami are spared with them)."""
+    hands = sum(1 for p in (Part.L_ARM, Part.R_ARM) if c.usable(p))
+    allies = [o for o in b.inside(c) if o.owner is None and o.root is not c.root and not b.hostile(c, o)]
+    held: list = []
+    while len(held) < hands:
+        pool = [o for o in allies if o.cid not in held]
+        if not pool:
+            break
+        if c.controller == "human":
+            k = b.ask(c, "Unlimited Void reaches everyone inside you are NOT touching - allies too. "
+                         f"Take hold of someone ({hands - len(held)} hand(s) free)?",
+                      [f"Hold {o.name}" for o in pool] + ["Nobody" if not held else "Nobody else"],
+                      [1.0] + [0.0] * len(pool))                 # (no answer: he grabs the first)
+            if k >= len(pool):
+                break
+            held.append(pool[k].cid)
+        else:
+            held.append(max(pool, key=lambda o: (o.controller == "human", o.level)).cid)
+    for cid in held:
+        b.say(f"   {c} keeps a hand on {b.by_cid[cid]}: the Void passes them by.")
+    left = [o for o in allies if o.cid not in held]
+    if left:
+        b.say(f"   Out of reach of {c}'s hands: {', '.join(o.name for o in left)}. The Void does not tell friend from foe.")
+    return held
+
+
 @effect("domain")
 def generic_domain(b, c, act, targets, part, amp, arg):
     p = act.params
-    if b.open_domain(c, act.key, p["name"], p["rounds"] - 1, p["tick"], lethal=p.get("lethal", True),
+    data = {k: p[k] for k in ("scope", "objects") if k in p}      # how this domain targets (battle.domain_reaches)
+    if p.get("touch"):
+        data["spared"] = choose_touched(b, c)
+    if b.open_domain(c, act.key, p["name"], p["rounds"] - 1, p["tick"], data, lethal=p.get("lethal", True),
                      open_barrier=p.get("open", False), shell=p.get("shell", "normal")) and b.rival is None:
         EFFECTS[p["tick"]](b, c, b.domain_of(c))        # the sure-hit lands at once
 
 
 @effect("shrine_tick")
 def shrine_tick(b, owner, d):
-    b.say("Malevolent Shrine: slashes fill everything in range.")
-    b.aoe(owner, ACTIONS["dismantle"], targets=b.domain_targets(owner), sure_hit=True, power=13)
+    """Malevolent Shrine has no barrier and no favourites: Cleave for everything with cursed energy,
+    Dismantle for everything without, on everyone and everything in range but Sukuna and what is his."""
+    b.say("Malevolent Shrine: slashes fill everything in range. Nothing in it is spared - friend, foe or stone.")
+    hit = b.domain_targets(owner)
+    friends = [t for t in hit if not b.hostile(owner, t)]
+    if friends:
+        b.say(f"   {', '.join(t.name for t in friends)}: on {owner}'s side, and inside it all the same.")
+    b.aoe(owner, ACTIONS["dismantle"], targets=hit, sure_hit=True, power=13)
+    if d.data.get("objects"):
+        b.shred_field(owner, 13)
 
 
 @effect("coffin_tick")
@@ -1361,7 +1400,8 @@ def blue(b, c, act, targets, part, amp, arg):
 
 @effect("void_tick")
 def void_tick(b, owner, d):
-    b.say("Unlimited Void: everything, forever, all at once.")
+    b.say("Unlimited Void: everything, forever, all at once - for everyone " + (
+          f"{owner} is not touching." if d.data.get("scope") == "all" else "inside."))
     for t in b.domain_targets(owner):
         b.strike(owner, t, ACTIONS["void_domain"], Part.HEAD, sure_hit=True, power=9)
         b.add_status(t, ST.STUN, 1.0, 2, 1.0, {"void"})       # it does not let go the moment the barrier does
@@ -1679,22 +1719,51 @@ def womb_tick(b, owner, d):
 # ======================================================================================
 # The moves the canon fights needed from techniques that already existed
 # ======================================================================================
+def _love_blades(c) -> list:
+    """Copied techniques that can fill Authentic Mutual Love's barrier: those with an attack in them."""
+    return [k for k in _copy(c)["stored"] if any(a.kind == Kind.ATTACK for a in TECHNIQUES[k].actions)]
+
+
 @effect("mutual_love")
 def mutual_love(b, c, act, targets, part, amp, arg):
-    if b.open_domain(c, "mutual_love", "Authentic Mutual Love", 2, "mutual_love_tick") and b.rival is None:
+    """Yuta chooses ONE copied technique to imbue the barrier with, and it is turned on the one enemy
+    he names - a sure-hit, every round, for as long as the domain stands."""
+    stored = _love_blades(c)
+    tech = None
+    if stored:
+        ranked = sorted(stored, key=lambda k: -max(a.power for a in TECHNIQUES[k].actions if a.kind == Kind.ATTACK))
+        if c.controller == "human" and len(ranked) > 1:
+            k = b.ask(c, "Authentic Mutual Love: which copied technique fills the barrier? It becomes the sure-hit.",
+                      [TECHNIQUES[x].name for x in ranked[:24]], [1.0] + [0.0] * (len(ranked[:24]) - 1))
+            tech = ranked[k]
+        else:
+            tech = ranked[0]
+    target = targets[0] if targets else None
+    data = {"only": target.root.cid if target is not None else None, "copied": tech}
+    if b.open_domain(c, "mutual_love", "Authentic Mutual Love", 2, "mutual_love_tick", data) and b.rival is None:
         mutual_love_tick(b, c, b.domain_of(c))
 
 
 @effect("mutual_love_tick")
 def mutual_love_tick(b, owner, d):
-    stored = [k for k in _copy(owner)["stored"] if any(a.kind == Kind.ATTACK for a in TECHNIQUES[k].actions)]
-    if not stored:
+    tech = TECHNIQUES.get(d.data.get("copied") or "")
+    if tech is None:
         b.say("Authentic Mutual Love: a field of blades, and nothing copied to fill them with.")
         return
-    tech = TECHNIQUES[stored[int(b.rng.integers(len(stored)))]]
+    marked = b.by_cid.get(d.data.get("only") or "")
+    if marked is None or not marked.alive or marked.fled:        # the one it was turned on is gone: the next
+        foes = [e for e in b.enemies(owner) if e.owner is None] or b.enemies(owner)
+        marked = max(foes, key=lambda e: (e.level, e.hp), default=None)
+        d.data["only"] = marked.root.cid if marked is not None else None
+        if marked is not None:
+            b.say(f"Authentic Mutual Love turns on {marked}.")
     best = max((a for a in tech.actions if a.kind == Kind.ATTACK), key=lambda a: a.power)
-    b.say(f"Authentic Mutual Love: {owner} draws a blade, and it holds {best.name}. It cannot miss.")
-    b.aoe(owner, best, targets=b.domain_targets(owner), sure_hit=True)
+    hit = [t for t in b.domain_targets(owner) if t.owner is None] or b.domain_targets(owner)
+    if not hit:
+        b.say(f"Authentic Mutual Love: the barrier holds {best.name}, with nobody left to turn it on.")
+        return
+    b.say(f"Authentic Mutual Love: the barrier is {tech.name} now. {best.name} cannot miss {hit[0]}.")
+    b.aoe(owner, best, targets=hit[:1], sure_hit=True)
 
 
 @effect("world_slash")
