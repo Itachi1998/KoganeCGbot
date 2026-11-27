@@ -49,3 +49,26 @@ one cent; storage is $0.25 per GB-month, and a thousand characters are about 0.5
 
 Create the table with `python -m ai.migrate ... --create-table` (or `GameStore.create_table()`);
 the definition is `storage.table_definition()`.
+
+## Many battles at once
+A battle never touches the database while it is being fought. Its state is in memory (and
+snapshotted to Redis each round); the database is written when a command finishes and when a
+fight ends (the fighters only), each write a few hundred bytes.
+
+- **One thread per battle**, parked while it waits for players (`KOGANE_MAX_BATTLES`, default 256,
+  is the ceiling on battles + commands in flight).
+- **A colony is locked only while a command works on it**, never for the length of a fight. A fight
+  marks its players (`ColonySession.in_battle`) and curses (`Roamer.engaged`) busy and lets go of
+  the lock, so other fights and commands in the same colony carry on. Different colonies never
+  wait on each other at all.
+- **SQLite** is one connection in WAL mode behind a lock: writes are serialized, each takes well
+  under a millisecond, and readers are not blocked. Saving a 200-player colony with nothing
+  changed costs about 15 ms; after a fight only the fighters are written.
+
+Measured on one core with players that answer instantly (the worst case): 200 fights going at once
+in ONE colony finished in about 21 s, every result saved correctly, and a bystander's `/look` was
+answered in about 200 ms (max 307 ms) throughout. With human players, who take seconds per turn, the
+limit you meet first is Discord's rate limits, not the database.
+
+Past one process: SQLite + the in-memory colony sessions assume a single bot process. To run
+several (Discord shards), move to DynamoDB and put the colony lock and lobby state in Redis.

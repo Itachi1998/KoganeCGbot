@@ -377,11 +377,12 @@ class LobbyCog(commands.Cog, name="Lobby"):
         if owner is None:
             return "The owner has no living character here."
         nid = owner.node
-        here = [p for u in lb.players if (p := game.player(u)) is not None and nid in game.where(p)]
+        here = [p for u in lb.players if (p := game.player(u)) is not None and nid in game.where(p)
+                and p.user_id not in game.in_battle]
         away = [u for u in lb.players if game.player(u) is None or nid not in game.where(game.player(u))]
         note = (" Not at node %d, so not in it: " % nid + ", ".join(f"<@{u}>" for u in away)) if away else ""
         if mode == "hunt":
-            roamers = [r for r in game.world.roamers if not r.respawn_at and r.node == nid][:3]
+            roamers = [r for r in game.world.roamers if not r.respawn_at and not r.engaged and r.node == nid][:3]
             if not roamers:
                 return (f"There are no curses at node {nid}. `/look` shows what is nearby; move toward them, or "
                         "let time pass and they will come to you.")
@@ -409,7 +410,7 @@ class LobbyCog(commands.Cog, name="Lobby"):
             game = rt.session(guild)
             colony = Colony(str(guild.id), game.colony.name, rules=list(game.colony.rules))   # a throwaway copy
             io = DiscordIO(self.bot, lb.channel, asyncio.get_running_loop())
-            b = Battle(str(guild.id), seed=int(self.rng.integers(1 << 30)), io=io, colony=colony)
+            b = Battle(str(guild.id), seed=int(self.rng.integers(1 << 30)), io=io, colony=colony, cache=rt.cache)
             for uid in lb.players:
                 rec = game.player(uid) or rt.store.get_player(str(guild.id), str(uid))
                 if rec is not None and rec.alive:
@@ -418,7 +419,7 @@ class LobbyCog(commands.Cog, name="Lobby"):
                 b.add(factory(self.rng), 50)
             standard_field(b)
             io.say(f"*** {lb.name}: a spar (nothing here is saved) ***")
-            result = await run_battle(b, io)
+            result = await run_battle(b, io, rt.pool)
             await lb.channel.send(view=style.panel(self.bot, "Spar over",
                                                    f"{style.stat('Rounds', result['rounds'])}\n"
                                                    f"{style.stat('Standing', ', '.join(result['winners']) or 'nobody')}",

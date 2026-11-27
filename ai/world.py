@@ -68,6 +68,7 @@ class Roamer:
     host: str = ""                # ...and whose body it was
     slash: bool = False           # ...and whether he has learned the slash that cuts the world
     body_hp: float = 0.0          # ...and that body's maximum HP, which is his
+    engaged: bool = False         # in a fight right now (not saved): it neither moves nor joins another
 
     @property
     def label(self) -> str:
@@ -312,6 +313,8 @@ class World:
         prey = {p.node for p in players if p.alive and self.nodes[p.node].kind != "hideout"}
         open_nodes = [n.nid for n in self.nodes.values() if n.kind != "hideout" and n.layer > 0]
         for r in self.roamers:
+            if r.engaged:                                     # busy fighting somebody
+                continue
             if r.respawn_at:
                 if now < r.respawn_at or not self._respawn(r, now, rng, open_nodes, held):
                     continue
@@ -344,7 +347,7 @@ class World:
                 self.medic = int(rng.choice(options))
         fights: dict[int, list] = {}
         for r in self.roamers:
-            if not r.respawn_at and r.node in prey and len(fights.get(r.node, ())) < 3:
+            if not r.respawn_at and not r.engaged and r.node in prey and len(fights.get(r.node, ())) < 3:
                 fights.setdefault(r.node, []).append(r)       # at most three join one fight
         return sorted(fights.items())
 

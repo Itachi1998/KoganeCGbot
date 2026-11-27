@@ -8,6 +8,7 @@ and blocks until it is over.  Front ends must not run two commands on one sessio
 """
 from __future__ import annotations
 
+import threading
 import time
 from types import SimpleNamespace
 from typing import Callable, Optional
@@ -39,7 +40,14 @@ class ColonySession:
         self.server_id = str(server_id)
         self.store = store or GameStore()
         self.cache = cache if cache is not None else BattleCache()
-        self.io = io or IO()
+        self._tls = threading.local()                 # each command thread plays its fights through its own io
+        self._default_io = io or IO()
+        # Many fights at once: a front end that runs commands on several threads takes ``lock``
+        # around each command and sets ``concurrent``; a fight then lets go of the lock while it is
+        # played, with its players (``in_battle``) and roamers (``engaged``) marked busy.
+        self.lock = threading.Lock()
+        self.concurrent = False
+        self.in_battle: set = set()                   # user ids
         self.battle_banner = battle_banner            # extra text when a fight starts (the CLI prints its help)
         # Front-end hooks (the CLI leaves them as they are; the Discord bot ties fights to lobbies):
         self.can_fight: Callable = lambda p: True     # may this player be attacked / fight at all?
@@ -58,13 +66,23 @@ class ColonySession:
         for p in self.players:
             self.steer(p)
 
+    @property
+    def io(self) -> IO:
+        return getattr(self._tls, "io", self._default_io)
+
+    @io.setter
+    def io(self, value: IO) -> None:
+        self._tls.io = value
+
     # ---- bookkeeping -------------------------------------------------------------------
-    def save(self) -> None:
+    def save(self, only=None) -> None:
+        """Write the colony, the map and the players (``only``: just these players - after a fight,
+        only the fighters changed). Items that have not changed are not written (storage._put)."""
         self.colony.clock = self.now
         self.collect_sales()
         self.store.put_colony(self.colony)
         self.store.put_map(self.server_id, self.world.state())
-        for p in self.players:
+        for p in (self.players if only is None else only):
             self.store.put_player(p)
         self.update_leaderboard()
 
@@ -227,7 +245,16 @@ class ColonySession:
         for kw in world.field_objects(node):
             b.add_object(**kw)
         io.say(f"\n*** {label} ***" + (f"\n{self.battle_banner}\n" if self.battle_banner else ""))
-        b.run()
+        ids = {p.user_id for p in party}
+        self.in_battle |= ids
+        if self.concurrent:
+            self.lock.release()                           # the colony carries on while this is fought
+        try:
+            b.run()
+        finally:
+            if self.concurrent:
+                self.lock.acquire()
+            self.in_battle -= ids
         for p in self.players:
             self.steer(p)
         for c in b.fighters:                              # a curse born in the fight stays in the colony
@@ -249,7 +276,7 @@ class ColonySession:
                                                                             "rounds": b.round}})
                 except Exception as e:                    # a cache outage must not lose the fight
                     print(f"[colony] character snapshot failed: {type(e).__name__}: {e}")
-        self.save()                                       # and for good, in the database
+        self.save(only=party)                             # and for good, in the database
         if hasattr(io, "flush"):
             io.flush()
         return added
@@ -259,11 +286,19 @@ class ColonySession:
         world, rng = self.world, self.rng
         party = party if party is not None else [p for p in self.players if p.alive and self.can_fight(p)
                                                  and nid in self.where(p)]
+        party = [p for p in party if p.user_id not in self.in_battle]
+        roamers = [r for r in roamers if not r.engaged]
         if not party or not roamers:
             return None
         specs = [world.spec_for(r, rng) for r in roamers]
-        added = self.fight([(self.present(p, nid), 0) for p in party] + [(sp, 50) for sp in specs], nid,
-                           f"Curses close in at {world.nodes[nid].name}: " + ", ".join(sp.name for sp in specs))
+        for r in roamers:
+            r.engaged = True
+        try:
+            added = self.fight([(self.present(p, nid), 0) for p in party] + [(sp, 50) for sp in specs], nid,
+                               f"Curses close in at {world.nodes[nid].name}: " + ", ".join(sp.name for sp in specs))
+        finally:
+            for r in roamers:
+                r.engaged = False
         for r, c in zip(roamers, added[len(party):]):
             if not c.alive:
                 world.defeat(r, self.now, rng)
@@ -333,6 +368,9 @@ class ColonySession:
         self.players[:] = [p for p in self.players if p.alive]
         if not me.alive:
             out("You are dead. Create a new character.")
+            return
+        if me.user_id in self.in_battle:
+            out("You are in a fight. Finish it first (your controls are in the battle's channel).")
             return
         tokens = line.split()
         if not tokens:
@@ -764,6 +802,7 @@ class ColonySession:
             foe = next((p for p in players if me.node in where(p) and p is not me
                         and p.name.lower().startswith(rest[0].lower())), None)
             err = (("No such player at this node." if foe is None else None)
+                   or (f"{foe.name} is already in a fight." if foe.user_id in self.in_battle else None)
                    or self.pvp_check(me, foe))
             if err:
                 out(err)
@@ -805,14 +844,16 @@ class ColonySession:
                         ways = [x for x in world.nodes[e["node"]].edges if world.nodes[x].kind != "hideout"]
                         e["node"] = step if step is not None else int(rng.choice(ways)) if ways else e["node"]
             found = [SimpleNamespace(node=n, alive=True, fingers=p.fingers + p.inventory.count("sukuna_finger"))
-                     for p in players if p.alive and self.can_fight(p) for n in where(p)]
+                     for p in players if p.alive and self.can_fight(p) and p.user_id not in self.in_battle
+                     for n in where(p)]
             held = sum(p.fingers + p.inventory.count("sukuna_finger") for p in players if p.alive)
             fights = world.tick(found, now, rng, held)
             for line in world.news:                       # what Sukuna has been doing
                 out("\n!!! " + line)
             world.news.clear()
             for nid, roamers in fights:                  # only players who can fight (in a lobby, on Discord)
-                party = [p for p in players if p.alive and self.can_fight(p) and nid in where(p)]
+                party = [p for p in players if p.alive and self.can_fight(p) and nid in where(p)
+                         and p.user_id not in self.in_battle]
                 if party and rng.random() < skills.evade_chance(party):    # navigation: slip away
                     guide = max(party, key=lambda p: skills.get(p, "navigation"))
                     out(f"\n{guide.name} spots {', '.join(r.label for r in roamers)} first and leads the way "

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 import discord
@@ -19,7 +20,10 @@ class Runtime:
         self.store = GameStore(local_path=os.environ.get("CULLING_SAVE", "culling_save.json"))
         self.cache = BattleCache()
         self.sessions: dict = {}
-        self.locks: dict = {}
+        # Every battle in progress holds one thread (parked while it waits for players), so the pool
+        # is the ceiling on simultaneous battles + commands. Threads waiting on input cost ~nothing.
+        self.pool = ThreadPoolExecutor(max_workers=int(os.environ.get("KOGANE_MAX_BATTLES", "256")),
+                                       thread_name_prefix="battle")
         self.busy_users: set = set()          # users in a lobby spar right now
         self.lobbies: dict = {}               # channel id -> Lobby (cogs/lobby.py)
         self.loop = None
@@ -50,35 +54,35 @@ class Runtime:
             return DiscordIO(self.bot, lb.channel, self.loop)      # the fight is shown in the lobby's thread
         game.can_fight, game.pvp_check, game.io_for = can_fight, pvp_check, io_for
 
-    def lock(self, guild_id) -> asyncio.Lock:
-        return self.locks.setdefault(str(guild_id), asyncio.Lock())
-
     def session(self, guild: discord.Guild) -> ColonySession:
         gid = str(guild.id)
         if gid not in self.sessions:
             self.sessions[gid] = ColonySession(gid, self.store, self.cache, name=guild.name,
                                                managers=[str(guild.owner_id)] if guild.owner_id else [])
+            self.sessions[gid].concurrent = True          # fights let go of the colony's lock (colony.py)
             self._hooks(self.sessions[gid], guild.id)
         return self.sessions[gid]
 
-    async def run(self, guild: discord.Guild, channel, fn, *args, wait: bool = False):
-        """Run ``fn(session, *args)`` in a worker thread with this colony to itself.
+    async def run(self, guild: discord.Guild, channel, fn, *args, wait: bool = True):
+        """Run ``fn(session, *args)`` on a battle thread, holding the colony's lock.
 
-        Fights started by the command are played in ``channel``. Returns (ok, result); ok is False
-        when the colony is busy and ``wait`` is not set.
+        The lock is only held while the command works on the colony; a fight it starts releases
+        it for as long as the fight lasts (the fighters are marked busy instead), so any number
+        of fights and commands go on side by side in one colony. Fights are played in ``channel``,
+        or in the lobby's thread. Returns (True, result).
         """
-        lock = self.lock(guild.id)
-        if lock.locked() and not wait:
-            return False, None
-        async with lock:
-            game = self.session(guild)
-            self.loop = asyncio.get_running_loop()
-            io = DiscordIO(self.bot, channel, self.loop)
-            game.io = io
-            try:
-                return True, await asyncio.to_thread(fn, game, *args)
-            finally:
-                await asyncio.to_thread(io.flush)
+        game = self.session(guild)
+        self.loop = asyncio.get_running_loop()
+        io = DiscordIO(self.bot, channel, self.loop)
+
+        def work():
+            with game.lock:
+                game.io = io                              # this thread's fights go through this io
+                try:
+                    return fn(game, *args)
+                finally:
+                    io.flush()
+        return True, await self.loop.run_in_executor(self.pool, work)
 
     async def command(self, guild: discord.Guild, channel, user_id, line: str) -> Optional[str]:
         """One colony command for a user. None when the colony is busy with something else."""

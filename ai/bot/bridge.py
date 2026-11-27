@@ -36,11 +36,13 @@ TURN_TIMEOUT = 180.0          # seconds a player has to commit (then they wait)
 CHANNEL_TIMEOUT = 120.0       # ...to gather cursed energy (then they gather nothing)
 ASK_TIMEOUT = 60.0            # ...to answer a question (then the engine decides)
 MENTIONS = discord.AllowedMentions(users=True, roles=False, everyone=False)
-# Components V2 messages hold at most 4000 characters of text in total. The battle feed is one
-# message, edited as the fight goes on, until the next lines would not fit; then a new one starts.
+# Components V2 messages hold at most 4000 characters of text in total. The battle feed is ONE
+# message per battle, edited as the fight goes on. When the next lines would not fit, the feed
+# turns a page: the message shows the newest page, and its arrow buttons let anyone leaf back
+# through the earlier ones (privately, so the live page stays put for everyone else).
 # Measured (ai engine battles, 20 seeds each): rounds per full message - 1v1 median 9 (7-12),
 # 2v2 median 6 (5-8), three teams of two median 4 (2-8).
-FEED_LIMIT = 4000 - len(style.code(""))
+FEED_LIMIT = 4000 - len(style.code("")) - 40          # (room for the page line)
 
 
 def domain_line(b) -> str:
@@ -84,9 +86,8 @@ class DiscordIO(IO):
         self.bot, self.dest, self.loop = bot, channel, loop    # (self.channel is IO.channel)
         self.turn_timeout, self.channel_timeout, self.ask_timeout = turn_timeout, channel_timeout, ask_timeout
         self.public: list = []
-        self.feed_msg = None                  # the live battle feed message, edited as lines arrive
-        self.feed_text = ""
-        self.interrupted = False              # something else was posted after the feed: start a new one
+        self.feed_msg = None                  # the battle's one feed message, edited as lines arrive
+        self.pages: list = []                 # its pages of text; the last one is live
         self.private: dict = defaultdict(list)
         self.prompts: dict = {}               # user id -> the Prompt they are being asked
         self._lock = threading.Lock()
@@ -115,21 +116,22 @@ class DiscordIO(IO):
         self._post(go(), wait=False)
 
     def flush(self) -> None:
-        """Append what has been said to the live feed message (a new message once it is full)."""
+        """Add what has been said to the feed: onto the live page, or onto a new page when it is full."""
         with self._lock:
             lines, self.public = self.public, []
         text = "\n".join(lines).strip("\n")
         if not text:
             return
-        combined = (self.feed_text + "\n" + text) if self.feed_text else text
-        if self.feed_msg is not None and not self.interrupted and len(combined) <= FEED_LIMIT:
-            self.feed_text = combined
-            self._post(_quiet_edit(self.feed_msg, None, combined))              # waited: edits stay in order
-            return
         for piece in style.chunks(text.split("\n"), FEED_LIMIT):
             piece = piece.rstrip("\n")
-            msg = self._send(lambda piece=piece: _feed_view(piece))
-            self.feed_msg, self.feed_text, self.interrupted = msg, piece, False
+            if self.pages and len(self.pages[-1]) + 1 + len(piece) <= FEED_LIMIT:
+                self.pages[-1] += "\n" + piece
+            else:
+                self.pages.append(piece)
+        if self.feed_msg is None:
+            self.feed_msg = self._send(lambda: FeedView(self.pages))
+        else:
+            self._post(_quiet_edit(self.feed_msg, lambda: FeedView(self.pages)))    # waited: edits stay in order
 
     def take_private(self, user_id: str) -> list:
         with self._lock:
@@ -189,6 +191,8 @@ class DiscordIO(IO):
                 if timed_out:
                     b.say(f"{c.name} hesitates too long" + (" and gathers nothing." if kind == "channel" else "."))
                     done = True
+                if done:
+                    p.open = False                    # closed BEFORE the reply: nothing new can be queued
                 p.busy = False
                 if reply is not None:
                     self.loop.call_soon_threadsafe(_resolve, reply, ("\n".join(out), done))
@@ -197,6 +201,13 @@ class DiscordIO(IO):
         finally:
             p.open = False
             self.prompts.pop(uid, None)
+            while True:                               # anything that slipped in as it closed gets an answer
+                try:
+                    _, late = p.requests.get_nowait()
+                except queue.Empty:
+                    break
+                if late is not None:
+                    self.loop.call_soon_threadsafe(_resolve, late, ("That moment has passed.", True))
             if call is not None:                       # the ping has done its job: keep the feed at the bottom
                 self._post(_quiet_delete(call), wait=False)
 
@@ -223,13 +234,40 @@ def _resolve(fut: asyncio.Future, value) -> None:
         fut.set_result(value)
 
 
-def _feed_view(text: str) -> discord.ui.LayoutView:
-    return style.panel(None, None, style.code(text), accent=style.ASH, thumbnail=False, timeout=None)
+class FeedView(discord.ui.LayoutView):
+    """A page of the battle feed. ``index`` None = the live (last) page, shown on the shared message;
+    its arrows open the earlier pages for whoever clicks, as a private copy they can leaf through."""
+
+    def __init__(self, pages: list, index: Optional[int] = None):
+        super().__init__(timeout=None if index is None else 300)
+        self.pages, self.index = pages, index
+        n = len(pages)
+        i = n - 1 if index is None else max(0, min(index, n - 1))
+        container = discord.ui.Container(accent_colour=style.ASH)
+        container.add_item(discord.ui.TextDisplay(style.code(pages[i])))
+        if n > 1 or index is not None:
+            container.add_item(discord.ui.TextDisplay(f"-# Page {i + 1}/{n}" + (" (live)" if index is None else "")))
+            row = discord.ui.ActionRow()
+            for emoji, target, off in (("◀️", i - 1, i == 0), ("▶️", i + 1, i >= n - 1)):
+                btn = discord.ui.Button(emoji=emoji, style=discord.ButtonStyle.blurple, disabled=off)
+                btn.callback = self._go(target)
+                row.add_item(btn)
+            container.add_item(row)
+        self.add_item(container)
+
+    def _go(self, target: int):
+        async def cb(itx: discord.Interaction) -> None:
+            view = FeedView(self.pages, target)
+            if self.index is None:                    # from the shared message: a private copy
+                await itx.response.send_message(view=view, ephemeral=True)
+            else:
+                await itx.response.edit_message(view=view)
+        return cb
 
 
-async def _quiet_edit(message: discord.Message, view, feed_text: Optional[str] = None) -> None:
+async def _quiet_edit(message: discord.Message, view) -> None:
     try:
-        await message.edit(view=view if view is not None else _feed_view(feed_text))
+        await message.edit(view=view() if callable(view) else view)
     except discord.HTTPException:
         pass
 
@@ -241,12 +279,13 @@ async def _quiet_delete(message: discord.Message) -> None:
         pass
 
 
-async def run_battle(b, io: DiscordIO) -> dict:
-    """Play a battle to the end in a worker thread; returns ``Battle.finish()``'s result."""
+async def run_battle(b, io: DiscordIO, pool=None) -> dict:
+    """Play a battle to the end on a battle thread; returns ``Battle.finish()``'s result."""
+    loop = asyncio.get_running_loop()
     try:
-        return await asyncio.to_thread(b.run)
+        return await loop.run_in_executor(pool, b.run)
     finally:
-        await asyncio.to_thread(io.flush)
+        await loop.run_in_executor(pool, io.flush)
 
 
 # ======================================================================================
