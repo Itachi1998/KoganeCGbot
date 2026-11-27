@@ -171,3 +171,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ai engine save files (GameStore's JSON fallback)
+culling_save.json
+culling_save.json.tmp

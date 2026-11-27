@@ -1,0 +1,663 @@
+"""A colony as a game session, independent of any front end.
+
+This is the body of the command-line colony mode, moved into a class so the CLI
+(cli.colony_mode) and the Discord bot (ai/bot) run exactly the same game.
+``command(me, line, out)`` runs one world command for one player: whatever it reports goes to
+``out``, and any fight it starts is played through ``self.io`` (the front end's battle adapter)
+and blocks until it is over.  Front ends must not run two commands on one session at once.
+"""
+from __future__ import annotations
+
+import time
+from types import SimpleNamespace
+from typing import Callable, Optional
+
+import numpy as np
+
+from .battle import IO, Battle
+from .constants import (PART_HP_FRAC, CLASS_NAME, DAY, GRADE_NAME, Grade, Part, PClass, Stat,
+                        REST_RECOVERY, SIX_EYES_RECOVERY, SIX_EYES_REST)
+from .crimes import Crime
+from .data import ITEMS, SHIKIGAMI
+from .effects import PUPPET_CHARGE, scout_state
+from .effects import _puppets as puppet_state
+from .records import PlayerRecord, grade_for, has_six_eyes, vessel_techniques, xp_to_next
+from .rules import RULES, Colony, buy_rule, enforce_inactivity, transfer_points
+from .storage import BattleCache, GameStore
+from .techniques import TECHNIQUES
+from .world import Roamer, World
+
+PART_LABEL = {Part.HEAD: "head", Part.TORSO: "torso", Part.L_ARM: "l.arm", Part.R_ARM: "r.arm",
+              Part.L_LEG: "l.leg", Part.R_LEG: "r.leg", Part.EXTRA_1: "limb+1", Part.EXTRA_2: "limb+2"}
+
+
+class ColonySession:
+    def __init__(self, server_id: str, store: Optional[GameStore] = None, cache: Optional[BattleCache] = None,
+                 io: Optional[IO] = None, seed: Optional[int] = None, name: str = "Tokyo No. 1 Colony",
+                 managers=(), battle_banner: Optional[str] = None):
+        self.server_id = str(server_id)
+        self.store = store or GameStore()
+        self.cache = cache if cache is not None else BattleCache()
+        self.io = io or IO()
+        self.battle_banner = battle_banner            # extra text when a fight starts (the CLI prints its help)
+        self.rng = np.random.default_rng(seed)
+        colony = self.store.get_colony(self.server_id)
+        if colony is None:
+            colony = Colony(self.server_id, name, managers=list(managers), map_seed=int(self.rng.integers(1 << 30)))
+            self.store.put_colony(colony)
+        self.colony = colony
+        saved = self.store.get_map(self.server_id)
+        self.world = World.from_state(saved) if saved else World(colony.map_seed)
+        self.players = [p for p in self.store.list_players(self.server_id) if p.alive]
+        self.now = max([time.time(), colony.clock] + [p.last_score_ts for p in self.players])
+        for p in self.players:
+            self.steer(p)
+
+    # ---- bookkeeping -------------------------------------------------------------------
+    def save(self) -> None:
+        self.colony.clock = self.now
+        self.store.put_colony(self.colony)
+        self.store.put_map(self.server_id, self.world.state())
+        for p in self.players:
+            self.store.put_player(p)
+
+    def day(self) -> int:
+        return int((self.now - self.colony.created_ts) // DAY)
+
+    def player(self, user_id) -> Optional[PlayerRecord]:
+        """The living character a user has in this colony."""
+        return next((p for p in self.players if p.user_id == str(user_id) and p.alive), None)
+
+    def add_player(self, rec: PlayerRecord, out: Callable = print) -> bool:
+        """A new character joins. False if that user already has a living one here; a dead one is replaced."""
+        rec.created_ts = rec.last_score_ts = self.now
+        if not self.store.put_player(rec, new_only=True):
+            old = self.store.get_player(self.server_id, rec.user_id)
+            if old is not None and old.alive:
+                return False
+            self.store.put_player(rec)
+        self.players[:] = [p for p in self.players if p.user_id != rec.user_id] + [rec]   # in place: front ends hold it
+        self.steer(rec)
+        if self.is_puppeteer(rec):
+            out(f"Your body is sealed in a hideout at node {rec.hideout}. It cannot travel: "
+                f"`deploy` a puppet and steer that instead.")
+        self.save()
+        return True
+
+    def remove_player(self, user_id) -> Optional[PlayerRecord]:
+        """Delete a user's character here (alive or dead) and take their offers off the market."""
+        rec = self.store.get_player(self.server_id, str(user_id))
+        if rec is None:
+            return None
+        self.players[:] = [p for p in self.players if p.user_id != str(user_id)]
+        self.store._delete(f"SERVER#{self.server_id}", f"PLAYER#{user_id}")
+        self.colony.market = [o for o in self.colony.market if o["seller"] != str(user_id)]
+        self.save()
+        return rec
+
+    # ---- helpers (formerly closures inside cli.colony_mode) -------------------------------
+    def fight(self, sides, node, label):
+        """sides: list of (spec, team). Runs a battle at a node and writes results back."""
+        world, colony, rng = self.world, self.colony, self.rng
+        b = Battle(self.server_id, seed=int(rng.integers(1 << 30)), io=self.io, colony=colony, world=world,
+                   node=node, now=self.now, cache=self.cache)
+        added = [b.add(spec, team) for spec, team in sides]
+        for kw in world.field_objects(node):
+            b.add_object(**kw)
+        self.io.say(f"\n*** {label} ***" + (f"\n{self.battle_banner}\n" if self.battle_banner else ""))
+        b.run()
+        for p in self.players:
+            self.steer(p)
+        for c in b.fighters:                              # a curse born in the fight stays in the colony
+            if c.meta.get("vengeful") and c.alive:
+                world.roamers.append(Roamer(max(r.rid for r in world.roamers) + 1, int(c.grade), node))
+            if c.meta.get("sukuna") and c.alive and "roamer_id" not in c.meta:     # a vessel that could not hold him
+                held = c.inventory.count("sukuna_finger")
+                world.roamers.append(Roamer(max(r.rid for r in world.roamers) + 1, int(Grade.SPECIAL), node,
+                                            kind="sukuna", fingers=held, vessel=vessel_techniques(c.techniques),
+                                            host=c.meta.get("host", ""),
+                                            slash=bool(c.tech_state.get("ten_shadows", {}).get("world_slash")),
+                                            body_hp=float(c.meta.get("body_hp", c.max_hp))))
+                self.io.say(f"\n!!! SUKUNA walks {colony.name} with {held} finger(s). He will gather the rest: "
+                            f"the Finger Bearers first, then anyone carrying or caging one.")
+        return added
+
+    @staticmethod
+    def is_puppeteer(p):
+        return "puppet_manipulation" in p.techniques
+
+    def present(self, p, nid):
+        """A player's fighter for a battle at nid: in person, or commanding scouts from afar."""
+        spec = p.to_spec("human")
+        if not self.is_puppeteer(p) and p.node != nid:
+            spec.meta["remote_scout"] = True
+        return spec
+
+    def steer(self, p):
+        """A puppeteer's map position is the puppet they are steering, or their body if none is out."""
+        if not self.is_puppeteer(p):
+            return
+        world = self.world
+        if p.hideout is None:                             # the body needs somewhere to stay
+            p.hideout = min((n.nid for n in world.nodes.values() if n.kind == "hideout"),
+                            key=lambda n: world.hops(0, n))
+        st = puppet_state(p.tech_state.setdefault("puppets", {"bank": 0.0, "stock": 3}))
+        ids = {e["id"]: e for e in st["out"]}
+        if st["sel"] not in ids:
+            st["sel"] = next(iter(ids), None)
+        p.node = ids[st["sel"]]["node"] if st["sel"] is not None else p.hideout
+
+    def where(self, p):
+        """Every node this player can be found at: in person, or through what they sent out."""
+        if not self.is_puppeteer(p):
+            return [p.node] + [e["node"] for _, e, _ in self.scouts_of(p)]
+        return [e["node"] for e in puppet_state(p.tech_state["puppets"])["out"]] + [p.hideout]
+
+    @staticmethod
+    def scouts_of(p):
+        """[(kind, entry, name)] for every spirit and shikigami this player has out in the colony."""
+        found = []
+        if "cursed_spirit_manipulation" in p.techniques:
+            st = scout_state(p.tech_state, "csm")
+            stored = {s["id"]: s for s in st["spirits"]}
+            found += [("spirit", e, stored[e["id"]]["name"]) for e in st["out"] if e["id"] in stored]
+        if "ten_shadows" in p.techniques:
+            found += [("shikigami", e, SHIKIGAMI[e["id"]].name)
+                      for e in scout_state(p.tech_state, "ten_shadows")["out"]]
+        return found
+
+    def sight(self, nid):
+        """What can be seen at a node (your own eyes or a scout's)."""
+        world = self.world
+        n = world.nodes[nid]
+        curses = [r.label for r in world.roamers if not r.respawn_at and r.node == nid]
+        others = [p.name for p in self.players if nid in self.where(p)]
+        intact = sum(not world.broken[o] for o in n.objects)
+        return (f"node {nid} {n.name} [{n.kind}] -> {', '.join(map(str, n.edges))} | curses: "
+                f"{', '.join(curses) or 'none'} | players: {', '.join(others) or 'none'} | {intact} intact object(s)"
+                + (" | THE MEDIC IS HERE" if world.medic == nid else ""))
+
+    # ---- one world command -----------------------------------------------------------------
+    def command(self, me: PlayerRecord, line: str, out: Callable = print) -> None:
+        """Run one colony command for ``me``, let the hours it takes pass, and save."""
+        self.players[:] = [p for p in self.players if p.alive]
+        if not me.alive:
+            out("You are dead. Create a new character.")
+            return
+        tokens = line.split()
+        if not tokens:
+            return
+        colony, world, players, now = self.colony, self.world, self.players, self.now
+        day, where, sight, steer, present, fight = self.day, self.where, self.sight, self.steer, self.present, self.fight
+        scouts_of, is_puppeteer = self.scouts_of, self.is_puppeteer
+        steer(me)
+        node = world.nodes[me.node]
+        cmd, rest = tokens[0].lower(), tokens[1:]
+        spend = 0.0                                       # hours of game time this command takes
+        if cmd == "map":
+            out(world.describe(me.node))
+        elif cmd == "look":
+            out(f"{node.name} [{node.kind}] -> " + ", ".join(f"{e}:{world.nodes[e].name}" for e in node.edges))
+            for oid in node.objects:
+                o = world.objects[oid]
+                state = "broken" if world.broken[oid] else "looted" if world.looted[oid] else "intact"
+                out(f"   obj#{oid} {o.name} ({o.role}, {state})")
+            here = [p.name + (" (puppet)" if is_puppeteer(p) and p.hideout != me.node else "")
+                    for p in players if me.node in where(p) and p is not me]
+            near = [f"{r.label} at node {r.node}" for r in world.roamers
+                    if not r.respawn_at and (r.node == me.node or r.node in node.edges)]
+            out("   Players here: " + (", ".join(here) or "none") + " | Nearby: " + (", ".join(near) or "quiet"))
+            if world.medic == me.node:
+                out("   The colony's medic is here. (`treat`)")
+            for kind, e, name in scouts_of(me):           # what your scouts see
+                out(f"   Through {name}: {sight(e['node'])}")
+        elif cmd == "me":
+            left = colony.inactivity_days - (now - me.last_score_ts) / DAY
+            out(f"{me.name}: {CLASS_NAME[me.pclass]}, level {me.level} ({me.xp}/{xp_to_next(me.level)} XP), "
+                f"{GRADE_NAME[grade_for(me.level, me.techniques)]}, {me.points} points")
+            out(f"   Techniques: {', '.join(TECHNIQUES[t].name for t in me.techniques)} "
+                f"(brain capacity {me.brain_capacity})")
+            out(f"   Condition: {me.condition_text()}")
+            stats = me.to_spec().stats
+            cond = me.condition or {"hp": 1.0, "parts": [1.0] * 6, "gone": [0] * 6, "scar": 0.0}
+            mx = stats[Stat.MAX_HP] * (1 - cond["scar"])
+            out(f"   HP {mx * cond['hp']:.0f}/{mx:.0f}"
+                + (f" (max was {stats[Stat.MAX_HP]:.0f} before soul damage)" if cond["scar"] > 0.001 else "")
+                + " | " + " · ".join(
+                    f"{PART_LABEL[Part(i)]} " + ("GONE" if cond["gone"][i] else
+                                                 f"{mx * PART_HP_FRAC[i] * cond['parts'][i]:.0f}/{mx * PART_HP_FRAC[i]:.0f}")
+                    for i in range(6)))
+            six = has_six_eyes(me.techniques, me.six_eyes)
+            pct = SIX_EYES_RECOVERY if six else stats[Stat.CE_REGEN]
+            have = me.rested_ce(now)
+            out(f"   Cursed energy {have * stats[Stat.MAX_CE]:.0f}/{stats[Stat.MAX_CE]:.0f}"
+                + ("" if have >= 0.999 else f" ({have:.0%}: still coming back from the last fight)")
+                + f". It returns {pct:.0f}% of the maximum a round in a fight and "
+                  f"{(SIX_EYES_REST if six else REST_RECOVERY):.0%} every 5 minutes outside one.")
+            out(f"   Stamina {stats[Stat.MAX_STA]:.0f}, {stats[Stat.STA_REGEN]:.1f} a round; full again between fights.")
+            out(f"   Cursed energy efficiency: {me.efficiency:.0f}% off technique costs"
+                + (" (the Six Eyes: the highest there is)" if six else ""))
+            out("   Vessel: " + ("strong - it can cage all twenty of Sukuna's fingers" if me.vessel >= 20 else
+                                 "ordinary - nobody knows how many fingers it can take, if any")
+                + f". Fingers caged: {me.fingers}"
+                + (f" (+{10 * me.fingers}% output and strength on everything)." if me.fingers else "."))
+            if "limitless" in me.techniques:
+                out("   Six Eyes: +35 efficiency and +6 perception in a fight; you read every technique as it "
+                    "is channelled, and see every enemy's technique and cursed energy in `status`.")
+            out(f"   Gear: {me.equipment} | Bag: {me.inventory} | Vows: {me.vows or 'none'}")
+            out(f"   Record: {me.crimes.summary()} | Kills: {me.kills} | {left:.1f} days until technique removal")
+        elif cmd == "go" and rest and rest[0].isdigit():
+            pst = puppet_state(me.tech_state["puppets"]) if is_puppeteer(me) else None
+            if pst is not None and pst["sel"] is None:
+                out("Your body cannot leave the hideout. `deploy` a puppet first.")
+            else:
+                msg = world.enter(me, int(rest[0]), day())
+                out(msg)
+                spend = 1.0 if "can't" not in msg else 0.0
+                if pst is not None:                       # it is the puppet that walked
+                    next(e for e in pst["out"] if e["id"] == pst["sel"])["node"] = me.node
+        elif cmd in ("scouts", "send", "order") or (cmd == "recall" and not is_puppeteer(me)):
+            kinds = [k for k in ("csm", "ten_shadows") if {"csm": "cursed_spirit_manipulation"}.get(k, k) in me.techniques]
+            if not kinds:
+                out("Only spirit manipulators and Ten Shadows users can send something out.")
+                return
+            mine = scouts_of(me)
+            key = rest[0].lower() if rest else ""
+            pick = next(((k, e, n) for k, e, n in mine if str(e["id"]) == key), None)
+            if cmd == "scouts":
+                for k in kinds:
+                    st = scout_state(me.tech_state, k)
+                    gone = {e["id"] for e in st["out"]}
+                    if k == "csm":
+                        ready = [f"{s['id']}: {s['name']}" for s in st["spirits"] if s["id"] not in gone]
+                        out("Stored spirits (each has its own cursed energy): " + (", ".join(ready) or "none"))
+                    else:
+                        ready = [f"{x}: {SHIKIGAMI[x].name}" for x, v in st["roster"].items() if v == "tamed" and x not in gone]
+                        out("Tamed shikigami in your shadow (they run on YOUR cursed energy): " + (", ".join(ready) or "none"))
+                for kind, e, name in mine:
+                    out(f"  {e['id']}: {name} ({kind}, {'auto' if e.get('auto') else 'manual'}, {e['hp']:.0%}) sees "
+                        + sight(e["node"]))
+                if not mine:
+                    out("  Nothing is out. `send <id>` releases one where you stand.")
+            elif cmd == "send":
+                st_c = scout_state(me.tech_state, "csm") if "csm" in kinds else None
+                st_s = scout_state(me.tech_state, "ten_shadows") if "ten_shadows" in kinds else None
+                spirit = st_c and next((s for s in st_c["spirits"] if str(s["id"]) == key), None)
+                auto = len(rest) > 1 and rest[1].lower() == "auto"
+                if pick is not None:
+                    out("That one is already out.")
+                elif spirit:
+                    if len(st_c["out"]) >= 3:
+                        out("You can keep three spirits in the field at most.")
+                    else:
+                        st_c["out"].append({"id": spirit["id"], "node": me.node, "auto": auto, "hp": 1.0})
+                        out(f"You spit out the orb. {spirit['name']} unfolds and waits for orders"
+                            + (" - then lopes off to hunt." if auto else "."))
+                elif st_s and st_s["roster"].get(key) == "tamed":
+                    if len(st_s["out"]) >= (3 if me.level >= 12 else 2):
+                        out("You cannot hold that many shikigami in the world at once.")
+                    else:
+                        st_s["out"].append({"id": key, "node": me.node, "auto": auto, "hp": 1.0})
+                        out(f"{SHIKIGAMI[key].name} rises out of your shadow"
+                            + (" and slips away to hunt." if auto else " and waits for orders."))
+                else:
+                    out("You have nothing by that id to send. See `scouts`.")
+            elif pick is None:
+                out("Nothing of yours is out under that id. See `scouts`.")
+            elif cmd == "recall":
+                kind, e, name = pick
+                if kind == "spirit" and e["node"] != me.node:
+                    out(f"{name} has to come back to you first (it is at node {e['node']}).")
+                else:
+                    scout_state(me.tech_state, "csm" if kind == "spirit" else "ten_shadows")["out"].remove(e)
+                    out(f"{name} " + ("is swallowed again." if kind == "spirit" else "sinks back into your shadow."))
+            else:                                         # order <id> <node|auto|manual>
+                kind, e, name = pick
+                what = rest[1].lower() if len(rest) > 1 else ""
+                if what in ("auto", "manual"):
+                    e["auto"] = what == "auto"
+                    out(f"{name} " + ("will hunt on its own." if e["auto"] else "holds until you order it."))
+                elif what.isdigit() and int(what) in world.nodes[e["node"]].edges:
+                    e["node"], e["auto"] = int(what), False
+                    out(f"{name} moves. It sees: {sight(e['node'])}")
+                    spend = 1.0
+                else:
+                    out(f"`order {e['id']} <node>` (one of {world.nodes[e['node']].edges}), or auto / manual.")
+        elif cmd in ("deploy", "puppets", "puppet", "recall"):
+            if not is_puppeteer(me):
+                out("Only a puppeteer has puppets.")
+                return
+            pst = puppet_state(me.tech_state["puppets"])
+            cur_p = next((e for e in pst["out"] if e["id"] == pst["sel"]), None)
+            if cmd == "puppets":
+                out(f"Body: hideout at node {me.hideout}. In the hideout: {pst['stock']} puppet(s). "
+                    f"Banked cursed energy: {pst['bank']:.0f}.")
+                for e in pst["out"]:
+                    out(f"  {'>' if e['id'] == pst['sel'] else ' '} Puppet Mk.{e['id']}  node {e['node']}: "
+                        f"{world.nodes[e['node']].name}  ({e['hp']:.0%} intact)")
+                if not pst["out"]:
+                    out("  No puppet is out. `deploy` one to move through the colony.")
+            elif cmd == "deploy":
+                if pst["stock"] <= 0 or len(pst["out"]) >= 3:
+                    out("No puppet left to send (3 at most; `rest` in the hideout rebuilds wrecked ones).")
+                else:
+                    pst["stock"] -= 1
+                    charge = min(pst["bank"], PUPPET_CHARGE)      # banked energy goes into the puppet
+                    pst["bank"] -= charge
+                    pst["out"].append({"id": pst["next"], "node": me.hideout, "hp": 1.0, "charge": charge})
+                    pst["sel"], pst["next"] = pst["next"], pst["next"] + 1
+                    out(f"Puppet Mk.{pst['sel']} walks out of the hideout. You are steering it now.")
+            elif cmd == "puppet":
+                pick = next((e for e in pst["out"] if rest and rest[0].lstrip("mk.#") == str(e["id"])), None)
+                if pick is None:
+                    out("No such puppet out there. See `puppets`.")
+                else:
+                    pst["sel"] = pick["id"]
+                    out(f"You are steering Puppet Mk.{pick['id']} at node {pick['node']}.")
+            elif cur_p is None or cur_p["node"] != me.hideout:
+                out("Walk the puppet back to your hideout first.")
+            else:
+                pst["out"].remove(cur_p)
+                pst["stock"] += 1
+                out(f"Puppet Mk.{cur_p['id']} is back on its rack.")
+            steer(me)
+        elif cmd in ("break", "loot") and rest and rest[0].lstrip("#").isdigit():
+            out(world.interact(me, int(rest[0].lstrip("#")), cmd, day()))
+        elif cmd == "wait":
+            spend = float(rest[0]) if rest and rest[0].replace(".", "", 1).isdigit() else 1.0
+        elif cmd == "rest":
+            if node.kind != "hideout":
+                out("You can only rest in a hideout.")
+            elif is_puppeteer(me) and me.node != me.hideout:
+                out("That is someone else's bolt-hole. Your body, and your workshop, are at "
+                    f"node {me.hideout}.")
+            else:
+                me.hideout = me.node
+                if is_puppeteer(me):                      # rebuild what was wrecked
+                    pst = puppet_state(me.tech_state["puppets"])
+                    pst["stock"] = 3 - len(pst["out"])
+                out("You bar the door. This is your hideout now; wandering curses won't find you here. "
+                    "You can change cursed tools here. Your wounds stay as they are.")
+                spend = 8.0
+        elif cmd in ("heal", "treat") and is_puppeteer(me) and me.node != me.hideout:
+            out("A puppet cannot be healed, and it cannot heal. Your body is back in the hideout.")
+        elif cmd == "heal":
+            who = me if not rest else next((p for p in players if p.node == me.node and p is not me
+                                            and p.name.lower().startswith(rest[0].lower())), None)
+            if who is None:
+                out("No such player at this node.")
+            elif not who.injured:
+                out(f"{who.name} is unhurt.")
+            elif who is me and not me.can_self_heal:
+                out("You have no way to heal yourself. Track down the medic (`medic`) or a player who can "
+                    "output reverse cursed energy.")
+            elif who is not me and not me.can_heal_others:
+                out("You can't output reverse cursed energy into someone else (level 12 with Shrine or Copy only).")
+            elif who is not me and who.pclass == PClass.CURSED_SPIRIT:
+                out("Reverse cursed energy would destroy a cursed spirit, not mend it.")
+            else:
+                if who is me:                             # curses rebuild with cursed energy, sorcerers with RCT
+                    who.mend(0.3 if me.pclass == PClass.CURSED_SPIRIT else 0.4, 1)
+                else:
+                    who.mend(0.25, 1)
+                out(f"An hour of concentration. {who.name}: {who.condition_text()}")
+                spend = 1.0
+        elif cmd == "medic":
+            out(world.medic_rumour(me.node, exact=colony.has("score_board")))
+        elif cmd == "treat":
+            if world.medic != me.node:
+                out("The medic isn't here. " + world.medic_rumour(me.node, exact=colony.has("score_board")))
+            elif me.pclass == PClass.CURSED_SPIRIT:
+                out("The medic works with reverse cursed energy. It would kill you.")
+            elif not me.injured:
+                out("The medic looks you over: nothing to fix.")
+            elif not me.mendable:
+                out("The medic shakes their head. The body is fine; the damage is to your soul, and no "
+                    "reverse cursed technique reaches that.")
+            else:
+                me.mend(1.0, 4)
+                me.mend(1.0)
+                out("The medic works in silence: limbs regrown, wounds closed."
+                    + (" The scars on your soul are beyond them." if me.injured else " You are whole again."))
+                spend = 1.0
+        elif cmd in ("equip", "unequip", "stash") and rest:
+            key = rest[0].lower()
+            it = ITEMS.get(key)
+            worn = ITEMS.get(me.equipment.get(key) or "") if cmd == "unequip" and key in me.equipment else it
+            if me.hideout != me.node and not (worn is not None and worn.mundane and cmd != "stash"):
+                out("Cursed tools can only be changed in your own hideout (`rest` in a hideout to claim it).")
+            elif cmd == "unequip":
+                slot = key if key in me.equipment else it.slot if it and me.equipment.get(it.slot) == key else None
+                if not slot or not me.equipment.get(slot):
+                    out("Nothing equipped there.")
+                elif slot == "weapon" and "tool_devotion" in me.vows:
+                    out("Your binding vow forbids putting this tool down.")
+                else:
+                    me.inventory.append(me.equipment[slot])
+                    me.equipment[slot] = None
+                    out(f"You put away your {slot}.")
+            elif not it or it.slot in ("object", "supply") or key not in me.inventory:
+                out("You don't have that in your bag to equip.")
+            elif cmd == "stash":
+                if "copy" not in me.techniques or it.slot != "weapon":
+                    out("Only a Copy user can store weapons in Rika's vault.")
+                else:
+                    me.inventory.remove(key)
+                    me.tech_state.setdefault("copy", {"stored": [], "tools": []})["tools"].append(key)
+                    out(f"Rika swallows the {it.name}. You can draw it during a full manifestation.")
+            elif it.slot == "weapon" and "tool_devotion" in me.vows:
+                out("Your binding vow forbids wielding another tool.")
+            else:
+                me.inventory.remove(key)
+                if me.equipment.get(it.slot):
+                    me.inventory.append(me.equipment[it.slot])
+                me.equipment[it.slot] = key
+                out(f"You equip the {it.name}.")
+        elif cmd == "fingers":
+            held = me.inventory.count("sukuna_finger")
+            out(f"You carry {held} of Sukuna's fingers and have caged {me.fingers}. "
+                + ("Your body is a strong vessel." if me.vessel >= 20 else "Whether your body can take another, nobody can say."))
+            out(f"Finger Bearers still lurking in this colony: {world.fingers_left()}. They are special-grade curses "
+                "and stay where they are; kill one and its finger is yours.")
+            for r in world.roamers:
+                if r.kind == "bearer" and not r.respawn_at and (colony.has("score_board") or world.hops(me.node, r.node) <= 2):
+                    out(f"   One lurks at node {r.node}: {world.nodes[r.node].name} ({world.hops(me.node, r.node)} away).")
+            if world.sukuna():
+                k = world.sukuna()
+                body = f", in {k.host}'s body" + (" - a Ten Shadows body" if "ten_shadows" in k.vessel else "") if k.host else ""
+                out(f"   SUKUNA walks this colony with {k.fingers} finger(s){body}. He is gathering the rest, and he "
+                    f"was last seen at node {k.node}.")
+        elif cmd == "eat" or (cmd == "use" and rest and rest[0].lower() == "sukuna_finger"):
+            if "sukuna_finger" not in me.inventory:
+                out("You have none of Sukuna's fingers.")
+            else:
+                me.inventory.remove("sukuna_finger")
+                if "sukuna_finger" in me.looted:
+                    me.looted.remove("sukuna_finger")
+                if me.fingers + 1 > me.vessel:                # more than this body can cage
+                    total = me.fingers + 1 + me.inventory.count("sukuna_finger")
+                    out(f"\n!!! You swallow the finger. It is more than your body can cage. Markings spread across "
+                        f"your face, a second pair of eyes opens beneath your own - and {me.name} is gone.")
+                    out(f"!!! SUKUNA walks {colony.name} with {total} finger(s). He will gather the rest: the Finger "
+                        f"Bearers first, then anyone carrying or caging one.")
+                    me.alive, me.fingers = False, 0
+                    world.roamers.append(Roamer(max(r.rid for r in world.roamers) + 1, int(Grade.SPECIAL), me.node,
+                                                kind="sukuna", fingers=total, vessel=vessel_techniques(me.techniques),
+                                                host=me.name, body_hp=float(me.to_spec().stats[Stat.MAX_HP])))
+                    if "ten_shadows" in me.techniques:
+                        out("!!! Yours was a Ten Shadows body. Every shikigami is his now, Mahoraga with them - and "
+                            "with Mahoraga, in time, the slash that cuts the world.")
+                else:
+                    me.fingers += 1
+                    out(f"You swallow the finger, and your body cages it. Sukuna's cursed energy runs under everything "
+                        f"you do now: +{10 * me.fingers}% output and strength, +{25 * me.fingers} cursed energy.")
+        elif cmd == "search":
+            out(world.search(me, day()))
+            spend = 1.0
+        elif cmd == "use" and rest:
+            it = ITEMS.get(rest[0].lower())
+            if not it or it.key not in me.inventory or it.slot not in ("supply", "object"):
+                out("You don't have that to use.")
+            elif it.slot == "object":
+                out("A cursed object is consumed in battle (`item`).")
+            elif not me.mendable:
+                out("You have no wounds it would help.")
+            else:
+                me.inventory.remove(it.key)
+                me.mend(it.params["heal"] / float(me.to_spec().stats[Stat.MAX_HP]))
+                out(f"You use the {it.name}. {me.condition_text()}")
+        elif cmd in ("shop", "market"):
+            out(f"The colony's only shop is at node {world.shop}: {world.nodes[world.shop].name}."
+                + ("" if node.kind == "shop" else " You have to be there to trade."))
+            if cmd == "shop":
+                for it in ITEMS.values():
+                    if it.shop:
+                        out(f"  {it.key:<18} buy {it.cost:>3}  sell {it.cost // 2:>3}  {it.name} [{it.kind}] {it.desc}")
+            out("Offered by other players (`buy #<n>`):" if colony.market else "No player has anything up for sale.")
+            for n, offer in enumerate(colony.market, 1):
+                who = next((p.name for p in players if p.user_id == offer["seller"]), "someone gone")
+                out(f"  #{n} {ITEMS[offer['item']].name:<26} {offer['price']:>5} pts   from {who}"
+                    + ("  (taken from the dead)" if offer["looted"] else ""))
+        elif cmd == "unlist" and rest and rest[0].lstrip("#").isdigit():
+            n = int(rest[0].lstrip("#")) - 1
+            if not 0 <= n < len(colony.market) or colony.market[n]["seller"] != me.user_id:
+                out("That is not one of your offers. See `market`.")
+            elif node.kind != "shop":
+                out(f"The colony's only shop is at node {world.shop}.")
+            else:
+                offer = colony.market.pop(n)
+                me.inventory.append(offer["item"])
+                if offer["looted"]:
+                    me.looted.append(offer["item"])
+                out(f"You take the {ITEMS[offer['item']].name} back.")
+        elif cmd in ("buy", "sell") and rest:
+            key = rest[0].lower()
+            it = ITEMS.get(key)
+            if node.kind != "shop":
+                out(f"The colony's only shop is at node {world.shop}.")
+            elif cmd == "buy" and key.startswith("#") and key[1:].isdigit():      # another player's offer
+                n = int(key[1:]) - 1
+                offer = colony.market[n] if 0 <= n < len(colony.market) else None
+                if offer is None:
+                    out("No such offer. See `market`.")
+                elif offer["seller"] == me.user_id:
+                    out("That is your own offer (`unlist` takes it back).")
+                elif me.points < offer["price"]:
+                    out(f"That costs {offer['price']} points; you have {me.points}.")
+                else:
+                    colony.market.pop(n)
+                    me.points -= offer["price"]
+                    seller = next((p for p in players if p.user_id == offer["seller"]), None)
+                    if seller is not None:                # a sale is not a score: no clock reset
+                        seller.points += offer["price"]
+                    me.inventory.append(offer["item"])
+                    out(f"Bought {ITEMS[offer['item']].name} for {offer['price']} points"
+                        + (f" from {seller.name}." if seller else "."))
+            elif not it:
+                out("No such item. See `shop`.")
+            elif cmd == "buy":
+                if not it.shop:
+                    out("The shop does not stock that.")
+                elif me.points < it.cost:
+                    out(f"{it.name} costs {it.cost} points; you have {me.points}.")
+                else:
+                    me.points -= it.cost
+                    me.inventory.append(it.key)
+                    out(f"Bought {it.name}. It's in your bag"
+                        + ("; consume it in battle with `item`." if it.slot == "object"
+                           else "; equip it in your hideout."))
+            elif it.key not in me.inventory:
+                out("That isn't in your bag. (Something equipped has to come off in your hideout first.)")
+            elif it.mundane:
+                out("The shop deals only in cursed tools and cursed objects.")
+            elif len(rest) == 1:                          # straight to the shopkeeper
+                me.inventory.remove(it.key)
+                if it.key in me.looted:
+                    me.looted.remove(it.key)
+                me.points += it.cost // 2                # a sale is not a score: the 19-day clock keeps running
+                out(f"Sold {it.name} for {it.cost // 2} points.")
+            elif not rest[1].isdigit() or int(rest[1]) < 1:
+                out("`sell <item> <price>` - the price is a whole number of points.")
+            else:                                         # offered to other players at your price
+                price, looted = int(rest[1]), it.key in me.looted
+                if not looted and price > 2 * it.cost:
+                    out(f"You may ask at most {2 * it.cost} for a {it.name} (double its shop price of {it.cost}). "
+                        f"Only tools taken from the dead can go for any price.")
+                else:
+                    me.inventory.remove(it.key)
+                    if looted:
+                        me.looted.remove(it.key)
+                    colony.market.append({"seller": me.user_id, "item": it.key, "price": price, "looted": looted})
+                    out(f"Your {it.name} is up for {price} points. It stays yours until someone buys it.")
+        elif cmd == "rules":
+            for r in RULES.values():
+                out(f"  {'[ADDED]' if colony.has(r.key) else f'{r.cost:>3} pts'}  {r.key:<16} {r.desc}")
+        elif cmd == "addrule" and rest:
+            out(buy_rule(colony, me, rest[0].lower()))
+        elif cmd == "give" and len(rest) == 2 and rest[1].isdigit():
+            other = next((p for p in players if p.name.lower().startswith(rest[0].lower()) and p is not me), None)
+            err = transfer_points(colony, me, other, int(rest[1]), now) if other else "No such player."
+            out(err or f"Transferred {rest[1]} points to {other.name}.")
+        elif cmd == "players":
+            for i, p in enumerate(players, 1):
+                out(f"  {i}) {p.name} L{p.level} @ node {p.node}" + (f", {p.points} pts" if colony.has("score_board") or p is me else ""))
+        elif cmd == "pvp" and rest:
+            foe = next((p for p in players if me.node in where(p) and p is not me
+                        and p.name.lower().startswith(rest[0].lower())), None)
+            if foe is None:
+                out("No such player at this node.")
+            else:
+                me.crimes.add(Crime.ASSAULT, me.node, day())
+                fight([(present(me, me.node), 0), (present(foe, me.node), 1)], me.node, f"{me.name} attacks {foe.name}!")
+                spend = 1.0
+        else:
+            out("Unknown command. Type `help`.")
+            return
+
+        self.advance(spend, out)
+        self.save()
+
+    def advance(self, spend: float, out: Callable = print) -> None:
+        """The world moves an hour at a time: roamers close in, fights break out, idle players die."""
+        world, colony, players, rng = self.world, self.colony, self.players, self.rng
+        where, scouts_of, fight, present = self.where, self.scouts_of, self.fight, self.present
+        now = self.now
+        while spend > 0:                                  # the world moves an hour at a time
+            step = min(1.0, spend)
+            spend -= step
+            self.now += step * 3600
+            now = self.now
+            for p in players:
+                st = p.tech_state.get("puppets")
+                if st is not None:                        # the restricted body stores energy over time
+                    st["bank"] = min(400.0, st["bank"] + 40 * step / 24)
+            hunted = {r.node for r in world.roamers if not r.respawn_at}
+            for p in players:                             # scouts on auto go looking for curses
+                for kind, e, name in scouts_of(p):
+                    if e.get("auto") and e["node"] not in hunted:
+                        step = world._step_toward(e["node"], hunted)
+                        ways = [x for x in world.nodes[e["node"]].edges if world.nodes[x].kind != "hideout"]
+                        e["node"] = step if step is not None else int(rng.choice(ways)) if ways else e["node"]
+            found = [SimpleNamespace(node=n, alive=True, fingers=p.fingers + p.inventory.count("sukuna_finger"))
+                     for p in players if p.alive for n in where(p)]
+            fights = world.tick(found, now, rng)
+            for line in world.news:                       # what Sukuna has been doing
+                out("\n!!! " + line)
+            world.news.clear()
+            for nid, roamers in fights:
+                party = [p for p in players if p.alive and nid in where(p)]
+                if not party:
+                    continue
+                specs = [world.spec_for(r, rng) for r in roamers]
+                added = fight([(present(p, nid), 0) for p in party] + [(s, 50) for s in specs], nid,
+                              f"Curses close in at {world.nodes[nid].name}: " + ", ".join(s.name for s in specs))
+                for r, c in zip(roamers, added[len(party):]):
+                    if not c.alive:
+                        world.defeat(r, now, rng)
+                    elif r.kind == "sukuna":              # he keeps whatever he took back, and what he learned
+                        r.fingers = c.inventory.count("sukuna_finger")
+                        r.slash = r.slash or bool(c.tech_state.get("ten_shadows", {}).get("world_slash"))
+                spend = 0
+            for p in enforce_inactivity(players, colony, now):
+                out(f"\n!!! {p.name}'s score has not changed in {colony.inactivity_days} days. "
+                    f"Their cursed technique is removed. {p.name} is dead.")

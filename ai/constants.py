@@ -200,8 +200,8 @@ REACT_PER = 16               # perception needed to be offered a defence while c
 # its user's cursed energy output (all technique damage, and domain refinement); the square
 # root of it goes on strength, durability, HP and the cursed energy pool.
 TIER_POWER = {0: 0.5, 1: 0.7, 2: 1.0, 3: 1.4, 4: 2.0, 5: 3.4}         # by Grade (4, 3, 2, semi-1, 1, special)
-# How rare each grade of technique is when the culling game hands one out.
-TIER_RARITY = {0: 0.15, 1: 0.27, 2: 0.30, 3: 0.15, 4: 0.10, 5: 0.03}
+# How rare each technique is when the culling game hands one out is NOT set by grade: ai/rarity.py
+# keeps the original bot's per-technique rarities and class odds.
 # ---- Sukuna's fingers -------------------------------------------------------------------------
 FINGER_AMP = 0.10            # each finger a VESSEL has caged: +10% cursed energy output and strength, on every ability
 SUKUNA_LEVEL = 20            # Sukuna himself is always Sukuna: every ability, the same body, whatever he has gathered.

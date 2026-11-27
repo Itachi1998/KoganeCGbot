@@ -78,6 +78,12 @@ register(Technique("spirit_body", "Cursed Spirit Body", innate=False, copyable=F
       params={"frac": 0.3, "limbs": 1, "cd": 3}, desc="Cursed spirits rebuild themselves with cursed energy."),
 )))
 
+# The Six Eyes are a trait, not a technique: Limitless always has them, and the original bot gave
+# copy and construction users a 1-in-2 chance of them too (see rarity.py). A player who rolled
+# them carries this; the "six_eyes" flag is what the engine reads.
+register(Technique("six_eyes", "Six Eyes", innate=False, copyable=False, flags=("six_eyes",),
+                   desc="Every flow of cursed energy laid bare: the best efficiency and recovery there is."))
+
 # ======================================================================================
 # Innate techniques
 # ======================================================================================
@@ -857,7 +863,7 @@ TIMING = {
 
 
 # ======================================================================================
-# Technique grades.  Not balanced on purpose: see constants.TIER_POWER / TIER_RARITY.
+# Technique grades.  Not balanced on purpose: see constants.TIER_POWER (rarity is in rarity.py).
 # ======================================================================================
 _G = {5: ["limitless", "shrine", "copy", "cursed_spirit_manipulation", "ten_shadows", "idle_transfiguration",
           "body_hop", "idle_death_gamble", "mythical_beast_amber", "jacobs_ladder", "heavenly_restriction",

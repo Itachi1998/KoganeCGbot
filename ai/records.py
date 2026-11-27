@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 import numpy as np
 
-from .constants import (FINGER_AMP, CE_RECOVERY, REST_RECOVERY, REST_STEP, SIX_EYES_EFF, SIX_EYES_REST, SUKUNA_EFF, SUKUNA_CE_BASE, SUKUNA_LEVEL, SUKUNA_OUT_FINGER, SUKUNA_OUT_FLOOR, STRONG_VESSEL, TIER_POWER, TIER_RARITY, ADVANCED_LEVEL, BRAIN_SLOTS, EFF_CAP, N_STATS, REINCARNATED_UNLOCK, Grade,
+from .constants import (FINGER_AMP, CE_RECOVERY, REST_RECOVERY, REST_STEP, SIX_EYES_EFF, SIX_EYES_REST, SUKUNA_EFF, SUKUNA_CE_BASE, SUKUNA_LEVEL, SUKUNA_OUT_FINGER, SUKUNA_OUT_FLOOR, STRONG_VESSEL, TIER_POWER, ADVANCED_LEVEL, BRAIN_SLOTS, EFF_CAP, N_STATS, REINCARNATED_UNLOCK, Grade,
                         PClass, Stat)
 from .crimes import Crime, CrimeLog
 from .data import CLASS_BASE, ITEMS
@@ -46,14 +46,14 @@ def grade_for_level(level: int) -> Grade:        # kept for callers that have no
 
 
 def roll_technique(pclass, rng) -> str:
-    """The culling game decides what you awaken with: first how strong (TIER_RARITY), then which."""
-    from .data import PLAYABLE
-    pool = PLAYABLE[PClass(pclass)]
-    tiers = sorted({TECHNIQUES[k].grade for k in pool})
-    weights = np.array([TIER_RARITY[int(t)] for t in tiers], dtype=float)
-    tier = tiers[int(rng.choice(len(tiers), p=weights / weights.sum()))]
-    choices = [k for k in pool if TECHNIQUES[k].grade == tier]
-    return choices[int(rng.integers(len(choices)))]
+    """The culling game decides what you awaken with, at the odds the original bot used
+    (rarity.py: per-technique rarity numbers and its weight_system)."""
+    from .rarity import roll_technique as _roll
+    return _roll(pclass, rng)
+
+
+def has_six_eyes(techniques, six_eyes: bool = False) -> bool:
+    return bool(six_eyes) or any("six_eyes" in TECHNIQUES[k].flags for k in techniques if k in TECHNIQUES)
 
 
 def build_stats(pclass: PClass, level: int, techniques: list[str],
@@ -135,6 +135,7 @@ class PlayerRecord:
     hideout: Optional[int] = None
     kills: dict = field(default_factory=lambda: {"players": 0, "spirits": 0})
     looted: list = field(default_factory=list)             # item keys taken from the dead (sell at any price)
+    six_eyes: bool = False                                 # born with the Six Eyes (Limitless always is)
     fingers: int = 0                                       # Sukuna's fingers eaten and still caged
     vessel: int = 0                                        # how many this body can cage (20 = a strong vessel)
     ce_frac: float = 1.0                                   # cursed energy left after the last fight (share of maximum)...
@@ -174,14 +175,14 @@ class PlayerRecord:
     def rested_ce(self, now: float) -> float:
         """Share of maximum cursed energy this character has by ``now``: what the last fight left,
         plus a quarter of the maximum for every five minutes since (the Six Eyes: 85%)."""
-        six = any("six_eyes" in TECHNIQUES[k].flags for k in self.techniques if k in TECHNIQUES)
+        six = has_six_eyes(self.techniques, self.six_eyes)
         rate = SIX_EYES_REST if six else REST_RECOVERY
         return float(min(1.0, self.ce_frac + rate * max(0.0, now - self.ce_ts) / REST_STEP))
 
     @property
     def efficiency(self) -> float:
         """Percent off technique costs, as a fight will apply it."""
-        if any("six_eyes" in TECHNIQUES[k].flags for k in self.techniques if k in TECHNIQUES):
+        if has_six_eyes(self.techniques, self.six_eyes):
             return SIX_EYES_EFF
         return float(self.to_spec().stats[Stat.EFF])
 
@@ -244,6 +245,8 @@ class PlayerRecord:
     # ---- conversion ------------------------------------------------------------------
     def to_spec(self, controller: str = "human") -> Spec:
         techs = ["basic"] + (["spirit_body"] if self.pclass == PClass.CURSED_SPIRIT else []) + list(self.techniques)
+        if self.six_eyes and "six_eyes" not in techs:
+            techs.append("six_eyes")
         flags = {f for k in techs for f in TECHNIQUES[k].flags}
         return Spec(name=self.name, pclass=PClass(self.pclass), level=self.level,
                     grade=grade_for(self.level, techs),
