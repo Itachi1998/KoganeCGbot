@@ -214,6 +214,11 @@ REACT_PER = 16               # perception needed to be offered a defence while c
 RANGE_OUTPUT = 1.25          # a domain pulled in one step of reach hits this much harder; pushed out one, this much less
 SNAP_DEBUFF = 0.7            # Snap Release: a technique let go without gathering lands at this share of its strength
 OATH_BUFF = 1.3              # Oath of Incantation: the once-a-fight instant technique lands this much harder
+# The Furnace Covenant (Sukuna's vow on his flame, Shinjuku): what Malevolent Shrine cuts is left as
+# explosive dust, and the flame arrow loosed inside the domain sets it off.
+FURNACE_DUST = 0.15          # extra strength of the blast per measure of dust in the domain...
+FURNACE_CAP = 10             # ...up to this many measures
+FURNACE_SEALED = 1.5         # ...and this much more when the barrier is closed and nothing can escape
 # Switching from a committed move to a defence mid-round (perception check). The chance it comes
 # off: SWITCH_BASE, plus SWITCH_PER for each point of perception above REACT_PER, plus SWITCH_SPD
 # for each point of speed over the attacker's (minus when slower), kept within SWITCH_MIN..MAX.

@@ -34,7 +34,7 @@ SACRIFICE = {
 }
 BOONS = ("out", "str", "tool")          # cursed energy output, strength, tool output
 TECHNIQUE_STATS = ("out", "str", "tool", "cost", "speed")
-DOMAIN_STATS = ("range", "output", "refine", "rounds", "cost", "shell")
+DOMAIN_STATS = ("range", "output", "refine", "rounds", "cost", "shell", "open")
 
 
 @dataclass(frozen=True)
@@ -49,6 +49,7 @@ class Vow:
     release: str = ""                              # "snap" | "oath": the next channelled technique goes at once
     repeat: bool = False                           # may be sworn again once it has been spent
     kind: str = "technique"                        # technique | domain | release | binding (for the lists)
+    scoped: bool = False                           # sworn on ONE technique: `vow <key> <technique>`
 
 
 _pct = lambda m: f"{abs(m - 1):.0%}"               # noqa: E731
@@ -84,6 +85,18 @@ VOWS = {v.key: v for v in (
         f"PERMANENT. Once a fight, your first channelled technique needs no gathering and no time, and lands "
         f"{_pct(OATH_BUFF)} harder. In exchange every other technique you ever use has to be chanted.",
         permanent=True, release="oath", kind="release"),
+    Vow("skipped_rite", "Skipped Rite",
+        "PERMANENT, on ONE technique you name. This once it is loosed with none of its rite: no gathering, no "
+        "incantation, no hand sign, at full strength, unread. For ever after that technique needs its whole rite: "
+        "it must be chanted, everyone facing you sees it coming, and no vow will hurry it again. (Sukuna's vow on "
+        "the slash that cuts the world.)",
+        permanent=True, kind="release", scoped=True),
+    Vow("furnace_covenant", "Furnace Covenant",
+        "PERMANENT. Your flame arrow (Divine Flame: Open) may not be used against several opponents unless your "
+        "domain is up. In exchange everything Malevolent Shrine cuts is left as explosive dust: loose the flame "
+        "inside your own domain and it all goes off - on everything the domain takes in, and far harder if the "
+        "barrier is sealed. (Sukuna's vow on his flame.)",
+        ("flame_bound",), permanent=True, kind="binding"),
     # ---- domain: move its numbers around ------------------------------------------------------------------
     Vow("widened_domain", "Widened Domain",
         f"Your domain reaches one step further (one target -> every enemy -> all it natively takes in), and its "
@@ -99,6 +112,15 @@ VOWS = {v.key: v for v in (
         "Swap your barrier's conditions: strong from OUTSIDE instead of from inside. Nothing breaks in (an open "
         "domain gets no edge on it), but it holds nobody in and gives ground to another closed barrier.",
         domain={"shell": "reinforced"}, kind="domain"),
+    Vow("sealed_barrier", "Sealed Barrier",
+        "Close a barrier round a barrierless domain: nobody inside can leave it, and what is loosed in it "
+        "cannot disperse. It gives up what being open gave: no reaching round another domain's barrier in a clash.",
+        domain={"open": False}, kind="domain"),
+    Vow("borrowed_expansion", "Ninety-Nine Seconds",
+        "Only when your brain can bear no more domains in this fight. It bears one more - on a clock: that domain "
+        "stands one round less, and it is the last. Other vows can still shape it. (How Sukuna brought Malevolent "
+        "Shrine back at the end.)",
+        domain={"rounds": -1}, kind="domain"),
     Vow("brief_domain", "Brief Domain", "Your domain stands one round less, and is 25% stronger in a clash.",
         domain={"rounds": -1, "refine": 1.25}, kind="domain"),
     Vow("lasting_domain", "Lasting Domain", "Your domain stands one round longer; its sure-hit is 15% weaker.",
@@ -130,8 +152,8 @@ def trade(key: str, name: str, desc: str, technique: dict = None, domain: dict =
     better = lambda k, v: (v < 1) if k in ("cost", "speed") else (v > 1)      # noqa: E731
     gains = [better(k, v) for k, v in technique.items()] + [
         (v > 0) if k in ("range", "rounds") else (v < 1) if k == "cost" else (v > 1)
-        for k, v in domain.items() if k != "shell"]
-    if gains and all(gains) and "shell" not in domain:
+        for k, v in domain.items() if k not in ("shell", "open")]
+    if gains and all(gains) and "shell" not in domain and "open" not in domain:
         raise ValueError("a binding vow gives something up: this one only gains")
     vow = Vow(key, name, desc, boons=technique, domain=domain, permanent=permanent,
               kind="domain" if domain and not technique else "technique")
@@ -144,7 +166,7 @@ def _shift_domain(c, changes: dict) -> None:
     for k, v in changes.items():
         if k in ("range", "rounds"):
             mods[k] += v
-        elif k == "shell":
+        elif k in ("shell", "open"):
             mods[k] = v
         else:
             mods[k] *= v
@@ -156,13 +178,32 @@ def available(c) -> list:
     return [v for v in VOWS.values() if v.key not in taken]
 
 
-def apply(b, c, vow: Vow, announce: bool = True) -> bool:
+def bindable(b, c) -> list:
+    """Techniques a one-technique vow (Skipped Rite) could be sworn on now: channelled, and not bound yet."""
+    return [a for a in b.actions_for(c) if a.channel and a.react is None
+            and a.key not in c.chant_bound and a.key not in c.rite_skip]
+
+
+def apply(b, c, vow: Vow, announce: bool = True, arg: str = None) -> bool:
+    """Swear ``vow``. ``announce`` False = a permanent vow coming into a new fight with its swearer.
+    ``arg``: the technique, for a vow sworn on one (``vow.scoped``)."""
     taken = c.meta.setdefault("vows", set())
-    if vow.key in taken:
+    entry = f"{vow.key}:{arg}" if vow.scoped else vow.key
+    if vow.scoped:
+        if not arg:
+            b.tell(c, f"Name the technique: `vow {vow.key} <technique>`.")
+            return False
+        if announce and not any(a.key == arg for a in bindable(b, c)):
+            b.tell(c, "That has to be one of your channelled techniques, and one no vow binds yet.")
+            return False
+    if entry in taken:
         b.tell(c, "That vow is already in force." + (" (It can be sworn again once it is spent.)" if vow.repeat else ""))
         return False
     if "tool" in vow.boons and c.weapon is None:
         b.tell(c, "You need a cursed tool in hand to swear that.")
+        return False
+    if "flame_bound" in vow.restrictions and announce and not any(a.key == "fuga" for a in b.actions_for(c)):
+        b.tell(c, "That vow is sworn on the flame arrow, and you have none.")
         return False
     if vow.release and c.vow_snap is not None:
         b.tell(c, "A vow is already waiting on your next technique.")
@@ -170,7 +211,14 @@ def apply(b, c, vow: Vow, announce: bool = True) -> bool:
     if vow.domain and announce and b.domain_of(c) is not None:
         b.tell(c, "Your domain is already standing: a vow can only shape the next one.")
         return False
-    taken.add(vow.key)
+    if vow.key == "borrowed_expansion" and not c.meta.get("brain_spent"):
+        b.tell(c, "Your brain can still bear a domain. That vow is for when it cannot.")
+        return False
+    if vow.domain.get("open") is False and announce and not any(
+            a.params.get("open") for a in b.actions_for(c) if a.effect == "domain"):
+        b.tell(c, "Your domain already has a barrier. Only a barrierless domain can be sealed.")
+        return False
+    taken.add(entry)
     for r in vow.restrictions:
         c.vow_flags.add(r)
         if r == "bound_arm":
@@ -180,12 +228,22 @@ def apply(b, c, vow: Vow, announce: bool = True) -> bool:
             c.mult[k] *= v
     if vow.domain:
         _shift_domain(c, vow.domain)
+    if vow.key == "borrowed_expansion":                  # one more, and opening it spends the brain again
+        c.meta["brain_spent"], c.meta["last_domain"] = False, True
     if vow.release:
         c.vow_snap = vow.release                         # (the oath arms once in every fight: apply runs on joining)
-    if vow.permanent and c.record is not None and vow.key not in c.record.vows:
-        c.record.vows.append(vow.key)
+    if vow.scoped:
+        if announce:
+            c.rite_skip.add(arg)                         # the boon: taken in this fight, or not at all
+        else:
+            c.chant_bound.add(arg)                       # the price, in every fight after
+    if vow.permanent:                                    # kept: on a player's record, or on an NPC for whoever tracks it
+        kept = c.record.vows if c.record is not None else c.meta.setdefault("sworn", [])
+        if entry not in kept:
+            kept.append(entry)
     if announce:
-        b.say(f"{c} swears a binding vow - {vow.name}: {vow.desc}")
+        on = next((a.name for a in b.actions_for(c) if a.key == arg), arg) if vow.scoped else ""
+        b.say(f"{c} swears a binding vow - {vow.name}{f' on {on}' if on else ''}: {vow.desc}")
     return True
 
 

@@ -69,6 +69,7 @@ class Roamer:
     slash: bool = False           # ...and whether he has learned the slash that cuts the world
     body_hp: float = 0.0          # ...and that body's maximum HP, which is his
     engaged: bool = False         # in a fight right now (not saved): it neither moves nor joins another
+    vows: list = field(default_factory=list)     # permanent binding vows he has sworn since (Sukuna)
 
     @property
     def label(self) -> str:
@@ -164,7 +165,8 @@ class World:
                 "broken": np.packbits(self.broken).tobytes(),
                 "looted": np.packbits(self.looted).tobytes(),
                 "searched": np.packbits(self.searched).tobytes(),
-                "roamers": [[r.rid, r.grade, r.node, r.respawn_at, r.kind, r.fingers, list(r.vessel), r.host, r.slash, r.body_hp]
+                "roamers": [[r.rid, r.grade, r.node, r.respawn_at, r.kind, r.fingers, list(r.vessel), r.host, r.slash,
+                             r.body_hp, list(r.vows)]
                             for r in self.roamers],
                 "medic": self.medic}
 
@@ -181,7 +183,8 @@ class World:
         w.roamers = [Roamer(int(r[0]), int(r[1]), int(r[2]), float(r[3]), str(r[4]) if len(r) > 4 else "curse",
                             int(r[5]) if len(r) > 5 else 0, list(r[6]) if len(r) > 6 else [],
                             str(r[7]) if len(r) > 7 else "", bool(r[8]) if len(r) > 8 else False,
-                            float(r[9]) if len(r) > 9 else 0.0)
+                            float(r[9]) if len(r) > 9 else 0.0,
+                            vows=list(r[10]) if len(r) > 10 else [])
                      for r in st["roamers"]]
         if not any(r.kind == "bearer" for r in w.roamers):    # a save from before the fingers
             w.roamers += bearers
@@ -356,7 +359,7 @@ class World:
         if special:                                           # special grade and up take time to come back
             r.respawn_at = now + RESPAWN_HOURS.get(r.kind, RESPAWN_HOURS["curse"]) * 3600
             if r.kind == "sukuna":                            # what he held is the killer's now
-                r.fingers, r.vessel, r.host, r.slash, r.body_hp = 0, [], "", False, 0.0
+                r.fingers, r.vessel, r.host, r.slash, r.body_hp, r.vows = 0, [], "", False, 0.0, []
         else:                                                 # grade 4 to 1: no timer, re-form far away
             far = [n.nid for n in self.nodes.values() if n.kind != "hideout" and n.layer >= self.layers - 2]
             r.node = int(rng.choice(far))
@@ -367,7 +370,7 @@ class World:
         if r.kind == "bearer":
             return finger_bearer(rng)
         if r.kind == "sukuna":
-            spec = sukuna_npc(r.fingers, rng, r.vessel, r.host, r.slash, r.body_hp)
+            spec = sukuna_npc(r.fingers, rng, r.vessel, r.host, r.slash, r.body_hp, r.vows)
             spec.meta["roamer_id"] = r.rid
             return spec
         return npc_spirit(Grade(r.grade), rng)

@@ -72,6 +72,21 @@ Every domain takes in who it does in the manga (`constants.Tier`, set per domain
 * **release**: Snap Release lets the next channelled technique go at once with no gathering, weaker,
   and the same technique owes a chant next round. Oath of Incantation is permanent: once a fight the
   first technique goes at once and stronger, and every other technique must be chanted for good.
+* **Sukuna's, from the Shinjuku Showdown** (any player who has the technique can swear them; the roaming
+  Sukuna swears them himself when the fight calls for it, and the permanent ones stay with him):
+  * *barrierless Malevolent Shrine* - his domain as it comes: no barrier, everything in range, and it
+    reaches round an ordinary barrier in a clash. *Condensed / Pinpoint Domain* are his range-for-output
+    re-sets against Gojo (output now also counts in the clash).
+  * *Skipped Rite* (`vow skipped_rite <technique>`, permanent) - one technique loosed once with no
+    gathering, chant or sign; for ever after it needs its whole rite: always chanted, always seen coming,
+    never hurried by a vow again. His vow on the slash that cuts the world.
+  * *Furnace Covenant* (permanent; he always has it) - the flame arrow may not be used on several
+    opponents outside his own domain; inside it, everything Malevolent Shrine has cut is dust that the
+    flame sets off on all the domain takes in (`FURNACE_*` in `ai/constants.py`).
+  * *Sealed Barrier* - a barrierless domain closed: the blast is half again as strong, and the domain
+    loses its reach round other barriers.
+  * *Ninety-Nine Seconds* - when the brain can bear no more domains (burnt out and healed four times),
+    one more, a round shorter, and the last.
 New vows are data: `vows.trade(key, name, desc, technique={...}, domain={...})`.
 ### Perception check
 Attacked while committed to a move with no defence set? With perception 16+ you are asked: keep

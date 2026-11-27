@@ -18,7 +18,7 @@ import numpy as np
 
 from .constants import (BRAIN_HEALS, SLASH_ROUNDS, CE_RECOVERY, SIX_EYES_EFF, SIX_EYES_RECOVERY, SUKUNA_EFF, FINGER_AMP, FINGER_CE, SUKUNA_CE_BASE, SUKUNA_CE_FINGER, SUKUNA_LEVEL, TIER_POWER, FRAME_STACKS, FRAME_STEP, UNSEEN_PER, DUR_FACTOR, EFF_CAP, PART_HP_FRAC, Rng, Target, ADVANCED_LEVEL, BRAIN_SLOTS, EXTRA, LIMBS, N_STATS, UZUMAKI_EXTRACT_MIN_GRADE,
                         DType, Grade, GRADE_NAME, Kind, Part, PClass, PState, Stat, Status,
-                        RANGE_OUTPUT, TIER_NAME, Tier)
+                        RANGE_OUTPUT, TIER_NAME, Tier, FURNACE_CAP, FURNACE_DUST, FURNACE_SEALED)
 from .crimes import CRIME_INFO, FABRICATED
 from .data import JOKES, MERGE_NAMES, SHIKI_ORDER, SHIKIGAMI
 from .records import Spec, build_stats, npc_spirit, sukuna_share
@@ -292,8 +292,33 @@ def shrine_tick(b, owner, d):
     if friends:
         b.say(f"   {', '.join(t.name for t in friends)}: on {owner}'s side, and inside it all the same.")
     b.aoe(owner, ACTIONS["dismantle"], targets=hit, sure_hit=True, power=13)
+    cut = len(hit) + (len(b.field) if d.data.get("objects") else 0)
     if d.data.get("objects"):
         b.shred_field(owner, 13 * b.domain_output)
+    d.data["dust"] = d.data.get("dust", 0) + 1 + cut     # what it cuts hangs in the air (the Furnace Covenant)
+    if "flame_bound" in owner.vow_flags:
+        b.say(f"   Everything it cuts is left hanging as dust that wants to burn ({d.data['dust']} measure(s)"
+              + (", and sealed in" if not d.data.get("open") else "") + ").")
+
+
+@effect("fuga")
+def fuga(b, c, act, targets, part, amp, arg):
+    """Divine Flame: Open. An arrow of flame - and, under the Furnace Covenant, the spark for everything
+    Malevolent Shrine has cut to dust: inside his own domain it goes off on all the domain takes in."""
+    d = b.domain_of(c)
+    dust = d.data.get("dust", 0) if d is not None and d.key == "shrine_domain" and b.rival is None else 0
+    if dust and "flame_bound" in c.vow_flags:
+        sealed = not d.data.get("open")
+        power = act.power * (1 + FURNACE_DUST * min(dust, FURNACE_CAP)) * (FURNACE_SEALED if sealed else 1.0)
+        b.say(f"{c}: \"Open.\" The flame finds the dust of everything Malevolent Shrine has cut"
+              + (" - and the barrier is closed: there is nowhere for it to go." if sealed else ". It all goes off."))
+        d.data["dust"] = 0
+        b.aoe(c, act, amp, targets=b.domain_targets(c), sure_hit=True, power=power)
+        if d.data.get("objects"):
+            b.shred_field(c, power, "is blown apart")
+        return
+    for t in targets:
+        b.strike(c, t, act, part, amp)
 
 
 @effect("coffin_tick")
@@ -335,6 +360,8 @@ def _wheel_turns(b, c):
 def _ds_valid(b, c, act, target, arg):
     if target is not None and "hr_zero" in target.root.flags:
         return f"{target} has no cursed energy - the domain cannot register them as a defendant."
+    if target is not None and target.root.cid in c.meta.get("sentenced", ()):
+        return f"{target} has already been sentenced by this court: it does not try the same defendant twice."
     return None
 
 
@@ -397,6 +424,7 @@ def deadly_sentencing(b, c, act, targets, part, amp, arg):
         b.say(f"{c}'s gavel becomes the Executioner's Sword. One cut is death.")
         b.add_status(c, ST.EXEC_SWORD, 1.0, 99)
     if sentence >= 1:
+        c.meta.setdefault("sentenced", set()).add(t.root.cid)     # a verdict is final: no second trial this fight
         if t.innate:
             b.say(f"{t}'s cursed technique is confiscated.")
             b.add_status(t, ST.SEALED, 1.0, 3 + sentence)

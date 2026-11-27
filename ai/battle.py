@@ -155,9 +155,12 @@ class Combatant:
         self.domain_mods = {"range": 0,                       # steps of reach: -1 pulled in, +1 pushed out
                             "output": 1.0, "refine": 1.0,     # sure-hit strength; strength in a clash
                             "rounds": 0, "cost": 1.0,         # how long it stands; what it costs
-                            "shell": None}                    # "reinforced": strong from outside, soft inside
+                            "shell": None,                    # "reinforced": strong from outside, soft inside
+                            "open": None}                     # False: a barrierless domain closed (sealed)
         self.vow_snap: Optional[str] = None                   # "snap" | "oath": the next channelled technique goes at once
         self.chant_due: dict = {}                             # action key -> round in which it must be chanted
+        self.rite_skip: set = set()                           # techniques whose rite is skipped, this once (Skipped Rite)
+        self.chant_bound: set = set()                         # ...and those that must be chanted for ever after
         self.dmg_mult = float(self.meta.get("dmg_mult", 1.0))   # weak curses hit softly
         self.vow_flags: set = set()
         self.sealed_parts: set = set()
@@ -362,9 +365,10 @@ class Battle:
         c.meta["base_max_hp"] = float(stats[S.MAX_HP])   # before soul scars
         self.fighters.append(c)
         self.by_cid[c.cid] = c
-        for key in spec.vows:                            # permanent vows come into every fight
+        for entry in spec.vows:                          # permanent vows come into every fight
+            key, _, arg = str(entry).partition(":")      # ("skipped_rite:world_slash": a vow on one technique)
             if key in vows.VOWS:
-                vows.apply(self, c, vows.VOWS[key], announce=False)
+                vows.apply(self, c, vows.VOWS[key], announce=False, arg=arg or None)
         held = spec.meta.get("fingers", spec.record.fingers if spec.record is not None else 0)
         if held:                                         # Sukuna's fingers amplify everything their holder does
             effects.set_fingers(self, c, held)
@@ -552,10 +556,15 @@ class Battle:
             return "needs a usable " + " or ".join(Part(p).name for p in group)
         if c.cooldowns.get(act.key, 0) > self.round:
             return f"recharging until round {c.cooldowns[act.key]}"
+        if (act.key == "fuga" and "flame_bound" in c.vow_flags and self.domain_of(c) is None
+                and sum(1 for e in self.enemies(c) if e.owner is None) >= 2):
+            return "a binding vow forbids the flame against several opponents outside your own domain"
         if act.kind == Kind.DOMAIN and "no_domain" in c.vow_flags:
             return "a binding vow forbids your domain"
         if act.kind == Kind.DOMAIN and c.meta.get("brain_spent"):
-            return "your brain has been burnt out and healed too many times to expand a domain again in this fight"
+            return ("your brain has been burnt out and healed too many times to expand a domain again in this fight"
+                    + ("" if "borrowed_expansion" in c.meta.get("vows", ()) else
+                       " (a binding vow could buy one more: `vow borrowed_expansion`)"))
         if act.react == React.DODGE and "no_dodge" in c.vow_flags:
             return "a binding vow forbids dodging"
         if act.key == "weapon" and "no_tools" in c.vow_flags:
@@ -627,9 +636,11 @@ class Battle:
         targets = [c] if t == Target.SELF else [target] if target is not None else []
         ce, sta = self.costs(c, act)
         quick = effects.QUICK.get(act.effect)
+        rite = bool(act.channel) and act.key in c.rite_skip                       # its rite skipped, this once (a vow)
+        bound = act.key in c.chant_bound and not rite                             # ...and owed for ever after
         owed = bool(act.channel) and c.chant_due.get(act.key, -1) >= self.round    # snapped last round: chant it now
-        snap = c.vow_snap if (act.channel and not owed) else None
-        free = bool(quick and quick(self, c)) or snap is not None
+        snap = c.vow_snap if (act.channel and not owed and not bound and not rite) else None
+        free = bool(quick and quick(self, c)) or snap is not None or rite
         gathered = self.phase == "commit" and act.channel and not free
         if gathered:                                     # it has to have been channelled for
             missing = self.charged_for(c, act)
@@ -648,7 +659,13 @@ class Battle:
         quick = effects.QUICK.get(act.effect)
         skip = bool(quick and quick(self, c))            # nothing to activate right now
         vowed = 1.0
-        if act.channel and not skip and snap is not None:    # a binding vow: let go at once, no gathering
+        if act.channel and not skip and rite:            # the Skipped Rite: no gathering, no chant, no sign - once
+            c.rite_skip.discard(act.key)
+            c.chant_bound.add(act.key)
+            skip = True
+            self.say(f"{c} honours a binding vow: {act.name} is loosed with none of its rite - no gathering, no "
+                     f"incantation, no sign. From now on it will always need all of them.")
+        elif act.channel and not skip and snap is not None:  # a binding vow: let go at once, no gathering
             c.vow_snap, skip = None, True
             if snap == "oath":                           # permanent: stronger for it - and every technique after is chanted
                 vowed, c.must_chant = OATH_BUFF, True
@@ -661,7 +678,8 @@ class Battle:
                 self.say(f"{c} honours a binding vow: {act.name} is loosed at once on what cursed energy is in hand "
                          f"- weaker for it. To use it again next round it will have to be chanted.")
         chanting = chant and act.can_chant
-        spoken = bool(act.channel and not skip and (chanting or owed or c.must_chant or act.params.get("must_chant")))
+        spoken = bool(act.channel and not skip and (chanting or owed or bound or c.must_chant
+                                                     or act.params.get("must_chant")))
         if owed and act.channel and not skip:
             self.say(f"{c} pays what the vow asked: {act.name} has to be chanted this time.")
         lead = self.timing(c, act, chant=spoken, skip=skip)
@@ -674,6 +692,10 @@ class Battle:
             self._channel(c)                             # (outside a round: gather and be read on the spot)
             if spoken:
                 self.say(f"{c} begins an incantation.")
+        if bound and act.channel and not skip:           # the Skipped Rite's price: the sign, the words, the pointing hand
+            c.pending.seen |= {o.cid for o in self.fighters if o.alive and o.team != c.team}
+            self.say(f"{c} gives {act.name} its whole rite - the sign, the words, the pointing hand. "
+                     f"Everyone facing it sees it coming.")
         if lead >= 1.0:
             self.tell(c, f"{act.name} will not land until next round.")
         return True
@@ -1042,7 +1064,7 @@ class Battle:
                          [keep] + [f"Switch: {a.name} ({a.react.name.lower()}, {p:.0%})" for a in opts])
             want = opts[k - 1] if k else None
         else:
-            want = ai.pick_reaction(self, tgt, atk, opts)
+            want = None if ai.holds_move(self, tgt) else ai.pick_reaction(self, tgt, atk, opts)
         if want is None:
             self.tell(tgt, "You hold to your move and take what comes.")
             return None
@@ -1578,7 +1600,7 @@ class Battle:
                           inside, so it gives ground to another closed barrier (INSIDE_WEAK)
         miniature         reinforced, and shrunk to the size of a ball: MINI_DOMAIN harder to break
         """
-        r = self._refinement(d)
+        r = self._refinement(d) * d.data.get("output", 1.0)      # (a sure-hit made stronger presses harder: range for output)
         mine, theirs = d.data.get("shell", "normal"), other.data.get("shell", "normal")
         if d.data.get("open") and not other.data.get("open") and theirs == "normal":
             r *= OPEN_EDGE
@@ -1599,6 +1621,7 @@ class Battle:
     def _shell_failed(self, d: Domain) -> None:
         """Remember that this way of building the barrier did not win (NPCs learn from it)."""
         owner = self.by_cid[d.owner]
+        owner.meta["domain_lost"] = owner.meta.get("domain_lost", 0) + 1
         tried = owner.meta.setdefault("shell_failed", [])
         if d.data.get("shell", "normal") not in tried:
             tried.append(d.data.get("shell", "normal"))
@@ -1617,6 +1640,9 @@ class Battle:
             self.say(f"{c} cannot expand a domain inside their own side's.")
             return False
         mods = c.domain_mods                             # what binding vows have done to this fighter's domain
+        if mods.get("open") is False and open_barrier:   # a barrierless domain, sealed: nothing gets out of it
+            open_barrier = False
+            data = {**(data or {}), "sealed": True}
         rounds = max(0, rounds + mods["rounds"])
         if mods["shell"] and not open_barrier and shell == "normal":
             shell = mods["shell"]
@@ -1628,6 +1654,9 @@ class Battle:
         self.say(f"\n>>> DOMAIN EXPANSION: {name.upper()} <<<  ({c})")
         if c.meta.pop("last_domain", False):
             c.meta["brain_spent"] = True                 # the healed brain will not bear another after this one
+        if new.data.get("sealed"):
+            self.say(f"   {c} has closed a barrier round a domain that never had one: nothing inside it gets out, "
+                     f"and it has lost the reach round other barriers that being open gave it.")
         if new.data["shell"] == "reinforced":
             self.say(f"   {c} has swapped the barrier's conditions: hard as stone from outside, soft within. "
                      f"Nothing breaks in; anyone inside can break out.")

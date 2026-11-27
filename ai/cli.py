@@ -89,9 +89,10 @@ Battle commands
                               An ordinary weapon holds no cursed energy - it cannot hurt a curse,
                               and a sorcerer killed with one rises as a curse. Use
                               `use infused_strike` / `use infused_shot` to pour energy in.
-  vow [key]                   list binding vows / swear one (free). Vows move your technique's and your
+  vow [key] [technique]       list binding vows / swear one (free). Vows move your technique's and your
                               domain's numbers around (range for output, an inverted barrier...), or let a
-                              technique go without the channelling phase (snap_release, oath_of_incantation)
+                              technique go without the channelling phase (snap_release, oath_of_incantation,
+                              and `vow skipped_rite <technique>`: once, with none of its rite)
   spare <target> <points>     buy mercy (needs the Point Transfer rule)
   flee | pass | help
 Parts: head torso larm rarm lleg rleg (extra1 extra2).  Targets: the id in brackets (e1, p2, s1)."""
@@ -367,7 +368,14 @@ def battle_command(b, c, line: str, out=print) -> bool:
                 f"rounds {d['rounds']:+d}, cost x{d['cost']:.2f}, barrier "
                 + ("strong from outside (inverted)" if d["shell"] == "reinforced" else "strong from inside"))
         elif rest[0].lower() in vows.VOWS:
-            vows.apply(b, c, vows.VOWS[rest[0].lower()])
+            v, arg = vows.VOWS[rest[0].lower()], (rest[1].lower() if len(rest) > 1 else None)
+            if v.scoped and arg is None:                 # sworn on one technique: which?
+                opts = vows.bindable(b, c)[:24]
+                if not opts:
+                    out("You have no channelled technique a vow could be sworn on.")
+                    return False
+                arg = opts[b.ask(c, f"{v.name}: on which technique?", [a.name for a in opts])].key
+            vows.apply(b, c, v, arg=arg)
         else:
             out("No such vow.")
     elif cmd == "spare" and len(rest) == 2 and rest[1].isdigit():

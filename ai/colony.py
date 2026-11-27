@@ -598,6 +598,7 @@ class ColonySession:
             elif r.kind == "sukuna":                      # he keeps whatever he took back, and what he learned
                 r.fingers = c.inventory.count("sukuna_finger")
                 r.slash = r.slash or bool(c.tech_state.get("ten_shadows", {}).get("world_slash"))
+                r.vows = sorted(set(r.vows) | set(c.meta.get("sworn", [])))      # ...and what he has sworn for good
         return added
 
     @staticmethod

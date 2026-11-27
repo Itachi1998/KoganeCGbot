@@ -20,6 +20,21 @@ def _domain_coming(b, c, enemies) -> bool:
     return any(e.pending and e.pending.act.kind == Kind.DOMAIN and c.cid in e.pending.seen for e in enemies)
 
 
+def _flame_ready(b, c) -> bool:
+    """His own domain has left dust standing and nothing contests it: the flame would set it all off."""
+    d = b.domain_of(c)
+    return bool(d is not None and d.data.get("dust") and "flame_bound" in c.vow_flags and b.rival is None)
+
+
+def holds_move(b, c) -> bool:
+    """Caught mid-move with the chance to drop it for a defence (the perception check): an NPC sees a
+    domain expansion through - and Sukuna the flame that sets off his domain's dust - unless badly hurt."""
+    p = c.pending
+    if p is None or c.hp < 0.35 * c.max_hp:
+        return False
+    return p.act.kind == Kind.DOMAIN or (p.act.key == "fuga" and _flame_ready(b, c))
+
+
 def _kept_up(b, c):
     """A defence this fighter simply keeps running (Infinity), if it has lapsed and would help."""
     foes = b.enemies(c)
@@ -82,6 +97,8 @@ def score(b, c, a, enemies, hpf) -> float:
             return 1.0                                   # it would only stop in the air
         if a.key == "execute":
             return 100.0
+        if a.key == "fuga" and _flame_ready(b, c):   # the flame, when his own domain has left dust for it
+            return 150.0 + 10 * b.domain_of(c).data["dust"]
         if a.key == "funeral_hold":                  # worth it only on someone already frozen
             return 34.0 if any(e.has(Status.STUN) for e in enemies) else 0.0
         if "ai" in a.params:
@@ -231,6 +248,8 @@ def _defends(b, c, enemies) -> bool:
         return False                                    # no dodging a sure-hit: answer the domain itself
     if _kept_up(b, c) is not None:
         return False                                    # the wall goes back up before anything else
+    if _flame_ready(b, c) and any(a.key == "fuga" and b.why_cant(c, a) is None for a in b.actions_for(c)):
+        return False                                    # the dust is standing: the flame comes before any guard
     hpf = c.hp / max(c.max_hp, 1)
     by = {a.react: a for a in guards}
     cover = by.get(React.COVER)
@@ -273,9 +292,63 @@ def channel(b, c) -> None:
         c.meta["intent_name"] = plan[0].name
 
 
+def _sukuna_vows(b, c, enemies) -> bool:
+    """Sukuna swears what he swore in Shinjuku, when the fight calls for the same answer.
+    Returns True if he has also used his turn doing it.
+
+      the slash that cuts the world, against Infinity   the Skipped Rite: loosed at once, unread, this once;
+                                                        it needs its whole rite for ever after
+      his domain has lost a clash                       range for output: Malevolent Shrine pulled in a step
+                                                        (and to one target if it loses again), stronger for it
+      his brain can bear no more domains, and none      Ninety-Nine Seconds: one more, on a clock (and a round
+      stands against him                                bought back with Lasting Domain, for the flame)
+      opening his domain on several opponents, with     the barrier sealed (in _go, as he opens it), so the dust
+      no other domain standing                          his domain leaves has nowhere to go when the flame finds
+                                                        it (Furnace Covenant, which he always lives under)
+    """
+    from . import vows
+    taken = c.meta.setdefault("vows", set())
+    acts = {a.key: a for a in b.actions_for(c)}
+    ws = acts.get("world_slash")
+    behind = [e for e in enemies if e.has(Status.INFINITY) and b.adapt_pierce(c, e) < 1.0]
+    if (ws is not None and behind and c.pending is None and "world_slash" not in c.chant_bound
+            and "world_slash" not in c.rite_skip and b.why_cant(c, ws) is None
+            and vows.apply(b, c, vows.VOWS["skipped_rite"], arg="world_slash")):
+        tgt = max(behind, key=lambda e: e.level)
+        if b.perform(c, ws, tgt, pick_part(b, c, tgt), False, None):
+            return True
+    if (c.meta.get("brain_spent") and "borrowed_expansion" not in taken
+            and not any(b.hostile(c, b.by_cid[d.owner]) for d in b.domains())   # (not thrown away on a clash)
+            and any(a.kind == Kind.DOMAIN for a in acts.values())
+            and vows.apply(b, c, vows.VOWS["borrowed_expansion"]) and "flame_bound" in c.vow_flags
+            and "lasting_domain" not in taken):
+        vows.apply(b, c, vows.VOWS["lasting_domain"])     # ...and a round bought back, for the flame to find the dust
+    if b.domain_of(c) is None and any(a.kind == Kind.DOMAIN for a in acts.values()):
+        lost = c.meta.get("domain_lost", 0)
+        for need, key in ((1, "condensed_domain"), (2, "pinpoint_domain")):
+            if lost >= need and key not in taken:
+                vows.apply(b, c, vows.VOWS[key])
+    return False
+
+
+def _go(b, c, plan) -> bool:
+    """Carry a plan out. Sukuna, opening his domain on several opponents with no other domain standing
+    and none lost, seals its barrier first (see _sukuna_vows)."""
+    if (plan[0].kind == Kind.DOMAIN and c.meta.get("sukuna") and c.kind == "fighter"
+            and "flame_bound" in c.vow_flags and b.domain_of(c) is None and b.why_cant(c, plan[0]) is None
+            and "sealed_barrier" not in c.meta.setdefault("vows", set()) and not c.meta.get("domain_lost")
+            and sum(1 for e in b.enemies(c) if e.owner is None) >= 2 and not _domain_coming(b, c, b.enemies(c))
+            and not any(b.hostile(c, b.by_cid[d.owner]) for d in b.domains())):
+        from . import vows
+        vows.apply(b, c, vows.VOWS["sealed_barrier"])
+    return b.perform(c, *plan)
+
+
 def act(b, c) -> None:
     rng = b.rng
     enemies = b.enemies(c)
+    if c.meta.get("sukuna") and c.kind == "fighter" and enemies and _sukuna_vows(b, c, enemies):
+        return
     if c.has(Status.ANTI_DOMAIN) and c.meta.get("anti_hands") and not _domain_threat(b, c) and not any(
             e.pending and e.pending.act.kind == Kind.DOMAIN and c.cid in e.pending.seen for e in enemies):
         b.drop_stance(c, "lets the hand sign go")       # no domain to answer: free the hands
@@ -296,10 +369,10 @@ def act(b, c) -> None:
         c.meta.pop("intent", None)
         return
     intent = c.meta.pop("intent", None)                 # what it gathered energy for
-    if intent is not None and b.perform(c, *intent):
+    if intent is not None and _go(b, c, intent):
         return
     for plan in _ranked(b, c, enemies):
-        if b.perform(c, *plan):
+        if _go(b, c, plan):
             return
     for e in enemies:                                   # can't reach anyone: close the distance
         if b.elevated(e) and c.pos != e.pos and b.move(c, e.pos):

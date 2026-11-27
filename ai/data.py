@@ -312,7 +312,9 @@ register(Technique("shrine", "Shrine", desc="Slashes that adjust to the target."
     A("spiderweb", "Spiderweb", target=ALL, power=16, ce=14, rng=RANGED, requires=ANY_ARM, channel=1,
       tags=fs({"slash"}), desc="A web of slashes through the ground under everyone."),
     A("fuga", "Divine Flame: Open", power=48, ce=40, rng=RANGED, requires=ANY_ARM, channel=1, can_chant=True,
-      min_level=12, tags=fs({"fire"}), desc="The arrow of flame kept for what slashes cannot finish."),
+      min_level=12, tags=fs({"fire"}), effect="fuga",
+      desc="The arrow of flame kept for what slashes cannot finish. Under the Furnace Covenant it also sets off "
+           "the dust Malevolent Shrine leaves, on everything inside the domain."),
     A("world_slash", "Dismantle: The Slash That Cuts the World", power=55, ce=45, rng=RANGED, requires=BOTH_ARMS,
       channel=1, min_level=18, effect="world_slash", params={"must_chant": True, "cond": "seen_mahoraga"},
       tags=fs({"slash"}),

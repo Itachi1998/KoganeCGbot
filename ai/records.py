@@ -385,8 +385,12 @@ def body_hp_of(techniques, pclass=PClass.SORCERER, level: int = SUKUNA_LEVEL) ->
     return float(build_stats(pclass, level, ["basic"] + [k for k in techniques if k != "basic"])[Stat.MAX_HP])
 
 
+# The vows Sukuna already lives under when he walks: the one on his flame (vows.py: furnace_covenant).
+SUKUNA_VOWS = ("furnace_covenant",)
+
+
 def sukuna_npc(fingers: int, rng: Optional[np.random.Generator] = None, vessel=(), host: str = "",
-               slash: bool = False, body_hp: float = 0.0) -> Spec:
+               slash: bool = False, body_hp: float = 0.0, vows=()) -> Spec:
     """Sukuna walking free in a body he has taken. He is always the same Sukuna - level 20,
     every ability he ever had - and the fingers decide how much cursed energy he has to put into
     them (``sukuna_share``, and his reserves). ``vessel`` is the innate technique of the body he
@@ -412,4 +416,5 @@ def sukuna_npc(fingers: int, rng: Optional[np.random.Generator] = None, vessel=(
     spec.meta.update(vessel=vessel_techniques(vessel), host=host, body_hp=hp)
     spec.inventory = ["sukuna_finger"] * fingers
     spec.meta.update(sukuna=True, fingers=fingers, unlock_bonus=99)  # nothing of his is locked behind a level
+    spec.vows = sorted(set(SUKUNA_VOWS) | set(vows))                 # his standing vows, and any sworn since
     return spec
