@@ -8,6 +8,7 @@ and blocks until it is over.  Front ends must not run two commands on one sessio
 """
 from __future__ import annotations
 
+import re
 import threading
 import time
 from types import SimpleNamespace
@@ -33,6 +34,31 @@ PART_LABEL = {Part.HEAD: "head", Part.TORSO: "torso", Part.L_ARM: "l.arm", Part.
               Part.L_LEG: "l.leg", Part.R_LEG: "r.leg", Part.EXTRA_1: "limb+1", Part.EXTRA_2: "limb+2"}
 
 
+NAME_MIN, NAME_MAX = 2, 24
+
+
+def clean_name(raw) -> tuple:
+    """A character name a player typed -> (name, None) or (None, why not). Markdown, mentions and
+    line breaks are stripped so a name cannot ping anyone or break the bot's layouts."""
+    name = re.sub(r"[`*~|<>@#\\\[\](){}:/]", "", str(raw or "").replace("_", " "))
+    name = " ".join(name.split())
+    if len(name) < NAME_MIN:
+        return None, f"A character's name needs at least {NAME_MIN} letters or digits."
+    if len(name) > NAME_MAX:
+        return None, f"A character's name can be at most {NAME_MAX} characters."
+    if not any(ch.isalnum() for ch in name):
+        return None, "A character's name needs letters or digits in it."
+    return name, None
+
+
+class ColonyBusy(RuntimeError):
+    """The colony's lock could not be had in time (another process is holding it)."""
+
+
+LOCK_TTL = 30.0            # seconds the colony lock survives its holder dying mid-command
+FIGHT_TTL = 120.0          # seconds a "fighting" / "engaged" mark survives its process dying mid-fight
+
+
 class ColonySession:
     def __init__(self, server_id: str, store: Optional[GameStore] = None, cache: Optional[BattleCache] = None,
                  io: Optional[IO] = None, seed: Optional[int] = None, name: str = "Tokyo No. 1 Colony",
@@ -42,26 +68,46 @@ class ColonySession:
         self.cache = cache if cache is not None else BattleCache()
         self._tls = threading.local()                 # each command thread plays its fights through its own io
         self._default_io = io or IO()
-        # Many fights at once: a front end that runs commands on several threads takes ``lock``
-        # around each command and sets ``concurrent``; a fight then lets go of the lock while it is
-        # played, with its players (``in_battle``) and roamers (``engaged``) marked busy.
+        # Many fights at once, in one process or several. A front end that runs commands on several
+        # threads brackets each one with ``acquire()`` / ``release()`` and sets ``concurrent``:
+        #   the lock      this process's ``lock``, then the colony's lock in Redis (``cache``), so two
+        #                 bot processes never work on one colony at the same moment;
+        #   catching up   every save bumps the colony's version in Redis; ``acquire`` reloads the
+        #                 colony from the database when another process has saved since (``sync``);
+        #   fights        a fight saves, lets go of the lock while it is played and takes it back at
+        #                 the end. Its players (``in_battle``) and roamers (``Roamer.engaged``) are
+        #                 marked busy in Redis for as long as it lasts (a heartbeat keeps the marks
+        #                 alive; they lapse by themselves if the process dies). The process playing
+        #                 a fight owns its fighters' records until it ends: nobody else may change them.
         self.lock = threading.Lock()
         self.concurrent = False
-        self.in_battle: set = set()                   # user ids
+        self._name = f"colony:{self.server_id}"
+        self._mine: dict = {}                         # user id -> record, for fights THIS process is playing
+        self._my_roamers: set = set()                 # roamer ids engaged by this process's fights
+        self._sparring: set = set()                   # user ids in a lobby spar played by this process
+        self._beat: Optional[threading.Thread] = None
+        if getattr(self.store, "coord", None) is None:
+            self.store.coord = self.cache             # the store's game-wide items coordinate through it too
         self.battle_banner = battle_banner            # extra text when a fight starts (the CLI prints its help)
         # Front-end hooks (the CLI leaves them as they are; the Discord bot ties fights to lobbies):
         self.can_fight: Callable = lambda p: True     # may this player be attacked / fight at all?
         self.pvp_check: Callable = lambda me, foe: None   # an error message, or None to allow a PvP fight
         self.io_for: Callable = lambda party: self.io     # where a fight involving these players is shown
         self.rng = np.random.default_rng(seed)
-        colony = self.store.get_colony(self.server_id)
-        if colony is None:
-            colony = Colony(self.server_id, name, managers=list(managers), map_seed=int(self.rng.integers(1 << 30)))
-            self.store.put_colony(colony)
-        self.colony = colony
-        saved = self.store.get_map(self.server_id)
-        self.world = World.from_state(saved) if saved else World(colony.map_seed)
-        self.players = [p for p in self.store.list_players(self.server_id) if p.alive]
+        token = self.cache.acquire(self._name, ttl=LOCK_TTL, wait=LOCK_TTL)     # (two processes founding it at once)
+        try:
+            colony = self.store.get_colony(self.server_id)
+            if colony is None:
+                colony = Colony(self.server_id, name, managers=list(managers),
+                                map_seed=int(self.rng.integers(1 << 30)))
+                self.store.put_colony(colony)
+            self.colony = colony
+            saved = self.store.get_map(self.server_id)
+            self.world = World.from_state(saved) if saved else World(colony.map_seed)
+            self.players = [p for p in self.store.list_players(self.server_id) if p.alive]
+            self._ver = self.cache.version(self._name)
+        finally:
+            self.cache.release(self._name, token)
         self.now = max([time.time(), colony.clock] + [p.last_score_ts for p in self.players])
         for p in self.players:
             self.steer(p)
@@ -74,16 +120,117 @@ class ColonySession:
     def io(self, value: IO) -> None:
         self._tls.io = value
 
+    # ---- the lock, and keeping up with other processes ------------------------------------------
+    def acquire(self, wait: float = 30.0, keep=()) -> None:
+        """Take the colony for one command. Raises ColonyBusy if another process keeps it too long."""
+        self.lock.acquire()
+        try:
+            self._tls.me = getattr(self._tls, "me", None) if keep else None      # (a new command starts clean)
+            token = self.cache.acquire(self._name, ttl=LOCK_TTL, wait=wait)
+            if token is None:
+                raise ColonyBusy(self.server_id)
+            self._tls.token = token
+            self.sync(keep)
+            self._tls.held = True
+        except BaseException:
+            self.cache.release(self._name, getattr(self._tls, "token", None))
+            self._tls.token = None
+            self.lock.release()
+            raise
+
+    def release(self) -> None:
+        """Let the colony go (a no-op if this thread does not hold it)."""
+        if not getattr(self._tls, "held", False):
+            return
+        self._tls.held = False
+        token, self._tls.token = getattr(self._tls, "token", None), None
+        self.cache.release(self._name, token)
+        self.lock.release()
+
+    def enter_spar(self, user_ids) -> None:
+        """Mark players busy for a practice fight the colony itself does not run (the lobby's spar):
+        nothing can ambush or attack them, and they cannot give colony commands, until it is over."""
+        ids = {str(u) for u in user_ids}
+        self._sparring |= ids
+        self.cache.mark(self._name + ":fighting", ids, self._mark_ttl())
+
+    def leave_spar(self, user_ids) -> None:
+        ids = {str(u) for u in user_ids}
+        self._sparring -= ids
+        self.cache.unmark(self._name + ":fighting", ids)
+
+    def sync(self, keep=()) -> None:
+        """Catch up with what other processes did: reload if the colony was saved elsewhere, and
+        learn which roamers are busy in somebody's fight."""
+        ver = self.cache.version(self._name)
+        if ver != self._ver:
+            self.reload(keep)
+            self._ver = ver
+        busy = self.cache.marked(self._name + ":engaged")
+        for r in self.world.roamers:
+            r.engaged = str(r.rid) in busy
+
+    def reload(self, keep=()) -> None:
+        """Re-read the colony, the map and the players from the database, in place: everything that
+        holds this session's colony / world / players list sees the new state. The records of
+        ``keep`` and of players in fights this process is playing are NOT replaced - their fight is
+        the newest thing that has happened to them."""
+        colony = self.store.get_colony(self.server_id)
+        if colony is not None:
+            self.colony.__dict__.update(colony.__dict__)
+        saved = self.store.get_map(self.server_id)
+        if saved:
+            news = self.world.news
+            self.world.__dict__.update(World.from_state(saved).__dict__)
+            self.world.news = news
+        held = {p.user_id: p for p in keep}
+        held.update(self._mine)
+        fresh = {p.user_id: p for p in self.store.list_players(self.server_id) if p.alive}
+        merged = [held.get(uid, p) for uid, p in fresh.items()]
+        merged += [p for uid, p in held.items() if uid not in fresh and p.alive and p.server_id == self.server_id]
+        self.players[:] = merged
+        self.now = max(self.now, self.colony.clock)
+        for p in self.players:
+            self.steer(p)
+
+    @property
+    def in_battle(self) -> set:
+        """User ids of everyone in a fight in this colony right now (any process). A snapshot."""
+        return self.cache.marked(self._name + ":fighting")
+
+    def _heartbeat(self) -> None:
+        """Keep this process's fighting / engaged marks alive while its fights last."""
+        while True:
+            time.sleep(FIGHT_TTL / 3)
+            try:
+                self.cache.mark(self._name + ":fighting", list(self._mine) + list(self._sparring), FIGHT_TTL)
+                self.cache.mark(self._name + ":engaged", list(self._my_roamers), FIGHT_TTL)
+            except Exception as e:                        # Redis hiccup: try again next beat
+                print(f"[colony] heartbeat failed: {type(e).__name__}: {e}")
+
+    def _mark_ttl(self) -> float:
+        if not self.concurrent:
+            return 6 * 3600.0                             # one thread, no heartbeat: the fight itself clears them
+        if self._beat is None:
+            self._beat = threading.Thread(target=self._heartbeat, daemon=True, name=f"beat-{self.server_id}")
+            self._beat.start()
+        return FIGHT_TTL
+
     # ---- bookkeeping -------------------------------------------------------------------
     def save(self, only=None) -> None:
         """Write the colony, the map and the players (``only``: just these players - after a fight,
         only the fighters changed). Items that have not changed are not written (storage._put)."""
+        self.cache.extend(self._name, getattr(self._tls, "token", None), LOCK_TTL)    # a big save takes a moment
         self.colony.clock = self.now
         self.collect_sales()
+        before = self.store.writes
         self.store.put_colony(self.colony)
         self.store.put_map(self.server_id, self.world.state())
         for p in (self.players if only is None else only):
-            self.store.put_player(p)
+            if p.server_id == self.server_id:             # (someone who has just left for another colony)
+                self.store.put_player(p)
+        if self.store.writes != before:                   # tell the other processes there is something new
+            self._ver = self.cache.bump(self._name)
         self.update_leaderboard()
 
     # ---- the global leaderboard and global market (GLOBAL items in the store) ----------------
@@ -124,19 +271,25 @@ class ColonySession:
         return "\n".join(out)
 
     def collect_sales(self) -> None:
-        """Points owed to this colony's players for things they sold on the global market."""
-        owed = {k: v for k, v in self.store.get_global("MARKET").get("payouts", {}).items()
-                if k.startswith(self.server_id + ":")}
-        if not owed:
+        """Points owed to this colony's players for things they sold (global market, or a local sale
+        made while they were in a fight). Taken off the books and paid in one atomic step."""
+        book = self.store.get_global("MARKET").get("payouts", {})
+        prefix = self.server_id + ":"
+        if not any(k.startswith(prefix) for k in book):
             return
-        paid = []
-        for p in self.players:
-            k = f"{self.server_id}:{p.user_id}"
-            if k in owed:
-                p.points += owed[k]                         # a sale is not a score: no clock reset
-                paid.append(k)
-        if paid:
-            self.store.update_global("MARKET", lambda d: [d["payouts"].pop(k, None) for k in paid])
+        busy = self.in_battle
+        due = {f"{prefix}{p.user_id}": p for p in self.players if p.alive and p.user_id not in busy}
+        taken: dict = {}
+
+        def take(d):
+            pay = d.get("payouts", {})
+            for k in due:
+                if k in pay:
+                    taken[k] = pay.pop(k)
+        if any(k in book for k in due):
+            self.store.update_global("MARKET", take)
+        for k, points in taken.items():
+            due[k].points += points                       # a sale is not a score: no clock reset
 
     def global_market(self, me, verb: str, args: list, at_shop: bool) -> str:
         """market global | sell <item> <price> global | buy g<n> | unlist g<n>."""
@@ -176,35 +329,121 @@ class ColonySession:
         if offer is None:
             return "No such offer. See `market global`."
         mine = offer["seller"] == me.user_id and offer["server"] == self.server_id
+        if verb == "unlist" and not mine:
+            return "That is not your offer."
+        if verb == "buy" and mine:
+            return "That is your own offer (`unlist g<n>` takes it back)."
+        if verb == "buy" and me.points < offer["price"]:
+            return f"That costs {offer['price']} points; you have {me.points}."
+        taken: list = []
+
+        def take(d):                                      # decided inside the update: another colony (or another
+            live = next((o for o in d.get("offers", []) if o["id"] == oid), None)     # process) may have got there first
+            if live is None:
+                return
+            d["offers"].remove(live)
+            taken.append(live)
+            if verb == "buy":
+                k = f"{live['server']}:{live['seller']}"
+                pay = d.setdefault("payouts", {})
+                pay[k] = pay.get(k, 0) + live["price"]
+        self.store.update_global("MARKET", take)
+        if not taken:
+            return "That offer has just gone. See `market global`."
+        offer = taken[0]
+        me.inventory.append(offer["item"])
         if verb == "unlist":
-            if not mine:
-                return "That is not your offer."
-            self.store.update_global("MARKET", lambda d: d["offers"].remove(offer))
-            me.inventory.append(offer["item"])
             if offer["looted"]:
                 me.looted.append(offer["item"])
             return f"You take the {ITEMS[offer['item']].name} back."
-        if mine:
-            return "That is your own offer (`unlist g<n>` takes it back)."
-        if me.points < offer["price"]:
-            return f"That costs {offer['price']} points; you have {me.points}."
-        def sold(d):
-            d["offers"].remove(offer)
-            k = f"{offer['server']}:{offer['seller']}"
-            pay = d.setdefault("payouts", {})
-            pay[k] = pay.get(k, 0) + offer["price"]
-        self.store.update_global("MARKET", sold)
         me.points -= offer["price"]                       # only once the sale is on the books
-        me.inventory.append(offer["item"])
         return (f"Bought {ITEMS[offer['item']].name} for {offer['price']} points from {offer['name']} of "
                 f"{offer['colony']}. They are paid the next time their colony moves.")
 
     def day(self) -> int:
         return int((self.now - self.colony.created_ts) // DAY)
 
+    @staticmethod
+    def find_player(token: str, pool: list):
+        """A player named in a command: ``id:<user id>`` (what the Discord bot sends, exact), or the
+        start of a character's name (what a person types)."""
+        token = token.strip()
+        if token.lower().startswith("id:"):
+            return next((p for p in pool if p.user_id == token[3:]), None)
+        low = token.lower()
+        return (next((p for p in pool if p.name.lower() == low), None)
+                or next((p for p in pool if p.name.lower().startswith(low)), None))
+
     def player(self, user_id) -> Optional[PlayerRecord]:
         """The living character a user has in this colony."""
         return next((p for p in self.players if p.user_id == str(user_id) and p.alive), None)
+
+    def name_taken(self, name: str, user_id=None) -> bool:
+        """Is a living character here already called that (someone else's)?"""
+        low = name.lower()
+        return any(p.alive and p.name.lower() == low and p.user_id != str(user_id) for p in self.players)
+
+    def _pack_up(self, p: PlayerRecord) -> None:
+        """Before a character leaves this colony: take their offers off the colony's market (back
+        into the bag), and call back whatever they had out in it."""
+        for offer in [o for o in self.colony.market if o["seller"] == p.user_id]:
+            self.colony.market.remove(offer)
+            p.inventory.append(offer["item"])
+            if offer["looted"]:
+                p.looted.append(offer["item"])
+        for key in ("csm", "ten_shadows"):
+            st = p.tech_state.get(key)
+            if isinstance(st, dict) and st.get("out"):
+                st["out"] = []
+        pst = p.tech_state.get("puppets")
+        if isinstance(pst, dict) and pst.get("out"):
+            pst["stock"] = pst.get("stock", 0) + len(pst["out"])
+            pst["out"], pst["sel"] = [], None
+
+    def exchange(self, other: "ColonySession", user_id) -> str:
+        """Colony transfer (both colonies need the Free Passage rule). One character per colony: if
+        the user also has a living character in the other colony, the two trade places - each moves
+        to the other's colony. The caller holds BOTH colonies (acquire them in server-id order)."""
+        from .rules import can_move_player
+        uid = str(user_id)
+        me = self.player(uid)
+        if me is None:
+            return "You have no living character in this colony."
+        if other is self or other.server_id == self.server_id:
+            return "That is the colony you are in."
+        if not can_move_player(self.colony, other.colony):
+            return "Both colonies must have added the Free Passage rule."
+        theirs = other.player(uid)
+        if uid in self.in_battle or uid in other.in_battle:
+            return "Not while one of your characters is in a fight."
+        if other.name_taken(me.name, uid) or (theirs is not None and self.name_taken(theirs.name, uid)):
+            return "A character with that name already lives there. (Names are unique within a colony.)"
+        shift = other.now - self.now                      # each colony keeps its own clock: carry elapsed time over
+        self._pack_up(me)
+        self.players[:] = [p for p in self.players if p is not me]
+        if theirs is not None:
+            other._pack_up(theirs)
+            other.players[:] = [p for p in other.players if p is not theirs]
+        for rec, src, dst, delta in ((me, self, other, shift),) + (((theirs, other, self, -shift),) if theirs else ()):
+            rec.server_id, rec.node, rec.hideout = dst.server_id, 0, None
+            rec.last_score_ts += delta
+            rec.created_ts += delta
+            rec.ce_ts += delta if rec.ce_ts else 0.0
+            dst.players.append(rec)
+            dst.steer(rec)
+        self.store.put_player(me)                         # the arrival first: a crash here duplicates, never loses
+        if theirs is not None:
+            self.store.put_player(theirs)                 # (it takes the slot the mover left)
+        else:
+            self.store._delete(f"SERVER#{self.server_id}", f"PLAYER#{uid}")
+        self.save()
+        other.save()
+        self._ver = self.cache.bump(self._name)           # the players changed even if no other item did
+        other._ver = other.cache.bump(other._name)
+        if theirs is not None:
+            return (f"{me.name} leaves {self.colony.name} for {other.colony.name}, and {theirs.name} comes the "
+                    f"other way: one character per colony, so they trade places.")
+        return f"{me.name} leaves {self.colony.name} for {other.colony.name}."
 
     def add_player(self, rec: PlayerRecord, out: Callable = print) -> bool:
         """A new character joins. False if that user already has a living one here; a dead one is replaced."""
@@ -246,15 +485,27 @@ class ColonySession:
             b.add_object(**kw)
         io.say(f"\n*** {label} ***" + (f"\n{self.battle_banner}\n" if self.battle_banner else ""))
         ids = {p.user_id for p in party}
-        self.in_battle |= ids
+        me = getattr(self._tls, "me", None)               # whoever gave the command that led here
+        mine = party + ([me] if me is not None and me not in party and me.alive else [])
+        self.save(only=mine)                              # what matters of this command so far, before letting go
+        self._mine.update({p.user_id: p for p in party})
+        self.cache.mark(self._name + ":fighting", ids, self._mark_ttl())
         if self.concurrent:
-            self.lock.release()                           # the colony carries on while this is fought
+            self.release()                                # the colony carries on while this is fought
         try:
             b.run()
         finally:
-            if self.concurrent:
-                self.lock.acquire()
-            self.in_battle -= ids
+            try:
+                if hasattr(io, "flush"):
+                    io.flush()                            # (outside the lock: it waits on Discord)
+            finally:
+                if self.concurrent:
+                    self._retake(mine)
+                self.cache.unmark(self._name + ":fighting", ids)
+                for uid in ids:
+                    self._mine.pop(uid, None)
+        for oid in b.broken_oids:                         # (the map may have been reloaded under the fight)
+            self.world.mark_broken(oid)
         for p in self.players:
             self.steer(p)
         for c in b.fighters:                              # a curse born in the fight stays in the colony
@@ -277,29 +528,54 @@ class ColonySession:
                 except Exception as e:                    # a cache outage must not lose the fight
                     print(f"[colony] character snapshot failed: {type(e).__name__}: {e}")
         self.save(only=party)                             # and for good, in the database
-        if hasattr(io, "flush"):
-            io.flush()
         return added
+
+    def _retake(self, party) -> None:
+        """Take the colony back after a fight. The fight's results must not be lost: wait as long as
+        it takes, and if the lock truly cannot be had, write the fighters' records regardless."""
+        for attempt in range(10):
+            try:
+                self.acquire(wait=30.0, keep=party)
+                return
+            except ColonyBusy:
+                print(f"[colony] {self.server_id}: still waiting for the colony after a fight ({attempt + 1})")
+        for p in party:
+            self.store.put_player(p)
+        self.cache.bump(self._name)
+        raise ColonyBusy(self.server_id)
 
     def encounter(self, nid, roamers, party=None):
         """Roamers fight the players present at a node. Returns the combatants, or None if nobody is there."""
         world, rng = self.world, self.rng
         party = party if party is not None else [p for p in self.players if p.alive and self.can_fight(p)
                                                  and nid in self.where(p)]
-        party = [p for p in party if p.user_id not in self.in_battle]
-        roamers = [r for r in roamers if not r.engaged]
+        busy = self.in_battle
+        party = [p for p in party if p.user_id not in busy]
+        live = {r.rid: r for r in world.roamers}          # (callers may hold roamers from before a reload)
+        roamers = [live[r.rid] for r in roamers if r.rid in live and not live[r.rid].engaged
+                   and not live[r.rid].respawn_at]
         if not party or not roamers:
             return None
         specs = [world.spec_for(r, rng) for r in roamers]
+        rids = [r.rid for r in roamers]
         for r in roamers:
             r.engaged = True
+        self._my_roamers.update(rids)
+        self.cache.mark(self._name + ":engaged", rids, self._mark_ttl())
         try:
             added = self.fight([(self.present(p, nid), 0) for p in party] + [(sp, 50) for sp in specs], nid,
                                f"Curses close in at {world.nodes[nid].name}: " + ", ".join(sp.name for sp in specs))
         finally:
-            for r in roamers:
-                r.engaged = False
-        for r, c in zip(roamers, added[len(party):]):
+            self.cache.unmark(self._name + ":engaged", rids)
+            self._my_roamers.difference_update(rids)
+            live = {r.rid: r for r in world.roamers}      # the map may have been reloaded meanwhile
+            for rid in rids:
+                if rid in live:
+                    live[rid].engaged = False
+        for rid, c in zip(rids, added[len(party):]):
+            r = live.get(rid)
+            if r is None:
+                continue
             if not c.alive:
                 world.defeat(r, self.now, rng)
             elif r.kind == "sukuna":                      # he keeps whatever he took back, and what he learned
@@ -372,6 +648,7 @@ class ColonySession:
         if me.user_id in self.in_battle:
             out("You are in a fight. Finish it first (your controls are in the battle's channel).")
             return
+        self._tls.me = me
         tokens = line.split()
         if not tokens:
             return
@@ -571,10 +848,12 @@ class ColonySession:
         elif cmd in ("heal", "treat") and is_puppeteer(me) and me.node != me.hideout:
             out("A puppet cannot be healed, and it cannot heal. Your body is back in the hideout.")
         elif cmd == "heal":
-            who = me if not rest else next((p for p in players if p.node == me.node and p is not me
-                                            and p.name.lower().startswith(rest[0].lower())), None)
+            who = me if not rest else self.find_player(rest[0], [p for p in players if p.node == me.node
+                                                                 and p is not me])
             if who is None:
                 out("No such player at this node.")
+            elif who is not me and who.user_id in self.in_battle:
+                out(f"{who.name} is in a fight. Wait until it is over.")
             elif not who.injured:
                 out(f"{who.name} is unhurt.")
             elif who is me and not me.can_self_heal:
@@ -745,8 +1024,15 @@ class ColonySession:
                     colony.market.pop(n)
                     me.points -= offer["price"]
                     seller = next((p for p in players if p.user_id == offer["seller"]), None)
-                    if seller is not None:                # a sale is not a score: no clock reset
-                        seller.points += offer["price"]
+                    if seller is not None and seller.user_id not in self.in_battle:
+                        seller.points += offer["price"]   # a sale is not a score: no clock reset
+                    else:                                 # mid-fight (their record is the fight's) or gone: owed
+                        key, owed = f"{self.server_id}:{offer['seller']}", offer["price"]
+
+                        def book(d):
+                            pay = d.setdefault("payouts", {})
+                            pay[key] = pay.get(key, 0) + owed
+                        self.store.update_global("MARKET", book)
                     me.inventory.append(offer["item"])
                     out(f"Bought {ITEMS[offer['item']].name} for {offer['price']} points"
                         + (f" from {seller.name}." if seller else "."))
@@ -792,15 +1078,16 @@ class ColonySession:
         elif cmd == "addrule" and rest:
             out(buy_rule(colony, me, rest[0].lower()))
         elif cmd == "give" and len(rest) == 2 and rest[1].isdigit():
-            other = next((p for p in players if p.name.lower().startswith(rest[0].lower()) and p is not me), None)
-            err = transfer_points(colony, me, other, int(rest[1]), now) if other else "No such player."
+            other = self.find_player(rest[0], [p for p in players if p is not me])
+            err = ("No such player." if other is None else
+                   f"{other.name} is in a fight. Give it to them when it is over." if other.user_id in self.in_battle
+                   else transfer_points(colony, me, other, int(rest[1]), now))
             out(err or f"Transferred {rest[1]} points to {other.name}.")
         elif cmd == "players":
             for i, p in enumerate(players, 1):
                 out(f"  {i}) {p.name} L{p.level} @ node {p.node}" + (f", {p.points} pts" if colony.has("score_board") or p is me else ""))
         elif cmd == "pvp" and rest:
-            foe = next((p for p in players if me.node in where(p) and p is not me
-                        and p.name.lower().startswith(rest[0].lower())), None)
+            foe = self.find_player(rest[0], [p for p in players if me.node in where(p) and p is not me])
             err = (("No such player at this node." if foe is None else None)
                    or (f"{foe.name} is already in a fight." if foe.user_id in self.in_battle else None)
                    or self.pvp_check(me, foe))
@@ -843,8 +1130,9 @@ class ColonySession:
                         step = world._step_toward(e["node"], hunted)
                         ways = [x for x in world.nodes[e["node"]].edges if world.nodes[x].kind != "hideout"]
                         e["node"] = step if step is not None else int(rng.choice(ways)) if ways else e["node"]
+            busy = self.in_battle                         # (one look per hour, not one per player)
             found = [SimpleNamespace(node=n, alive=True, fingers=p.fingers + p.inventory.count("sukuna_finger"))
-                     for p in players if p.alive and self.can_fight(p) and p.user_id not in self.in_battle
+                     for p in players if p.alive and self.can_fight(p) and p.user_id not in busy
                      for n in where(p)]
             held = sum(p.fingers + p.inventory.count("sukuna_finger") for p in players if p.alive)
             fights = world.tick(found, now, rng, held)
@@ -852,8 +1140,9 @@ class ColonySession:
                 out("\n!!! " + line)
             world.news.clear()
             for nid, roamers in fights:                  # only players who can fight (in a lobby, on Discord)
+                busy = self.in_battle
                 party = [p for p in players if p.alive and self.can_fight(p) and nid in where(p)
-                         and p.user_id not in self.in_battle]
+                         and p.user_id not in busy]
                 if party and rng.random() < skills.evade_chance(party):    # navigation: slip away
                     guide = max(party, key=lambda p: skills.get(p, "navigation"))
                     out(f"\n{guide.name} spots {', '.join(r.label for r in roamers)} first and leads the way "
@@ -862,7 +1151,8 @@ class ColonySession:
                 if self.encounter(nid, roamers, party) is None:
                     continue
                 spend = 0
-            for p in enforce_inactivity(players, colony, now):
+            busy = self.in_battle
+            for p in enforce_inactivity([x for x in players if x.user_id not in busy], colony, now):
                 out(f"\n!!! {p.name}'s score has not changed in {colony.inactivity_days} days. "
                     f"Their cursed technique is removed. {p.name} is dead.")
 

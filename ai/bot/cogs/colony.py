@@ -304,29 +304,31 @@ class Colony(commands.Cog):
             return
         await self.do(ctx, f"pvp {self._name(ctx, player)}")
 
-    @commands.hybrid_command(name="transfer", description="Move to another colony (both need the Free Passage rule)")
+    @commands.hybrid_command(name="transfer", description="Move to another colony, or trade places with your "
+                                                          "character there (both need Free Passage)")
     @commands.guild_only()
-    async def transfer(self, ctx, server_id: str):
-        dst = self.bot.get_guild(int(server_id)) if server_id.isdigit() else None
+    @app_commands.describe(server="the server (colony) to go to: pick from the list, or paste its id")
+    async def transfer(self, ctx, server: str):
+        """One character per colony. With no character in the other colony yours moves there; if you
+        have one in each, the two trade places - each goes to the other's colony."""
+        dst = self.bot.get_guild(int(server)) if server.strip().isdigit() else discord.utils.find(
+            lambda g: g.name.lower() == server.strip().lower(), self.bot.guilds)
         if dst is None:
-            await ctx.send("I am not in a server with that id.", ephemeral=True)
+            await ctx.send("I am not in a server by that name or id.", ephemeral=True)
             return
+        if dst.id == ctx.guild.id:
+            await ctx.send("That is the colony you are in.", ephemeral=True)
+            return
+        await ctx.defer(ephemeral=True)
+        text = await self.rt.exchange(ctx.guild, dst, ctx.author.id)
+        await ctx.send(text or "One of the colonies is busy. Try again in a moment.", ephemeral=True)
 
-        def move(game):
-            rec = game.player(ctx.author.id)
-            if rec is None:
-                return "You have no living character here."
-            self.rt.session(dst)                          # make sure the destination colony exists
-            err = game.store.move_player(rec, str(dst.id))
-            if err:
-                return err
-            game.players[:] = [p for p in game.players if p is not rec]
-            other = self.rt.sessions.get(str(dst.id))
-            if other is not None:
-                other.players[:] = [p for p in other.players if p.user_id != rec.user_id] + [rec]
-            return f"{rec.name} leaves {game.colony.name} for {dst.name}."
-        ok, text = await self.rt.run(ctx.guild, ctx.channel, move)
-        await ctx.send(text if ok else "The colony is busy. Try again in a moment.", ephemeral=True)
+    @transfer.autocomplete("server")
+    async def _transfer_servers(self, itx: discord.Interaction, current: str):
+        low = current.lower()
+        mine = [g for g in self.bot.guilds if g.id != itx.guild_id and g.get_member(itx.user.id) is not None
+                and low in g.name.lower()]
+        return [app_commands.Choice(name=g.name[:100], value=str(g.id)) for g in mine[:25]]
 
     # ---- skill points --------------------------------------------------------------------------
     @commands.hybrid_command(name="skills", description="Spend skill points (+10 a level to 10, +5 after)")
@@ -356,10 +358,10 @@ class Colony(commands.Cog):
     async def puppets(self, ctx):
         await self.do(ctx, "puppets")
 
-    def _name(self, ctx, member: discord.abc.User) -> str:
-        """The colony commands find a player by the start of their character's name."""
-        rec = self.rt.session(ctx.guild).player(member.id)
-        return (rec.name if rec else member.display_name).split()[0]
+    @staticmethod
+    def _name(ctx, member: discord.abc.User) -> str:
+        """Colony commands take ``id:<user id>``: exact, whatever the character is called."""
+        return f"id:{member.id}"
 
 
 async def setup(bot: commands.Bot) -> None:

@@ -21,7 +21,9 @@ class CullingBot(commands.Bot):
         intents.message_content = True
         intents.members = True
         intents.guilds = True
-        super().__init__(command_prefix=",", intents=intents)
+        # Nothing the bot posts can ping @everyone or a role, whatever a player names their character.
+        super().__init__(command_prefix=",", intents=intents,
+                         allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=True))
         self.runtime = None                      # opened at start-up, not on import (it opens the database)
 
     async def setup_hook(self) -> None:

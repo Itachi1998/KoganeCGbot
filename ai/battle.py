@@ -282,6 +282,7 @@ class Battle:
         self._next_team = 100
         self._cid_n: dict[str, int] = {}
         self._last_kill: dict[str, int] = {}             # root cid -> round of its side's latest kill
+        self.broken_oids: list = []                      # map objects broken in this fight (colony.py re-applies them)
         self._plain = False                              # the blow being resolved carries no cursed energy
         self.last_tags: set = set()                      # tags of the damage being applied (for hooks)
 
@@ -1255,6 +1256,7 @@ class Battle:
             if c.pos == obj.fid:
                 c.pos = None
         if obj.oid is not None and by is not None:       # property damage goes on the record
+            self.broken_oids.append(obj.oid)
             if self.world is not None:
                 self.world.mark_broken(obj.oid)
             if by.root.crimes is not None:

@@ -24,6 +24,7 @@ import pickle
 import sqlite3
 import threading
 import time
+import uuid
 import zlib
 from decimal import Decimal
 from typing import Optional
@@ -31,7 +32,7 @@ from typing import Optional
 import numpy as np
 
 from .records import PlayerRecord
-from .rules import Colony, can_move_player
+from .rules import Colony
 
 
 # ======================================================================================
@@ -41,6 +42,7 @@ class BattleCache:
     def __init__(self, url: Optional[str] = None, ttl: int = 6 * 3600):
         self.ttl = ttl
         self._mem: dict = {}
+        self._mutex = threading.Lock()                   # guards _mem when Redis is not there
         self.r = None
         try:
             import redis
@@ -143,6 +145,162 @@ class BattleCache:
         else:
             self._mem.pop(k, None)
 
+    # ---- coordination: shared by every thread and every bot process on this Redis ---------------
+    # Named locks (owned: only the holder's token releases them; they expire if the holder dies),
+    # version counters (has someone else changed this since I looked?), expiring sets (who is in a
+    # fight right now - entries lapse by themselves if their process dies) and small JSON documents
+    # (lobbies). Without Redis they live in this process's memory, which is right for one process.
+    _RELEASE = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end"
+    _EXTEND = ("if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('pexpire', KEYS[1], ARGV[2]) "
+               "else return 0 end")
+
+    def acquire(self, name: str, ttl: float = 30.0, wait: float = 30.0) -> Optional[str]:
+        """Take the lock ``name``. Returns the token to release it with, or None if it could not be
+        had within ``wait`` seconds. It frees itself after ``ttl`` seconds if never released."""
+        k, token = f"cg:lock:{name}", uuid.uuid4().hex
+        deadline, pause = time.monotonic() + wait, 0.002
+        while True:
+            if self.r is not None:
+                if self.r.set(k, token, nx=True, px=int(ttl * 1000)):
+                    return token
+            else:
+                with self._mutex:
+                    held = self._mem.get(k)
+                    if held is None or held[1] <= time.monotonic():
+                        self._mem[k] = (token, time.monotonic() + ttl)
+                        return token
+            if time.monotonic() >= deadline:
+                return None
+            time.sleep(pause)
+            pause = min(pause * 2, 0.05)
+
+    def release(self, name: str, token: Optional[str]) -> bool:
+        """Let go of ``name`` - only if ``token`` still holds it (it may have expired and been retaken)."""
+        if token is None:
+            return False
+        k = f"cg:lock:{name}"
+        if self.r is not None:
+            return bool(self.r.eval(self._RELEASE, 1, k, token))
+        with self._mutex:
+            if self._mem.get(k, (None,))[0] == token:
+                del self._mem[k]
+                return True
+        return False
+
+    def extend(self, name: str, token: Optional[str], ttl: float = 30.0) -> bool:
+        """Push a held lock's expiry out (a long save). False if it is no longer ours."""
+        if token is None:
+            return False
+        k = f"cg:lock:{name}"
+        if self.r is not None:
+            return bool(self.r.eval(self._EXTEND, 1, k, token, int(ttl * 1000)))
+        with self._mutex:
+            if self._mem.get(k, (None,))[0] == token:
+                self._mem[k] = (token, time.monotonic() + ttl)
+                return True
+        return False
+
+    def version(self, name: str) -> int:
+        k = f"cg:ver:{name}"
+        v = self.r.get(k) if self.r is not None else self._mem.get(k)
+        return int(v) if v else 0
+
+    def bump(self, name: str) -> int:
+        k = f"cg:ver:{name}"
+        if self.r is not None:
+            return int(self.r.incr(k))
+        with self._mutex:
+            self._mem[k] = int(self._mem.get(k, 0)) + 1
+            return self._mem[k]
+
+    def mark(self, name: str, members, ttl: float) -> None:
+        """Put ``members`` in the expiring set ``name`` for ``ttl`` seconds (again = refresh)."""
+        members = [str(m) for m in members]
+        if not members:
+            return
+        k, until = f"cg:set:{name}", time.time() + ttl
+        if self.r is not None:
+            self.r.zadd(k, {m: until for m in members})
+            self.r.expire(k, int(ttl) + 60)
+        else:
+            with self._mutex:
+                self._mem.setdefault(k, {}).update({m: until for m in members})
+
+    def unmark(self, name: str, members) -> None:
+        members = [str(m) for m in members]
+        if not members:
+            return
+        k = f"cg:set:{name}"
+        if self.r is not None:
+            self.r.zrem(k, *members)
+        else:
+            with self._mutex:
+                for m in members:
+                    self._mem.get(k, {}).pop(m, None)
+
+    def marked(self, name: str) -> set:
+        """The members of ``name`` that have not expired."""
+        k, now = f"cg:set:{name}", time.time()
+        if self.r is not None:
+            return {m.decode() if isinstance(m, bytes) else m for m in self.r.zrangebyscore(k, now, "+inf")}
+        with self._mutex:
+            return {m for m, until in self._mem.get(k, {}).items() if until > now}
+
+    def put_json(self, name: str, value, ttl: Optional[float] = None) -> None:
+        k, raw = f"cg:doc:{name}", json.dumps(_to_json(value), separators=(",", ":"))
+        if self.r is not None:
+            self.r.set(k, raw, ex=int(ttl) if ttl else None)
+        else:
+            with self._mutex:
+                self._mem[k] = (raw, time.time() + ttl if ttl else None)
+
+    def get_json(self, name: str):
+        k = f"cg:doc:{name}"
+        if self.r is not None:
+            raw = self.r.get(k)
+        else:
+            with self._mutex:
+                raw, until = self._mem.get(k, (None, None))
+                if until is not None and until <= time.time():
+                    self._mem.pop(k, None)
+                    raw = None
+        return _from_json(json.loads(raw)) if raw else None
+
+    def drop(self, name: str) -> None:
+        k = f"cg:doc:{name}"
+        if self.r is not None:
+            self.r.delete(k)
+        else:
+            with self._mutex:
+                self._mem.pop(k, None)
+
+    def map_set(self, name: str, field, value) -> None:
+        k = f"cg:map:{name}"
+        if self.r is not None:
+            self.r.hset(k, str(field), str(value))
+        else:
+            with self._mutex:
+                self._mem.setdefault(k, {})[str(field)] = str(value)
+
+    def map_del(self, name: str, *fields) -> None:
+        k = f"cg:map:{name}"
+        if not fields:
+            return
+        if self.r is not None:
+            self.r.hdel(k, *[str(f) for f in fields])
+        else:
+            with self._mutex:
+                for f in fields:
+                    self._mem.get(k, {}).pop(str(f), None)
+
+    def map_all(self, name: str) -> dict:
+        k = f"cg:map:{name}"
+        if self.r is not None:
+            return {(a.decode() if isinstance(a, bytes) else a): (b.decode() if isinstance(b, bytes) else b)
+                    for a, b in self.r.hgetall(k).items()}
+        with self._mutex:
+            return dict(self._mem.get(k, {}))
+
 
 # ======================================================================================
 # DynamoDB
@@ -215,6 +373,12 @@ def pack(pk: str, sk: str, item: dict) -> dict:
     return out
 
 
+def _digest(stored: dict) -> bytes:
+    """What an item looks like in storage, in 16 bytes: equal digests = nothing to write."""
+    return hashlib.blake2b(bytes(stored["d"]) + repr(sorted((k, v) for k, v in stored.items() if k != "d")).encode(),
+                           digest_size=16).digest()
+
+
 def unpack(stored: dict) -> dict:
     d = stored.get("d")
     if d is None:                                       # an unpacked item (written before packing existed)
@@ -244,8 +408,11 @@ class GameStore:
         self.db = None
         self.local_path = local_path
         self._local: dict = {}
-        self._written: dict = {}                        # (pk, sk) -> digest of the last write: unchanged = no write
-        self._lock = threading.RLock()
+        self._written: dict = {}                        # (pk, sk) -> digest of what storage holds (as last read or
+        self._lock = threading.RLock()                  #             written here): unchanged = no write
+        self.writes = 0                                 # items actually written (skips do not count)
+        self.coord = None                               # a BattleCache: coordinates GLOBAL items between processes
+        self._globals: dict = {}                        # sk -> (version seen, item)
         if kind == "dynamodb":
             try:
                 import boto3
@@ -283,8 +450,7 @@ class GameStore:
     # ---- primitives --------------------------------------------------------------------
     def _put(self, pk: str, sk: str, item: dict, new_only: bool = False) -> bool:
         stored = pack(pk, sk, item)
-        digest = hashlib.blake2b(stored["d"] + repr(sorted((k, v) for k, v in stored.items() if k != "d")).encode(),
-                                 digest_size=16).digest()
+        digest = _digest(stored)
         with self._lock:
             if not new_only and self._written.get((pk, sk)) == digest:
                 return True                             # nothing changed since the last write: skip it
@@ -311,16 +477,28 @@ class GameStore:
                 self._local.setdefault(pk, {})[sk] = item
                 self._flush()
             self._written[(pk, sk)] = digest
+            self.writes += 1
         return True
+
+    def _seen(self, stored: dict) -> dict:
+        """Note what storage holds for an item just read (another process may have written it), so
+        the next save of the same content is skipped and a save of anything else is not."""
+        if stored.get("d") is not None:
+            self._written[(stored["PK"], stored["SK"])] = _digest(stored)
+        return unpack(stored)
 
     def _get(self, pk: str, sk: str) -> Optional[dict]:
         with self._lock:
             if self.table is not None:
-                item = self.table.get_item(Key={"PK": pk, "SK": sk}).get("Item")
-                return unpack(_from_db(item)) if item else None
+                item = self.table.get_item(Key={"PK": pk, "SK": sk}, ConsistentRead=True).get("Item")
+                if item is None:
+                    self._written.pop((pk, sk), None)
+                return self._seen(_from_db(item)) if item else None
             if self.db is not None:
                 row = self.db.execute("SELECT item FROM items WHERE pk=? AND sk=?", (pk, sk)).fetchone()
-                return unpack(_unblob(row[0])) if row else None
+                if row is None:
+                    self._written.pop((pk, sk), None)
+                return self._seen(_unblob(row[0])) if row else None
             return self._local.get(pk, {}).get(sk)
 
     def _delete(self, pk: str, sk: str) -> None:
@@ -338,36 +516,48 @@ class GameStore:
         with self._lock:
             if self.table is not None:
                 from boto3.dynamodb.conditions import Key
-                kw = {"KeyConditionExpression": Key("PK").eq(pk) & Key("SK").begins_with(prefix)}
+                kw = {"KeyConditionExpression": Key("PK").eq(pk) & Key("SK").begins_with(prefix),
+                      "ConsistentRead": True}
                 items = []
                 while True:
                     page = self.table.query(**kw)
                     items += page["Items"]
                     if "LastEvaluatedKey" not in page:
-                        return [unpack(_from_db(i)) for i in items]
+                        return [self._seen(_from_db(i)) for i in items]
                     kw["ExclusiveStartKey"] = page["LastEvaluatedKey"]
             if self.db is not None:
                 rows = self.db.execute("SELECT item FROM items WHERE pk=? AND sk >= ? AND sk < ? ORDER BY sk",
                                        (pk, prefix, prefix + "￿")).fetchall()
-                return [unpack(_unblob(r[0])) for r in rows]
+                return [self._seen(_unblob(r[0])) for r in rows]
             return [v for k, v in sorted(self._local.get(pk, {}).items()) if k.startswith(prefix)]
 
     # ---- game-wide items (PK = GLOBAL): the global leaderboard and the global market -------------
-    # Kept in memory after the first read; one bot process owns them (run one bot per database).
+    # Shared by every colony and every bot process. ``coord`` (a BattleCache) gives each one a lock
+    # and a version number in Redis: an update takes the lock and re-reads the item if another
+    # process has changed it since this one last looked. Without ``coord`` this process owns them.
     def get_global(self, sk: str) -> dict:
         with self._lock:
-            cache = self.__dict__.setdefault("_globals", {})
-            if sk not in cache:
-                cache[sk] = self._get("GLOBAL", sk) or {}
-            return cache[sk]
+            ver = self.coord.version(f"global:{sk}") if self.coord is not None else 0
+            seen = self._globals.get(sk)
+            if seen is None or seen[0] != ver:
+                seen = self._globals[sk] = (ver, self._get("GLOBAL", sk) or {})
+            return seen[1]
 
     def update_global(self, sk: str, fn) -> dict:
-        """Read-modify-write a GLOBAL item under the store's lock (written only if it changed)."""
-        with self._lock:
-            d = self.get_global(sk)
-            fn(d)
-            self._put("GLOBAL", sk, d)
-            return d
+        """Read-modify-write a GLOBAL item: one writer at a time, written only if it changed."""
+        token = self.coord.acquire(f"global:{sk}", ttl=15, wait=15) if self.coord is not None else None
+        try:
+            with self._lock:
+                d = self.get_global(sk)
+                before = self.writes
+                fn(d)
+                self._put("GLOBAL", sk, d)
+                if self.coord is not None and self.writes != before:
+                    self._globals[sk] = (self.coord.bump(f"global:{sk}"), d)
+                return d
+        finally:
+            if self.coord is not None:
+                self.coord.release(f"global:{sk}", token)
 
     def raw_items(self):
         """Every stored item in the common (packed) format, for migrate.py."""
@@ -442,22 +632,6 @@ class GameStore:
             return [PlayerRecord.from_item(unpack(_unblob(r[0]))) for r in rows]
         return [PlayerRecord.from_item(v) for pk in self._local.values() for sk, v in pk.items()
                 if sk == f"PLAYER#{user_id}"]
-
-    def move_player(self, rec: PlayerRecord, dst_server: str) -> Optional[str]:
-        """Colony transfer. Returns an error message or None on success."""
-        src, dst = self.get_colony(rec.server_id), self.get_colony(dst_server)
-        if src is None or dst is None:
-            return "Unknown colony."
-        if not can_move_player(src, dst):
-            return "Both colonies must have added the Free Passage rule."
-        other = self.get_player(dst_server, rec.user_id)
-        if other is not None and other.alive:
-            return "You already have a living character in that colony."
-        old = rec.server_id
-        rec.server_id, rec.node, rec.hideout = dst_server, 0, None
-        self.put_player(rec)
-        self._delete(f"SERVER#{old}", f"PLAYER#{rec.user_id}")
-        return None
 
 
 def _blob(stored: dict) -> bytes:
