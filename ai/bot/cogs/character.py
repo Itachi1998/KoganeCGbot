@@ -49,7 +49,7 @@ def sheet(rec: PlayerRecord, colony_name: str, now: float, inactivity_days: int,
     mx_hp = st[Stat.MAX_HP] * (1 - cond["scar"])
     hp = mx_hp * cond["hp"]
     ce = rec.rested_ce(now) * st[Stat.MAX_CE]
-    left = inactivity_days - (now - rec.last_score_ts) / DAY
+    left = min(inactivity_days, inactivity_days - (time.time() - rec.last_score_ts) / DAY)      # real days
     techs = ", ".join(TECHNIQUES[t].name for t in rec.techniques) or "none"
     lines = [
         style.heading(rec.name, 2),
@@ -184,6 +184,8 @@ class Character(commands.Cog):
         def join(game):
             out: list = []
             if replace:
+                if str(user.id) in game.in_battle:        # (its fight would write the old character back)
+                    return "busy", out
                 game.remove_player(user.id)
             if game.name_taken(rec.name, rec.user_id):
                 return "name", out
@@ -196,6 +198,9 @@ class Character(commands.Cog):
         if status == "name":
             return CreateView(self, user, guild, name, f"Someone here is already called **{name}**. "
                                                        f"Press **Change name** and pick another.")
+        if status == "busy":
+            return style.panel(self.bot, "Create a character", "Not while your character is in a fight.",
+                               accent=style.DANGER)
         if status == "exists":
             return style.panel(self.bot, "Create a character",
                                "You cannot create more than one player per colony. (`/delete` your current one first.)",
@@ -260,8 +265,7 @@ class Character(commands.Cog):
         if key is None:
             await ctx.send("No such innate technique. Start typing and pick one from the list.", ephemeral=True)
             return
-        game = self.rt.sessions.get(str(ctx.guild.id))
-        if game is not None and str(ctx.author.id) in game.in_battle:
+        if str(ctx.author.id) in self.rt.fighting(ctx.guild.id):
             await ctx.send("Not while your character is in a fight.", ephemeral=True)
             return
         await ctx.defer(ephemeral=True)
@@ -302,8 +306,12 @@ class Character(commands.Cog):
     @commands.guild_only()
     async def delete(self, ctx: commands.Context) -> None:
         await ctx.defer(ephemeral=True)
-        ok, rec = await self.rt.run(ctx.guild, ctx.channel, lambda game: game.remove_player(ctx.author.id))
-        if not ok:
+        uid = ctx.author.id
+        ok, rec = await self.rt.run(ctx.guild, ctx.channel,
+                                    lambda game: "busy" if str(uid) in game.in_battle else game.remove_player(uid))
+        if ok and rec == "busy":
+            await ctx.send("Not while your character is in a fight.", ephemeral=True)
+        elif not ok:
             await ctx.send("The colony is busy (a fight is on). Try again when it is over.", ephemeral=True)
         elif rec is None:
             await ctx.send("You do not have a player in this colony.", ephemeral=True)

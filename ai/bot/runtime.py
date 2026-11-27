@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
@@ -65,6 +66,10 @@ class Runtime:
     def lobby_of(self, guild_id, user_id) -> Optional[Lobby]:
         return self.book.of_user(guild_id, user_id)
 
+    def fighting(self, guild_id) -> set:
+        """User ids in a fight in this server's colony right now, on any bot process (straight from Redis)."""
+        return self.cache.marked(f"colony:{guild_id}:fighting")
+
     def _hooks(self, game: ColonySession, guild_id: int) -> None:
         def can_fight(p):                     # curses only find players on a team in a PUBLIC lobby
             where = self.book.members(guild_id).get(str(p.user_id))
@@ -94,6 +99,7 @@ class Runtime:
             game = ColonySession(gid, self.store, self.cache, name=guild.name,
                                  managers=[str(guild.owner_id)] if guild.owner_id else [])
             game.concurrent = True                # fights let go of the colony's lock (colony.py)
+            game.idle_clock = time.time           # the 19 days are real days here, whatever the colony's clock says
             self._hooks(game, guild.id)
             self.sessions.setdefault(gid, game)
         return self.sessions[gid]

@@ -179,10 +179,9 @@ class LobbyCog(commands.Cog, name="Lobby"):
         (marks lapse by themselves if the process playing the fight dies)."""
         if lb.starting_until > time.time():
             return True
-        game = game or self.rt.sessions.get(str(lb.guild_id))
-        if game is None or not lb.players:
+        if not lb.players:
             return False
-        busy = game.in_battle
+        busy = self.rt.fighting(lb.guild_id)
         return any(str(u) in busy for u in lb.players)
 
     # ---- commands -------------------------------------------------------------------------------
@@ -263,8 +262,7 @@ class LobbyCog(commands.Cog, name="Lobby"):
         if lb is None:
             await ctx.send("You are not in a lobby.", ephemeral=True)
             return
-        game = self.rt.sessions.get(str(ctx.guild.id))
-        if game is not None and str(ctx.author.id) in game.in_battle:
+        if str(ctx.author.id) in self.rt.fighting(ctx.guild.id):
             await ctx.send("Not in the middle of a fight.", ephemeral=True)
             return
         self.rt.book.update(lb.channel_id, lambda x: x.leave(ctx.author.id))

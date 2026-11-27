@@ -93,6 +93,10 @@ class ColonySession:
         self.can_fight: Callable = lambda p: True     # may this player be attacked / fight at all?
         self.pvp_check: Callable = lambda me, foe: None   # an error message, or None to allow a PvP fight
         self.io_for: Callable = lambda party: self.io     # where a fight involving these players is shown
+        # The clock the 19-day rule runs on. The colony's own clock moves with every command anyone
+        # gives, which suits one hot-seat table; a server full of players sets this to real time,
+        # so nobody else's commands can run a character's 19 days out.
+        self.idle_clock: Callable = lambda: self.now
         self.rng = np.random.default_rng(seed)
         token = self.cache.acquire(self._name, ttl=LOCK_TTL, wait=LOCK_TTL)     # (two processes founding it at once)
         try:
@@ -217,12 +221,12 @@ class ColonySession:
         return FIGHT_TTL
 
     # ---- bookkeeping -------------------------------------------------------------------
-    def save(self, only=None) -> None:
+    def save(self, only=None) -> None:  # noqa: C901
         """Write the colony, the map and the players (``only``: just these players - after a fight,
         only the fighters changed). Items that have not changed are not written (storage._put)."""
         self.cache.extend(self._name, getattr(self._tls, "token", None), LOCK_TTL)    # a big save takes a moment
         self.colony.clock = self.now
-        self.collect_sales()
+        self.collect_sales(only)
         before = self.store.writes
         self.store.put_colony(self.colony)
         self.store.put_map(self.server_id, self.world.state())
@@ -270,7 +274,7 @@ class ColonySession:
             out.append(f"{i:>3} {e['name'][:20]:<20} {e['points']:>5} {e['level']:>3} {e['kills']:>5} {e['rules']:>5}  {where}")
         return "\n".join(out)
 
-    def collect_sales(self) -> None:
+    def collect_sales(self, only=None) -> None:
         """Points owed to this colony's players for things they sold (global market, or a local sale
         made while they were in a fight). Taken off the books and paid in one atomic step."""
         book = self.store.get_global("MARKET").get("payouts", {})
@@ -278,7 +282,10 @@ class ColonySession:
         if not any(k.startswith(prefix) for k in book):
             return
         busy = self.in_battle
-        due = {f"{prefix}{p.user_id}": p for p in self.players if p.alive and p.user_id not in busy}
+        pool = self.players if only is None else only          # (only those this save will write)
+        mine = set(self._mine)
+        due = {f"{prefix}{p.user_id}": p for p in pool if p.alive and p.server_id == self.server_id
+               and (p.user_id not in busy or p.user_id in mine)}
         taken: dict = {}
 
         def take(d):
@@ -459,6 +466,7 @@ class ColonySession:
             out(f"Your body is sealed in a hideout at node {rec.hideout}. It cannot travel: "
                 f"`deploy` a puppet and steer that instead.")
         self.save()
+        self._ver = self.cache.bump(self._name)           # (the player item was written before the save counted)
         return True
 
     def remove_player(self, user_id) -> Optional[PlayerRecord]:
@@ -470,6 +478,7 @@ class ColonySession:
         self.store._delete(f"SERVER#{self.server_id}", f"PLAYER#{user_id}")
         self.colony.market = [o for o in self.colony.market if o["seller"] != str(user_id)]
         self.save()
+        self._ver = self.cache.bump(self._name)
         return rec
 
     # ---- helpers (formerly closures inside cli.colony_mode) -------------------------------
@@ -484,26 +493,34 @@ class ColonySession:
         for kw in world.field_objects(node):
             b.add_object(**kw)
         io.say(f"\n*** {label} ***" + (f"\n{self.battle_banner}\n" if self.battle_banner else ""))
-        ids = {p.user_id for p in party}
         me = getattr(self._tls, "me", None)               # whoever gave the command that led here
-        mine = party + ([me] if me is not None and me not in party and me.alive else [])
+        mine = list(party)
+        for extra in [me] + list(getattr(self._tls, "touched", ())):      # ...and whoever it has changed so far
+            if extra is not None and extra.alive and extra not in mine:
+                mine.append(extra)
+        ids = {p.user_id for p in mine}                   # all of them are busy until this is over
         self.save(only=mine)                              # what matters of this command so far, before letting go
-        self._mine.update({p.user_id: p for p in party})
-        self.cache.mark(self._name + ":fighting", ids, self._mark_ttl())
-        if self.concurrent:
-            self.release()                                # the colony carries on while this is fought
+        self._mine.update({p.user_id: p for p in mine})
         try:
-            b.run()
-        finally:
+            self.cache.mark(self._name + ":fighting", ids, self._mark_ttl())
+            if self.concurrent:
+                self.release()                            # the colony carries on while this is fought
             try:
-                if hasattr(io, "flush"):
-                    io.flush()                            # (outside the lock: it waits on Discord)
+                b.run()
             finally:
-                if self.concurrent:
-                    self._retake(mine)
+                try:
+                    if hasattr(io, "flush"):
+                        io.flush()                        # (outside the lock: it waits on Discord)
+                finally:
+                    if self.concurrent:
+                        self._retake(mine)
+        finally:                                          # whatever went wrong, nobody stays marked busy
+            for uid in ids:
+                self._mine.pop(uid, None)
+            try:
                 self.cache.unmark(self._name + ":fighting", ids)
-                for uid in ids:
-                    self._mine.pop(uid, None)
+            except Exception as e:
+                print(f"[colony] could not clear fight marks (they lapse in {FIGHT_TTL:.0f}s): {type(e).__name__}: {e}")
         for oid in b.broken_oids:                         # (the map may have been reloaded under the fight)
             self.world.mark_broken(oid)
         for p in self.players:
@@ -550,10 +567,10 @@ class ColonySession:
         party = party if party is not None else [p for p in self.players if p.alive and self.can_fight(p)
                                                  and nid in self.where(p)]
         busy = self.in_battle
-        party = [p for p in party if p.user_id not in busy]
-        live = {r.rid: r for r in world.roamers}          # (callers may hold roamers from before a reload)
-        roamers = [live[r.rid] for r in roamers if r.rid in live and not live[r.rid].engaged
-                   and not live[r.rid].respawn_at]
+        party = [p for p in party if p.alive and p.user_id not in busy and nid in self.where(p)]
+        live = {r.rid: r for r in world.roamers}          # (callers may hold roamers from before another fight,
+        roamers = [live[r.rid] for r in roamers if r.rid in live and not live[r.rid].engaged     # or a reload)
+                   and not live[r.rid].respawn_at and live[r.rid].node == nid]
         if not party or not roamers:
             return None
         specs = [world.spec_for(r, rng) for r in roamers]
@@ -646,9 +663,10 @@ class ColonySession:
             out("You are dead. Create a new character.")
             return
         if me.user_id in self.in_battle:
-            out("You are in a fight. Finish it first (your controls are in the battle's channel).")
+            out("You are in a fight, or one your last command set off is still being played. Wait until it is over "
+                "(a fighter's controls are in the battle's channel).")
             return
-        self._tls.me = me
+        self._tls.me, self._tls.touched = me, []
         tokens = line.split()
         if not tokens:
             return
@@ -678,7 +696,7 @@ class ColonySession:
             for kind, e, name in scouts_of(me):           # what your scouts see
                 out(f"   Through {name}: {sight(e['node'])}")
         elif cmd == "me":
-            left = colony.inactivity_days - (now - me.last_score_ts) / DAY
+            left = min(colony.inactivity_days, colony.inactivity_days - (self.idle_clock() - me.last_score_ts) / DAY)
             out(f"{me.name}: {CLASS_NAME[me.pclass]}, level {me.level} ({me.xp}/{xp_to_next(me.level)} XP), "
                 f"{GRADE_NAME[grade_for(me.level, me.techniques)]}, {me.points} points")
             out(f"   Techniques: {', '.join(TECHNIQUES[t].name for t in me.techniques)} "
@@ -830,7 +848,7 @@ class ColonySession:
         elif cmd in ("break", "loot") and rest and rest[0].lstrip("#").isdigit():
             out(world.interact(me, int(rest[0].lstrip("#")), cmd, day()))
         elif cmd == "wait":
-            spend = float(rest[0]) if rest and rest[0].replace(".", "", 1).isdigit() else 1.0
+            spend = min(24.0, float(rest[0]) if rest and rest[0].replace(".", "", 1).isdigit() else 1.0)
         elif cmd == "rest":
             if node.kind != "hideout":
                 out("You can only rest in a hideout.")
@@ -868,6 +886,7 @@ class ColonySession:
                     who.mend(0.3 if me.pclass == PClass.CURSED_SPIRIT else 0.4, 1)
                 else:
                     who.mend(0.25, 1)
+                    self._tls.touched.append(who)
                 out(f"An hour of concentration. {who.name}: {who.condition_text()}")
                 spend = 1.0
         elif cmd == "medic":
@@ -1026,6 +1045,7 @@ class ColonySession:
                     seller = next((p for p in players if p.user_id == offer["seller"]), None)
                     if seller is not None and seller.user_id not in self.in_battle:
                         seller.points += offer["price"]   # a sale is not a score: no clock reset
+                        self._tls.touched.append(seller)
                     else:                                 # mid-fight (their record is the fight's) or gone: owed
                         key, owed = f"{self.server_id}:{offer['seller']}", offer["price"]
 
@@ -1082,6 +1102,8 @@ class ColonySession:
             err = ("No such player." if other is None else
                    f"{other.name} is in a fight. Give it to them when it is over." if other.user_id in self.in_battle
                    else transfer_points(colony, me, other, int(rest[1]), now))
+            if not err:
+                self._tls.touched.append(other)
             out(err or f"Transferred {rest[1]} points to {other.name}.")
         elif cmd == "players":
             for i, p in enumerate(players, 1):
@@ -1119,12 +1141,15 @@ class ColonySession:
             spend -= step
             self.now += step * 3600
             now = self.now
+            fighting = self.in_battle                     # (their records belong to their fights for now)
             for p in players:
                 st = p.tech_state.get("puppets")
-                if st is not None:                        # the restricted body stores energy over time
+                if st is not None and p.user_id not in fighting:      # the restricted body stores energy over time
                     st["bank"] = min(400.0, st["bank"] + 40 * step / 24)
             hunted = {r.node for r in world.roamers if not r.respawn_at}
             for p in players:                             # scouts on auto go looking for curses
+                if p.user_id in fighting:
+                    continue
                 for kind, e, name in scouts_of(p):
                     if e.get("auto") and e["node"] not in hunted:
                         step = world._step_toward(e["node"], hunted)
@@ -1152,7 +1177,7 @@ class ColonySession:
                     continue
                 spend = 0
             busy = self.in_battle
-            for p in enforce_inactivity([x for x in players if x.user_id not in busy], colony, now):
+            for p in enforce_inactivity([x for x in players if x.user_id not in busy], colony, self.idle_clock()):
                 out(f"\n!!! {p.name}'s score has not changed in {colony.inactivity_days} days. "
                     f"Their cursed technique is removed. {p.name} is dead.")
 
