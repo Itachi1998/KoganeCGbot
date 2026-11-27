@@ -677,7 +677,7 @@ class Battle:
                 c.meta.get("vows", set()).discard("snap_release")       # spent: it can be sworn again
                 self.say(f"{c} honours a binding vow: {act.name} is loosed at once on what cursed energy is in hand "
                          f"- weaker for it. To use it again next round it will have to be chanted.")
-        chanting = chant and act.can_chant
+        chanting = chant and act.can_chant and not (rite or snap is not None)   # (let go by a vow: nothing was spoken)
         spoken = bool(act.channel and not skip and (chanting or owed or bound or c.must_chant
                                                      or act.params.get("must_chant")))
         if owed and act.channel and not skip:
@@ -874,6 +874,12 @@ class Battle:
             if not p.targets:
                 return
         targets = [self.by_cid[x] for x in p.targets]
+        shut = [x for x in targets if x is not c and self.separated(c, x)]
+        if shut:                                         # a barrier has closed between them since it was committed
+            targets = [x for x in targets if x not in shut]
+            if not targets and act.target != Target.ENEMY:
+                self.say(f"{c}'s {act.name} stops at the barrier: {shut[0].name} is on the other side of it.")
+                return
         if act.target == Target.ENEMY:
             targets = [x for x in targets if x.alive and not x.fled and self.can_reach(c, x, act)]
             if not targets:                             # original target gone: pick another
