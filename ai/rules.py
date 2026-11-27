@@ -19,7 +19,8 @@ class Rule:
 RULES = {r.key: r for r in (
     Rule("point_transfer", "Point Transfer", "Players may give points to one another (and buy mercy with them)."),
     Rule("colony_transfer", "Free Passage", "Players may move to another colony that has also added this rule."),
-    Rule("score_board", "Open Score Board", "Everyone can see every player's points and last known location."),
+    Rule("score_board", "Open Score Board", "Players may view every player's name, points, number of rules added "
+         "and location: the colony and global leaderboards (manga rule 9)."),
     Rule("long_clock", "Extended Clock", "The inactivity limit becomes 30 days instead of 19."),
 )}
 
@@ -62,6 +63,7 @@ def buy_rule(colony: Colony, rec, key: str) -> str:
         return f"Adding a rule costs {rule.cost} points; you have {rec.points}."
     rec.points -= rule.cost                             # spending is not scoring: the clock keeps running
     colony.rules.append(key)
+    rec.rules_added = getattr(rec, "rules_added", 0) + 1
     return f"Rule added to {colony.name}: {rule.name} - {rule.desc}"
 
 

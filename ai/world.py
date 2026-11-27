@@ -27,7 +27,11 @@ TEMPLATES = (("Vending Machine", "throwable", True, 13, 20, 30, None),
 STREETS = ["Crossing", "Underpass", "Arcade Street", "Station Front", "Overpass", "Back Alley", "Plaza"]
 BUILDINGS = ["Pachinko Parlour", "Hospital", "Apartment Block", "Theatre", "Stadium", "Mall", "Courthouse"]
 NEVER = float(10 ** 15)        # a respawn time that never comes
-RESPAWN_HOURS = {Grade.G1: 6, Grade.SPECIAL: 24}       # lower grades are always roaming
+# Grade 4 to Grade 1 curses have no timer: killed, they re-form at once somewhere far off.
+# Special grade and up take time, and Sukuna longest of all.
+RESPAWN_HOURS = {"curse": 24, "bearer": 48, "killer": 72, "sukuna": 168}   # special-grade curse / ...
+TOTAL_FINGERS = 20             # bearers and Sukuna come back only while fewer than this are in play
+FINGER_RECHECK = 6             # hours before trying again when the fingers are all accounted for
 
 
 @dataclass
@@ -182,6 +186,9 @@ class World:
             w.roamers += bearers
         if not any(r.kind == "killer" for r in w.roamers):    # a save from before he existed
             w.roamers += killer
+        for r in w.roamers:                                   # killed when one-of-a-kinds never came back:
+            if r.respawn_at >= NEVER:                         # they return at the next tick
+                r.respawn_at = 1.0
         w.medic = int(st.get("medic", w.medic))
         return w
 
@@ -264,6 +271,27 @@ class World:
         spots = gen.choice(deep, size=min(FINGER_BEARERS, len(deep)), replace=False)
         return [Roamer(first_id + i, int(Grade.SPECIAL), int(nid), kind="bearer") for i, nid in enumerate(spots)]
 
+    def fingers_in_play(self, held: int = 0) -> int:
+        """Fingers in bearers, in Sukuna, and (``held``) carried or caged by players."""
+        return (self.fingers_left() + sum(r.fingers for r in self.roamers if r.kind == "sukuna" and not r.respawn_at)
+                + int(held))
+
+    def _respawn(self, r: Roamer, now: float, rng, open_nodes: list, held: int) -> bool:
+        """Bring a defeated roamer back. False when it has to wait (all twenty fingers are taken)."""
+        if r.kind in ("bearer", "sukuna") and self.fingers_in_play(held) >= TOTAL_FINGERS:
+            r.respawn_at = now + FINGER_RECHECK * 3600
+            return False
+        if r.kind == "bearer":                                # a new curse grows around a finger, deep in
+            deep = [n.nid for n in self.nodes.values() if n.kind in ("street", "building") and n.layer >= 2]
+            r.respawn_at, r.node = 0.0, int(rng.choice(deep or open_nodes))
+            self.news.append(f"A new Finger Bearer has grown around one of Sukuna's fingers at node {r.node}.")
+            return True
+        r.respawn_at, r.node = 0.0, int(rng.choice(open_nodes))
+        if r.kind == "sukuna":                                # reincarnated again, around one finger
+            r.fingers = 1
+            self.news.append(f"Sukuna has returned to this colony around a single finger, at node {r.node}.")
+        return True
+
     def fingers_left(self) -> int:
         return sum(1 for r in self.roamers if r.kind == "bearer" and not r.respawn_at)
 
@@ -278,15 +306,15 @@ class World:
                 self.news.append(f"Sukuna has torn a finger out of the bearer at node {r.node}. "
                                  f"He holds {r.fingers} now; {self.fingers_left()} bearer(s) remain.")
 
-    def tick(self, players: list, now: float, rng: np.random.Generator) -> list:
-        """Move every roamer one node. Returns [(node id, [roamers])] where a fight starts."""
+    def tick(self, players: list, now: float, rng: np.random.Generator, held: int = 0) -> list:
+        """Move every roamer one node. Returns [(node id, [roamers])] where a fight starts.
+        ``held``: Sukuna's fingers carried or caged by players (respawns keep the total at twenty)."""
         prey = {p.node for p in players if p.alive and self.nodes[p.node].kind != "hideout"}
         open_nodes = [n.nid for n in self.nodes.values() if n.kind != "hideout" and n.layer > 0]
         for r in self.roamers:
             if r.respawn_at:
-                if now < r.respawn_at:
+                if now < r.respawn_at or not self._respawn(r, now, rng, open_nodes, held):
                     continue
-                r.respawn_at, r.node = 0.0, int(rng.choice(open_nodes))
             if r.kind == "bearer":                            # it lurks where it is
                 continue
             if r.kind == "sukuna":                            # he goes after his fingers: bearers first, then
@@ -321,12 +349,12 @@ class World:
         return sorted(fights.items())
 
     def defeat(self, r: Roamer, now: float, rng: np.random.Generator) -> None:
-        hours = RESPAWN_HOURS.get(Grade(r.grade))
-        if r.kind in ("killer", "bearer", "sukuna"):          # one of a kind: gone for good
-            r.respawn_at = NEVER
-        elif hours:                                           # strong curses take time to re-form
-            r.respawn_at = now + hours * 3600
-        else:                                                 # weak ones re-form at once, far away
+        special = r.kind != "curse" or Grade(r.grade) >= Grade.SPECIAL
+        if special:                                           # special grade and up take time to come back
+            r.respawn_at = now + RESPAWN_HOURS.get(r.kind, RESPAWN_HOURS["curse"]) * 3600
+            if r.kind == "sukuna":                            # what he held is the killer's now
+                r.fingers, r.vessel, r.host, r.slash, r.body_hp = 0, [], "", False, 0.0
+        else:                                                 # grade 4 to 1: no timer, re-form far away
             far = [n.nid for n in self.nodes.values() if n.kind != "hideout" and n.layer >= self.layers - 2]
             r.node = int(rng.choice(far))
 

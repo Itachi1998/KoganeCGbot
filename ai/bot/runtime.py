@@ -30,8 +30,9 @@ class Runtime:
                      if lb.guild_id == int(guild_id) and int(user_id) in lb.members), None)
 
     def _hooks(self, game: ColonySession, guild_id: int) -> None:
-        def can_fight(p):
-            return self.lobby_of(guild_id, p.user_id) is not None
+        def can_fight(p):                     # curses only find players in a PUBLIC lobby
+            lb = self.lobby_of(guild_id, p.user_id)
+            return lb is not None and not lb.private
 
         def pvp_check(me, foe):
             mine, theirs = self.lobby_of(guild_id, me.user_id), self.lobby_of(guild_id, foe.user_id)

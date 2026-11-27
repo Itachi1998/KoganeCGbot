@@ -10,7 +10,7 @@ is tight once Docker builds numpy.
      them it fails to log in with `PrivilegedIntentsRequired`.
    - **Reset Token** and copy it (it goes in `deploy/.env`).
 2. **OAuth2 → URL Generator**: scopes `bot` and `applications.commands`; bot permissions **Send
-   Messages**, **Send Messages in Threads**, **Create Public Threads**, **Embed Links**, **Read Message
+   Messages**, **Send Messages in Threads**, **Create Public Threads**, **Create Private Threads**, **Embed Links**, **Read Message
    History**, **Use Application Commands**. Open the URL and add the bot to your test server.
 
 ## 2. Option A: Docker (recommended)

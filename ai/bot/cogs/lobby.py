@@ -32,7 +32,16 @@ from ...rules import Colony
 from .. import style
 from ..bridge import DiscordIO, run_battle
 
-TEAMS = ("Team A", "Team B")
+TEAMS = ("Team A", "Team B", "Team C", "Field")
+FIELD = "Field"                                       # everyone on the field fights for themselves
+
+
+def side_of(lb, uid: int) -> int:
+    """Battle team number: Team A/B/C are 0/1/2; each player on the Field is a side of their own."""
+    for i, t in enumerate(TEAMS):
+        if uid in lb.teams[t]:
+            return 10 + lb.teams[t].index(uid) if t == FIELD else i
+    return -1
 
 
 def make_npc(index: int, level: int, rng):
@@ -49,8 +58,10 @@ def make_npc(index: int, level: int, rng):
 
 
 class Lobby:
-    def __init__(self, guild_id: int, owner: int, name: str, channel):
+    def __init__(self, guild_id: int, owner: int, name: str, channel, private: bool = False):
         self.guild_id, self.owner, self.name, self.channel = guild_id, owner, name, channel
+        self.private = private                       # invite-only, PvP only, and no curse finds its members
+        self.invited: set = {owner}
         self.teams = {t: [] for t in TEAMS}           # user ids
         self.spectators: list = []
         self.ready: set = set()
@@ -59,7 +70,10 @@ class Lobby:
 
     @property
     def players(self) -> list:
-        return self.teams[TEAMS[0]] + self.teams[TEAMS[1]]
+        return [u for t in TEAMS for u in self.teams[t]]
+
+    def sides(self) -> set:
+        return {side_of(self, u) for u in self.players}
 
     @property
     def members(self) -> set:
@@ -91,15 +105,20 @@ class LobbyView(discord.ui.LayoutView):
         here = owner_rec.node if owner_rec else None
         curses = ([r.label for r in game.world.roamers if not r.respawn_at and r.node == here]
                   if game is not None and here is not None else [])
-        body = [f"{style.stat('Owner', f'<@{lb.owner}>')}  {style.stat('Status', 'In battle' if lb.running else 'In queue')}"]
+        body = [f"{style.stat('Owner', f'<@{lb.owner}>')}  {style.stat('Status', 'In battle' if lb.running else 'In queue')}"
+                f"  {style.stat('Type', 'Private (invite only, PvP only)' if lb.private else 'Public')}"]
         for t in TEAMS:
             body.append(f"### `{t}`\n" + ("\n".join(who(u) for u in lb.teams[t]) or "> No players"))
+        if lb.private:
+            body.append("### `Invited`\n" + (", ".join(f"<@{u}>" for u in sorted(lb.invited)) or "> -"))
         body.append("### `At the owner's node`\n"
                     + (f"> node {here}: " + (", ".join(curses) or "no curses") if here is not None else "> -"))
         body.append("### `Spar opponents`\n" + ("\n".join(f"> {label}" for label, _ in lb.npcs) or "> None"))
         body.append("### `Spectators`\n" + (", ".join(f"<@{u}>" for u in lb.spectators) or "> None"))
-        body.append("-# Only players on a team can fight or be attacked. **Hunt** and **PvP** are real and saved; "
-                    "**Spar** is practice and saves nothing.")
+        body.append("-# Teams A, B and C fight each other; everyone on the Field fights everyone. "
+                    + ("A private lobby is for PvP between invited players only: no curse finds its members."
+                       if lb.private else "Only players on a team can fight or be attacked. **Hunt** and **PvP** "
+                       "are real and saved; **Spar** is practice and saves nothing."))
         container = discord.ui.Container(accent_colour=style.LOBBY)
         url = style.avatar_url(cog.bot)
         head = discord.ui.TextDisplay(style.heading(lb.name))
@@ -110,16 +129,21 @@ class LobbyView(discord.ui.LayoutView):
             for t in TEAMS:
                 row.add_item(self._btn(f"Join {t}", discord.ButtonStyle.green, self._join(t)))
             row.add_item(self._btn("Spectate", discord.ButtonStyle.secondary, self.spectate))
-            row.add_item(self._btn("Ready Up", discord.ButtonStyle.green, self.ready))
-            row.add_item(self._btn("Leave Lobby", discord.ButtonStyle.red, self.leave))
             container.add_item(row)
+            row2 = discord.ui.ActionRow()
+            row2.add_item(self._btn("Ready Up", discord.ButtonStyle.green, self.ready))
+            row2.add_item(self._btn("Leave Lobby", discord.ButtonStyle.red, self.leave))
+            row2.add_item(self._btn("Refresh", discord.ButtonStyle.secondary, self.refresh))
+            container.add_item(row2)
             own = discord.ui.ActionRow()
-            own.add_item(self._btn("Hunt", discord.ButtonStyle.green, self.hunt))
+            if not lb.private:
+                own.add_item(self._btn("Hunt", discord.ButtonStyle.green, self.hunt))
             own.add_item(self._btn("PvP", discord.ButtonStyle.red, self.pvp))
-            own.add_item(self._btn("Spar", discord.ButtonStyle.blurple, self.spar))
-            own.add_item(self._btn("Refresh", discord.ButtonStyle.secondary, self.refresh))
+            if not lb.private:
+                own.add_item(self._btn("Spar", discord.ButtonStyle.blurple, self.spar))
             own.add_item(self._btn("Disband", discord.ButtonStyle.red, self.disband))
             container.add_item(own)
+        if not lb.running and not lb.private:
             curses_sel = discord.ui.Select(placeholder="Spar: add a cursed spirit...", options=[
                 discord.SelectOption(label=f"{GRADE_NAME[g]} curse", value=str(g)) for g in Grade])
             curses_sel.callback = self.add_curse
@@ -148,6 +172,10 @@ class LobbyView(discord.ui.LayoutView):
             rec = self.cog.rt.store.get_player(str(itx.guild.id), str(itx.user.id))
             if rec is None or not rec.alive:
                 await itx.response.send_message("You need a living character in this colony (`/create`).",
+                                                ephemeral=True)
+                return
+            if self.lobby.private and itx.user.id not in self.lobby.invited:
+                await itx.response.send_message("This lobby is private: the owner has to `/lobby invite` you.",
                                                 ephemeral=True)
                 return
             if itx.user.id in self.cog.rt.busy_users:
@@ -220,11 +248,15 @@ class LobbyView(discord.ui.LayoutView):
             await itx.response.send_message("Not everyone is ready: " + ", ".join(f"<@{u}>" for u in missing),
                                             ephemeral=True)
             return
-        if mode == "spar" and not lb.npcs and not all(lb.teams.values()):
-            await itx.response.send_message("Add spar opponents, or put players on both teams.", ephemeral=True)
+        if lb.private and mode != "pvp":
+            await itx.response.send_message("A private lobby is for PvP only.", ephemeral=True)
             return
-        if mode == "pvp" and not all(lb.teams.values()):
-            await itx.response.send_message("PvP needs players on both teams.", ephemeral=True)
+        if mode == "spar" and not lb.npcs and len(lb.sides()) < 2:
+            await itx.response.send_message("Add spar opponents, or put players on two or more sides.", ephemeral=True)
+            return
+        if mode == "pvp" and len(lb.sides()) < 2:
+            await itx.response.send_message("PvP needs at least two sides: two teams, or two players on the Field.",
+                                            ephemeral=True)
             return
         lb.running = True
         await self.refresh(itx)
@@ -266,24 +298,47 @@ class LobbyCog(commands.Cog, name="Lobby"):
                                            "You are not in a lobby.")),
                        ephemeral=True)
 
-    @lobby.command(name="create", description="Open a lobby")
+    @lobby.command(name="create", description="Open a lobby (private: invite-only PvP)")
     @commands.guild_only()
-    async def create(self, ctx: commands.Context, name: Optional[str] = None) -> None:
-        name = name or f"{ctx.author.display_name}'s lobby"
+    async def create(self, ctx: commands.Context, name: Optional[str] = None, private: bool = False) -> None:
+        name = name or f"{ctx.author.display_name}'s {'private ' if private else ''}lobby"
         channel = ctx.channel
         if isinstance(ctx.channel, discord.TextChannel):
             try:
-                channel = await ctx.channel.create_thread(name=name[:90], type=discord.ChannelType.public_thread)
+                channel = await ctx.channel.create_thread(
+                    name=name[:90], invitable=False if private else True,
+                    type=discord.ChannelType.private_thread if private else discord.ChannelType.public_thread)
+                if private:
+                    await channel.add_user(ctx.author)
             except discord.HTTPException:
+                if private:
+                    await ctx.send("I could not open a private thread here (I need **Create Private Threads**).",
+                                   ephemeral=True)
+                    return
                 channel = ctx.channel
         if channel.id in self.rt.lobbies:
             await ctx.send("There is already a lobby here.", ephemeral=True)
             return
-        lb = Lobby(ctx.guild.id, ctx.author.id, name, channel)
+        lb = Lobby(ctx.guild.id, ctx.author.id, name, channel, private=private)
         self.rt.lobbies[channel.id] = lb
         await channel.send(view=LobbyView(self, lb))
         if channel is not ctx.channel:
             await ctx.send(f"Lobby opened: {channel.mention}", ephemeral=True)
+
+    @lobby.command(name="invite", description="Invite a player to your private lobby")
+    @commands.guild_only()
+    async def invite(self, ctx: commands.Context, member: discord.Member) -> None:
+        lb = next((x for x in self.rt.lobbies.values() if x.guild_id == ctx.guild.id and x.owner == ctx.author.id
+                   and x.private), None)
+        if lb is None:
+            await ctx.send("You do not own a private lobby.", ephemeral=True)
+            return
+        lb.invited.add(member.id)
+        try:
+            await lb.channel.add_user(member)
+        except (discord.HTTPException, AttributeError):
+            pass
+        await ctx.send(f"Invited {member.mention} to **{lb.name}**.", ephemeral=True)
 
     @lobby.command(name="leave", description="Leave your lobby (nothing can attack you after that)")
     @commands.guild_only()
@@ -332,14 +387,16 @@ class LobbyCog(commands.Cog, name="Lobby"):
                         "let time pass and they will come to you.")
             game.encounter(nid, roamers, here)
         else:
-            sides = {p.user_id: (0 if int(p.user_id) in lb.teams[TEAMS[0]] else 1) for p in here}
+            sides = {p.user_id: side_of(lb, int(p.user_id)) for p in here}
             if len(set(sides.values())) < 2:
-                return f"Both teams need someone at node {nid}." + note
+                return f"At least two sides need someone at node {nid}." + note
+            starter = side_of(lb, lb.owner)
             for p in here:
-                if sides[p.user_id] == 0:                  # Team A started it: Judgeman hears of it
+                if sides[p.user_id] == starter:            # the side that started it: Judgeman hears of it
                     p.crimes.add(Crime.ASSAULT, nid, game.day())
+            names = sorted({t for t in TEAMS for u in lb.teams[t] if str(u) in sides})
             game.fight([(game.present(p, nid), sides[p.user_id]) for p in here], nid,
-                       f"{TEAMS[0]} attacks {TEAMS[1]}!")
+                       " vs ".join(names) + (" (every one for themselves)" if FIELD in names else "") + "!")
         game.save()
         return ("The fight is over." + note) if note else None
 
@@ -353,11 +410,10 @@ class LobbyCog(commands.Cog, name="Lobby"):
             colony = Colony(str(guild.id), game.colony.name, rules=list(game.colony.rules))   # a throwaway copy
             io = DiscordIO(self.bot, lb.channel, asyncio.get_running_loop())
             b = Battle(str(guild.id), seed=int(self.rng.integers(1 << 30)), io=io, colony=colony)
-            for team_no, team in enumerate(TEAMS):
-                for uid in lb.teams[team]:
-                    rec = game.player(uid) or rt.store.get_player(str(guild.id), str(uid))
-                    if rec is not None and rec.alive:
-                        b.add(copy.deepcopy(rec).to_spec("human"), team_no)
+            for uid in lb.players:
+                rec = game.player(uid) or rt.store.get_player(str(guild.id), str(uid))
+                if rec is not None and rec.alive:
+                    b.add(copy.deepcopy(rec).to_spec("human"), side_of(lb, uid))
             for label, factory in lb.npcs:
                 b.add(factory(self.rng), 50)
             standard_field(b)

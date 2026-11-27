@@ -19,6 +19,7 @@
 * characters and colonies are saved to SQLite (`culling.db`, or `CULLING_SQLITE`), or to DynamoDB
   with `CULLING_DB=dynamodb`; both hold the same items, and `python -m ai.migrate` copies between them
   (see `ai/STORAGE.md`). Redis (`REDIS_URL`) holds live battles and post-battle character snapshots.
+* **From a local terminal, token in AWS (SSM / Secrets Manager):** see `deploy/LOCAL.md` - `deploy/run_local.sh`
 * **On a server (EC2):** see `deploy/EC2.md` - `docker compose -f deploy/docker-compose.yml up -d --build`
 * the command-line version still works: `python -c "from ai.cli import main; main([])"`
 ### Commands
@@ -29,6 +30,9 @@
 * `/lobby create`: **fights need a lobby**. Outside one you can move and do everything else, but no
   curse or player can attack you. In a lobby: **Hunt** the curses at the owner's node and **PvP** (Team A
   vs Team B) are real and saved; **Spar** is practice and saves nothing. Ambushes play in the lobby thread.
+  Sides: Team A, Team B, Team C and the Field (every one for themselves). `/lobby create private:True`
+  makes an invite-only lobby (`/lobby invite`) for PvP only; curses never find its members.
+* `/leaderboard [global]` (needs the Open Score Board rule), `/market global`, `/sell ... global_market:True`
 * `/learn create|colony|battle|lobby`
 * in a fight, press **Open controls** when the bot pings you
 ### Character creation
@@ -43,6 +47,13 @@ physical strength (close-range moves), perception, soul perception (needed to ha
 Transfiguration), domain refinement, navigation. Most technique moves need perception to unlock;
 a reincarnated sorcerer's counts +6, so awakened sorcerers have much more to unlock. Details in
 `ai/skills.py` and `ai/data.py` (`perception_needed`).
+### Curses coming back
+Grade 4 to Grade 1 curses re-form far away the moment they die. Special-grade curses return after
+24 h, Finger Bearers 48 h, the Sorcerer Killer 72 h and Sukuna 7 days - bearers and Sukuna only while
+fewer than 20 fingers are in play (`RESPAWN_HOURS` in `ai/world.py`).
+### Battle feed
+One message per stretch of rounds, edited as the fight goes; a new one starts at Discord's 4000
+character limit (about 9 rounds of a 1v1, 6 of a 2v2, 4 of a three-team fight).
 ### Perception check
 Attacked while committed to a move with no defence set? With perception 16+ you are asked: keep
 your move and take the hit, or drop it and switch to a defence, which comes up in time with a

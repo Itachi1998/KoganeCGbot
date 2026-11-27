@@ -61,10 +61,125 @@ class ColonySession:
     # ---- bookkeeping -------------------------------------------------------------------
     def save(self) -> None:
         self.colony.clock = self.now
+        self.collect_sales()
         self.store.put_colony(self.colony)
         self.store.put_map(self.server_id, self.world.state())
         for p in self.players:
             self.store.put_player(p)
+        self.update_leaderboard()
+
+    # ---- the global leaderboard and global market (GLOBAL items in the store) ----------------
+    LEADERBOARD_SIZE = 200
+
+    def board_entry(self, p) -> dict:
+        return {"name": p.name, "colony": self.colony.name, "server": self.server_id, "points": p.points,
+                "level": p.level, "kills": p.kills.get("players", 0), "curses": p.kills.get("spirits", 0),
+                "rules": getattr(p, "rules_added", 0), "node": p.node}
+
+    def update_leaderboard(self) -> None:
+        """This colony's living players on the game-wide board (top LEADERBOARD_SIZE by points)."""
+        mine = {f"{self.server_id}:{p.user_id}": self.board_entry(p) for p in self.players if p.alive}
+
+        def fn(d):
+            entries = {k: v for k, v in d.get("entries", {}).items() if not k.startswith(self.server_id + ":")}
+            entries.update(mine)
+            top = sorted(entries.items(), key=lambda kv: (-kv[1]["points"], -kv[1]["level"]))[:self.LEADERBOARD_SIZE]
+            d["entries"] = dict(top)
+        self.store.update_global("LEADERBOARD", fn)
+
+    def leaderboard(self, scope: str = "colony", n: int = 15) -> str:
+        if not self.colony.has("score_board"):
+            return ("Nobody here can see the score board yet: a player has to add the Open Score Board rule "
+                    "(`addrule score_board`, 100 points).")
+        if scope == "global":
+            rows = list(self.store.get_global("LEADERBOARD").get("entries", {}).values())
+            title = "Culling Game - all colonies"
+        else:
+            rows = [self.board_entry(p) for p in self.players if p.alive]
+            title = f"{self.colony.name}"
+        rows.sort(key=lambda e: (-e["points"], -e["level"]))
+        out = [f"{title}: top {min(n, len(rows))} of {len(rows)}",
+               f"{'#':>3} {'name':<20} {'pts':>5} {'lvl':>3} {'kills':>5} {'rules':>5}  where"]
+        for i, e in enumerate(rows[:n], 1):
+            where = f"{e['colony']} node {e['node']}" if scope == "global" else f"node {e['node']}"
+            out.append(f"{i:>3} {e['name'][:20]:<20} {e['points']:>5} {e['level']:>3} {e['kills']:>5} {e['rules']:>5}  {where}")
+        return "\n".join(out)
+
+    def collect_sales(self) -> None:
+        """Points owed to this colony's players for things they sold on the global market."""
+        owed = {k: v for k, v in self.store.get_global("MARKET").get("payouts", {}).items()
+                if k.startswith(self.server_id + ":")}
+        if not owed:
+            return
+        paid = []
+        for p in self.players:
+            k = f"{self.server_id}:{p.user_id}"
+            if k in owed:
+                p.points += owed[k]                         # a sale is not a score: no clock reset
+                paid.append(k)
+        if paid:
+            self.store.update_global("MARKET", lambda d: [d["payouts"].pop(k, None) for k in paid])
+
+    def global_market(self, me, verb: str, args: list, at_shop: bool) -> str:
+        """market global | sell <item> <price> global | buy g<n> | unlist g<n>."""
+        mkt = self.store.get_global("MARKET")
+        offers = mkt.get("offers", [])
+        if verb == "list":
+            if not offers:
+                return "Nothing is up for sale on the global market."
+            return "Global market (every colony; `buy g<n>` at your shop):\n" + "\n".join(
+                f"  g{o['id']} {ITEMS[o['item']].name:<26} {o['price']:>5} pts   from {o['name']} ({o['colony']})"
+                + ("  (taken from the dead)" if o["looted"] else "") for o in offers)
+        if not at_shop:
+            return f"Trading happens at the colony's shop (node {self.world.shop})."
+        if verb == "sell":
+            key, price = args[0].lower(), args[1]
+            it = ITEMS.get(key)
+            if it is None or key not in me.inventory:
+                return "That isn't in your bag."
+            if it.mundane:
+                return "Only cursed tools and cursed objects are traded."
+            looted = key in me.looted
+            if not looted and price > 2 * it.cost:
+                return f"You may ask at most {2 * it.cost} for a {it.name} (twice its shop price)."
+            me.inventory.remove(key)
+            if looted:
+                me.looted.remove(key)
+
+            def add(d):
+                d.setdefault("offers", []).append({"id": d.get("next", 1), "seller": me.user_id, "server": self.server_id,
+                                                   "name": me.name, "colony": self.colony.name, "item": key,
+                                                   "price": price, "looted": looted})
+                d["next"] = d.get("next", 1) + 1
+            self.store.update_global("MARKET", add)
+            return f"Your {it.name} is on the global market for {price} points. Every colony can see it."
+        oid = int(args[0].lstrip("gG#")) if args and args[0].lstrip("gG#").isdigit() else -1
+        offer = next((o for o in offers if o["id"] == oid), None)
+        if offer is None:
+            return "No such offer. See `market global`."
+        mine = offer["seller"] == me.user_id and offer["server"] == self.server_id
+        if verb == "unlist":
+            if not mine:
+                return "That is not your offer."
+            self.store.update_global("MARKET", lambda d: d["offers"].remove(offer))
+            me.inventory.append(offer["item"])
+            if offer["looted"]:
+                me.looted.append(offer["item"])
+            return f"You take the {ITEMS[offer['item']].name} back."
+        if mine:
+            return "That is your own offer (`unlist g<n>` takes it back)."
+        if me.points < offer["price"]:
+            return f"That costs {offer['price']} points; you have {me.points}."
+        def sold(d):
+            d["offers"].remove(offer)
+            k = f"{offer['server']}:{offer['seller']}"
+            pay = d.setdefault("payouts", {})
+            pay[k] = pay.get(k, 0) + offer["price"]
+        self.store.update_global("MARKET", sold)
+        me.points -= offer["price"]                       # only once the sale is on the books
+        me.inventory.append(offer["item"])
+        return (f"Bought {ITEMS[offer['item']].name} for {offer['price']} points from {offer['name']} of "
+                f"{offer['colony']}. They are paid the next time their colony moves.")
 
     def day(self) -> int:
         return int((self.now - self.colony.created_ts) // DAY)
@@ -542,6 +657,14 @@ class ColonySession:
                 me.inventory.remove(it.key)
                 me.mend(it.params["heal"] / float(me.to_spec().stats[Stat.MAX_HP]))
                 out(f"You use the {it.name}. {me.condition_text()}")
+        elif cmd in ("leaderboard", "lb", "board"):
+            out(self.leaderboard("global" if rest and rest[0].lower() == "global" else "colony"))
+        elif cmd == "market" and rest and rest[0].lower() == "global":
+            out(self.global_market(me, "list", [], node.kind == "shop"))
+        elif cmd == "sell" and len(rest) == 3 and rest[2].lower() == "global" and rest[1].isdigit():
+            out(self.global_market(me, "sell", [rest[0], int(rest[1])], node.kind == "shop"))
+        elif cmd in ("buy", "unlist") and rest and rest[0].lower().startswith("g") and rest[0][1:].isdigit():
+            out(self.global_market(me, cmd, rest, node.kind == "shop"))
         elif cmd in ("shop", "market"):
             out(f"The colony's only shop is at node {world.shop}: {world.nodes[world.shop].name}."
                 + ("" if node.kind == "shop" else " You have to be there to trade."))
@@ -683,7 +806,8 @@ class ColonySession:
                         e["node"] = step if step is not None else int(rng.choice(ways)) if ways else e["node"]
             found = [SimpleNamespace(node=n, alive=True, fingers=p.fingers + p.inventory.count("sukuna_finger"))
                      for p in players if p.alive and self.can_fight(p) for n in where(p)]
-            fights = world.tick(found, now, rng)
+            held = sum(p.fingers + p.inventory.count("sukuna_finger") for p in players if p.alive)
+            fights = world.tick(found, now, rng, held)
             for line in world.news:                       # what Sukuna has been doing
                 out("\n!!! " + line)
             world.news.clear()

@@ -563,6 +563,9 @@ WORLD_HELP = """Colony commands
                                any price. Sold when another player buys it.
   skills | upgrade <skill> [n] spend skill points (+10 a level to level 10, +5 after): efficiency,
                                speed, strength, perception, soul, refinement, navigation
+  market global | sell <item> <price> global | buy g<n> | unlist g<n>
+                               the global market: offers every colony can see and buy (at a shop)
+  leaderboard [global]         this colony's / every colony's top players (needs the score_board rule)
   rules | addrule <key>        colony rules cost 100 points each
   give <player> <points>       needs the Point Transfer rule
   pvp <player>                 attack another player at your node (works in hideouts too)

@@ -1,4 +1,4 @@
-"""Launch the bot: ``python -m ai.bot`` (token in the DISCORD_TOKEN or TOKEN environment variable).
+"""Launch the bot: ``python -m ai.bot``. The token comes from DISCORD_TOKEN, or from AWS (``fetch_token``).
 
 Same setup as the original main.py - prefix ``,``, the same intents, ``,sync`` for the owner - but
 the cogs load at start-up (setup_hook), so slash commands work before anyone runs ``,sync``.
@@ -22,9 +22,10 @@ class CullingBot(commands.Bot):
         intents.members = True
         intents.guilds = True
         super().__init__(command_prefix=",", intents=intents)
-        self.runtime = Runtime(self)
+        self.runtime = None                      # opened at start-up, not on import (it opens the database)
 
     async def setup_hook(self) -> None:
+        self.runtime = Runtime(self)
         for mod in pkgutil.iter_modules(cogs.__path__):
             await self.load_extension(f"{cogs.__name__}.{mod.name}")
             print(f"Cog loaded: {mod.name}")
@@ -53,11 +54,46 @@ async def sync(ctx: commands.Context) -> None:
     await ctx.send(f"Commands synced: {len(synced)} global" + (f", {len(here)} in this server" if here else ""))
 
 
-def main() -> None:
+def fetch_token() -> str:
+    """The bot token: DISCORD_TOKEN (or TOKEN) if set, else fetched from AWS with your local AWS login
+    (``aws configure`` / ``aws sso login``; AWS_PROFILE and AWS_REGION are honoured):
+
+      DISCORD_TOKEN_SSM=/kogane/discord-token     an SSM Parameter Store SecureString (free tier)
+      DISCORD_TOKEN_SECRET=kogane/discord         a Secrets Manager secret: the token itself, or JSON
+                                                  with a "DISCORD_TOKEN" (or DISCORD_TOKEN_SECRET_KEY) key
+    The token is never printed or logged.
+    """
     token = os.environ.get("DISCORD_TOKEN") or os.environ.get("TOKEN")
-    if not token:
-        raise SystemExit("Set DISCORD_TOKEN (or TOKEN) to the bot's token.")
-    bot.run(token)
+    if token:
+        return token
+    ssm_name, secret_id = os.environ.get("DISCORD_TOKEN_SSM"), os.environ.get("DISCORD_TOKEN_SECRET")
+    if not (ssm_name or secret_id):
+        raise SystemExit("No token: set DISCORD_TOKEN, or DISCORD_TOKEN_SSM / DISCORD_TOKEN_SECRET to fetch it "
+                         "from AWS (see deploy/LOCAL.md).")
+    try:
+        import boto3
+        if ssm_name:
+            resp = boto3.client("ssm").get_parameter(Name=ssm_name, WithDecryption=True)
+            print(f"Token: from SSM parameter {ssm_name}")
+            return resp["Parameter"]["Value"].strip()
+        raw = boto3.client("secretsmanager").get_secret_value(SecretId=secret_id)["SecretString"].strip()
+        print(f"Token: from Secrets Manager secret {secret_id}")
+        if raw.startswith("{"):
+            import json
+            data = json.loads(raw)
+            key = os.environ.get("DISCORD_TOKEN_SECRET_KEY", "DISCORD_TOKEN")
+            if key not in data:
+                raise SystemExit(f"The secret is JSON but has no {key!r} key.")
+            return str(data[key]).strip()
+        return raw
+    except SystemExit:
+        raise
+    except Exception as e:                       # say what failed, never what the token is
+        raise SystemExit(f"Could not fetch the token from AWS: {type(e).__name__}: {e}")
+
+
+def main() -> None:
+    bot.run(fetch_token())
 
 
 if __name__ == "__main__":

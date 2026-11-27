@@ -146,6 +146,7 @@ class PlayerRecord:
     six_eyes: bool = False                                 # born with the Six Eyes (Limitless always is)
     old_stats: Optional[dict] = None                       # {"hp", "ce", "str", "spd"} rolled at creation (oldstats.py)
     skill_points: int = 0                                  # unspent (skills.py)
+    rules_added: int = 0                                   # rules this player has bought (shown on the score board)
     skills: dict = field(default_factory=dict)             # skill -> points spent
     fingers: int = 0                                       # Sukuna's fingers eaten and still caged
     vessel: int = 0                                        # how many this body can cage (20 = a strong vessel)

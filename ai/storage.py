@@ -352,6 +352,23 @@ class GameStore:
                 return [unpack(_unblob(r[0])) for r in rows]
             return [v for k, v in sorted(self._local.get(pk, {}).items()) if k.startswith(prefix)]
 
+    # ---- game-wide items (PK = GLOBAL): the global leaderboard and the global market -------------
+    # Kept in memory after the first read; one bot process owns them (run one bot per database).
+    def get_global(self, sk: str) -> dict:
+        with self._lock:
+            cache = self.__dict__.setdefault("_globals", {})
+            if sk not in cache:
+                cache[sk] = self._get("GLOBAL", sk) or {}
+            return cache[sk]
+
+    def update_global(self, sk: str, fn) -> dict:
+        """Read-modify-write a GLOBAL item under the store's lock (written only if it changed)."""
+        with self._lock:
+            d = self.get_global(sk)
+            fn(d)
+            self._put("GLOBAL", sk, d)
+            return d
+
     def raw_items(self):
         """Every stored item in the common (packed) format, for migrate.py."""
         with self._lock:

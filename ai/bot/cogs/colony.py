@@ -18,7 +18,8 @@ from ...rules import RULES
 from ...skills import SKILLS
 from .. import style
 
-INFO = ("look", "map", "me", "medic", "fingers", "shop", "market", "rules", "scouts", "puppets", "players")
+INFO = ("look", "map", "me", "medic", "fingers", "shop", "market", "rules", "scouts", "puppets", "players",
+        "leaderboard", "skills")
 
 
 async def reply(ctx: commands.Context, view: discord.ui.LayoutView, ephemeral: bool = False) -> None:
@@ -242,20 +243,30 @@ class Colony(commands.Cog):
                 "You have to be there to buy.")
         await ctx.send(view=ShopView(self, ctx, note), ephemeral=True)
 
-    @commands.hybrid_command(name="buy", description="Buy from the shop (item key) or another player (#n)")
+    @commands.hybrid_command(name="buy", description="Buy from the shop (item key), a player here (#n) or anywhere (g<n>)")
     @commands.guild_only()
     async def buy(self, ctx, item: str):
         await self.do(ctx, f"buy {item}")
 
-    @commands.hybrid_command(name="sell", description="Sell to the shop (half price) or list it at your price")
+    @commands.hybrid_command(name="sell", description="Sell to the shop (half price), or list it at your price")
     @commands.guild_only()
-    async def sell(self, ctx, item: str, price: Optional[int] = None):
-        await self.do(ctx, f"sell {item}" + (f" {price}" if price else ""))
+    @app_commands.describe(global_market="list it where every colony can buy it (needs a price)")
+    async def sell(self, ctx, item: str, price: Optional[int] = None, global_market: bool = False):
+        await self.do(ctx, f"sell {item}" + (f" {price}" if price else "") + (" global" if global_market and price else ""))
 
-    @commands.hybrid_command(name="market", description="What other players have up for sale")
+    @commands.hybrid_command(name="market", description="What players have up for sale (here, or in every colony)")
     @commands.guild_only()
-    async def market(self, ctx):
-        await self.do(ctx, "market")
+    @app_commands.choices(scope=[app_commands.Choice(name="this colony", value="colony"),
+                                 app_commands.Choice(name="global (every colony)", value="global")])
+    async def market(self, ctx, scope: Optional[str] = "colony"):
+        await self.do(ctx, "market global" if scope == "global" else "market")
+
+    @commands.hybrid_command(name="leaderboard", description="Top players (needs the Open Score Board rule)")
+    @commands.guild_only()
+    @app_commands.choices(scope=[app_commands.Choice(name="this colony", value="colony"),
+                                 app_commands.Choice(name="global (every colony)", value="global")])
+    async def leaderboard(self, ctx, scope: Optional[str] = "colony"):
+        await self.do(ctx, "leaderboard global" if scope == "global" else "leaderboard", "Leaderboard")
 
     # ---- Sukuna ----------------------------------------------------------------------------------
     @commands.hybrid_command(name="fingers", description="Sukuna's fingers: what you hold, where the bearers lurk")
