@@ -88,6 +88,15 @@ Every domain takes in who it does in the manga (`constants.Tier`, set per domain
   * *Ninety-Nine Seconds* - when the brain can bear no more domains (burnt out and healed four times),
     one more, a round shorter, and the last.
 New vows are data: `vows.trade(key, name, desc, technique={...}, domain={...})`.
+### Deadly Sentencing: confiscation
+A guilty verdict takes ONE thing the defendant is wielding, picked at random: one of their innate
+techniques (the others stay usable) or the cursed tool in their hand (unequipped for the rest of the
+fight, kept in the bag). With neither, their cursed energy. A sentenced defendant is not tried again.
+### Rabbit Escape
+While Rabbit Escape is out (or channelled), its side is hidden behind the rabbits: enemies lose
+`RABBIT_VEIL` perception reading it, so gathered energy and committed techniques go unseen and nobody
+gets the perception-check window against its attacks; shikigami summoned behind it arrive unannounced;
+escaping the fight is `RABBIT_FLEE` likelier. The Six Eyes see through it. Kill the rabbits to end it.
 ### Perception check
 Attacked while committed to a move with no defence set? With perception 16+ you are asked: keep
 your move and take the hit, or drop it and switch to a defence, which comes up in time with a

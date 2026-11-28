@@ -20,7 +20,7 @@ from .constants import (BRAIN_HEALS, SLASH_ROUNDS, CE_RECOVERY, SIX_EYES_EFF, SI
                         DType, Grade, GRADE_NAME, Kind, Part, PClass, PState, Stat, Status,
                         RANGE_OUTPUT, TIER_NAME, Tier, FURNACE_CAP, FURNACE_DUST, FURNACE_SEALED)
 from .crimes import CRIME_INFO, FABRICATED
-from .data import JOKES, MERGE_NAMES, SHIKI_ORDER, SHIKIGAMI
+from .data import ITEMS, JOKES, MERGE_NAMES, SHIKI_ORDER, SHIKIGAMI
 from .records import Spec, build_stats, npc_spirit, sukuna_share
 from .techniques import ACTION_TECH, ACTIONS, TECHNIQUES
 
@@ -425,12 +425,38 @@ def deadly_sentencing(b, c, act, targets, part, amp, arg):
         b.add_status(c, ST.EXEC_SWORD, 1.0, 99)
     if sentence >= 1:
         c.meta.setdefault("sentenced", set()).add(t.root.cid)     # a verdict is final: no second trial this fight
-        if t.innate:
-            b.say(f"{t}'s cursed technique is confiscated.")
-            b.add_status(t, ST.SEALED, 1.0, 3 + sentence)
-        else:
-            b.say(f"{t} has no technique to take - their cursed energy is confiscated instead.")
-            b.add_status(t, ST.CE_SEALED, 1.0, 3 + sentence)
+        confiscate(b, c, t, 3 + sentence)
+
+
+def confiscate(b, court, t, rounds: int) -> None:
+    """Confiscation takes ONE technique the defendant is wielding, picked at random: any of their
+    innate techniques, or the technique of the cursed tool in their hand (the court took Kamutoke
+    from Sukuna, not Shrine). With nothing of the kind to take, it takes their cursed energy."""
+    held = t.meta.setdefault("confiscated", {})
+    pool = [("tech", k) for k in t.innate if held.get(k, 0) < b.round]
+    if t.weapon is not None and not t.weapon.mundane:
+        pool.append(("tool", t.equipment["weapon"]))
+    if not pool:
+        b.say(f"{t} has no technique to take - their cursed energy is confiscated instead.")
+        b.add_status(t, ST.CE_SEALED, 1.0, rounds)
+        return
+    kind, key = pool[int(b.rng.integers(len(pool)))]
+    if kind == "tool":
+        t.equipment["weapon"] = None                    # back in the bag when the fight is over; not before
+        t.inventory.append(key)
+        t.meta.setdefault("court_holds", set()).add(key)
+        b.say(f"Of everything {t} is wielding the court takes one thing, at random: the cursed tool "
+              f"{ITEMS[key].name} is confiscated. It is out of their hands for the rest of this fight.")
+        return
+    if len(t.innate) == 1:                              # their only technique: the whole of it is sealed
+        b.say(f"{t}'s cursed technique is confiscated.")
+        b.add_status(t, ST.SEALED, 1.0, rounds)
+        return
+    held[key] = b.round + rounds
+    b.say(f"Of everything {t} is wielding the court takes one thing, at random: {TECHNIQUES[key].name} is "
+          f"confiscated for {rounds} rounds. What else they have, they keep.")
+    if t.pending is not None and ACTION_TECH.get(t.pending.act.key) == key:
+        t.pending = None
 
 
 @effect("execute")
@@ -880,6 +906,10 @@ def summon_shikigami(b, c, act, targets, part, amp, arg):
         b.say(f"No sign, no shadow: {s.name} is simply there, beside something nobody can see.")
     else:
         b.say(f"{c} forms the shadow sign. {s.name} rises from the shadow.")
+    if "swarm" in s.base_traits:                        # Rabbit Escape: nothing to fear, and nothing to see past
+        b.say(f"   Rabbits pour over the field by the hundred. While they last, {c}'s side cannot be read through "
+              f"them: what it gathers and commits goes unseen, nobody gets the moment to switch to a defence "
+              f"against it, and it slips away from the fight far more easily.")
 
 
 @choices("merge_shikigami")

@@ -23,7 +23,7 @@ from typing import Optional
 import numpy as np
 
 from . import ai
-from .constants import (SNAP_DEBUFF, OATH_BUFF, REINCARNATED_PER_BONUS, SWITCH_BASE, SWITCH_PER, SWITCH_SPD, SWITCH_MIN, SWITCH_MAX, BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
+from .constants import (SNAP_DEBUFF, OATH_BUFF, REINCARNATED_PER_BONUS, SWITCH_BASE, SWITCH_PER, SWITCH_SPD, SWITCH_MIN, SWITCH_MAX, BUFF_TIME, CHANNEL_TIME, CHANT_TIME, MELEE_TIME, RANGED_TIME, REACT_PER, AMPLIFY_GUARD, FRAME_READ, Grade, FBE_GUARD, CLASH_MARGIN, NONLETHAL_CLASH, OPEN_EDGE, MINI_DOMAIN, INSIDE_WEAK, SIX_EYES_EFF, SUKUNA_EFF, EFF_CAP, JACKPOT_DMG, JACKPOT_STR, STALEMATE_ROUNDS, UNSEEN_PER, RABBIT_VEIL, RABBIT_FLEE, ANY_ARM, ANY_LEG, BLACK_FLASH_MULT, CHANNEL_AMP, CHANT_AMP, DAY, DMG_SCALE,
                         DOT_STATUSES, DUR_FACTOR, EXTRA,
                         LEGS, LIMBS, N_PARTS, N_STATS, N_STATUS, PART_ACC, PART_DMG_MULT,
                         PART_HP_FRAC, POINTS_PLAYER, POINTS_SPIRIT, SOUL_PER, STICKY, VITAL,
@@ -427,6 +427,14 @@ class Battle:
                 return True
         return False
 
+    def veil(self, c: Combatant, o: Combatant) -> float:
+        """Perception ``o`` loses trying to read ``c``: Rabbit Escape, out on c's side (or channelled by
+        someone on it), fills the field with decoys. The Six Eyes see through it."""
+        if "six_eyes" in o.flags:
+            return 0.0
+        return RABBIT_VEIL if any(x.alive and not x.fled and x.team == c.team and "swarm" in x.traits
+                                  for x in self.fighters) else 0.0
+
     def summons(self, c: Combatant, kind: Optional[str] = None) -> list:
         return [o for o in self.fighters if o.alive and o.owner == c.cid and (kind is None or o.kind == kind)]
 
@@ -536,6 +544,8 @@ class Battle:
             return f"unlocks at perception {act.min_per} (yours counts as {self.unlock_per(c):.0f})"
         if tech.innate and c.has(ST.SEALED) and act.needs_status is None:
             return "your technique is sealed"
+        if tech.innate and c.meta.get("confiscated", {}).get(tech.key, 0) >= self.round and act.needs_status is None:
+            return f"{tech.name} has been confiscated by the court (until round {c.meta['confiscated'][tech.key]})"
         if tech.innate and c.has(ST.AMPLIFY):
             return "Domain Amplification is up - your own technique cannot be used through it"
         if (c.has(ST.ANTI_DOMAIN) and c.meta.get("anti_hands") and act.effect not in STANCE_EFFECTS
@@ -799,7 +809,7 @@ class Battle:
                 if not o.alive or o is c or o.team == c.team:
                     continue
                 six = "six_eyes" in o.flags or "revealed" in c.vow_flags
-                per = o.stat(S.PER)
+                per = o.stat(S.PER) - self.veil(c, o)
                 if six and c.meta.get("intent_name"):
                     self.tell(o, f"You read {c} completely: {c.charge:.0f} cursed energy in the {where}, "
                                  f"shaped for {c.meta['intent_name']}.")
@@ -833,7 +843,7 @@ class Battle:
         for o in self.fighters:
             if not o.alive or o is c or o.team == c.team:
                 continue
-            per = o.stat(S.PER) + (99 if "revealed" in c.vow_flags or "six_eyes" in o.flags else 0)
+            per = o.stat(S.PER) - self.veil(c, o) + (99 if "revealed" in c.vow_flags or "six_eyes" in o.flags else 0)
             if per >= conceal + 4:
                 aim = ", ".join(self.by_cid[x].name for x in p.targets if x != c.cid) or "everyone nearby"
                 self.tell(o, f"You read {c}: {p.act.name} ({p.act.ce} CE) building in the {where}, aimed at {aim}.")
@@ -1028,7 +1038,7 @@ class Battle:
             linked = [a for a in opts if a.params.get("while_attacking")]
             if linked:                                   # a technique that defends as it attacks
                 choice = linked[0]
-            elif tgt.stat(S.PER) >= REACT_PER and tgt.reactions > 0 and opts:
+            elif tgt.stat(S.PER) - self.veil(atk, tgt) >= REACT_PER and tgt.reactions > 0 and opts:
                 choice = self._switch_window(tgt, atk, part, name, opts)
         elif tgt.plan == "wait" or tgt.controller != "human":
             choice = ai.pick_reaction(self, tgt, atk, opts) if opts and tgt.reactions > 0 else None
@@ -2148,6 +2158,9 @@ class Battle:
         if item is not None and (item.mundane or "inventory_curse" in c.inventory):
             home = True                                  # anyone can pick up a bat anywhere; the Inventory
                                                          # Curse hands over any tool it holds, mid-fight
+        if key in c.meta.get("court_holds", ()):
+            self.tell(c, "The court has confiscated that. You get it back when the fight is over.")
+            return False
         if key not in rika_tools and not home:           # Rika's vault is the one exception
             self.tell(c, "Cursed tools can only be changed in your hideout.")
             return False
@@ -2200,7 +2213,8 @@ class Battle:
             return True
         foes = self.enemies(c)
         fastest = max((e.stat(S.SPD) for e in foes), default=0)
-        if self.rng.random() < np.clip(0.35 + 0.03 * (c.stat(S.SPD) - fastest), 0.1, 0.9):
+        hidden = RABBIT_FLEE if any(self.veil(c, e) for e in foes) else 0.0     # gone behind the rabbits
+        if self.rng.random() < np.clip(0.35 + hidden + 0.03 * (c.stat(S.SPD) - fastest), 0.1, 0.95):
             self._leave(c, f"{c} escapes the fight.")
         else:
             self.say(f"{c} fails to get away.")
